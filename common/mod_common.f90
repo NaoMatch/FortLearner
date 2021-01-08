@@ -236,6 +236,10 @@ contains
 
         integer(kind=4) :: i, factor
         integer(kind=4) :: tmp_count
+        if (num .eq. 1) then
+            count_unique_real32 = 0
+            return
+        end if
         tmp_count = 1
         include "./include/common_count_unique/inc_count_unique_detail.f90"
         count_unique_real32 = tmp_count
