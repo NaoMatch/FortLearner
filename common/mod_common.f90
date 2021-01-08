@@ -410,12 +410,12 @@ contains
     include "./include/common_progress_bar/inc_progress_bar.f90"
 
 
-    !> A subroutine to get the absolute maximum value and its location from a square matrix at the same time. \n
+    !> A subroutine to get the off-diagonal absolute maximum value and its location from a symmetric matrix at the same time. \n
     !! \return returns the absolute maximum value and its location
-    !! \param loc absolute maximum value location
+    !! \param loc absolute maximum value off-diagonal location
     !! \param val absolute maximum value itself
-    !! \param matrix input 2-dim square array
-    !! \param n_dim rank of square matrix
+    !! \param matrix input 2-dim symmetric array
+    !! \param n_dim rank of symmetric matrix
     subroutine get_abs_maxloc_sqmat_real32(loc, val, matrix, n_dim)
         implicit none
         integer(kind=4), intent(inout) :: loc(2)
