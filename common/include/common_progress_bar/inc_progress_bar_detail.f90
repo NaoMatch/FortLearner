@@ -1,4 +1,4 @@
-if (mod(loop_index, step_size) .ne. 0) return
+if (mod(loop_index, step_size_mod) .ne. 0) return
 print'(a,$)',' ['
 do j=1, loop_index * ndigit / loop_max_index
     print'(a,$)','='

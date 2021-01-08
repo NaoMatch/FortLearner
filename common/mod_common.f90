@@ -351,6 +351,7 @@ contains
         integer(kind=4)                 :: nd
         nd = 2 ! #Dimension
         bit_size = 32 ! Bit Size
+        print*, nd, bit_size
         include "./include/common_read2bin_2d/inc_read2bin_2d_detail.f90"
     end subroutine read2bin_2d_32bit
     include "./include/common_read2bin_2d/inc_read2bin_2d.f90"
@@ -399,7 +400,8 @@ contains
         implicit none
         integer(kind=4), intent(in) :: loop_index,loop_max_index,step_size
         integer(kind=4), parameter  :: ndigit=100
-        integer(kind=4)             :: j
+        integer(kind=4)             :: j, step_size_mod
+        step_size_mod = maxval((/step_size, 1/))
         include "./include/common_progress_bar/inc_progress_bar_detail.f90"
     end subroutine progress_bar_int32
     include "./include/common_progress_bar/inc_progress_bar.f90"
