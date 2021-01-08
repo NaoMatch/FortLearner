@@ -351,7 +351,6 @@ contains
         integer(kind=4)                 :: nd
         nd = 2 ! #Dimension
         bit_size = 32 ! Bit Size
-        print*, nd, bit_size
         include "./include/common_read2bin_2d/inc_read2bin_2d_detail.f90"
     end subroutine read2bin_2d_32bit
     include "./include/common_read2bin_2d/inc_read2bin_2d.f90"
