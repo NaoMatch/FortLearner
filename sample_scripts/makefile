@@ -2,6 +2,7 @@ run:
 	make main_collect_unique_values
 	make main_count_unique
 	make main_get_abs_maxloc
+	make main_get_minmax
 	make main_identity
 	make main_is_sorted
 	make main_most_left_bit_position
