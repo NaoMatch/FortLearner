@@ -1,4 +1,4 @@
-subroutine block_quick_argsort_r8_r8(vector1, vector2, num)
+recursive subroutine block_quick_argsort_r8_r8(vector1, vector2, num)
     real(kind=8), intent(inout) :: vector1(num)
     real(kind=8), intent(inout)   :: vector2(num)
     integer(kind=8), intent(in)    :: num

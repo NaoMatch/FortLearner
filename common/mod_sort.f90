@@ -833,7 +833,7 @@ contains
     !! \param vector a vector to be sorted
     !! \param indices a indices to be sorted accoring to 'vector'
     !! \param num number of samples in vector
-    subroutine block_quick_argsort_r4_i4(vector1, vector2, num)
+    recursive subroutine block_quick_argsort_r4_i4(vector1, vector2, num)
         real(kind=4), intent(inout) :: vector1(num)
         integer(kind=4), intent(inout)   :: vector2(num)
         integer(kind=4), intent(in)    :: num
