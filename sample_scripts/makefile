@@ -6,6 +6,7 @@ run:
 	make main_groupby
 	make main_hyperparameter
 	make main_identity
+	make main_inner_product
 	make main_is_sorted
 	make main_mean_variance_covariance
 	make main_most_left_bit_position
@@ -46,6 +47,10 @@ main_hyperparameter:
 main_identity:
 	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_identity.f90 -o main_identity.out
 	./main_identity.out
+
+main_inner_product:
+	gfortran ../common/mod_const.f90 ../common/mod_common.f90 ../linalg/mod_linalg.f90 main_inner_product.f90 -o main_inner_product.out
+	./main_inner_product.out
 
 main_is_sorted:
 	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_is_sorted.f90 -o main_is_sorted.out
