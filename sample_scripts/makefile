@@ -5,6 +5,7 @@ run:
 	make main_get_minmax
 	make main_identity
 	make main_is_sorted
+	make main_mean_variance_covariance
 	make main_most_left_bit_position
 	make main_progress_bar
 	make main_rand_integer
@@ -42,6 +43,10 @@ main_is_sorted:
 main_math:
 	gfortran ../math/mod_math.f90 main_math.f90 -o main_math.out
 	./main_math.out
+
+main_mean_variance_covariance:
+	gfortran -fbounds-check -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_mean_variance_covariance.f90 -o main_mean_variance_covariance.out
+	./main_mean_variance_covariance.out
 
 main_most_left_bit_position:
 	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_most_left_bit_position.f90 -o main_most_left_bit_position.out
