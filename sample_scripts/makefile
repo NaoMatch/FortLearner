@@ -26,6 +26,10 @@ main_get_abs_maxloc:
 	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_get_abs_maxloc.f90 -o main_get_abs_maxloc.out
 	./main_get_abs_maxloc.out
 	
+main_get_minmax:
+	gfortran -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_get_minmax.f90 -o main_get_minmax.out
+	./main_get_minmax.out
+
 main_identity:
 	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_identity.f90 -o main_identity.out
 	./main_identity.out

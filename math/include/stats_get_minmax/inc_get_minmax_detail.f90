@@ -1,6 +1,6 @@
 min_val = huge(min_val)
 max_val = -huge(max_val)
-
+unroll = num - mod(num, buffer_get_minmax)
 do n=1, unroll, buffer_get_minmax
     do j=0, buffer_get_minmax-1, 1
         buffer(j+1) = vector(n+j)
