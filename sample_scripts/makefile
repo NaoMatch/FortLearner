@@ -4,6 +4,7 @@ run:
 	make main_get_abs_maxloc
 	make main_get_minmax
 	make main_groupby
+	make main_hyperparameter
 	make main_identity
 	make main_is_sorted
 	make main_mean_variance_covariance
@@ -36,6 +37,10 @@ main_get_minmax:
 main_groupby:
 	gfortran -fbounds-check -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_groupby.f90 -o main_groupby.out
 	./main_groupby.out
+
+main_hyperparameter:
+	gfortran ../common/mod_const.f90 ../common/mod_common.f90 ../hyperparameter/mod_hyperparameter.f90 main_hyperparameter.f90 -o main_hyperparameter.out
+	./main_hyperparameter.out
 
 main_identity:
 	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_identity.f90 -o main_identity.out
