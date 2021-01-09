@@ -1,0 +1,97 @@
+run_all:
+	make main_collect_unique_values
+	make main_count_unique
+	make main_get_abs_maxloc
+	make main_identity
+	make main_is_sorted
+	make main_most_left_bit_position
+	make main_progress_bar
+	make main_rand_integer
+	make main_rand_normal
+	make main_read2bin
+	make main_roulette_selection
+	make main_search
+	make main_sort
+
+
+main_collect_unique_values:
+	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_collect_unique_values.f90 -o main_collect_unique_values.out
+	./main_collect_unique_values.out
+
+main_count_unique:
+	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_count_unique.f90 -o main_count_unique.out
+	./main_count_unique.out
+
+main_get_abs_maxloc:
+	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_get_abs_maxloc.f90 -o main_get_abs_maxloc.out
+	./main_get_abs_maxloc.out
+	
+main_identity:
+	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_identity.f90 -o main_identity.out
+	./main_identity.out
+
+main_is_sorted:
+	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_is_sorted.f90 -o main_is_sorted.out
+	./main_is_sorted.out
+
+main_math:
+	gfortran ../math/mod_math.f90 main_math.f90 -o main_math.out
+	./main_math.out
+
+main_most_left_bit_position:
+	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_most_left_bit_position.f90 -o main_most_left_bit_position.out
+	./main_most_left_bit_position.out
+
+main_progress_bar:
+	gfortran -fbounds-check ../common/mod_const.f90 ../common/mod_common.f90 main_progress_bar.f90 -o main_progress_bar.out
+	./main_progress_bar.out
+
+main_rand_integer:
+	gfortran ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_random.f90 main_rand_integer.f90 -o main_rand_integer.out
+	./main_rand_integer.out
+
+main_rand_normal:
+	gfortran ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_random.f90 main_rand_normal.f90 -o main_rand_normal.out
+	./main_rand_normal.out
+
+main_read2bin:
+	gfortran -fbounds-check ../common/mod_const.f90 ../common/mod_common.f90 main_read2bin.f90 -o main_read2bin.out
+	./main_read2bin.out
+
+main_roulette_selection:
+	gfortran ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_random.f90 main_roulette_selection.f90 -o main_roulette_selection.out
+	./main_roulette_selection.out
+
+main_search:
+	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_search.f90 -o main_search.out
+	./main_search.out
+
+main_sort:
+	gfortran ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90 main_sort.f90 -o main_sort.out
+	./main_sort.out
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	# 
