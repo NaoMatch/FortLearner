@@ -84,30 +84,23 @@ module mod_linalg
         module procedure random_rotation_r8
     end interface random_rotation
 
-    interface normalize_vector
-        module procedure normalize_vector_r8
-    end interface normalize_vector
+    interface vector2sum1
+        module procedure vector2sum1_r4
+        module procedure vector2sum1_r8
+    end interface vector2sum1
 
 contains
 
-    subroutine normalize_vector_r8(vector, n_samples)
+    !> A subroutine to normalize vector
+    subroutine vector2sum1_r4(vector, n_samples)
         implicit none
-        real(kind=8), intent(inout) :: vector(n_samples)
-        integer(kind=8), intent(in) :: n_samples
-        real(kind=8)                :: sum_dist
-        integer(kind=8)             :: n
-
-        sum_dist = 0d0
-        do n=1, n_samples, 1
-            sum_dist = sum_dist + vector(n)
-        end do
-
-        sum_dist = sum_dist
-        sum_dist = 1d0 / sum_dist
-        do n=1, n_samples, 1
-            vector(n) = vector(n) * sum_dist
-        end do
-    end subroutine normalize_vector_r8
+        real(kind=4), intent(inout) :: vector(n_samples)
+        integer(kind=4), intent(in) :: n_samples
+        real(kind=4)                :: sum_vec
+        integer(kind=4)             :: n
+        include "./include/linalg_vector2sum1/inc_vector2sum1_detail.f90"
+    end subroutine vector2sum1_r4
+    include "./include/linalg_vector2sum1/inc_vector2sum1.f90"
 
 
     !> A function to compute supremum eigen value for symmetric matrix
