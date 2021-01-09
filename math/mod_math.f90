@@ -39,10 +39,10 @@ contains
         real(kind=4)                :: gini_int32
         integer(kind=4)             :: n_samples_tot, c
 
-        include "./include/gini/inc_gini_detail.f90"
+        include "./include/math_gini/inc_gini_detail.f90"
         gini_int32 = 1.0 - n_samples_tot / n_samples_tot**2.0
     end function gini_int32
-    include "./include/gini/inc_gini.f90"
+    include "./include/math_gini/inc_gini.f90"
 
 
 end module mod_math
