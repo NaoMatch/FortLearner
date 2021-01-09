@@ -6,16 +6,16 @@ program main_progress_bar
     integer(kind=4) :: i_i4, i_max_i4
     integer(kind=8) :: i_i8, i_max_i8
 
-    i_max_i4 = 10
+    i_max_i4 = 3
     do i_i4=1, i_max_i4, 1
         call progress_bar(i_i4, i_max_i4, 1)
         call sleep(1)
     end do
 
-    i_max_i8 = 10
-    do i_i8=1, i_max_i8, 1
-        call progress_bar(i_i8, i_max_i8, 1_8)
-        call sleep(1)
-    end do
+    ! i_max_i8 = 10
+    ! do i_i8=1, i_max_i8, 1
+    !     call progress_bar(i_i8, i_max_i8, 1_8)
+    !     call sleep(1)
+    ! end do
 
 end program main_progress_bar

@@ -1,4 +1,4 @@
-run_all:
+run:
 	make main_collect_unique_values
 	make main_count_unique
 	make main_get_abs_maxloc
