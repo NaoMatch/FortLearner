@@ -1,0 +1,1 @@
+tmp = maxval(sum(abs(matrix), dim=1))
