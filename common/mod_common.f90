@@ -3,6 +3,20 @@ module mod_common
     use mod_const
     implicit none
 
+    !> Interface to call num2char_i4, num2char_i8
+    interface num2char
+        module procedure num2char_r4
+        module procedure num2char_r8
+        module procedure num2char_i4
+        module procedure num2char_i8
+    end interface num2char
+
+    !> Interface to call get_int_digit_i4, get_int_digit_i8
+    interface get_int_digit
+        module procedure get_int_digit_i4
+        module procedure get_int_digit_i8       
+    end interface get_int_digit
+
     !> Interface to call identity_real32, identity_real64, identity_int32, identity_int64
     interface identity
         module procedure identity_real32
@@ -97,6 +111,35 @@ module mod_common
     end interface linear_search
 
 contains
+
+    !> A function to conver number to character directory.
+    !! \param num input number
+    function num2char_r4(num)
+        character(:), allocatable   :: num2char_r4
+        real(kind=4), intent(in) :: num
+        integer(kind=4) :: num_digit
+
+        allocate(character(10)::num2char_r4)
+        write (num2char_r4, '(E10.3e2)') num
+    end function num2char_r4
+    include "./include/common_num2char/inc_num2char.f90"
+
+
+    !> A function to get digit of integer.
+    !! \param num input integer
+    pure function get_int_digit_i4(num) result(num_digit)
+        implicit none
+        integer(kind=4),intent(in) :: num
+        integer(kind=4) :: num_digit
+        if (num .lt. 0_8) then
+            num_digit = int(log10(dble(abs(num)))) + 1
+            num_digit = num_digit + 1
+        else
+            num_digit = int(log10(dble(num))) + 1
+        end if
+    end function get_int_digit_i4
+    include "./include/common_get_int_digit/inc_get_init_digit.f90"
+
 
     !> A subroutine to collect unique values from sorted vector
     !! \return returns unique values
