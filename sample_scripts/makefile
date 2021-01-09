@@ -8,6 +8,7 @@ run:
 	make main_identity
 	make main_inner_product
 	make main_is_sorted
+	make main_mattxmat
 	make main_mean_variance_covariance
 	make main_most_left_bit_position
 	make main_vector2sum1
@@ -59,6 +60,10 @@ main_is_sorted:
 main_math:
 	gfortran ../math/mod_math.f90 main_math.f90 -o main_math.out
 	./main_math.out
+
+main_mattxmat:
+	gfortran -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../linalg/mod_linalg.f90 main_mattxmat.f90 -o main_mattxmat.out
+	./main_mattxmat.out
 
 main_mean_variance_covariance:
 	gfortran -fbounds-check -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_mean_variance_covariance.f90 -o main_mean_variance_covariance.out
