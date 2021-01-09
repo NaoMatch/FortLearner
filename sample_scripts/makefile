@@ -11,6 +11,7 @@ run:
 	make main_mattxmat
 	make main_mean_variance_covariance
 	make main_most_left_bit_position
+	make main_multi_mat_vec
 	make main_vector2sum1
 	make main_progress_bar
 	make main_rand_integer
@@ -72,6 +73,10 @@ main_mean_variance_covariance:
 main_most_left_bit_position:
 	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_most_left_bit_position.f90 -o main_most_left_bit_position.out
 	./main_most_left_bit_position.out
+
+main_multi_mat_vec:
+	gfortran -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../linalg/mod_linalg.f90 main_multi_mat_vec.f90 -o main_multi_mat_vec.out
+	./main_multi_mat_vec.out
 
 main_vector2sum1:
 	gfortran ../common/mod_const.f90 ../common/mod_common.f90 ../linalg/mod_linalg.f90 main_vector2sum1.f90 -o main_vector2sum1.out
