@@ -13,6 +13,7 @@ run:
 	make main_linear_regression
 	make main_mattxmat
 	make main_mean_variance_covariance
+	make main_metric
 	make main_most_left_bit_position
 	make main_multi_mat_vec
 	make main_vector2sum1
@@ -99,6 +100,19 @@ main_mattxmat:
 main_mean_variance_covariance:
 	gfortran -fbounds-check -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_mean_variance_covariance.f90 -o main_mean_variance_covariance.out
 	./main_mean_variance_covariance.out
+
+main_metric:
+	gfortran -w \
+	../common/mod_const.f90 \
+	../common/mod_common.f90 \
+	../common/mod_timer.f90 \
+	../common/mod_random.f90 \
+	../common/mod_sort.f90 \
+	../math/mod_stats.f90 \
+	../metric/mod_metric.f90 \
+	main_metric.f90 \
+	-o main_metric.out
+	./main_metric.out
 
 main_most_left_bit_position:
 	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_most_left_bit_position.f90 -o main_most_left_bit_position.out
