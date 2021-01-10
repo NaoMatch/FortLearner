@@ -8,6 +8,7 @@ run:
 	make main_hyperparameter
 	make main_identity
 	make main_inner_product
+	make main_inv_unit_lower_matrix
 	make main_is_sorted
 	make main_mattxmat
 	make main_mean_variance_covariance
@@ -59,6 +60,10 @@ main_identity:
 main_inner_product:
 	gfortran ../common/mod_const.f90 ../common/mod_common.f90 ../linalg/mod_linalg.f90 main_inner_product.f90 -o main_inner_product.out
 	./main_inner_product.out
+
+main_inv_unit_lower_matrix:
+	gfortran -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../linalg/mod_linalg.f90 main_inv_unit_lower_matrix.f90 -o main_inv_unit_lower_matrix.out
+	./main_inv_unit_lower_matrix.out
 
 main_is_sorted:
 	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_is_sorted.f90 -o main_is_sorted.out
