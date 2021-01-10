@@ -16,6 +16,7 @@ run:
 	make main_progress_bar
 	make main_rand_integer
 	make main_rand_normal
+	make main_random_rotation
 	make main_read2bin
 	make main_roulette_selection
 	make main_search
@@ -93,6 +94,10 @@ main_rand_integer:
 main_rand_normal:
 	gfortran ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_random.f90 main_rand_normal.f90 -o main_rand_normal.out
 	./main_rand_normal.out
+
+main_random_rotation:
+	gfortran -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../linalg/mod_linalg.f90 main_random_rotation.f90 -o main_random_rotation.out
+	./main_random_rotation.out
 
 main_read2bin:
 	gfortran -fbounds-check ../common/mod_const.f90 ../common/mod_common.f90 main_read2bin.f90 -o main_read2bin.out
