@@ -21,18 +21,22 @@ program main_metric
     y_true_i4 = int(y_true_r4*n_class, kind=4)
     y_pred_i4 = int(y_pred_r4*n_class, kind=4)
 
+
     print*, '============================================================='
     print*, "Mean Square Error"
     print*, "    ", metric%mean_square_error(y_true_r4, y_pred_r4)
     
+
     print*, '============================================================='
     print*, "Root Mean Square Error"
     print*, "    ", metric%root_mean_square_error(y_true_r4, y_pred_r4)
     
+
     print*, '============================================================='
     print*, "Accuracy"
     print*, "    ", metric%accuracy(y_true_i4, y_pred_i4)
     
+
     print*, '============================================================='
     print*, "ROC_AUC"
     print*, "    ", metric%auc(y_true_i4, y_pred_r4)

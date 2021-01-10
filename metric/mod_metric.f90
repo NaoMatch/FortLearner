@@ -72,6 +72,8 @@ contains
 
 
     !> A function to compute auc
+    !! \param y_true ground-truth values
+    !! \param y_pred predicted values
     function auc_i4(this, y_true, y_pred)
         implicit none
         class(metrics)   :: this
@@ -94,6 +96,8 @@ contains
 
 
     !> A function to compute logloss
+    !! \param y_true ground-truth values
+    !! \param y_pred predicted values
     function logloss_i4(this, y_true, y_pred)
         implicit none
         class(metrics)  :: this

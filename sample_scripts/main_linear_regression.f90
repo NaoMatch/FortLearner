@@ -1,7 +1,7 @@
 program main_linear_regression
     use mod_const, only: t_, f_
     use mod_common, only: read2bin_1d, read2bin_2d, read_bin_1d, read_bin_2d
-    use mod_metric, only: root_mean_square_error, mean_square_error
+    use mod_metric, only: metrics
     use mod_linear_regression, only: linear_regression, lasso_regression, ridge_regression
     implicit none
 
@@ -17,6 +17,7 @@ program main_linear_regression
     real(kind=8), ALLOCATABLE :: y_train(:), y_test(:)
     real(kind=8), ALLOCATABLE :: y_train_pred(:), y_test_pred(:)
 
+    type(metrics)           :: metric
     type(linear_regression) :: lr_reg
     type(lasso_regression)  :: ls_reg
     type(ridge_regression)  :: rd_reg
@@ -89,11 +90,11 @@ program main_linear_regression
     print*, "    predict test"
     y_test_pred = lr_reg%predict(x_test)
     print*, "    mean_square_error"
-    print*, "        train: ", mean_square_error(y_train, y_train_pred)
-    print*, "        test:  ", mean_square_error(y_test, y_test_pred)
+    print*, "        train: ", metric%mean_square_error(y_train, y_train_pred)
+    print*, "        test:  ", metric%mean_square_error(y_test, y_test_pred)
     print*, "    root_mean_square_error"
-    print*, "        train: ", root_mean_square_error(y_train, y_train_pred)
-    print*, "        test:  ", root_mean_square_error(y_test, y_test_pred)
+    print*, "        train: ", metric%root_mean_square_error(y_train, y_train_pred)
+    print*, "        test:  ", metric%root_mean_square_error(y_test, y_test_pred)
 
 
     print*, '============================================================='
@@ -108,11 +109,11 @@ program main_linear_regression
     print*, "    predict test"
     y_test_pred = ls_reg%predict(x_test)
     print*, "    mean_square_error"
-    print*, "        train: ", mean_square_error(y_train, y_train_pred)
-    print*, "        test:  ", mean_square_error(y_test, y_test_pred)
+    print*, "        train: ", metric%mean_square_error(y_train, y_train_pred)
+    print*, "        test:  ", metric%mean_square_error(y_test, y_test_pred)
     print*, "    root_mean_square_error"
-    print*, "        train: ", root_mean_square_error(y_train, y_train_pred)
-    print*, "        test:  ", root_mean_square_error(y_test, y_test_pred)
+    print*, "        train: ", metric%root_mean_square_error(y_train, y_train_pred)
+    print*, "        test:  ", metric%root_mean_square_error(y_test, y_test_pred)
 
 
     print*, '============================================================='
@@ -127,10 +128,10 @@ program main_linear_regression
     print*, "    predict test"
     y_test_pred = rd_reg%predict(x_test)
     print*, "    mean_square_error"
-    print*, "        train: ", mean_square_error(y_train, y_train_pred)
-    print*, "        test:  ", mean_square_error(y_test, y_test_pred)
+    print*, "        train: ", metric%mean_square_error(y_train, y_train_pred)
+    print*, "        test:  ", metric%mean_square_error(y_test, y_test_pred)
     print*, "    root_mean_square_error"
-    print*, "        train: ", root_mean_square_error(y_train, y_train_pred)
-    print*, "        test:  ", root_mean_square_error(y_test, y_test_pred)
+    print*, "        train: ", metric%root_mean_square_error(y_train, y_train_pred)
+    print*, "        test:  ", metric%root_mean_square_error(y_test, y_test_pred)
 
 end program main_linear_regression
