@@ -1,0 +1,92 @@
+\hypertarget{mod__common_8f90}{}\doxysection{common/mod\+\_\+common.f90 ファイル}
+\label{mod__common_8f90}\index{common/mod\_common.f90@{common/mod\_common.f90}}
+\doxysubsection*{データ型}
+\begin{DoxyCompactItemize}
+\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1num2char}{mod\+\_\+common\+::num2char}}
+\begin{DoxyCompactList}\small\item\em Interface to call num2char\+\_\+i4, num2char\+\_\+i8 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1get__int__digit}{mod\+\_\+common\+::get\+\_\+int\+\_\+digit}}
+\begin{DoxyCompactList}\small\item\em Interface to call get\+\_\+int\+\_\+digit\+\_\+i4, get\+\_\+int\+\_\+digit\+\_\+i8 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1identity}{mod\+\_\+common\+::identity}}
+\begin{DoxyCompactList}\small\item\em Interface to call identity\+\_\+real32, identity\+\_\+real64, identity\+\_\+int32, identity\+\_\+int64 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1read__bin__1d}{mod\+\_\+common\+::read\+\_\+bin\+\_\+1d}}
+\begin{DoxyCompactList}\small\item\em Interface to call read\+\_\+bin\+\_\+1d\+\_\+real32, read\+\_\+bin\+\_\+1d\+\_\+real64, read\+\_\+bin\+\_\+1d\+\_\+int32, read\+\_\+bin\+\_\+1d\+\_\+int64 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1read__bin__2d}{mod\+\_\+common\+::read\+\_\+bin\+\_\+2d}}
+\begin{DoxyCompactList}\small\item\em Interface to call read\+\_\+bin\+\_\+2d\+\_\+real32, read\+\_\+bin\+\_\+2d\+\_\+real64, read\+\_\+bin\+\_\+2d\+\_\+int32, read\+\_\+bin\+\_\+2d\+\_\+int64 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1read2bin__2d}{mod\+\_\+common\+::read2bin\+\_\+2d}}
+\begin{DoxyCompactList}\small\item\em Interface to call read2bin\+\_\+2d\+\_\+32bit, read2bin\+\_\+2d\+\_\+64bit \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1read2bin__1d}{mod\+\_\+common\+::read2bin\+\_\+1d}}
+\begin{DoxyCompactList}\small\item\em Interface to call read2bin\+\_\+1d\+\_\+32bit, read2bin\+\_\+1d\+\_\+64bit \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1progress__bar}{mod\+\_\+common\+::progress\+\_\+bar}}
+\begin{DoxyCompactList}\small\item\em Interface to call progress\+\_\+bar\+\_\+int32, progress\+\_\+bar\+\_\+int64 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1is__sorted}{mod\+\_\+common\+::is\+\_\+sorted}}
+\begin{DoxyCompactList}\small\item\em Interface to call is\+\_\+sorted\+\_\+real32, is\+\_\+sorted\+\_\+real64, is\+\_\+sorted\+\_\+int32, is\+\_\+sorted\+\_\+int64 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1count__unique}{mod\+\_\+common\+::count\+\_\+unique}}
+\begin{DoxyCompactList}\small\item\em Interface to call count\+\_\+unique\+\_\+real32, count\+\_\+unique\+\_\+real64, count\+\_\+unique\+\_\+int32, count\+\_\+unique\+\_\+int64 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1most__left__bit__position}{mod\+\_\+common\+::most\+\_\+left\+\_\+bit\+\_\+position}}
+\begin{DoxyCompactList}\small\item\em Interface to call most\+\_\+left\+\_\+bit\+\_\+position\+\_\+int32, most\+\_\+left\+\_\+bit\+\_\+position\+\_\+int64 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1get__abs__maxloc}{mod\+\_\+common\+::get\+\_\+abs\+\_\+maxloc}}
+\begin{DoxyCompactList}\small\item\em Interface to call get\+\_\+abs\+\_\+maxloc\+\_\+real32, get\+\_\+abs\+\_\+maxloc\+\_\+real64, get\+\_\+abs\+\_\+maxloc\+\_\+int32, get\+\_\+abs\+\_\+maxloc\+\_\+int64 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1collect__unique__values}{mod\+\_\+common\+::collect\+\_\+unique\+\_\+values}}
+\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1binary__search__left}{mod\+\_\+common\+::binary\+\_\+search\+\_\+left}}
+\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1binary__search__right}{mod\+\_\+common\+::binary\+\_\+search\+\_\+right}}
+\item 
+interface \mbox{\hyperlink{interfacemod__common_1_1linear__search}{mod\+\_\+common\+::linear\+\_\+search}}
+\end{DoxyCompactItemize}
+\doxysubsection*{モジュール}
+\begin{DoxyCompactItemize}
+\item 
+module \mbox{\hyperlink{namespacemod__common}{mod\+\_\+common}}
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} module for common functions. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{関数/サブルーチン}
+\begin{DoxyCompactItemize}
+\item 
+character(\+:) function, allocatable \mbox{\hyperlink{namespacemod__common_a0dc9f65bcba7cc1e45cf43a0f82d675b}{mod\+\_\+common\+::num2char\+\_\+r4}} (num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to conver number to character directory. \end{DoxyCompactList}\item 
+pure integer(kind=4) function \mbox{\hyperlink{namespacemod__common_a27b2ca1d2de87950d21a66a44c8b5210}{mod\+\_\+common\+::get\+\_\+int\+\_\+digit\+\_\+i4}} (num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to get digit of integer. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__common_ae2dd2078cf8f6ed2dabcef9493ba7681}{mod\+\_\+common\+::collect\+\_\+unique\+\_\+values\+\_\+r8}} (uniq\+\_\+v, vector, n\+\_\+samples)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to collect unique values from sorted vector \end{DoxyCompactList}\item 
+integer(kind=8) function \mbox{\hyperlink{namespacemod__common_a50e79a8943335e465fff10f3aa417f40}{mod\+\_\+common\+::linear\+\_\+search\+\_\+r8}} (vector, n\+\_\+samples, value)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to linear search. \textquotesingle{}vector\textquotesingle{} must be sorted by ascending order. \end{DoxyCompactList}\item 
+integer(kind=8) function \mbox{\hyperlink{namespacemod__common_ac0c29fe91238c2549123c50ba675d14e}{mod\+\_\+common\+::binary\+\_\+search\+\_\+left\+\_\+r8}} (vector, n\+\_\+samples, value)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to binary search from left. \textquotesingle{}vector\textquotesingle{} must be sorted by ascending order. \end{DoxyCompactList}\item 
+integer(kind=8) function \mbox{\hyperlink{namespacemod__common_a4bf8a6bd34c528485a8d87f25a557940}{mod\+\_\+common\+::binary\+\_\+search\+\_\+right\+\_\+r8}} (array, n\+\_\+samples, value)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to binary search from right. \textquotesingle{}vector\textquotesingle{} must be sorted by ascending order. \end{DoxyCompactList}\item 
+integer(kind=4) function \mbox{\hyperlink{namespacemod__common_a4e7209e6fb5a4781ba91a8dee811a9bd}{mod\+\_\+common\+::most\+\_\+left\+\_\+bit\+\_\+position\+\_\+int32}} (val)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to get the leftmost bit position. \end{DoxyCompactList}\item 
+integer(kind=4) function \mbox{\hyperlink{namespacemod__common_aa671a69b39e4deabaa7829c177c66500}{mod\+\_\+common\+::count\+\_\+unique\+\_\+real32}} (vector, num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to count the unique values of the sorted 1-\/dim array \end{DoxyCompactList}\item 
+logical(kind=4) function \mbox{\hyperlink{namespacemod__common_a9bfbefe7432621a43960bc6e3640adfe}{mod\+\_\+common\+::is\+\_\+sorted\+\_\+real32}} (vector, num, ascending)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to check if the 1-\/dim array is sorted or not \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__common_a3307b1e676155b219f62922981d01211}{mod\+\_\+common\+::identity\+\_\+real32}} (matrix, n\+\_\+dim)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to initialize an n-\/dimensional square matrix to a unit matrix. Subroutines of other data types (identity\+\_\+real64, identity\+\_\+int32, identity\+\_\+int64) are stored in \textquotesingle{}./common/include/identity/\textquotesingle{}. ~\newline
+ Note that \textquotesingle{}integer\textquotesingle{} and \textquotesingle{}real\textquotesingle{} kind are unified. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__common_a94ee316ec5611c0650a240bda2cb1ec7}{mod\+\_\+common\+::read\+\_\+bin\+\_\+1d\+\_\+real32}} (file\+\_\+name, vector)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to read binary file dumped by \textquotesingle{}\mbox{\hyperlink{interfacemod__common_1_1read2bin__1d}{read2bin\+\_\+1d}}\textquotesingle{}. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__common_a2f7a8f4da08b46c2de453177ee80c19f}{mod\+\_\+common\+::read\+\_\+bin\+\_\+2d\+\_\+real32}} (file\+\_\+name, matrix)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to read binary file dumped by \textquotesingle{}\mbox{\hyperlink{interfacemod__common_1_1read2bin__2d}{read2bin\+\_\+2d}}\textquotesingle{}. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__common_a1f58766d5d1ee029e7581e0a5a1444a7}{mod\+\_\+common\+::read2bin\+\_\+2d\+\_\+32bit}} (input\+\_\+file\+\_\+name, output\+\_\+file\+\_\+name, n\+\_\+rows, n\+\_\+cols, skip\+\_\+header, input\+\_\+dtype, output\+\_\+dtype)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to read a CSV file and dump it as a binary file. ~\newline
+ {\bfseries{NOTICE}}\+: Can\textquotesingle{}t handle multiple data types at the same time. ~\newline
+ Use \textquotesingle{}read\+\_\+bin\textquotesingle{} subroutine to read the dumped binary file. ~\newline
+ The type of the output data (32bit or 64bit) is determined by the type of the argument. ~\newline
+ Subroutines of other data types (read2bin\+\_\+2d\+\_\+64bit) are stored in \textquotesingle{}./common/include/read2bin/\textquotesingle{}. ~\newline
+\end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__common_a8be58d3fac513978b01f77eb5a731c4d}{mod\+\_\+common\+::read2bin\+\_\+1d\+\_\+32bit}} (input\+\_\+file\+\_\+name, output\+\_\+file\+\_\+name, n\+\_\+rows, skip\+\_\+header, input\+\_\+dtype, output\+\_\+dtype)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to read a CSV file and dump it as a binary file. ~\newline
+ {\bfseries{NOTICE}}\+: Can\textquotesingle{}t handle multiple data types at the same time. ~\newline
+ Use \textquotesingle{}read\+\_\+bin\textquotesingle{} subroutine to read the dumped binary file. ~\newline
+ The type of the output data (32bit or 64bit) is determined by the type of the argument. ~\newline
+ Subroutines of other data types (read2bin\+\_\+2d\+\_\+64bit) are stored in \textquotesingle{}./common/include/read2bin/\textquotesingle{}. ~\newline
+\end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__common_a54a7fd23c9e96f3a4c2ecac08cd8dc5d}{mod\+\_\+common\+::progress\+\_\+bar\+\_\+int32}} (loop\+\_\+index, loop\+\_\+max\+\_\+index, step\+\_\+size)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to display a progress bar. ~\newline
+ {\bfseries{ORIGINAL}}\+: \href{https://nkmrtkhd.blogspot.com/2009/07/fortran.html}{\texttt{ https\+://nkmrtkhd.\+blogspot.\+com/2009/07/fortran.\+html}} ~\newline
+ Subroutines of other data types (progress\+\_\+bar\+\_\+int64) are stored in \textquotesingle{}./common/include/progress\+\_\+bar/\textquotesingle{}. ~\newline
+\end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__common_a096761619390cd50423e7f0f6db59402}{mod\+\_\+common\+::get\+\_\+abs\+\_\+maxloc\+\_\+sqmat\+\_\+real32}} (loc, val, matrix, n\+\_\+dim)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to get the off-\/diagonal absolute maximum value and its location from a symmetric matrix at the same time. ~\newline
+\end{DoxyCompactList}\end{DoxyCompactItemize}

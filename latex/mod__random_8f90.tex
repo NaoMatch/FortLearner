@@ -1,0 +1,34 @@
+\hypertarget{mod__random_8f90}{}\doxysection{common/mod\+\_\+random.f90 ファイル}
+\label{mod__random_8f90}\index{common/mod\_random.f90@{common/mod\_random.f90}}
+\doxysubsection*{データ型}
+\begin{DoxyCompactItemize}
+\item 
+interface \mbox{\hyperlink{interfacemod__random_1_1rand__normal}{mod\+\_\+random\+::rand\+\_\+normal}}
+\begin{DoxyCompactList}\small\item\em Interface to call rand\+\_\+normal\+\_\+real32\+\_\+1d, rand\+\_\+normal\+\_\+real64\+\_\+1d \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__random_1_1permutation}{mod\+\_\+random\+::permutation}}
+\begin{DoxyCompactList}\small\item\em Interface to call permutation\+\_\+real32, permutation\+\_\+real64, permutation\+\_\+int32, permutation\+\_\+int64 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__random_1_1permutation__head}{mod\+\_\+random\+::permutation\+\_\+head}}
+\begin{DoxyCompactList}\small\item\em Interface to call permutation\+\_\+head\+\_\+real32, permutation\+\_\+head\+\_\+real64, permutation\+\_\+head\+\_\+int32, permutation\+\_\+head\+\_\+int64 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__random_1_1rand__integer}{mod\+\_\+random\+::rand\+\_\+integer}}
+\begin{DoxyCompactList}\small\item\em Interface to call rand\+\_\+integer\+\_\+int32, rand\+\_\+integer\+\_\+int64 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__random_1_1roulette__selection}{mod\+\_\+random\+::roulette\+\_\+selection}}
+\begin{DoxyCompactList}\small\item\em Interface to call roulette\+\_\+selection\+\_\+r4, roulette\+\_\+selection\+\_\+r8 \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{モジュール}
+\begin{DoxyCompactItemize}
+\item 
+module \mbox{\hyperlink{namespacemod__random}{mod\+\_\+random}}
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} module for random operations. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{関数/サブルーチン}
+\begin{DoxyCompactItemize}
+\item 
+integer(kind=4) function \mbox{\hyperlink{namespacemod__random_a89d96b51133fbe6ea6c92a834133cf56}{mod\+\_\+random\+::roulette\+\_\+selection\+\_\+r4}} (vector, n\+\_\+samples, reverse)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to roulette selection from \textquotesingle{}vector\textquotesingle{} \textquotesingle{}vector\textquotesingle{} must be normalized, sum(vector) P== 1. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__random_a1bc842a977a6238cc97aaaf593dc16ff}{mod\+\_\+random\+::rand\+\_\+normal\+\_\+real32\+\_\+1d}} (vector, num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to generate normally distributed random number of 1-\/dim. Subroutines of other data types (rand\+\_\+normal\+\_\+real64\+\_\+1d) are stored in \textquotesingle{}./common/include/rand\+\_\+normal/\textquotesingle{}. ~\newline
+\end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__random_af44c0a60952835535a4c788b6f39739f}{mod\+\_\+random\+::permutation\+\_\+real32}} (vector, num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to randomly permutate input vector \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__random_a67a5d6e2c89ac5017695a5614c6e38c5}{mod\+\_\+random\+::permutation\+\_\+head\+\_\+real32}} (vector, num, n\+\_\+head)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to randomly permutate the first N of input vector \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__random_af4abd9ecd40b7e87826d2fd0bceda436}{mod\+\_\+random\+::rand\+\_\+integer\+\_\+int32}} (lo, hi, vector, num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to generate random integer with duplication \end{DoxyCompactList}\end{DoxyCompactItemize}

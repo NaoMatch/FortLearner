@@ -1,0 +1,131 @@
+\hypertarget{interfacemod__stats_1_1mean}{}\doxysection{インターフェース mod\+\_\+stats\+::mean}
+\label{interfacemod__stats_1_1mean}\index{mod\_stats::mean@{mod\_stats::mean}}
+
+
+Interface to call mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+real32, mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+real64, mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+int32, mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+int64  
+
+
+\doxysubsection*{公開メンバ関数}
+\begin{DoxyCompactItemize}
+\item 
+real(kind=4) function \mbox{\hyperlink{interfacemod__stats_1_1mean_adb0724cc7f7f7999ea1920f006fe5d62}{mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+real32}} (vector, num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to calculate mean value of vector. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{interfacemod__stats_1_1mean_a30a651ddb42ec50774bba05faea84894}{mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+real64}}
+\item 
+\mbox{\hyperlink{interfacemod__stats_1_1mean_a17d83e6e431378c0f7cb8378e82b6eac}{mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+int32}}
+\item 
+\mbox{\hyperlink{interfacemod__stats_1_1mean_aafae2166c97eb9b7449259456f35ed46}{mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+int64}}
+\item 
+real(kind=4) function, dimension(n\+\_\+cols) \mbox{\hyperlink{interfacemod__stats_1_1mean_acb9ab6da288414f853c281f915d14810}{mean\+\_\+values\+\_\+of\+\_\+matrix\+\_\+real32}} (matrix, n\+\_\+rows, n\+\_\+cols)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to calculate mean value of matrix, exactly equal to sum(matrix, dim=1)/N. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{interfacemod__stats_1_1mean_a5dc2f4a0b457311a48ff68ace7090932}{mean\+\_\+values\+\_\+of\+\_\+matrix\+\_\+real64}}
+\item 
+\mbox{\hyperlink{interfacemod__stats_1_1mean_a0fb8bb29a42dc892289482cea7343240}{mean\+\_\+values\+\_\+of\+\_\+matrix\+\_\+int32}}
+\item 
+\mbox{\hyperlink{interfacemod__stats_1_1mean_afe92273bab6bec053d2bf793db37000d}{mean\+\_\+values\+\_\+of\+\_\+matrix\+\_\+int64}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{詳解}
+Interface to call mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+real32, mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+real64, mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+int32, mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+int64 
+
+\doxysubsection{メンバ関数/サブルーチン詳解}
+\mbox{\Hypertarget{interfacemod__stats_1_1mean_a17d83e6e431378c0f7cb8378e82b6eac}\label{interfacemod__stats_1_1mean_a17d83e6e431378c0f7cb8378e82b6eac}} 
+\index{mod\_stats::mean@{mod\_stats::mean}!mean\_value\_of\_vector\_int32@{mean\_value\_of\_vector\_int32}}
+\index{mean\_value\_of\_vector\_int32@{mean\_value\_of\_vector\_int32}!mod\_stats::mean@{mod\_stats::mean}}
+\doxysubsubsection{\texorpdfstring{mean\_value\_of\_vector\_int32()}{mean\_value\_of\_vector\_int32()}}
+{\footnotesize\ttfamily mod\+\_\+stats\+::mean\+::mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+int32}
+
+\mbox{\Hypertarget{interfacemod__stats_1_1mean_aafae2166c97eb9b7449259456f35ed46}\label{interfacemod__stats_1_1mean_aafae2166c97eb9b7449259456f35ed46}} 
+\index{mod\_stats::mean@{mod\_stats::mean}!mean\_value\_of\_vector\_int64@{mean\_value\_of\_vector\_int64}}
+\index{mean\_value\_of\_vector\_int64@{mean\_value\_of\_vector\_int64}!mod\_stats::mean@{mod\_stats::mean}}
+\doxysubsubsection{\texorpdfstring{mean\_value\_of\_vector\_int64()}{mean\_value\_of\_vector\_int64()}}
+{\footnotesize\ttfamily mod\+\_\+stats\+::mean\+::mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+int64}
+
+\mbox{\Hypertarget{interfacemod__stats_1_1mean_adb0724cc7f7f7999ea1920f006fe5d62}\label{interfacemod__stats_1_1mean_adb0724cc7f7f7999ea1920f006fe5d62}} 
+\index{mod\_stats::mean@{mod\_stats::mean}!mean\_value\_of\_vector\_real32@{mean\_value\_of\_vector\_real32}}
+\index{mean\_value\_of\_vector\_real32@{mean\_value\_of\_vector\_real32}!mod\_stats::mean@{mod\_stats::mean}}
+\doxysubsubsection{\texorpdfstring{mean\_value\_of\_vector\_real32()}{mean\_value\_of\_vector\_real32()}}
+{\footnotesize\ttfamily real(kind=4) function mod\+\_\+stats\+::mean\+::mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+real32 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(num), intent(in)}]{vector,  }\item[{integer(kind=4), intent(in)}]{num }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} function to calculate mean value of vector. 
+
+\begin{DoxyReturn}{戻り値}
+mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+real32 mean value of vector 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em vector} & input 1-\/dim vector \\
+\hline
+{\em num} & size to input vector \\
+\hline
+\end{DoxyParams}
+呼び出し関係図\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{interfacemod__stats_1_1mean_adb0724cc7f7f7999ea1920f006fe5d62_cgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{interfacemod__stats_1_1mean_a30a651ddb42ec50774bba05faea84894}\label{interfacemod__stats_1_1mean_a30a651ddb42ec50774bba05faea84894}} 
+\index{mod\_stats::mean@{mod\_stats::mean}!mean\_value\_of\_vector\_real64@{mean\_value\_of\_vector\_real64}}
+\index{mean\_value\_of\_vector\_real64@{mean\_value\_of\_vector\_real64}!mod\_stats::mean@{mod\_stats::mean}}
+\doxysubsubsection{\texorpdfstring{mean\_value\_of\_vector\_real64()}{mean\_value\_of\_vector\_real64()}}
+{\footnotesize\ttfamily mod\+\_\+stats\+::mean\+::mean\+\_\+value\+\_\+of\+\_\+vector\+\_\+real64}
+
+\mbox{\Hypertarget{interfacemod__stats_1_1mean_a0fb8bb29a42dc892289482cea7343240}\label{interfacemod__stats_1_1mean_a0fb8bb29a42dc892289482cea7343240}} 
+\index{mod\_stats::mean@{mod\_stats::mean}!mean\_values\_of\_matrix\_int32@{mean\_values\_of\_matrix\_int32}}
+\index{mean\_values\_of\_matrix\_int32@{mean\_values\_of\_matrix\_int32}!mod\_stats::mean@{mod\_stats::mean}}
+\doxysubsubsection{\texorpdfstring{mean\_values\_of\_matrix\_int32()}{mean\_values\_of\_matrix\_int32()}}
+{\footnotesize\ttfamily mod\+\_\+stats\+::mean\+::mean\+\_\+values\+\_\+of\+\_\+matrix\+\_\+int32}
+
+\mbox{\Hypertarget{interfacemod__stats_1_1mean_afe92273bab6bec053d2bf793db37000d}\label{interfacemod__stats_1_1mean_afe92273bab6bec053d2bf793db37000d}} 
+\index{mod\_stats::mean@{mod\_stats::mean}!mean\_values\_of\_matrix\_int64@{mean\_values\_of\_matrix\_int64}}
+\index{mean\_values\_of\_matrix\_int64@{mean\_values\_of\_matrix\_int64}!mod\_stats::mean@{mod\_stats::mean}}
+\doxysubsubsection{\texorpdfstring{mean\_values\_of\_matrix\_int64()}{mean\_values\_of\_matrix\_int64()}}
+{\footnotesize\ttfamily mod\+\_\+stats\+::mean\+::mean\+\_\+values\+\_\+of\+\_\+matrix\+\_\+int64}
+
+\mbox{\Hypertarget{interfacemod__stats_1_1mean_acb9ab6da288414f853c281f915d14810}\label{interfacemod__stats_1_1mean_acb9ab6da288414f853c281f915d14810}} 
+\index{mod\_stats::mean@{mod\_stats::mean}!mean\_values\_of\_matrix\_real32@{mean\_values\_of\_matrix\_real32}}
+\index{mean\_values\_of\_matrix\_real32@{mean\_values\_of\_matrix\_real32}!mod\_stats::mean@{mod\_stats::mean}}
+\doxysubsubsection{\texorpdfstring{mean\_values\_of\_matrix\_real32()}{mean\_values\_of\_matrix\_real32()}}
+{\footnotesize\ttfamily real(kind=4) function, dimension(n\+\_\+cols) mod\+\_\+stats\+::mean\+::mean\+\_\+values\+\_\+of\+\_\+matrix\+\_\+real32 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(n\+\_\+rows, n\+\_\+cols), intent(in)}]{matrix,  }\item[{integer(kind=4), intent(in)}]{n\+\_\+rows,  }\item[{integer(kind=4), intent(in)}]{n\+\_\+cols }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} function to calculate mean value of matrix, exactly equal to sum(matrix, dim=1)/N. 
+
+\begin{DoxyReturn}{戻り値}
+mean\+\_\+values\+\_\+of\+\_\+matrix\+\_\+real32 mean values of matrix 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em matrix} & input 2-\/dim matrix \\
+\hline
+{\em n\+\_\+rows} & number of rows of matrix \\
+\hline
+{\em n\+\_\+cols} & number of columns of matrix \\
+\hline
+\end{DoxyParams}
+呼び出し関係図\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{interfacemod__stats_1_1mean_acb9ab6da288414f853c281f915d14810_cgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{interfacemod__stats_1_1mean_a5dc2f4a0b457311a48ff68ace7090932}\label{interfacemod__stats_1_1mean_a5dc2f4a0b457311a48ff68ace7090932}} 
+\index{mod\_stats::mean@{mod\_stats::mean}!mean\_values\_of\_matrix\_real64@{mean\_values\_of\_matrix\_real64}}
+\index{mean\_values\_of\_matrix\_real64@{mean\_values\_of\_matrix\_real64}!mod\_stats::mean@{mod\_stats::mean}}
+\doxysubsubsection{\texorpdfstring{mean\_values\_of\_matrix\_real64()}{mean\_values\_of\_matrix\_real64()}}
+{\footnotesize\ttfamily mod\+\_\+stats\+::mean\+::mean\+\_\+values\+\_\+of\+\_\+matrix\+\_\+real64}
+
+
+
+次のファイルからインターフェースの詳解が抽出されました\+:\begin{DoxyCompactItemize}
+\item 
+math/\mbox{\hyperlink{mod__stats_8f90}{mod\+\_\+stats.\+f90}}\end{DoxyCompactItemize}

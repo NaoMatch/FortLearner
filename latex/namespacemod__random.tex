@@ -1,0 +1,152 @@
+\hypertarget{namespacemod__random}{}\doxysection{mod\+\_\+randomモジュール}
+\label{namespacemod__random}\index{mod\_random@{mod\_random}}
+
+
+\mbox{\hyperlink{class_a}{A}} module for random operations.  
+
+
+\doxysubsection*{データ型}
+\begin{DoxyCompactItemize}
+\item 
+interface \mbox{\hyperlink{interfacemod__random_1_1rand__normal}{rand\+\_\+normal}}
+\begin{DoxyCompactList}\small\item\em Interface to call rand\+\_\+normal\+\_\+real32\+\_\+1d, rand\+\_\+normal\+\_\+real64\+\_\+1d \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__random_1_1permutation}{permutation}}
+\begin{DoxyCompactList}\small\item\em Interface to call permutation\+\_\+real32, permutation\+\_\+real64, permutation\+\_\+int32, permutation\+\_\+int64 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__random_1_1permutation__head}{permutation\+\_\+head}}
+\begin{DoxyCompactList}\small\item\em Interface to call permutation\+\_\+head\+\_\+real32, permutation\+\_\+head\+\_\+real64, permutation\+\_\+head\+\_\+int32, permutation\+\_\+head\+\_\+int64 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__random_1_1rand__integer}{rand\+\_\+integer}}
+\begin{DoxyCompactList}\small\item\em Interface to call rand\+\_\+integer\+\_\+int32, rand\+\_\+integer\+\_\+int64 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__random_1_1roulette__selection}{roulette\+\_\+selection}}
+\begin{DoxyCompactList}\small\item\em Interface to call roulette\+\_\+selection\+\_\+r4, roulette\+\_\+selection\+\_\+r8 \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{関数/サブルーチン}
+\begin{DoxyCompactItemize}
+\item 
+integer(kind=4) function \mbox{\hyperlink{namespacemod__random_a89d96b51133fbe6ea6c92a834133cf56}{roulette\+\_\+selection\+\_\+r4}} (vector, n\+\_\+samples, reverse)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to roulette selection from \textquotesingle{}vector\textquotesingle{} \textquotesingle{}vector\textquotesingle{} must be normalized, sum(vector) P== 1. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__random_a1bc842a977a6238cc97aaaf593dc16ff}{rand\+\_\+normal\+\_\+real32\+\_\+1d}} (vector, num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to generate normally distributed random number of 1-\/dim. Subroutines of other data types (rand\+\_\+normal\+\_\+real64\+\_\+1d) are stored in \textquotesingle{}./common/include/rand\+\_\+normal/\textquotesingle{}. ~\newline
+\end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__random_af44c0a60952835535a4c788b6f39739f}{permutation\+\_\+real32}} (vector, num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to randomly permutate input vector \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__random_a67a5d6e2c89ac5017695a5614c6e38c5}{permutation\+\_\+head\+\_\+real32}} (vector, num, n\+\_\+head)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to randomly permutate the first N of input vector \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__random_af4abd9ecd40b7e87826d2fd0bceda436}{rand\+\_\+integer\+\_\+int32}} (lo, hi, vector, num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to generate random integer with duplication \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{詳解}
+\mbox{\hyperlink{class_a}{A}} module for random operations. 
+
+\doxysubsection{関数/サブルーチン詳解}
+\mbox{\Hypertarget{namespacemod__random_a67a5d6e2c89ac5017695a5614c6e38c5}\label{namespacemod__random_a67a5d6e2c89ac5017695a5614c6e38c5}} 
+\index{mod\_random@{mod\_random}!permutation\_head\_real32@{permutation\_head\_real32}}
+\index{permutation\_head\_real32@{permutation\_head\_real32}!mod\_random@{mod\_random}}
+\doxysubsubsection{\texorpdfstring{permutation\_head\_real32()}{permutation\_head\_real32()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+random\+::permutation\+\_\+head\+\_\+real32 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(num), intent(inout)}]{vector,  }\item[{integer(kind=4), intent(in)}]{num,  }\item[{integer(kind=4), intent(in)}]{n\+\_\+head }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to randomly permutate the first N of input vector 
+
+\begin{DoxyReturn}{戻り値}
+vector input 1-\/dim vector 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em num} & size of input 1-\/dim vector \\
+\hline
+{\em n\+\_\+head} & number of pieces to be replaced at random \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespacemod__random_af44c0a60952835535a4c788b6f39739f}\label{namespacemod__random_af44c0a60952835535a4c788b6f39739f}} 
+\index{mod\_random@{mod\_random}!permutation\_real32@{permutation\_real32}}
+\index{permutation\_real32@{permutation\_real32}!mod\_random@{mod\_random}}
+\doxysubsubsection{\texorpdfstring{permutation\_real32()}{permutation\_real32()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+random\+::permutation\+\_\+real32 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(num), intent(inout)}]{vector,  }\item[{integer(kind=4), intent(in)}]{num }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to randomly permutate input vector 
+
+\begin{DoxyReturn}{戻り値}
+vector input 1-\/dim vector 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em num} & size of input 1-\/dim vector \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespacemod__random_af4abd9ecd40b7e87826d2fd0bceda436}\label{namespacemod__random_af4abd9ecd40b7e87826d2fd0bceda436}} 
+\index{mod\_random@{mod\_random}!rand\_integer\_int32@{rand\_integer\_int32}}
+\index{rand\_integer\_int32@{rand\_integer\_int32}!mod\_random@{mod\_random}}
+\doxysubsubsection{\texorpdfstring{rand\_integer\_int32()}{rand\_integer\_int32()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+random\+::rand\+\_\+integer\+\_\+int32 (\begin{DoxyParamCaption}\item[{integer(kind=4), intent(in)}]{lo,  }\item[{integer(kind=4), intent(in)}]{hi,  }\item[{integer(kind=4), dimension(num), intent(inout)}]{vector,  }\item[{integer(kind=4), intent(in)}]{num }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to generate random integer with duplication 
+
+
+\begin{DoxyParams}{引数}
+{\em lo} & minimum value \\
+\hline
+{\em hi} & maximum value \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+vector output vector 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em num} & the size of vector \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespacemod__random_a1bc842a977a6238cc97aaaf593dc16ff}\label{namespacemod__random_a1bc842a977a6238cc97aaaf593dc16ff}} 
+\index{mod\_random@{mod\_random}!rand\_normal\_real32\_1d@{rand\_normal\_real32\_1d}}
+\index{rand\_normal\_real32\_1d@{rand\_normal\_real32\_1d}!mod\_random@{mod\_random}}
+\doxysubsubsection{\texorpdfstring{rand\_normal\_real32\_1d()}{rand\_normal\_real32\_1d()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+random\+::rand\+\_\+normal\+\_\+real32\+\_\+1d (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(num), intent(inout)}]{vector,  }\item[{integer(kind=4), intent(in)}]{num }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to generate normally distributed random number of 1-\/dim. Subroutines of other data types (rand\+\_\+normal\+\_\+real64\+\_\+1d) are stored in \textquotesingle{}./common/include/rand\+\_\+normal/\textquotesingle{}. ~\newline
+
+
+\begin{DoxyReturn}{戻り値}
+vector input 1-\/dim vector 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em num} & size of input 1-\/dim vector \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespacemod__random_a89d96b51133fbe6ea6c92a834133cf56}\label{namespacemod__random_a89d96b51133fbe6ea6c92a834133cf56}} 
+\index{mod\_random@{mod\_random}!roulette\_selection\_r4@{roulette\_selection\_r4}}
+\index{roulette\_selection\_r4@{roulette\_selection\_r4}!mod\_random@{mod\_random}}
+\doxysubsubsection{\texorpdfstring{roulette\_selection\_r4()}{roulette\_selection\_r4()}}
+{\footnotesize\ttfamily integer(kind=4) function mod\+\_\+random\+::roulette\+\_\+selection\+\_\+r4 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(n\+\_\+samples), intent(inout)}]{vector,  }\item[{integer(kind=4), intent(in)}]{n\+\_\+samples,  }\item[{logical(kind=4), intent(in)}]{reverse }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} function to roulette selection from \textquotesingle{}vector\textquotesingle{} \textquotesingle{}vector\textquotesingle{} must be normalized, sum(vector) P== 1. 
+
+\begin{DoxyReturn}{戻り値}
+returns selected vector index 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em vector} & normalized vector \\
+\hline
+{\em n\+\_\+samples} & number of samples \\
+\hline
+{\em reverse} & if true, search from last element. \\
+\hline
+\end{DoxyParams}
+被呼び出し関係図\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=338pt]{namespacemod__random_a89d96b51133fbe6ea6c92a834133cf56_icgraph}
+\end{center}
+\end{figure}

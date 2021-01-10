@@ -1,0 +1,57 @@
+\hypertarget{interfacemod__linalg_1_1rotate__from__both__side}{}\doxysection{インターフェース mod\+\_\+linalg\+::rotate\+\_\+from\+\_\+both\+\_\+side}
+\label{interfacemod__linalg_1_1rotate__from__both__side}\index{mod\_linalg::rotate\_from\_both\_side@{mod\_linalg::rotate\_from\_both\_side}}
+
+
+Interface to call \mbox{\hyperlink{interfacemod__linalg_1_1rotate__from__both__side}{rotate\+\_\+from\+\_\+both\+\_\+side}}  
+
+
+\doxysubsection*{公開メンバ関数}
+\begin{DoxyCompactItemize}
+\item 
+subroutine \mbox{\hyperlink{interfacemod__linalg_1_1rotate__from__both__side_a5fb1f4ba9639734aff59412f143e96ba}{rotate\+\_\+from\+\_\+both\+\_\+side\+\_\+real32}} (mat, n\+\_\+dim, loc, c\+\_\+theta, s\+\_\+theta)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to rotate input matrix from both side. matrix\+\_\+rotated = transpose(rotation\+\_\+matrix) x matrix x rotation\+\_\+matrix. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{interfacemod__linalg_1_1rotate__from__both__side_aaa7f6d4eb72cbe551ac27b599c70ba46}{rotate\+\_\+from\+\_\+both\+\_\+side\+\_\+real64}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{詳解}
+Interface to call \mbox{\hyperlink{interfacemod__linalg_1_1rotate__from__both__side}{rotate\+\_\+from\+\_\+both\+\_\+side}} 
+
+\doxysubsection{メンバ関数/サブルーチン詳解}
+\mbox{\Hypertarget{interfacemod__linalg_1_1rotate__from__both__side_a5fb1f4ba9639734aff59412f143e96ba}\label{interfacemod__linalg_1_1rotate__from__both__side_a5fb1f4ba9639734aff59412f143e96ba}} 
+\index{mod\_linalg::rotate\_from\_both\_side@{mod\_linalg::rotate\_from\_both\_side}!rotate\_from\_both\_side\_real32@{rotate\_from\_both\_side\_real32}}
+\index{rotate\_from\_both\_side\_real32@{rotate\_from\_both\_side\_real32}!mod\_linalg::rotate\_from\_both\_side@{mod\_linalg::rotate\_from\_both\_side}}
+\doxysubsubsection{\texorpdfstring{rotate\_from\_both\_side\_real32()}{rotate\_from\_both\_side\_real32()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+linalg\+::rotate\+\_\+from\+\_\+both\+\_\+side\+::rotate\+\_\+from\+\_\+both\+\_\+side\+\_\+real32 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(n\+\_\+dim, n\+\_\+dim), intent(inout)}]{mat,  }\item[{integer(kind=4), intent(in)}]{n\+\_\+dim,  }\item[{integer(kind=4), dimension(2), intent(in)}]{loc,  }\item[{real(kind=4), intent(in)}]{c\+\_\+theta,  }\item[{real(kind=4), intent(in)}]{s\+\_\+theta }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to rotate input matrix from both side. matrix\+\_\+rotated = transpose(rotation\+\_\+matrix) x matrix x rotation\+\_\+matrix. 
+
+\begin{DoxyReturn}{戻り値}
+returns rotated matrix 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em mat} & input squared matrix to be rotated \\
+\hline
+{\em n\+\_\+dim} & rank of matrix \\
+\hline
+{\em loc} & location of columns to be rotated \\
+\hline
+{\em c\+\_\+theta} & cos(theta) \\
+\hline
+{\em s\+\_\+theta} & sin(theta) \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{interfacemod__linalg_1_1rotate__from__both__side_aaa7f6d4eb72cbe551ac27b599c70ba46}\label{interfacemod__linalg_1_1rotate__from__both__side_aaa7f6d4eb72cbe551ac27b599c70ba46}} 
+\index{mod\_linalg::rotate\_from\_both\_side@{mod\_linalg::rotate\_from\_both\_side}!rotate\_from\_both\_side\_real64@{rotate\_from\_both\_side\_real64}}
+\index{rotate\_from\_both\_side\_real64@{rotate\_from\_both\_side\_real64}!mod\_linalg::rotate\_from\_both\_side@{mod\_linalg::rotate\_from\_both\_side}}
+\doxysubsubsection{\texorpdfstring{rotate\_from\_both\_side\_real64()}{rotate\_from\_both\_side\_real64()}}
+{\footnotesize\ttfamily mod\+\_\+linalg\+::rotate\+\_\+from\+\_\+both\+\_\+side\+::rotate\+\_\+from\+\_\+both\+\_\+side\+\_\+real64}
+
+
+
+次のファイルからインターフェースの詳解が抽出されました\+:\begin{DoxyCompactItemize}
+\item 
+linalg/\mbox{\hyperlink{mod__linalg_8f90}{mod\+\_\+linalg.\+f90}}\end{DoxyCompactItemize}

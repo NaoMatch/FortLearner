@@ -1,0 +1,69 @@
+\hypertarget{interfacemod__linalg_1_1inv__unit__lower__matrix}{}\doxysection{インターフェース mod\+\_\+linalg\+::inv\+\_\+unit\+\_\+lower\+\_\+matrix}
+\label{interfacemod__linalg_1_1inv__unit__lower__matrix}\index{mod\_linalg::inv\_unit\_lower\_matrix@{mod\_linalg::inv\_unit\_lower\_matrix}}
+
+
+An interface to call inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+real32, inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+real64, inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+int32, inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+int64  
+
+
+\doxysubsection*{公開メンバ関数}
+\begin{DoxyCompactItemize}
+\item 
+subroutine \mbox{\hyperlink{interfacemod__linalg_1_1inv__unit__lower__matrix_a6da19ca52d630502c0503f05b82dda33}{inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+real32}} (matrix\+\_\+inv, matrix\+\_\+unit\+\_\+lower, n\+\_\+dim)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to calculate inverse matrix of unit lower matrix, unit lower matrix is calculated by \textquotesingle{}\mbox{\hyperlink{interfacemod__linalg_1_1cholesky__decomposition}{cholesky\+\_\+decomposition}}\textquotesingle{} or \textquotesingle{}\mbox{\hyperlink{interfacemod__linalg_1_1cholesky__decomposition__modified}{cholesky\+\_\+decomposition\+\_\+modified}}\textquotesingle{}. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{interfacemod__linalg_1_1inv__unit__lower__matrix_a210a0bdbca4334940960622757968468}{inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+real64}}
+\item 
+\mbox{\hyperlink{interfacemod__linalg_1_1inv__unit__lower__matrix_a3273518bbd6d228ac64603e0d7107a2c}{inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+int32}}
+\item 
+\mbox{\hyperlink{interfacemod__linalg_1_1inv__unit__lower__matrix_a65415622096344d07c45eb9d0332bf75}{inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+int64}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{詳解}
+An interface to call inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+real32, inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+real64, inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+int32, inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+int64 
+
+\doxysubsection{メンバ関数/サブルーチン詳解}
+\mbox{\Hypertarget{interfacemod__linalg_1_1inv__unit__lower__matrix_a3273518bbd6d228ac64603e0d7107a2c}\label{interfacemod__linalg_1_1inv__unit__lower__matrix_a3273518bbd6d228ac64603e0d7107a2c}} 
+\index{mod\_linalg::inv\_unit\_lower\_matrix@{mod\_linalg::inv\_unit\_lower\_matrix}!inv\_unit\_lower\_matrix\_int32@{inv\_unit\_lower\_matrix\_int32}}
+\index{inv\_unit\_lower\_matrix\_int32@{inv\_unit\_lower\_matrix\_int32}!mod\_linalg::inv\_unit\_lower\_matrix@{mod\_linalg::inv\_unit\_lower\_matrix}}
+\doxysubsubsection{\texorpdfstring{inv\_unit\_lower\_matrix\_int32()}{inv\_unit\_lower\_matrix\_int32()}}
+{\footnotesize\ttfamily mod\+\_\+linalg\+::inv\+\_\+unit\+\_\+lower\+\_\+matrix\+::inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+int32}
+
+\mbox{\Hypertarget{interfacemod__linalg_1_1inv__unit__lower__matrix_a65415622096344d07c45eb9d0332bf75}\label{interfacemod__linalg_1_1inv__unit__lower__matrix_a65415622096344d07c45eb9d0332bf75}} 
+\index{mod\_linalg::inv\_unit\_lower\_matrix@{mod\_linalg::inv\_unit\_lower\_matrix}!inv\_unit\_lower\_matrix\_int64@{inv\_unit\_lower\_matrix\_int64}}
+\index{inv\_unit\_lower\_matrix\_int64@{inv\_unit\_lower\_matrix\_int64}!mod\_linalg::inv\_unit\_lower\_matrix@{mod\_linalg::inv\_unit\_lower\_matrix}}
+\doxysubsubsection{\texorpdfstring{inv\_unit\_lower\_matrix\_int64()}{inv\_unit\_lower\_matrix\_int64()}}
+{\footnotesize\ttfamily mod\+\_\+linalg\+::inv\+\_\+unit\+\_\+lower\+\_\+matrix\+::inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+int64}
+
+\mbox{\Hypertarget{interfacemod__linalg_1_1inv__unit__lower__matrix_a6da19ca52d630502c0503f05b82dda33}\label{interfacemod__linalg_1_1inv__unit__lower__matrix_a6da19ca52d630502c0503f05b82dda33}} 
+\index{mod\_linalg::inv\_unit\_lower\_matrix@{mod\_linalg::inv\_unit\_lower\_matrix}!inv\_unit\_lower\_matrix\_real32@{inv\_unit\_lower\_matrix\_real32}}
+\index{inv\_unit\_lower\_matrix\_real32@{inv\_unit\_lower\_matrix\_real32}!mod\_linalg::inv\_unit\_lower\_matrix@{mod\_linalg::inv\_unit\_lower\_matrix}}
+\doxysubsubsection{\texorpdfstring{inv\_unit\_lower\_matrix\_real32()}{inv\_unit\_lower\_matrix\_real32()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+linalg\+::inv\+\_\+unit\+\_\+lower\+\_\+matrix\+::inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+real32 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(n\+\_\+dim, n\+\_\+dim), intent(inout)}]{matrix\+\_\+inv,  }\item[{real(kind=4), dimension(n\+\_\+dim, n\+\_\+dim), intent(inout)}]{matrix\+\_\+unit\+\_\+lower,  }\item[{integer(kind=4), intent(in)}]{n\+\_\+dim }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to calculate inverse matrix of unit lower matrix, unit lower matrix is calculated by \textquotesingle{}\mbox{\hyperlink{interfacemod__linalg_1_1cholesky__decomposition}{cholesky\+\_\+decomposition}}\textquotesingle{} or \textquotesingle{}\mbox{\hyperlink{interfacemod__linalg_1_1cholesky__decomposition__modified}{cholesky\+\_\+decomposition\+\_\+modified}}\textquotesingle{}. 
+
+\begin{DoxyReturn}{戻り値}
+retuns inverse matrix of unit lower matrix 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em matrix\+\_\+inv} & inverse matrix of unit lower matrix \\
+\hline
+{\em matrix\+\_\+unit\+\_\+lower} & unit lower matrix \\
+\hline
+{\em n\+\_\+dim} & rank of input/output matrix \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{interfacemod__linalg_1_1inv__unit__lower__matrix_a210a0bdbca4334940960622757968468}\label{interfacemod__linalg_1_1inv__unit__lower__matrix_a210a0bdbca4334940960622757968468}} 
+\index{mod\_linalg::inv\_unit\_lower\_matrix@{mod\_linalg::inv\_unit\_lower\_matrix}!inv\_unit\_lower\_matrix\_real64@{inv\_unit\_lower\_matrix\_real64}}
+\index{inv\_unit\_lower\_matrix\_real64@{inv\_unit\_lower\_matrix\_real64}!mod\_linalg::inv\_unit\_lower\_matrix@{mod\_linalg::inv\_unit\_lower\_matrix}}
+\doxysubsubsection{\texorpdfstring{inv\_unit\_lower\_matrix\_real64()}{inv\_unit\_lower\_matrix\_real64()}}
+{\footnotesize\ttfamily mod\+\_\+linalg\+::inv\+\_\+unit\+\_\+lower\+\_\+matrix\+::inv\+\_\+unit\+\_\+lower\+\_\+matrix\+\_\+real64}
+
+
+
+次のファイルからインターフェースの詳解が抽出されました\+:\begin{DoxyCompactItemize}
+\item 
+linalg/\mbox{\hyperlink{mod__linalg_8f90}{mod\+\_\+linalg.\+f90}}\end{DoxyCompactItemize}

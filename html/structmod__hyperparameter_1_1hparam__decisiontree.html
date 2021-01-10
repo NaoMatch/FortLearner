@@ -1,0 +1,986 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.9.1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>FortLearner: TYPE mod_hyperparameter::hparam_decisiontree</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">FortLearner
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 構築: Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'検索','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','検索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><a class="el" href="namespacemod__hyperparameter.html">mod_hyperparameter</a></li><li class="navelem"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html">hparam_decisiontree</a></li>  </ul>
+</div>
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#pub-attribs">公開変数類</a> &#124;
+<a href="structmod__hyperparameter_1_1hparam__decisiontree-members.html">全メンバ一覧</a>  </div>
+  <div class="headertitle">
+<div class="title">TYPE mod_hyperparameter::hparam_decisiontree</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="dynheader">
+mod_hyperparameter::hparam_decisiontree の継承関係図</div>
+<div class="dyncontent">
+<div class="center"><img src="structmod__hyperparameter_1_1hparam__decisiontree__inherit__graph.png" border="0" usemap="#amod__hyperparameter_1_1hparam__decisiontree_inherit__map" alt="Inheritance graph"/></div>
+<map name="amod__hyperparameter_1_1hparam__decisiontree_inherit__map" id="amod__hyperparameter_1_1hparam__decisiontree_inherit__map">
+<area shape="rect" title=" " alt="" coords="5,95,156,136"/>
+<area shape="rect" href="structmod__hyperparameter_1_1hparam__base.html" title=" " alt="" coords="9,5,153,47"/>
+</map>
+<center><span class="legend">[<a href="graph_legend.html">凡例</a>]</span></center></div>
+<div class="dynheader">
+mod_hyperparameter::hparam_decisiontree 連携図</div>
+<div class="dyncontent">
+<div class="center"><img src="structmod__hyperparameter_1_1hparam__decisiontree__coll__graph.png" border="0" usemap="#amod__hyperparameter_1_1hparam__decisiontree_coll__map" alt="Collaboration graph"/></div>
+<map name="amod__hyperparameter_1_1hparam__decisiontree_coll__map" id="amod__hyperparameter_1_1hparam__decisiontree_coll__map">
+<area shape="rect" title=" " alt="" coords="5,95,156,136"/>
+<area shape="rect" href="structmod__hyperparameter_1_1hparam__base.html" title=" " alt="" coords="9,5,153,47"/>
+</map>
+<center><span class="legend">[<a href="graph_legend.html">凡例</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+公開変数類</h2></td></tr>
+<tr class="memitem:ab378a903078e78fa1c87bf5a904f872f"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ab378a903078e78fa1c87bf5a904f872f">n_estimators</a> = 100_8</td></tr>
+<tr class="separator:ab378a903078e78fa1c87bf5a904f872f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15491db759bb40da8d2793946f6cc1a0"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a15491db759bb40da8d2793946f6cc1a0">criterion_int</a> = 0</td></tr>
+<tr class="separator:a15491db759bb40da8d2793946f6cc1a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6e4a310f3c977a4ed7997a9f0077f4c"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#af6e4a310f3c977a4ed7997a9f0077f4c">criterion_boost_int</a> = 0</td></tr>
+<tr class="separator:af6e4a310f3c977a4ed7997a9f0077f4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a218c55539fb86fc830fdc500fd0c6841"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a218c55539fb86fc830fdc500fd0c6841">verbose</a> = 0</td></tr>
+<tr class="separator:a218c55539fb86fc830fdc500fd0c6841"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae562cacfe58030b92017f765a59a25ae"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ae562cacfe58030b92017f765a59a25ae">max_epoch</a> = 300</td></tr>
+<tr class="separator:ae562cacfe58030b92017f765a59a25ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0974ac20455bddedab64df213be9855d"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a0974ac20455bddedab64df213be9855d">max_patient</a> = 100</td></tr>
+<tr class="separator:a0974ac20455bddedab64df213be9855d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c4fa467f337eddae919a6c708277fe9"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a8c4fa467f337eddae919a6c708277fe9">max_retry</a> = 100</td></tr>
+<tr class="separator:a8c4fa467f337eddae919a6c708277fe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8952dec3c0c7f2cad4dcefb88896d7e"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ae8952dec3c0c7f2cad4dcefb88896d7e">max_alpha</a> = 10</td></tr>
+<tr class="separator:ae8952dec3c0c7f2cad4dcefb88896d7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae77e85633ce83bffe31ac0954fe6d384"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ae77e85633ce83bffe31ac0954fe6d384">min_alpha</a> = 1</td></tr>
+<tr class="separator:ae77e85633ce83bffe31ac0954fe6d384"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab29b6b21419c5cc64360b0759520fe2c"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ab29b6b21419c5cc64360b0759520fe2c">n_repeats</a> = 10</td></tr>
+<tr class="separator:ab29b6b21419c5cc64360b0759520fe2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b79f66fa46c81adc8e504db76dd3536"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a8b79f66fa46c81adc8e504db76dd3536">n_rounds</a> = 10</td></tr>
+<tr class="separator:a8b79f66fa46c81adc8e504db76dd3536"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad91c384cb9b91b9a70b91e08ac3179d6"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ad91c384cb9b91b9a70b91e08ac3179d6">max_bins</a> = 255</td></tr>
+<tr class="separator:ad91c384cb9b91b9a70b91e08ac3179d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afcc8fe19c3ec5f87b15074366dd0edd5"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#afcc8fe19c3ec5f87b15074366dd0edd5">strategy_int</a> = 1_8</td></tr>
+<tr class="separator:afcc8fe19c3ec5f87b15074366dd0edd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43ca535e82a39941250f97e1fcbee7f2"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a43ca535e82a39941250f97e1fcbee7f2">max_depth</a> = -1_8</td></tr>
+<tr class="separator:a43ca535e82a39941250f97e1fcbee7f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35f8f251065524cd251f7e5913ac06db"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a35f8f251065524cd251f7e5913ac06db">min_samples_split</a> = 2</td></tr>
+<tr class="separator:a35f8f251065524cd251f7e5913ac06db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84ec6f787b663f1f22ebf797ded07cbd"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a84ec6f787b663f1f22ebf797ded07cbd">min_samples_leaf</a> = 1</td></tr>
+<tr class="separator:a84ec6f787b663f1f22ebf797ded07cbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade0bf999443715d2d17efecfad5b5377"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ade0bf999443715d2d17efecfad5b5377">max_features</a> = -1</td></tr>
+<tr class="separator:ade0bf999443715d2d17efecfad5b5377"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9e271c80e017ecb65a164880786a8e6"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ac9e271c80e017ecb65a164880786a8e6">max_feature_use</a> = huge(0_8)</td></tr>
+<tr class="separator:ac9e271c80e017ecb65a164880786a8e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98fb6821de8ae8870f2dc6051100e8c4"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a98fb6821de8ae8870f2dc6051100e8c4">max_leaf_nodes</a> = 255_8</td></tr>
+<tr class="separator:a98fb6821de8ae8870f2dc6051100e8c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52ff3ce62db552570f5738343d8bcd73"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a52ff3ce62db552570f5738343d8bcd73">fashion_int</a> = 10_8</td></tr>
+<tr class="separator:a52ff3ce62db552570f5738343d8bcd73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62916d86e5597e66acb36ac7e5a0fe81"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a62916d86e5597e66acb36ac7e5a0fe81">print_mod</a> = 1</td></tr>
+<tr class="separator:a62916d86e5597e66acb36ac7e5a0fe81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a505747eae2ef42546fa7426b1aa3d01b"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a505747eae2ef42546fa7426b1aa3d01b">num_threads_in_node</a> = 4</td></tr>
+<tr class="separator:a505747eae2ef42546fa7426b1aa3d01b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a552c6feaf326be0b2382100951403414"><td class="memItemLeft" align="right" valign="top">integer(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a552c6feaf326be0b2382100951403414">num_threads_in_forest</a> = 4</td></tr>
+<tr class="separator:a552c6feaf326be0b2382100951403414"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add616c38556d2f03a96c7eed99547caa"><td class="memItemLeft" align="right" valign="top">real(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#add616c38556d2f03a96c7eed99547caa">learning_rate</a> = .1</td></tr>
+<tr class="separator:add616c38556d2f03a96c7eed99547caa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0874f8470242c513ea4e59c29457bc7"><td class="memItemLeft" align="right" valign="top">real(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ad0874f8470242c513ea4e59c29457bc7">learning_rate_layer</a> = .1</td></tr>
+<tr class="separator:ad0874f8470242c513ea4e59c29457bc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af779c6d4f879a1f83d91fca0d66132c4"><td class="memItemLeft" align="right" valign="top">real(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#af779c6d4f879a1f83d91fca0d66132c4">drop_rate</a> = .9</td></tr>
+<tr class="separator:af779c6d4f879a1f83d91fca0d66132c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc9a687d3225165579bb51672c3ff9bd"><td class="memItemLeft" align="right" valign="top">real(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#acc9a687d3225165579bb51672c3ff9bd">update_ratio</a> = .9</td></tr>
+<tr class="separator:acc9a687d3225165579bb51672c3ff9bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade7733d70e2b6b98e96fcf61b9055fdc"><td class="memItemLeft" align="right" valign="top">real(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ade7733d70e2b6b98e96fcf61b9055fdc">momentum</a> = .9</td></tr>
+<tr class="separator:ade7733d70e2b6b98e96fcf61b9055fdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6b41b0da3f23a80b0230e09e2aff9de"><td class="memItemLeft" align="right" valign="top">real(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#aa6b41b0da3f23a80b0230e09e2aff9de">prunig_threshold</a> = .9</td></tr>
+<tr class="separator:aa6b41b0da3f23a80b0230e09e2aff9de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d63b03f40e83de8fc35061b92b297e3"><td class="memItemLeft" align="right" valign="top">real(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a4d63b03f40e83de8fc35061b92b297e3">weight_decay</a> = .9</td></tr>
+<tr class="separator:a4d63b03f40e83de8fc35061b92b297e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0bece9021a9acf7a3ec8448498447574"><td class="memItemLeft" align="right" valign="top">real(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a0bece9021a9acf7a3ec8448498447574">top_ratio</a> = .1</td></tr>
+<tr class="separator:a0bece9021a9acf7a3ec8448498447574"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adabdad06b56f480afb8ef79f8bcc6aa6"><td class="memItemLeft" align="right" valign="top">real(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#adabdad06b56f480afb8ef79f8bcc6aa6">min_weight_fraction_leaf</a> = .0</td></tr>
+<tr class="separator:adabdad06b56f480afb8ef79f8bcc6aa6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd895465df7ddb4021893b51a4a75901"><td class="memItemLeft" align="right" valign="top">real(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#acd895465df7ddb4021893b51a4a75901">min_impurity_decrease</a> = .0</td></tr>
+<tr class="separator:acd895465df7ddb4021893b51a4a75901"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab21464bba7c5d5287568aed09ab24162"><td class="memItemLeft" align="right" valign="top">real(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ab21464bba7c5d5287568aed09ab24162">other_ratio</a> = .1</td></tr>
+<tr class="separator:ab21464bba7c5d5287568aed09ab24162"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3ac2a9adf509f5a943597fc2e879289"><td class="memItemLeft" align="right" valign="top">real(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ac3ac2a9adf509f5a943597fc2e879289">lambda1</a> = 0d0</td></tr>
+<tr class="separator:ac3ac2a9adf509f5a943597fc2e879289"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5226a20355bcad305cb1afa1eceeeb0"><td class="memItemLeft" align="right" valign="top">real(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ad5226a20355bcad305cb1afa1eceeeb0">lambda2</a> = 1d0</td></tr>
+<tr class="separator:ad5226a20355bcad305cb1afa1eceeeb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88d39ca9fbd417547d2c55fb8ee81bb7"><td class="memItemLeft" align="right" valign="top">real(kind=8)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a88d39ca9fbd417547d2c55fb8ee81bb7">row_sampling</a> = 1d0</td></tr>
+<tr class="separator:a88d39ca9fbd417547d2c55fb8ee81bb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab67af2e795f7b8c07ac252c327097d71"><td class="memItemLeft" align="right" valign="top">logical(kind=4)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ab67af2e795f7b8c07ac252c327097d71">skip_used_features</a> = f_</td></tr>
+<tr class="separator:ab67af2e795f7b8c07ac252c327097d71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab012942074f63f4c41e1cbea56d211f1"><td class="memItemLeft" align="right" valign="top">logical(kind=4)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ab012942074f63f4c41e1cbea56d211f1">boot_strap</a> = f_</td></tr>
+<tr class="separator:ab012942074f63f4c41e1cbea56d211f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acce51137647b11920f985060e509fd6e"><td class="memItemLeft" align="right" valign="top">logical(kind=4)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#acce51137647b11920f985060e509fd6e">random_splitter</a> = f_</td></tr>
+<tr class="separator:acce51137647b11920f985060e509fd6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7abd855de7ea49804ce3416a7b46bd3"><td class="memItemLeft" align="right" valign="top">character(len=256)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ab7abd855de7ea49804ce3416a7b46bd3">criterion</a> = &quot;mse&quot;</td></tr>
+<tr class="separator:ab7abd855de7ea49804ce3416a7b46bd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c81cad9dcfd76c592d16374813385d4"><td class="memItemLeft" align="right" valign="top">character(len=256)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a3c81cad9dcfd76c592d16374813385d4">mse</a></td></tr>
+<tr class="separator:a3c81cad9dcfd76c592d16374813385d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a48f1ba26227397230524b836cd5918"><td class="memItemLeft" align="right" valign="top">character(len=256)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a6a48f1ba26227397230524b836cd5918">mae</a></td></tr>
+<tr class="separator:a6a48f1ba26227397230524b836cd5918"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b5c72e531377181699ba12aa329c110"><td class="memItemLeft" align="right" valign="top">character(len=256)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a3b5c72e531377181699ba12aa329c110">strategy</a> = &quot;quantile&quot;</td></tr>
+<tr class="separator:a3b5c72e531377181699ba12aa329c110"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac5b324d595efea82e118d1daecca0453"><td class="memItemLeft" align="right" valign="top">character(len=256)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#ac5b324d595efea82e118d1daecca0453">uniform</a></td></tr>
+<tr class="separator:ac5b324d595efea82e118d1daecca0453"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2cf24396c237452acd4608b436ce3732"><td class="memItemLeft" align="right" valign="top">character(len=256)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a2cf24396c237452acd4608b436ce3732">quantile</a></td></tr>
+<tr class="separator:a2cf24396c237452acd4608b436ce3732"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73c055c2ea8501a8e70daf16ead70001"><td class="memItemLeft" align="right" valign="top">character(len=256)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a73c055c2ea8501a8e70daf16ead70001">k</a></td></tr>
+<tr class="separator:a73c055c2ea8501a8e70daf16ead70001"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7608860bd0d14305f3b15c1d5e779f5f"><td class="memItemLeft" align="right" valign="top">character(len=256)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a7608860bd0d14305f3b15c1d5e779f5f">means</a></td></tr>
+<tr class="separator:a7608860bd0d14305f3b15c1d5e779f5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af145bb65af2bd04bf64e213676ca6615"><td class="memItemLeft" align="right" valign="top">character(len=256)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#af145bb65af2bd04bf64e213676ca6615">fashion</a> = &quot;best&quot;</td></tr>
+<tr class="separator:af145bb65af2bd04bf64e213676ca6615"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ccd0ac23800a5fb2700bd14f22923a6"><td class="memItemLeft" align="right" valign="top">character(len=256)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a5ccd0ac23800a5fb2700bd14f22923a6">best</a></td></tr>
+<tr class="separator:a5ccd0ac23800a5fb2700bd14f22923a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7245fed558f3000432ba5259bd678bbf"><td class="memItemLeft" align="right" valign="top">character(len=256)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a7245fed558f3000432ba5259bd678bbf">depth</a></td></tr>
+<tr class="separator:a7245fed558f3000432ba5259bd678bbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a245966468d329e5634950a9f6bce5b58"><td class="memItemLeft" align="right" valign="top">character(len=256)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a245966468d329e5634950a9f6bce5b58">level</a></td></tr>
+<tr class="separator:a245966468d329e5634950a9f6bce5b58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87d919b2f4c205ea1ae488dc0be647bd"><td class="memItemLeft" align="right" valign="top">character(len=256)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a87d919b2f4c205ea1ae488dc0be647bd">impurity</a></td></tr>
+<tr class="separator:a87d919b2f4c205ea1ae488dc0be647bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f50435ae9348fef7a301aab2ee80c64"><td class="memItemLeft" align="right" valign="top">character(len=256)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__decisiontree.html#a8f50435ae9348fef7a301aab2ee80c64">sample</a></td></tr>
+<tr class="separator:a8f50435ae9348fef7a301aab2ee80c64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_attribs_structmod__hyperparameter_1_1hparam__base"><td colspan="2" onclick="javascript:toggleInherit('pub_attribs_structmod__hyperparameter_1_1hparam__base')"><img src="closed.png" alt="-"/>&#160;基底クラス <a class="el" href="structmod__hyperparameter_1_1hparam__base.html">mod_hyperparameter::hparam_base</a> に属する継承公開変数類</td></tr>
+<tr class="memitem:a3574d841af6f35c0359959a6c2f54049 inherit pub_attribs_structmod__hyperparameter_1_1hparam__base"><td class="memItemLeft" align="right" valign="top">character(len=256)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__base.html#a3574d841af6f35c0359959a6c2f54049">algo_name</a></td></tr>
+<tr class="separator:a3574d841af6f35c0359959a6c2f54049 inherit pub_attribs_structmod__hyperparameter_1_1hparam__base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
+その他の継承メンバ</h2></td></tr>
+<tr class="inherit_header pub_methods_structmod__hyperparameter_1_1hparam__base"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_structmod__hyperparameter_1_1hparam__base')"><img src="closed.png" alt="-"/>&#160;基底クラス <a class="el" href="structmod__hyperparameter_1_1hparam__base.html">mod_hyperparameter::hparam_base</a> に属する継承公開メンバ関数</td></tr>
+<tr class="memitem:aca1c68c96dee7d9ed33d85f5da1cb606 inherit pub_methods_structmod__hyperparameter_1_1hparam__base"><td class="memItemLeft" align="right" valign="top">procedure&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__base.html#aca1c68c96dee7d9ed33d85f5da1cb606">validate_int_range</a></td></tr>
+<tr class="separator:aca1c68c96dee7d9ed33d85f5da1cb606 inherit pub_methods_structmod__hyperparameter_1_1hparam__base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad211b987c8046b8f9b8c670af53d9468 inherit pub_methods_structmod__hyperparameter_1_1hparam__base"><td class="memItemLeft" align="right" valign="top">procedure&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__base.html#ad211b987c8046b8f9b8c670af53d9468">validate_real_range</a></td></tr>
+<tr class="separator:ad211b987c8046b8f9b8c670af53d9468 inherit pub_methods_structmod__hyperparameter_1_1hparam__base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a724f37cd8a5d7b84dc2f3dde2df994fe inherit pub_methods_structmod__hyperparameter_1_1hparam__base"><td class="memItemLeft" align="right" valign="top">procedure&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__base.html#a724f37cd8a5d7b84dc2f3dde2df994fe">validate_char_list</a></td></tr>
+<tr class="separator:a724f37cd8a5d7b84dc2f3dde2df994fe inherit pub_methods_structmod__hyperparameter_1_1hparam__base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4e0ee70e253b341c0b37a30ba7ee54d inherit pub_methods_structmod__hyperparameter_1_1hparam__base"><td class="memItemLeft" align="right" valign="top">procedure&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__hyperparameter_1_1hparam__base.html#ac4e0ee70e253b341c0b37a30ba7ee54d">convert_char_to_int</a></td></tr>
+<tr class="separator:ac4e0ee70e253b341c0b37a30ba7ee54d inherit pub_methods_structmod__hyperparameter_1_1hparam__base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">メンバ詳解</h2>
+<a id="a5ccd0ac23800a5fb2700bd14f22923a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ccd0ac23800a5fb2700bd14f22923a6">&#9670;&nbsp;</a></span>best</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">character(len=256) mod_hyperparameter::hparam_decisiontree::best</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab012942074f63f4c41e1cbea56d211f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab012942074f63f4c41e1cbea56d211f1">&#9670;&nbsp;</a></span>boot_strap</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">logical(kind=4) mod_hyperparameter::hparam_decisiontree::boot_strap = f_</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab7abd855de7ea49804ce3416a7b46bd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab7abd855de7ea49804ce3416a7b46bd3">&#9670;&nbsp;</a></span>criterion</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">character(len=256) mod_hyperparameter::hparam_decisiontree::criterion = &quot;mse&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af6e4a310f3c977a4ed7997a9f0077f4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6e4a310f3c977a4ed7997a9f0077f4c">&#9670;&nbsp;</a></span>criterion_boost_int</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::criterion_boost_int = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a15491db759bb40da8d2793946f6cc1a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15491db759bb40da8d2793946f6cc1a0">&#9670;&nbsp;</a></span>criterion_int</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::criterion_int = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7245fed558f3000432ba5259bd678bbf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7245fed558f3000432ba5259bd678bbf">&#9670;&nbsp;</a></span>depth</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">character(len=256) mod_hyperparameter::hparam_decisiontree::depth</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af779c6d4f879a1f83d91fca0d66132c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af779c6d4f879a1f83d91fca0d66132c4">&#9670;&nbsp;</a></span>drop_rate</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(kind=8) mod_hyperparameter::hparam_decisiontree::drop_rate = .9</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af145bb65af2bd04bf64e213676ca6615"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af145bb65af2bd04bf64e213676ca6615">&#9670;&nbsp;</a></span>fashion</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">character(len=256) mod_hyperparameter::hparam_decisiontree::fashion = &quot;best&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a52ff3ce62db552570f5738343d8bcd73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52ff3ce62db552570f5738343d8bcd73">&#9670;&nbsp;</a></span>fashion_int</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::fashion_int = 10_8</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a87d919b2f4c205ea1ae488dc0be647bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87d919b2f4c205ea1ae488dc0be647bd">&#9670;&nbsp;</a></span>impurity</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">character(len=256) mod_hyperparameter::hparam_decisiontree::impurity</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a73c055c2ea8501a8e70daf16ead70001"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73c055c2ea8501a8e70daf16ead70001">&#9670;&nbsp;</a></span>k</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">character(len=256) mod_hyperparameter::hparam_decisiontree::k</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac3ac2a9adf509f5a943597fc2e879289"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac3ac2a9adf509f5a943597fc2e879289">&#9670;&nbsp;</a></span>lambda1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(kind=8) mod_hyperparameter::hparam_decisiontree::lambda1 = 0d0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad5226a20355bcad305cb1afa1eceeeb0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5226a20355bcad305cb1afa1eceeeb0">&#9670;&nbsp;</a></span>lambda2</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(kind=8) mod_hyperparameter::hparam_decisiontree::lambda2 = 1d0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="add616c38556d2f03a96c7eed99547caa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add616c38556d2f03a96c7eed99547caa">&#9670;&nbsp;</a></span>learning_rate</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(kind=8) mod_hyperparameter::hparam_decisiontree::learning_rate = .1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad0874f8470242c513ea4e59c29457bc7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0874f8470242c513ea4e59c29457bc7">&#9670;&nbsp;</a></span>learning_rate_layer</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(kind=8) mod_hyperparameter::hparam_decisiontree::learning_rate_layer = .1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a245966468d329e5634950a9f6bce5b58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a245966468d329e5634950a9f6bce5b58">&#9670;&nbsp;</a></span>level</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">character(len=256) mod_hyperparameter::hparam_decisiontree::level</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a6a48f1ba26227397230524b836cd5918"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a48f1ba26227397230524b836cd5918">&#9670;&nbsp;</a></span>mae</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">character(len=256) mod_hyperparameter::hparam_decisiontree::mae</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae8952dec3c0c7f2cad4dcefb88896d7e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8952dec3c0c7f2cad4dcefb88896d7e">&#9670;&nbsp;</a></span>max_alpha</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::max_alpha = 10</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad91c384cb9b91b9a70b91e08ac3179d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad91c384cb9b91b9a70b91e08ac3179d6">&#9670;&nbsp;</a></span>max_bins</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::max_bins = 255</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a43ca535e82a39941250f97e1fcbee7f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a43ca535e82a39941250f97e1fcbee7f2">&#9670;&nbsp;</a></span>max_depth</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::max_depth = -1_8</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae562cacfe58030b92017f765a59a25ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae562cacfe58030b92017f765a59a25ae">&#9670;&nbsp;</a></span>max_epoch</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::max_epoch = 300</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac9e271c80e017ecb65a164880786a8e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac9e271c80e017ecb65a164880786a8e6">&#9670;&nbsp;</a></span>max_feature_use</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::max_feature_use = huge(0_8)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ade0bf999443715d2d17efecfad5b5377"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade0bf999443715d2d17efecfad5b5377">&#9670;&nbsp;</a></span>max_features</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::max_features = -1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a98fb6821de8ae8870f2dc6051100e8c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98fb6821de8ae8870f2dc6051100e8c4">&#9670;&nbsp;</a></span>max_leaf_nodes</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::max_leaf_nodes = 255_8</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0974ac20455bddedab64df213be9855d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0974ac20455bddedab64df213be9855d">&#9670;&nbsp;</a></span>max_patient</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::max_patient = 100</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8c4fa467f337eddae919a6c708277fe9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c4fa467f337eddae919a6c708277fe9">&#9670;&nbsp;</a></span>max_retry</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::max_retry = 100</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7608860bd0d14305f3b15c1d5e779f5f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7608860bd0d14305f3b15c1d5e779f5f">&#9670;&nbsp;</a></span>means</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">character(len=256) mod_hyperparameter::hparam_decisiontree::means</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ae77e85633ce83bffe31ac0954fe6d384"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae77e85633ce83bffe31ac0954fe6d384">&#9670;&nbsp;</a></span>min_alpha</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::min_alpha = 1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acd895465df7ddb4021893b51a4a75901"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd895465df7ddb4021893b51a4a75901">&#9670;&nbsp;</a></span>min_impurity_decrease</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(kind=8) mod_hyperparameter::hparam_decisiontree::min_impurity_decrease = .0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a84ec6f787b663f1f22ebf797ded07cbd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84ec6f787b663f1f22ebf797ded07cbd">&#9670;&nbsp;</a></span>min_samples_leaf</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::min_samples_leaf = 1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a35f8f251065524cd251f7e5913ac06db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35f8f251065524cd251f7e5913ac06db">&#9670;&nbsp;</a></span>min_samples_split</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::min_samples_split = 2</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adabdad06b56f480afb8ef79f8bcc6aa6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adabdad06b56f480afb8ef79f8bcc6aa6">&#9670;&nbsp;</a></span>min_weight_fraction_leaf</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(kind=8) mod_hyperparameter::hparam_decisiontree::min_weight_fraction_leaf = .0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ade7733d70e2b6b98e96fcf61b9055fdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade7733d70e2b6b98e96fcf61b9055fdc">&#9670;&nbsp;</a></span>momentum</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(kind=8) mod_hyperparameter::hparam_decisiontree::momentum = .9</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3c81cad9dcfd76c592d16374813385d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c81cad9dcfd76c592d16374813385d4">&#9670;&nbsp;</a></span>mse</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">character(len=256) mod_hyperparameter::hparam_decisiontree::mse</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab378a903078e78fa1c87bf5a904f872f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab378a903078e78fa1c87bf5a904f872f">&#9670;&nbsp;</a></span>n_estimators</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::n_estimators = 100_8</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab29b6b21419c5cc64360b0759520fe2c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab29b6b21419c5cc64360b0759520fe2c">&#9670;&nbsp;</a></span>n_repeats</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::n_repeats = 10</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8b79f66fa46c81adc8e504db76dd3536"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b79f66fa46c81adc8e504db76dd3536">&#9670;&nbsp;</a></span>n_rounds</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::n_rounds = 10</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a552c6feaf326be0b2382100951403414"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a552c6feaf326be0b2382100951403414">&#9670;&nbsp;</a></span>num_threads_in_forest</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::num_threads_in_forest = 4</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a505747eae2ef42546fa7426b1aa3d01b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a505747eae2ef42546fa7426b1aa3d01b">&#9670;&nbsp;</a></span>num_threads_in_node</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::num_threads_in_node = 4</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab21464bba7c5d5287568aed09ab24162"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab21464bba7c5d5287568aed09ab24162">&#9670;&nbsp;</a></span>other_ratio</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(kind=8) mod_hyperparameter::hparam_decisiontree::other_ratio = .1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a62916d86e5597e66acb36ac7e5a0fe81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62916d86e5597e66acb36ac7e5a0fe81">&#9670;&nbsp;</a></span>print_mod</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::print_mod = 1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa6b41b0da3f23a80b0230e09e2aff9de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6b41b0da3f23a80b0230e09e2aff9de">&#9670;&nbsp;</a></span>prunig_threshold</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(kind=8) mod_hyperparameter::hparam_decisiontree::prunig_threshold = .9</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2cf24396c237452acd4608b436ce3732"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2cf24396c237452acd4608b436ce3732">&#9670;&nbsp;</a></span>quantile</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">character(len=256) mod_hyperparameter::hparam_decisiontree::quantile</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acce51137647b11920f985060e509fd6e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acce51137647b11920f985060e509fd6e">&#9670;&nbsp;</a></span>random_splitter</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">logical(kind=4) mod_hyperparameter::hparam_decisiontree::random_splitter = f_</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a88d39ca9fbd417547d2c55fb8ee81bb7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88d39ca9fbd417547d2c55fb8ee81bb7">&#9670;&nbsp;</a></span>row_sampling</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(kind=8) mod_hyperparameter::hparam_decisiontree::row_sampling = 1d0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a8f50435ae9348fef7a301aab2ee80c64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8f50435ae9348fef7a301aab2ee80c64">&#9670;&nbsp;</a></span>sample</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">character(len=256) mod_hyperparameter::hparam_decisiontree::sample</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab67af2e795f7b8c07ac252c327097d71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab67af2e795f7b8c07ac252c327097d71">&#9670;&nbsp;</a></span>skip_used_features</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">logical(kind=4) mod_hyperparameter::hparam_decisiontree::skip_used_features = f_</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3b5c72e531377181699ba12aa329c110"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b5c72e531377181699ba12aa329c110">&#9670;&nbsp;</a></span>strategy</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">character(len=256) mod_hyperparameter::hparam_decisiontree::strategy = &quot;quantile&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afcc8fe19c3ec5f87b15074366dd0edd5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afcc8fe19c3ec5f87b15074366dd0edd5">&#9670;&nbsp;</a></span>strategy_int</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::strategy_int = 1_8</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0bece9021a9acf7a3ec8448498447574"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0bece9021a9acf7a3ec8448498447574">&#9670;&nbsp;</a></span>top_ratio</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(kind=8) mod_hyperparameter::hparam_decisiontree::top_ratio = .1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac5b324d595efea82e118d1daecca0453"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac5b324d595efea82e118d1daecca0453">&#9670;&nbsp;</a></span>uniform</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">character(len=256) mod_hyperparameter::hparam_decisiontree::uniform</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="acc9a687d3225165579bb51672c3ff9bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc9a687d3225165579bb51672c3ff9bd">&#9670;&nbsp;</a></span>update_ratio</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(kind=8) mod_hyperparameter::hparam_decisiontree::update_ratio = .9</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a218c55539fb86fc830fdc500fd0c6841"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a218c55539fb86fc830fdc500fd0c6841">&#9670;&nbsp;</a></span>verbose</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">integer(kind=8) mod_hyperparameter::hparam_decisiontree::verbose = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4d63b03f40e83de8fc35061b92b297e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d63b03f40e83de8fc35061b92b297e3">&#9670;&nbsp;</a></span>weight_decay</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">real(kind=8) mod_hyperparameter::hparam_decisiontree::weight_decay = .9</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<hr/>次のファイルから型の詳解が抽出されました:<ul>
+<li>hyperparameter/<a class="el" href="mod__hyperparameter_8f90.html">mod_hyperparameter.f90</a></li>
+</ul>
+</div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+構築:&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+</small></address>
+</body>
+</html>

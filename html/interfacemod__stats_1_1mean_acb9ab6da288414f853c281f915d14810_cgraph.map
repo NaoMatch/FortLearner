@@ -1,0 +1,4 @@
+<map id="mod_stats::mean::mean_values_of_matrix_real32" name="mod_stats::mean::mean_values_of_matrix_real32">
+<area shape="rect" id="node1" title="A function to calculate mean value of matrix, exactly equal to sum(matrix, dim=1)/N." alt="" coords="5,5,172,47"/>
+<area shape="rect" id="node2" href="$namespacemod__stats.html#a5ce51910f7e169a21871d222ea4e3e94" title="A function to calculate mean value of matrix, exactly equal to sum(matrix, dim=1)/N." alt="" coords="220,5,387,47"/>
+</map>

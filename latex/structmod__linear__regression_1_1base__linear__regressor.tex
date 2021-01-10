@@ -1,0 +1,117 @@
+\hypertarget{structmod__linear__regression_1_1base__linear__regressor}{}\doxysection{TYPE mod\+\_\+linear\+\_\+regression\+::base\+\_\+linear\+\_\+regressor}
+\label{structmod__linear__regression_1_1base__linear__regressor}\index{mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}}
+
+
+Base Linear Regression Object  
+
+
+
+
+mod\+\_\+linear\+\_\+regression\+::base\+\_\+linear\+\_\+regressor の継承関係図
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=348pt]{structmod__linear__regression_1_1base__linear__regressor__inherit__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{公開メンバ関数}
+\begin{DoxyCompactItemize}
+\item 
+procedure \mbox{\hyperlink{structmod__linear__regression_1_1base__linear__regressor_a73b67cddffec097072d3c69835fc77e3}{predict\+\_\+simple}}
+\item 
+procedure \mbox{\hyperlink{structmod__linear__regression_1_1base__linear__regressor_af992b9be7fa271f920ea3dd80d34ae9c}{predict\+\_\+multiple}}
+\item 
+generic \mbox{\hyperlink{structmod__linear__regression_1_1base__linear__regressor_a9af81ec10e0350ef8588e8c063f047db}{predict}} =$>$ \mbox{\hyperlink{structmod__linear__regression_1_1base__linear__regressor_a73b67cddffec097072d3c69835fc77e3}{predict\+\_\+simple}}, \mbox{\hyperlink{structmod__linear__regression_1_1base__linear__regressor_af992b9be7fa271f920ea3dd80d34ae9c}{predict\+\_\+multiple}}
+\end{DoxyCompactItemize}
+\doxysubsection*{公開変数類}
+\begin{DoxyCompactItemize}
+\item 
+logical(kind=4) \mbox{\hyperlink{structmod__linear__regression_1_1base__linear__regressor_ae3951c424944a1411501a252ebd3d771}{is\+\_\+simple}}
+\item 
+logical(kind=4) \mbox{\hyperlink{structmod__linear__regression_1_1base__linear__regressor_a1ef229d6993a08e37474aa4e62dcd484}{is\+\_\+trained}}
+\item 
+real(kind=8) \mbox{\hyperlink{structmod__linear__regression_1_1base__linear__regressor_a9b71900be0b4e7ec58d8d3bfda4ed2e5}{coef\+\_\+}}
+\item 
+real(kind=8), dimension(\+:), allocatable \mbox{\hyperlink{structmod__linear__regression_1_1base__linear__regressor_a9a52760a389823914a06f4ad7795397c}{coefs\+\_\+}}
+\item 
+real(kind=8) \mbox{\hyperlink{structmod__linear__regression_1_1base__linear__regressor_aeae3bdc4ae6ed03a50d4b9cb50ca4433}{intercept\+\_\+}}
+\item 
+integer(kind=8) \mbox{\hyperlink{structmod__linear__regression_1_1base__linear__regressor_aaeea82b7e714a3a7d37fad405f3ab910}{n\+\_\+dim\+\_\+train}} =-\/1
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{詳解}
+Base Linear Regression Object 
+
+\doxysubsection{メンバ関数/サブルーチン詳解}
+\mbox{\Hypertarget{structmod__linear__regression_1_1base__linear__regressor_a9af81ec10e0350ef8588e8c063f047db}\label{structmod__linear__regression_1_1base__linear__regressor_a9af81ec10e0350ef8588e8c063f047db}} 
+\index{mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}!predict@{predict}}
+\index{predict@{predict}!mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}}
+\doxysubsubsection{\texorpdfstring{predict()}{predict()}}
+{\footnotesize\ttfamily generic mod\+\_\+linear\+\_\+regression\+::base\+\_\+linear\+\_\+regressor\+::predict}
+
+呼び出し関係図\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=348pt]{structmod__linear__regression_1_1base__linear__regressor_a9af81ec10e0350ef8588e8c063f047db_cgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{structmod__linear__regression_1_1base__linear__regressor_af992b9be7fa271f920ea3dd80d34ae9c}\label{structmod__linear__regression_1_1base__linear__regressor_af992b9be7fa271f920ea3dd80d34ae9c}} 
+\index{mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}!predict\_multiple@{predict\_multiple}}
+\index{predict\_multiple@{predict\_multiple}!mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}}
+\doxysubsubsection{\texorpdfstring{predict\_multiple()}{predict\_multiple()}}
+{\footnotesize\ttfamily procedure mod\+\_\+linear\+\_\+regression\+::base\+\_\+linear\+\_\+regressor\+::predict\+\_\+multiple}
+
+\mbox{\Hypertarget{structmod__linear__regression_1_1base__linear__regressor_a73b67cddffec097072d3c69835fc77e3}\label{structmod__linear__regression_1_1base__linear__regressor_a73b67cddffec097072d3c69835fc77e3}} 
+\index{mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}!predict\_simple@{predict\_simple}}
+\index{predict\_simple@{predict\_simple}!mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}}
+\doxysubsubsection{\texorpdfstring{predict\_simple()}{predict\_simple()}}
+{\footnotesize\ttfamily procedure mod\+\_\+linear\+\_\+regression\+::base\+\_\+linear\+\_\+regressor\+::predict\+\_\+simple}
+
+
+
+\doxysubsection{メンバ詳解}
+\mbox{\Hypertarget{structmod__linear__regression_1_1base__linear__regressor_a9b71900be0b4e7ec58d8d3bfda4ed2e5}\label{structmod__linear__regression_1_1base__linear__regressor_a9b71900be0b4e7ec58d8d3bfda4ed2e5}} 
+\index{mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}!coef\_@{coef\_}}
+\index{coef\_@{coef\_}!mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}}
+\doxysubsubsection{\texorpdfstring{coef\_}{coef\_}}
+{\footnotesize\ttfamily real(kind=8) mod\+\_\+linear\+\_\+regression\+::base\+\_\+linear\+\_\+regressor\+::coef\+\_\+}
+
+\mbox{\Hypertarget{structmod__linear__regression_1_1base__linear__regressor_a9a52760a389823914a06f4ad7795397c}\label{structmod__linear__regression_1_1base__linear__regressor_a9a52760a389823914a06f4ad7795397c}} 
+\index{mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}!coefs\_@{coefs\_}}
+\index{coefs\_@{coefs\_}!mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}}
+\doxysubsubsection{\texorpdfstring{coefs\_}{coefs\_}}
+{\footnotesize\ttfamily real(kind=8), dimension(\+:), allocatable mod\+\_\+linear\+\_\+regression\+::base\+\_\+linear\+\_\+regressor\+::coefs\+\_\+}
+
+\mbox{\Hypertarget{structmod__linear__regression_1_1base__linear__regressor_aeae3bdc4ae6ed03a50d4b9cb50ca4433}\label{structmod__linear__regression_1_1base__linear__regressor_aeae3bdc4ae6ed03a50d4b9cb50ca4433}} 
+\index{mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}!intercept\_@{intercept\_}}
+\index{intercept\_@{intercept\_}!mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}}
+\doxysubsubsection{\texorpdfstring{intercept\_}{intercept\_}}
+{\footnotesize\ttfamily real(kind=8) mod\+\_\+linear\+\_\+regression\+::base\+\_\+linear\+\_\+regressor\+::intercept\+\_\+}
+
+\mbox{\Hypertarget{structmod__linear__regression_1_1base__linear__regressor_ae3951c424944a1411501a252ebd3d771}\label{structmod__linear__regression_1_1base__linear__regressor_ae3951c424944a1411501a252ebd3d771}} 
+\index{mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}!is\_simple@{is\_simple}}
+\index{is\_simple@{is\_simple}!mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}}
+\doxysubsubsection{\texorpdfstring{is\_simple}{is\_simple}}
+{\footnotesize\ttfamily logical(kind=4) mod\+\_\+linear\+\_\+regression\+::base\+\_\+linear\+\_\+regressor\+::is\+\_\+simple}
+
+\mbox{\Hypertarget{structmod__linear__regression_1_1base__linear__regressor_a1ef229d6993a08e37474aa4e62dcd484}\label{structmod__linear__regression_1_1base__linear__regressor_a1ef229d6993a08e37474aa4e62dcd484}} 
+\index{mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}!is\_trained@{is\_trained}}
+\index{is\_trained@{is\_trained}!mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}}
+\doxysubsubsection{\texorpdfstring{is\_trained}{is\_trained}}
+{\footnotesize\ttfamily logical(kind=4) mod\+\_\+linear\+\_\+regression\+::base\+\_\+linear\+\_\+regressor\+::is\+\_\+trained}
+
+\mbox{\Hypertarget{structmod__linear__regression_1_1base__linear__regressor_aaeea82b7e714a3a7d37fad405f3ab910}\label{structmod__linear__regression_1_1base__linear__regressor_aaeea82b7e714a3a7d37fad405f3ab910}} 
+\index{mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}!n\_dim\_train@{n\_dim\_train}}
+\index{n\_dim\_train@{n\_dim\_train}!mod\_linear\_regression::base\_linear\_regressor@{mod\_linear\_regression::base\_linear\_regressor}}
+\doxysubsubsection{\texorpdfstring{n\_dim\_train}{n\_dim\_train}}
+{\footnotesize\ttfamily integer(kind=8) mod\+\_\+linear\+\_\+regression\+::base\+\_\+linear\+\_\+regressor\+::n\+\_\+dim\+\_\+train =-\/1}
+
+
+
+次のファイルから型の詳解が抽出されました\+:\begin{DoxyCompactItemize}
+\item 
+linear\+\_\+regression/\mbox{\hyperlink{mod__linear__regression_8f90}{mod\+\_\+linear\+\_\+regression.\+f90}}\end{DoxyCompactItemize}

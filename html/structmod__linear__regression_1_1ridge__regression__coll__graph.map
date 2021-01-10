@@ -1,0 +1,7 @@
+<map id="mod_linear_regression::ridge_regression" name="mod_linear_regression::ridge_regression">
+<area shape="rect" id="node1" title="Ridge Regression Object" alt="" coords="697,31,849,72"/>
+<area shape="rect" id="node2" href="$structmod__linear__regression_1_1base__linear__regressor.html" title="Base Linear Regression Object" alt="" coords="435,5,593,47"/>
+<area shape="rect" id="node3" href="$structmod__hyperparameter_1_1hparam__ridge__regression.html" title=" " alt="" coords="427,71,601,112"/>
+<area shape="rect" id="node4" href="$structmod__hyperparameter_1_1hparam__linear__regression.html" title=" " alt="" coords="199,71,377,112"/>
+<area shape="rect" id="node5" href="$structmod__hyperparameter_1_1hparam__base.html" title=" " alt="" coords="5,71,149,112"/>
+</map>

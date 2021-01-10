@@ -1,0 +1,6 @@
+<map id="クラス階層図" name="クラス階層図">
+<area shape="rect" id="node1" href="$structmod__linear__regression_1_1base__linear__regressor.html" title="Base Linear Regression Object" alt="" coords="5,71,163,112"/>
+<area shape="rect" id="node2" href="$structmod__linear__regression_1_1lasso__regression.html" title="Ridge Regression Object" alt="" coords="211,5,363,47"/>
+<area shape="rect" id="node3" href="$structmod__linear__regression_1_1linear__regression.html" title="Linear Regression Object" alt="" coords="211,71,363,112"/>
+<area shape="rect" id="node4" href="$structmod__linear__regression_1_1ridge__regression.html" title="Ridge Regression Object" alt="" coords="211,136,363,177"/>
+</map>

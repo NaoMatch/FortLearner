@@ -1,0 +1,61 @@
+\hypertarget{interfacemod__random_1_1roulette__selection}{}\doxysection{インターフェース mod\+\_\+random\+::roulette\+\_\+selection}
+\label{interfacemod__random_1_1roulette__selection}\index{mod\_random::roulette\_selection@{mod\_random::roulette\_selection}}
+
+
+Interface to call roulette\+\_\+selection\+\_\+r4, roulette\+\_\+selection\+\_\+r8  
+
+
+\doxysubsection*{公開メンバ関数}
+\begin{DoxyCompactItemize}
+\item 
+integer(kind=4) function \mbox{\hyperlink{interfacemod__random_1_1roulette__selection_a9ab7cd2975bf345ecb252ae65c159de8}{roulette\+\_\+selection\+\_\+r4}} (vector, n\+\_\+samples, reverse)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to roulette selection from \textquotesingle{}vector\textquotesingle{} \textquotesingle{}vector\textquotesingle{} must be normalized, sum(vector) P== 1. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{interfacemod__random_1_1roulette__selection_a93deb6f6f92e3272de95878b82f909b6}{roulette\+\_\+selection\+\_\+r8}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{詳解}
+Interface to call roulette\+\_\+selection\+\_\+r4, roulette\+\_\+selection\+\_\+r8 
+
+\doxysubsection{メンバ関数/サブルーチン詳解}
+\mbox{\Hypertarget{interfacemod__random_1_1roulette__selection_a9ab7cd2975bf345ecb252ae65c159de8}\label{interfacemod__random_1_1roulette__selection_a9ab7cd2975bf345ecb252ae65c159de8}} 
+\index{mod\_random::roulette\_selection@{mod\_random::roulette\_selection}!roulette\_selection\_r4@{roulette\_selection\_r4}}
+\index{roulette\_selection\_r4@{roulette\_selection\_r4}!mod\_random::roulette\_selection@{mod\_random::roulette\_selection}}
+\doxysubsubsection{\texorpdfstring{roulette\_selection\_r4()}{roulette\_selection\_r4()}}
+{\footnotesize\ttfamily integer(kind=4) function mod\+\_\+random\+::roulette\+\_\+selection\+::roulette\+\_\+selection\+\_\+r4 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(n\+\_\+samples), intent(inout)}]{vector,  }\item[{integer(kind=4), intent(in)}]{n\+\_\+samples,  }\item[{logical(kind=4), intent(in)}]{reverse }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} function to roulette selection from \textquotesingle{}vector\textquotesingle{} \textquotesingle{}vector\textquotesingle{} must be normalized, sum(vector) P== 1. 
+
+\begin{DoxyReturn}{戻り値}
+returns selected vector index 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em vector} & normalized vector \\
+\hline
+{\em n\+\_\+samples} & number of samples \\
+\hline
+{\em reverse} & if true, search from last element. \\
+\hline
+\end{DoxyParams}
+呼び出し関係図\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=338pt]{interfacemod__random_1_1roulette__selection_a9ab7cd2975bf345ecb252ae65c159de8_cgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{interfacemod__random_1_1roulette__selection_a93deb6f6f92e3272de95878b82f909b6}\label{interfacemod__random_1_1roulette__selection_a93deb6f6f92e3272de95878b82f909b6}} 
+\index{mod\_random::roulette\_selection@{mod\_random::roulette\_selection}!roulette\_selection\_r8@{roulette\_selection\_r8}}
+\index{roulette\_selection\_r8@{roulette\_selection\_r8}!mod\_random::roulette\_selection@{mod\_random::roulette\_selection}}
+\doxysubsubsection{\texorpdfstring{roulette\_selection\_r8()}{roulette\_selection\_r8()}}
+{\footnotesize\ttfamily mod\+\_\+random\+::roulette\+\_\+selection\+::roulette\+\_\+selection\+\_\+r8}
+
+
+
+次のファイルからインターフェースの詳解が抽出されました\+:\begin{DoxyCompactItemize}
+\item 
+common/\mbox{\hyperlink{mod__random_8f90}{mod\+\_\+random.\+f90}}\end{DoxyCompactItemize}
