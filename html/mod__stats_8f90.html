@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.9.1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>FortLearner: math/mod_stats.f90 ファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">FortLearner
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 構築: Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'検索','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','検索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div id="nav-path" class="navpath">
+  <ul>
+<li class="navelem"><a class="el" href="dir_296d53ceaeaa7e099814a6def439fe8a.html">math</a></li>  </ul>
+</div>
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">データ型</a> &#124;
+<a href="#namespaces">モジュール</a> &#124;
+<a href="#func-members">関数/サブルーチン</a>  </div>
+  <div class="headertitle">
+<div class="title">mod_stats.f90 ファイル</div>  </div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+データ型</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__stats_1_1sum__up__left.html">mod_stats::sum_up_left</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to call sum_up_left_real32, sum_up_left_with_indices_real32  <a href="interfacemod__stats_1_1sum__up__left.html#details">[詳解]</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__stats_1_1get__minmax.html">mod_stats::get_minmax</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to call get_minmax_real32, get_minmax_real64, get_minmax_int32, get_minmax_int64  <a href="interfacemod__stats_1_1get__minmax.html#details">[詳解]</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__stats_1_1mean.html">mod_stats::mean</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to call mean_value_of_vector_real32, mean_value_of_vector_real64, mean_value_of_vector_int32, mean_value_of_vector_int64  <a href="interfacemod__stats_1_1mean.html#details">[詳解]</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__stats_1_1variance.html">mod_stats::variance</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to call variance_value_of_vector_real32, variance_value_of_vector_real64, variance_value_of_vector_int32, variance_value_of_vector_int64  <a href="interfacemod__stats_1_1variance.html#details">[詳解]</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__stats_1_1covariance.html">mod_stats::covariance</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to call covariance_value_of_vectors_real32, covariance_value_of_vectors_real64, covariance_value_of_vectors_int32, covariance_value_of_vectors_int64  <a href="interfacemod__stats_1_1covariance.html#details">[詳解]</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__stats_1_1covariance__matrix.html">mod_stats::covariance_matrix</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__stats_1_1groupby__sum.html">mod_stats::groupby_sum</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__stats_1_1groupby__sq__sum.html">mod_stats::groupby_sq_sum</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__stats_1_1groupby__count.html">mod_stats::groupby_count</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="namespaces"></a>
+モジュール</h2></td></tr>
+<tr class="memitem:namespacemod__stats"><td class="memItemLeft" align="right" valign="top">module &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html">mod_stats</a></td></tr>
+<tr class="memdesc:namespacemod__stats"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> module to calculate simple statistics. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+関数/サブルーチン</h2></td></tr>
+<tr class="memitem:a582091e524ae4ea55444059defc08070"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#a582091e524ae4ea55444059defc08070">mod_stats::sum_up_left_real32</a> (sum_left, vector, num, threshold)</td></tr>
+<tr class="memdesc:a582091e524ae4ea55444059defc08070"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to the sum of values less than or equal the threshold from a 1-dim array. <br  />
+ <a href="namespacemod__stats.html#a582091e524ae4ea55444059defc08070">[詳解]</a><br /></td></tr>
+<tr class="separator:a582091e524ae4ea55444059defc08070"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad005c9452041c94a3fef4fa1e71d84d4"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#ad005c9452041c94a3fef4fa1e71d84d4">mod_stats::sum_up_left_with_indices_real32</a> (sum_left, vector, num, indices, n_idx, threshold)</td></tr>
+<tr class="memdesc:ad005c9452041c94a3fef4fa1e71d84d4"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to the sum of values less than or equal the threshold from a 1-dim array with position indices. <br  />
+ <a href="namespacemod__stats.html#ad005c9452041c94a3fef4fa1e71d84d4">[詳解]</a><br /></td></tr>
+<tr class="separator:ad005c9452041c94a3fef4fa1e71d84d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff10bb81d5ccef0afbc473de0f18d7f6"><td class="memItemLeft" align="right" valign="top">real(kind=4) function&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#aff10bb81d5ccef0afbc473de0f18d7f6">mod_stats::mean_value_of_vector_real32</a> (vector, num)</td></tr>
+<tr class="memdesc:aff10bb81d5ccef0afbc473de0f18d7f6"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> function to calculate mean value of vector.  <a href="namespacemod__stats.html#aff10bb81d5ccef0afbc473de0f18d7f6">[詳解]</a><br /></td></tr>
+<tr class="separator:aff10bb81d5ccef0afbc473de0f18d7f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ce51910f7e169a21871d222ea4e3e94"><td class="memItemLeft" align="right" valign="top">real(kind=4) function, dimension(n_cols)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#a5ce51910f7e169a21871d222ea4e3e94">mod_stats::mean_values_of_matrix_real32</a> (matrix, n_rows, n_cols)</td></tr>
+<tr class="memdesc:a5ce51910f7e169a21871d222ea4e3e94"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> function to calculate mean value of matrix, exactly equal to sum(matrix, dim=1)/N.  <a href="namespacemod__stats.html#a5ce51910f7e169a21871d222ea4e3e94">[詳解]</a><br /></td></tr>
+<tr class="separator:a5ce51910f7e169a21871d222ea4e3e94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f9f8f3a4f90a05cfb220309b4fed6ec"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#a3f9f8f3a4f90a05cfb220309b4fed6ec">mod_stats::get_minmax_real32</a> (min_val, max_val, vector, num)</td></tr>
+<tr class="memdesc:a3f9f8f3a4f90a05cfb220309b4fed6ec"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to get the minimum and maximum values from a 1-dim array at the same time. <br  />
+ <a href="namespacemod__stats.html#a3f9f8f3a4f90a05cfb220309b4fed6ec">[詳解]</a><br /></td></tr>
+<tr class="separator:a3f9f8f3a4f90a05cfb220309b4fed6ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53b7140d3d080ffb0415996afe04149a"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#a53b7140d3d080ffb0415996afe04149a">mod_stats::get_minmax_with_indices_real32</a> (min_val, max_val, vector, num, indices, n_idx)</td></tr>
+<tr class="memdesc:a53b7140d3d080ffb0415996afe04149a"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to get the minimum and maximum values of a specified index of a 1-dim array at the same time. <br  />
+ <a href="namespacemod__stats.html#a53b7140d3d080ffb0415996afe04149a">[詳解]</a><br /></td></tr>
+<tr class="separator:a53b7140d3d080ffb0415996afe04149a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad53130d70fb8b2ca8f869823b196ee16"><td class="memItemLeft" align="right" valign="top">real(kind=4) function&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#ad53130d70fb8b2ca8f869823b196ee16">mod_stats::variance_value_of_vector_real32</a> (vector, num, mean_of_vector)</td></tr>
+<tr class="memdesc:ad53130d70fb8b2ca8f869823b196ee16"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> function to calculate variance value of vector.  <a href="namespacemod__stats.html#ad53130d70fb8b2ca8f869823b196ee16">[詳解]</a><br /></td></tr>
+<tr class="separator:ad53130d70fb8b2ca8f869823b196ee16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42986cfd4624f205401319ac9fcc386a"><td class="memItemLeft" align="right" valign="top">real(kind=4) function, dimension(n_cols)&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#a42986cfd4624f205401319ac9fcc386a">mod_stats::variance_values_of_matrix_real32</a> (matrix, n_rows, n_cols, means_of_matrix)</td></tr>
+<tr class="memdesc:a42986cfd4624f205401319ac9fcc386a"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> function to calculate variance values of matrix.  <a href="namespacemod__stats.html#a42986cfd4624f205401319ac9fcc386a">[詳解]</a><br /></td></tr>
+<tr class="separator:a42986cfd4624f205401319ac9fcc386a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af14a98423451c470f7b94bad720c2153"><td class="memItemLeft" align="right" valign="top">real(kind=4) function&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#af14a98423451c470f7b94bad720c2153">mod_stats::covariance_value_of_vectors_real32</a> (vector1, vector2, num, mean1, mean2)</td></tr>
+<tr class="memdesc:af14a98423451c470f7b94bad720c2153"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> function to calculate covariance of two imput vectors.  <a href="namespacemod__stats.html#af14a98423451c470f7b94bad720c2153">[詳解]</a><br /></td></tr>
+<tr class="separator:af14a98423451c470f7b94bad720c2153"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a86eaf04b505f887c91b1b253b6e17280"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#a86eaf04b505f887c91b1b253b6e17280">mod_stats::covariance_matrix_of_matrix_real32</a> (cov_mat, matrix, n_rows, n_cols, means_of_matrix)</td></tr>
+<tr class="memdesc:a86eaf04b505f887c91b1b253b6e17280"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to calculate covariance matrix of input matrix.  <a href="namespacemod__stats.html#a86eaf04b505f887c91b1b253b6e17280">[詳解]</a><br /></td></tr>
+<tr class="separator:a86eaf04b505f887c91b1b253b6e17280"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56b51b1734429a0558a0b7e9c35a19e9"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#a56b51b1734429a0558a0b7e9c35a19e9">mod_stats::groupby_sum_r8</a> (uniq_x, x, stat_y, y, n_samples)</td></tr>
+<tr class="memdesc:a56b51b1734429a0558a0b7e9c35a19e9"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to calculate the total value of y for each unique value of x.  <a href="namespacemod__stats.html#a56b51b1734429a0558a0b7e9c35a19e9">[詳解]</a><br /></td></tr>
+<tr class="separator:a56b51b1734429a0558a0b7e9c35a19e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a829ac70ccc7752f1c8907e989edc8838"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#a829ac70ccc7752f1c8907e989edc8838">mod_stats::groupby_sum_fast_r8</a> (uniq_x, stat_x, x, n_samples)</td></tr>
+<tr class="separator:a829ac70ccc7752f1c8907e989edc8838"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e0d709e852c849caf0b195df45da63f"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#a7e0d709e852c849caf0b195df45da63f">mod_stats::groupby_sq_sum_r8</a> (uniq_x, x, stat_y, y, n_samples)</td></tr>
+<tr class="memdesc:a7e0d709e852c849caf0b195df45da63f"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to calculate the squared value of y for each unique value of x.  <a href="namespacemod__stats.html#a7e0d709e852c849caf0b195df45da63f">[詳解]</a><br /></td></tr>
+<tr class="separator:a7e0d709e852c849caf0b195df45da63f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1e42ea32c60929b24d4e15cee715d51"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#ad1e42ea32c60929b24d4e15cee715d51">mod_stats::groupby_count_r8</a> (uniq_x, x, stat_y, y, n_samples)</td></tr>
+<tr class="memdesc:ad1e42ea32c60929b24d4e15cee715d51"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to calculate the number of y for each unique value of x.  <a href="namespacemod__stats.html#ad1e42ea32c60929b24d4e15cee715d51">[詳解]</a><br /></td></tr>
+<tr class="separator:ad1e42ea32c60929b24d4e15cee715d51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70ddae3b1036a2a4a1e3d81186db6da8"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#a70ddae3b1036a2a4a1e3d81186db6da8">mod_stats::groupby_count_i8</a> (uniq_x, x, stat_y, y, n_samples)</td></tr>
+<tr class="separator:a70ddae3b1036a2a4a1e3d81186db6da8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2da4bd7a26959de25d727ce0b382629"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__stats.html#aa2da4bd7a26959de25d727ce0b382629">mod_stats::groupby_count_fast_r8</a> (uniq_x, stat_x, x, n_samples)</td></tr>
+<tr class="separator:aa2da4bd7a26959de25d727ce0b382629"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+</div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+構築:&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+</small></address>
+</body>
+</html>

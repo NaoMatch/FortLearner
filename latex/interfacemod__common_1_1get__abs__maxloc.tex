@@ -1,0 +1,73 @@
+\hypertarget{interfacemod__common_1_1get__abs__maxloc}{}\doxysection{インターフェース mod\+\_\+common\+::get\+\_\+abs\+\_\+maxloc}
+\label{interfacemod__common_1_1get__abs__maxloc}\index{mod\_common::get\_abs\_maxloc@{mod\_common::get\_abs\_maxloc}}
+
+
+Interface to call get\+\_\+abs\+\_\+maxloc\+\_\+real32, get\+\_\+abs\+\_\+maxloc\+\_\+real64, get\+\_\+abs\+\_\+maxloc\+\_\+int32, get\+\_\+abs\+\_\+maxloc\+\_\+int64  
+
+
+\doxysubsection*{公開メンバ関数}
+\begin{DoxyCompactItemize}
+\item 
+subroutine \mbox{\hyperlink{interfacemod__common_1_1get__abs__maxloc_a81796c40055531dc5571fb022d1e07e7}{get\+\_\+abs\+\_\+maxloc\+\_\+sqmat\+\_\+real32}} (loc, val, matrix, n\+\_\+dim)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to get the off-\/diagonal absolute maximum value and its location from a symmetric matrix at the same time. ~\newline
+\end{DoxyCompactList}\item 
+\mbox{\hyperlink{interfacemod__common_1_1get__abs__maxloc_a41850fda832394cc50e4faa161032f2c}{get\+\_\+abs\+\_\+maxloc\+\_\+sqmat\+\_\+real64}}
+\item 
+\mbox{\hyperlink{interfacemod__common_1_1get__abs__maxloc_ae2ddf5b39d47cc31de3c630affa3579a}{get\+\_\+abs\+\_\+maxloc\+\_\+sqmat\+\_\+int32}}
+\item 
+\mbox{\hyperlink{interfacemod__common_1_1get__abs__maxloc_afa0a8e6645526ff4157c7050dba06f4b}{get\+\_\+abs\+\_\+maxloc\+\_\+sqmat\+\_\+int64}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{詳解}
+Interface to call get\+\_\+abs\+\_\+maxloc\+\_\+real32, get\+\_\+abs\+\_\+maxloc\+\_\+real64, get\+\_\+abs\+\_\+maxloc\+\_\+int32, get\+\_\+abs\+\_\+maxloc\+\_\+int64 
+
+\doxysubsection{メンバ関数/サブルーチン詳解}
+\mbox{\Hypertarget{interfacemod__common_1_1get__abs__maxloc_ae2ddf5b39d47cc31de3c630affa3579a}\label{interfacemod__common_1_1get__abs__maxloc_ae2ddf5b39d47cc31de3c630affa3579a}} 
+\index{mod\_common::get\_abs\_maxloc@{mod\_common::get\_abs\_maxloc}!get\_abs\_maxloc\_sqmat\_int32@{get\_abs\_maxloc\_sqmat\_int32}}
+\index{get\_abs\_maxloc\_sqmat\_int32@{get\_abs\_maxloc\_sqmat\_int32}!mod\_common::get\_abs\_maxloc@{mod\_common::get\_abs\_maxloc}}
+\doxysubsubsection{\texorpdfstring{get\_abs\_maxloc\_sqmat\_int32()}{get\_abs\_maxloc\_sqmat\_int32()}}
+{\footnotesize\ttfamily mod\+\_\+common\+::get\+\_\+abs\+\_\+maxloc\+::get\+\_\+abs\+\_\+maxloc\+\_\+sqmat\+\_\+int32}
+
+\mbox{\Hypertarget{interfacemod__common_1_1get__abs__maxloc_afa0a8e6645526ff4157c7050dba06f4b}\label{interfacemod__common_1_1get__abs__maxloc_afa0a8e6645526ff4157c7050dba06f4b}} 
+\index{mod\_common::get\_abs\_maxloc@{mod\_common::get\_abs\_maxloc}!get\_abs\_maxloc\_sqmat\_int64@{get\_abs\_maxloc\_sqmat\_int64}}
+\index{get\_abs\_maxloc\_sqmat\_int64@{get\_abs\_maxloc\_sqmat\_int64}!mod\_common::get\_abs\_maxloc@{mod\_common::get\_abs\_maxloc}}
+\doxysubsubsection{\texorpdfstring{get\_abs\_maxloc\_sqmat\_int64()}{get\_abs\_maxloc\_sqmat\_int64()}}
+{\footnotesize\ttfamily mod\+\_\+common\+::get\+\_\+abs\+\_\+maxloc\+::get\+\_\+abs\+\_\+maxloc\+\_\+sqmat\+\_\+int64}
+
+\mbox{\Hypertarget{interfacemod__common_1_1get__abs__maxloc_a81796c40055531dc5571fb022d1e07e7}\label{interfacemod__common_1_1get__abs__maxloc_a81796c40055531dc5571fb022d1e07e7}} 
+\index{mod\_common::get\_abs\_maxloc@{mod\_common::get\_abs\_maxloc}!get\_abs\_maxloc\_sqmat\_real32@{get\_abs\_maxloc\_sqmat\_real32}}
+\index{get\_abs\_maxloc\_sqmat\_real32@{get\_abs\_maxloc\_sqmat\_real32}!mod\_common::get\_abs\_maxloc@{mod\_common::get\_abs\_maxloc}}
+\doxysubsubsection{\texorpdfstring{get\_abs\_maxloc\_sqmat\_real32()}{get\_abs\_maxloc\_sqmat\_real32()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+common\+::get\+\_\+abs\+\_\+maxloc\+::get\+\_\+abs\+\_\+maxloc\+\_\+sqmat\+\_\+real32 (\begin{DoxyParamCaption}\item[{integer(kind=4), dimension(2), intent(inout)}]{loc,  }\item[{real(kind=4), intent(inout)}]{val,  }\item[{real(kind=4), dimension(n\+\_\+dim, n\+\_\+dim), intent(in)}]{matrix,  }\item[{integer(kind=4), intent(in)}]{n\+\_\+dim }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to get the off-\/diagonal absolute maximum value and its location from a symmetric matrix at the same time. ~\newline
+
+
+\begin{DoxyReturn}{戻り値}
+returns the absolute maximum value and its location 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em loc} & absolute maximum value off-\/diagonal location \\
+\hline
+{\em val} & absolute maximum value itself \\
+\hline
+{\em matrix} & input 2-\/dim symmetric array \\
+\hline
+{\em n\+\_\+dim} & rank of symmetric matrix \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{interfacemod__common_1_1get__abs__maxloc_a41850fda832394cc50e4faa161032f2c}\label{interfacemod__common_1_1get__abs__maxloc_a41850fda832394cc50e4faa161032f2c}} 
+\index{mod\_common::get\_abs\_maxloc@{mod\_common::get\_abs\_maxloc}!get\_abs\_maxloc\_sqmat\_real64@{get\_abs\_maxloc\_sqmat\_real64}}
+\index{get\_abs\_maxloc\_sqmat\_real64@{get\_abs\_maxloc\_sqmat\_real64}!mod\_common::get\_abs\_maxloc@{mod\_common::get\_abs\_maxloc}}
+\doxysubsubsection{\texorpdfstring{get\_abs\_maxloc\_sqmat\_real64()}{get\_abs\_maxloc\_sqmat\_real64()}}
+{\footnotesize\ttfamily mod\+\_\+common\+::get\+\_\+abs\+\_\+maxloc\+::get\+\_\+abs\+\_\+maxloc\+\_\+sqmat\+\_\+real64}
+
+
+
+次のファイルからインターフェースの詳解が抽出されました\+:\begin{DoxyCompactItemize}
+\item 
+common/\mbox{\hyperlink{mod__common_8f90}{mod\+\_\+common.\+f90}}\end{DoxyCompactItemize}

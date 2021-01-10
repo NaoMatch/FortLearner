@@ -1,0 +1,6 @@
+<map id="mod_linear_regression::linear_regression" name="mod_linear_regression::linear_regression">
+<area shape="rect" id="node1" title="Linear Regression Object" alt="" coords="473,31,625,72"/>
+<area shape="rect" id="node2" href="$structmod__linear__regression_1_1base__linear__regressor.html" title="Base Linear Regression Object" alt="" coords="209,5,367,47"/>
+<area shape="rect" id="node3" href="$structmod__hyperparameter_1_1hparam__linear__regression.html" title=" " alt="" coords="199,71,377,112"/>
+<area shape="rect" id="node4" href="$structmod__hyperparameter_1_1hparam__base.html" title=" " alt="" coords="5,71,149,112"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="mod_linear_regression::base_linear_regressor::predict" name="mod_linear_regression::base_linear_regressor::predict">
+<area shape="rect" id="node1" title=" " alt="" coords="5,31,163,87"/>
+<area shape="rect" id="node2" href="$namespacemod__linear__regression.html#a307bae7ce357eda81ecb218c817171df" title="A function to predict trained multiple linear regression, multiple ridge regression model." alt="" coords="211,5,363,47"/>
+<area shape="rect" id="node3" href="$namespacemod__linear__regression.html#a593483756fdf7f3a5084b13f3f5544f3" title="A function to predict trained simple linear regression, simple ridge regression model." alt="" coords="211,71,363,112"/>
+</map>

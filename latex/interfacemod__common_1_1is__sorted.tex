@@ -1,0 +1,77 @@
+\hypertarget{interfacemod__common_1_1is__sorted}{}\doxysection{インターフェース mod\+\_\+common\+::is\+\_\+sorted}
+\label{interfacemod__common_1_1is__sorted}\index{mod\_common::is\_sorted@{mod\_common::is\_sorted}}
+
+
+Interface to call is\+\_\+sorted\+\_\+real32, is\+\_\+sorted\+\_\+real64, is\+\_\+sorted\+\_\+int32, is\+\_\+sorted\+\_\+int64  
+
+
+\doxysubsection*{公開メンバ関数}
+\begin{DoxyCompactItemize}
+\item 
+logical(kind=4) function \mbox{\hyperlink{interfacemod__common_1_1is__sorted_a2756fce0f7da3476a4c931b5a95e87e9}{is\+\_\+sorted\+\_\+real32}} (vector, num, ascending)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to check if the 1-\/dim array is sorted or not \end{DoxyCompactList}\item 
+\mbox{\hyperlink{interfacemod__common_1_1is__sorted_accc9f88d2bb0c361c743b418e7eab062}{is\+\_\+sorted\+\_\+real64}}
+\item 
+\mbox{\hyperlink{interfacemod__common_1_1is__sorted_ac5e3f9619288273df26619758f32c793}{is\+\_\+sorted\+\_\+int32}}
+\item 
+\mbox{\hyperlink{interfacemod__common_1_1is__sorted_ac67ab83014c8d3c8bfd03cf93c0d286b}{is\+\_\+sorted\+\_\+int64}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{詳解}
+Interface to call is\+\_\+sorted\+\_\+real32, is\+\_\+sorted\+\_\+real64, is\+\_\+sorted\+\_\+int32, is\+\_\+sorted\+\_\+int64 
+
+\doxysubsection{メンバ関数/サブルーチン詳解}
+\mbox{\Hypertarget{interfacemod__common_1_1is__sorted_ac5e3f9619288273df26619758f32c793}\label{interfacemod__common_1_1is__sorted_ac5e3f9619288273df26619758f32c793}} 
+\index{mod\_common::is\_sorted@{mod\_common::is\_sorted}!is\_sorted\_int32@{is\_sorted\_int32}}
+\index{is\_sorted\_int32@{is\_sorted\_int32}!mod\_common::is\_sorted@{mod\_common::is\_sorted}}
+\doxysubsubsection{\texorpdfstring{is\_sorted\_int32()}{is\_sorted\_int32()}}
+{\footnotesize\ttfamily mod\+\_\+common\+::is\+\_\+sorted\+::is\+\_\+sorted\+\_\+int32}
+
+\mbox{\Hypertarget{interfacemod__common_1_1is__sorted_ac67ab83014c8d3c8bfd03cf93c0d286b}\label{interfacemod__common_1_1is__sorted_ac67ab83014c8d3c8bfd03cf93c0d286b}} 
+\index{mod\_common::is\_sorted@{mod\_common::is\_sorted}!is\_sorted\_int64@{is\_sorted\_int64}}
+\index{is\_sorted\_int64@{is\_sorted\_int64}!mod\_common::is\_sorted@{mod\_common::is\_sorted}}
+\doxysubsubsection{\texorpdfstring{is\_sorted\_int64()}{is\_sorted\_int64()}}
+{\footnotesize\ttfamily mod\+\_\+common\+::is\+\_\+sorted\+::is\+\_\+sorted\+\_\+int64}
+
+\mbox{\Hypertarget{interfacemod__common_1_1is__sorted_a2756fce0f7da3476a4c931b5a95e87e9}\label{interfacemod__common_1_1is__sorted_a2756fce0f7da3476a4c931b5a95e87e9}} 
+\index{mod\_common::is\_sorted@{mod\_common::is\_sorted}!is\_sorted\_real32@{is\_sorted\_real32}}
+\index{is\_sorted\_real32@{is\_sorted\_real32}!mod\_common::is\_sorted@{mod\_common::is\_sorted}}
+\doxysubsubsection{\texorpdfstring{is\_sorted\_real32()}{is\_sorted\_real32()}}
+{\footnotesize\ttfamily logical(kind=4) function mod\+\_\+common\+::is\+\_\+sorted\+::is\+\_\+sorted\+\_\+real32 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(num), intent(in)}]{vector,  }\item[{integer(kind=4), intent(in)}]{num,  }\item[{logical(kind=4), optional}]{ascending }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} function to check if the 1-\/dim array is sorted or not 
+
+\begin{DoxyReturn}{戻り値}
+returns wheter 1-\/dim array sorted or not 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em vector} & input 1-\/dim vector to be checked sorted or not \\
+\hline
+{\em num} & the size of input vector \\
+\hline
+{\em ascending} & OPTIONAL, whether the vectors are in ascending order or not \\
+\hline
+\end{DoxyParams}
+呼び出し関係図\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{interfacemod__common_1_1is__sorted_a2756fce0f7da3476a4c931b5a95e87e9_cgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{interfacemod__common_1_1is__sorted_accc9f88d2bb0c361c743b418e7eab062}\label{interfacemod__common_1_1is__sorted_accc9f88d2bb0c361c743b418e7eab062}} 
+\index{mod\_common::is\_sorted@{mod\_common::is\_sorted}!is\_sorted\_real64@{is\_sorted\_real64}}
+\index{is\_sorted\_real64@{is\_sorted\_real64}!mod\_common::is\_sorted@{mod\_common::is\_sorted}}
+\doxysubsubsection{\texorpdfstring{is\_sorted\_real64()}{is\_sorted\_real64()}}
+{\footnotesize\ttfamily mod\+\_\+common\+::is\+\_\+sorted\+::is\+\_\+sorted\+\_\+real64}
+
+
+
+次のファイルからインターフェースの詳解が抽出されました\+:\begin{DoxyCompactItemize}
+\item 
+common/\mbox{\hyperlink{mod__common_8f90}{mod\+\_\+common.\+f90}}\end{DoxyCompactItemize}

@@ -1,0 +1,67 @@
+\hypertarget{interfacemod__common_1_1read__bin__1d}{}\doxysection{インターフェース mod\+\_\+common\+::read\+\_\+bin\+\_\+1d}
+\label{interfacemod__common_1_1read__bin__1d}\index{mod\_common::read\_bin\_1d@{mod\_common::read\_bin\_1d}}
+
+
+Interface to call read\+\_\+bin\+\_\+1d\+\_\+real32, read\+\_\+bin\+\_\+1d\+\_\+real64, read\+\_\+bin\+\_\+1d\+\_\+int32, read\+\_\+bin\+\_\+1d\+\_\+int64  
+
+
+\doxysubsection*{公開メンバ関数}
+\begin{DoxyCompactItemize}
+\item 
+subroutine \mbox{\hyperlink{interfacemod__common_1_1read__bin__1d_a3e5b43536a5144b02498b7765afa5047}{read\+\_\+bin\+\_\+1d\+\_\+real32}} (file\+\_\+name, vector)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to read binary file dumped by \textquotesingle{}\mbox{\hyperlink{interfacemod__common_1_1read2bin__1d}{read2bin\+\_\+1d}}\textquotesingle{}. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{interfacemod__common_1_1read__bin__1d_a94ffe195623515d7f8668edf3f121fe3}{read\+\_\+bin\+\_\+1d\+\_\+real64}}
+\item 
+\mbox{\hyperlink{interfacemod__common_1_1read__bin__1d_a8914ddadc5050038eba1b20e06a6aca6}{read\+\_\+bin\+\_\+1d\+\_\+int32}}
+\item 
+\mbox{\hyperlink{interfacemod__common_1_1read__bin__1d_ad7ff174d5424c3635e3c9ec28725261f}{read\+\_\+bin\+\_\+1d\+\_\+int64}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{詳解}
+Interface to call read\+\_\+bin\+\_\+1d\+\_\+real32, read\+\_\+bin\+\_\+1d\+\_\+real64, read\+\_\+bin\+\_\+1d\+\_\+int32, read\+\_\+bin\+\_\+1d\+\_\+int64 
+
+\doxysubsection{メンバ関数/サブルーチン詳解}
+\mbox{\Hypertarget{interfacemod__common_1_1read__bin__1d_a8914ddadc5050038eba1b20e06a6aca6}\label{interfacemod__common_1_1read__bin__1d_a8914ddadc5050038eba1b20e06a6aca6}} 
+\index{mod\_common::read\_bin\_1d@{mod\_common::read\_bin\_1d}!read\_bin\_1d\_int32@{read\_bin\_1d\_int32}}
+\index{read\_bin\_1d\_int32@{read\_bin\_1d\_int32}!mod\_common::read\_bin\_1d@{mod\_common::read\_bin\_1d}}
+\doxysubsubsection{\texorpdfstring{read\_bin\_1d\_int32()}{read\_bin\_1d\_int32()}}
+{\footnotesize\ttfamily mod\+\_\+common\+::read\+\_\+bin\+\_\+1d\+::read\+\_\+bin\+\_\+1d\+\_\+int32}
+
+\mbox{\Hypertarget{interfacemod__common_1_1read__bin__1d_ad7ff174d5424c3635e3c9ec28725261f}\label{interfacemod__common_1_1read__bin__1d_ad7ff174d5424c3635e3c9ec28725261f}} 
+\index{mod\_common::read\_bin\_1d@{mod\_common::read\_bin\_1d}!read\_bin\_1d\_int64@{read\_bin\_1d\_int64}}
+\index{read\_bin\_1d\_int64@{read\_bin\_1d\_int64}!mod\_common::read\_bin\_1d@{mod\_common::read\_bin\_1d}}
+\doxysubsubsection{\texorpdfstring{read\_bin\_1d\_int64()}{read\_bin\_1d\_int64()}}
+{\footnotesize\ttfamily mod\+\_\+common\+::read\+\_\+bin\+\_\+1d\+::read\+\_\+bin\+\_\+1d\+\_\+int64}
+
+\mbox{\Hypertarget{interfacemod__common_1_1read__bin__1d_a3e5b43536a5144b02498b7765afa5047}\label{interfacemod__common_1_1read__bin__1d_a3e5b43536a5144b02498b7765afa5047}} 
+\index{mod\_common::read\_bin\_1d@{mod\_common::read\_bin\_1d}!read\_bin\_1d\_real32@{read\_bin\_1d\_real32}}
+\index{read\_bin\_1d\_real32@{read\_bin\_1d\_real32}!mod\_common::read\_bin\_1d@{mod\_common::read\_bin\_1d}}
+\doxysubsubsection{\texorpdfstring{read\_bin\_1d\_real32()}{read\_bin\_1d\_real32()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+common\+::read\+\_\+bin\+\_\+1d\+::read\+\_\+bin\+\_\+1d\+\_\+real32 (\begin{DoxyParamCaption}\item[{character(len=256), intent(in)}]{file\+\_\+name,  }\item[{real(kind=4), dimension(\+:), allocatable}]{vector }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to read binary file dumped by \textquotesingle{}\mbox{\hyperlink{interfacemod__common_1_1read2bin__1d}{read2bin\+\_\+1d}}\textquotesingle{}. 
+
+\begin{DoxyReturn}{戻り値}
+returns data as vector 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em file\+\_\+name} & file name to be read \\
+\hline
+{\em vector} & read data \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{interfacemod__common_1_1read__bin__1d_a94ffe195623515d7f8668edf3f121fe3}\label{interfacemod__common_1_1read__bin__1d_a94ffe195623515d7f8668edf3f121fe3}} 
+\index{mod\_common::read\_bin\_1d@{mod\_common::read\_bin\_1d}!read\_bin\_1d\_real64@{read\_bin\_1d\_real64}}
+\index{read\_bin\_1d\_real64@{read\_bin\_1d\_real64}!mod\_common::read\_bin\_1d@{mod\_common::read\_bin\_1d}}
+\doxysubsubsection{\texorpdfstring{read\_bin\_1d\_real64()}{read\_bin\_1d\_real64()}}
+{\footnotesize\ttfamily mod\+\_\+common\+::read\+\_\+bin\+\_\+1d\+::read\+\_\+bin\+\_\+1d\+\_\+real64}
+
+
+
+次のファイルからインターフェースの詳解が抽出されました\+:\begin{DoxyCompactItemize}
+\item 
+common/\mbox{\hyperlink{mod__common_8f90}{mod\+\_\+common.\+f90}}\end{DoxyCompactItemize}

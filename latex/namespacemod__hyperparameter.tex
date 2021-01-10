@@ -1,0 +1,111 @@
+\hypertarget{namespacemod__hyperparameter}{}\doxysection{mod\+\_\+hyperparameterモジュール}
+\label{namespacemod__hyperparameter}\index{mod\_hyperparameter@{mod\_hyperparameter}}
+\doxysubsection*{データ型}
+\begin{DoxyCompactItemize}
+\item 
+type \mbox{\hyperlink{structmod__hyperparameter_1_1hparam__base}{hparam\+\_\+base}}
+\item 
+type \mbox{\hyperlink{structmod__hyperparameter_1_1hparam__linear__regression}{hparam\+\_\+linear\+\_\+regression}}
+\item 
+type \mbox{\hyperlink{structmod__hyperparameter_1_1hparam__lasso__regression}{hparam\+\_\+lasso\+\_\+regression}}
+\item 
+type \mbox{\hyperlink{structmod__hyperparameter_1_1hparam__ridge__regression}{hparam\+\_\+ridge\+\_\+regression}}
+\item 
+type \mbox{\hyperlink{structmod__hyperparameter_1_1hparam__discretizer}{hparam\+\_\+discretizer}}
+\item 
+type \mbox{\hyperlink{structmod__hyperparameter_1_1hparam__decisiontree}{hparam\+\_\+decisiontree}}
+\end{DoxyCompactItemize}
+\doxysubsection*{関数/サブルーチン}
+\begin{DoxyCompactItemize}
+\item 
+subroutine \mbox{\hyperlink{namespacemod__hyperparameter_aae94471d8a58c6be62d903342157e279}{validate\+\_\+char\+\_\+list}} (this, hparam\+\_\+name, hparam, preset\+\_\+list, exception)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to validate character hyperparameter. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__hyperparameter_a22941eab3463c97d0b71c4cf12a66e56}{validate\+\_\+real\+\_\+range}} (this, hparam\+\_\+name, hparam, min\+\_\+val, max\+\_\+val, exception)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to validate real hyperparameter. \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__hyperparameter_a9acaeaa8353fec34f4692ff400fd705f}{validate\+\_\+int\+\_\+range}} (this, hparam\+\_\+name, hparam, min\+\_\+val, max\+\_\+val, exception)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to validate integer hyperparameter. \end{DoxyCompactList}\item 
+integer(kind=8) function \mbox{\hyperlink{namespacemod__hyperparameter_acc5d5d78556d293eb106edfb0d085dcc}{convert\+\_\+char\+\_\+to\+\_\+int}} (this, hparam, preset\+\_\+list)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to convert input character to integer. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{関数/サブルーチン詳解}
+\mbox{\Hypertarget{namespacemod__hyperparameter_acc5d5d78556d293eb106edfb0d085dcc}\label{namespacemod__hyperparameter_acc5d5d78556d293eb106edfb0d085dcc}} 
+\index{mod\_hyperparameter@{mod\_hyperparameter}!convert\_char\_to\_int@{convert\_char\_to\_int}}
+\index{convert\_char\_to\_int@{convert\_char\_to\_int}!mod\_hyperparameter@{mod\_hyperparameter}}
+\doxysubsubsection{\texorpdfstring{convert\_char\_to\_int()}{convert\_char\_to\_int()}}
+{\footnotesize\ttfamily integer(kind=8) function mod\+\_\+hyperparameter\+::convert\+\_\+char\+\_\+to\+\_\+int (\begin{DoxyParamCaption}\item[{class(\mbox{\hyperlink{structmod__hyperparameter_1_1hparam__base}{hparam\+\_\+base}})}]{this,  }\item[{character(len=256)}]{hparam,  }\item[{character(len=256), dimension(\+:)}]{preset\+\_\+list }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} function to convert input character to integer. 
+
+
+\begin{DoxyParams}{引数}
+{\em hparam} & input hyperparameter character \\
+\hline
+{\em preset\+\_\+list} & preset character list \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespacemod__hyperparameter_aae94471d8a58c6be62d903342157e279}\label{namespacemod__hyperparameter_aae94471d8a58c6be62d903342157e279}} 
+\index{mod\_hyperparameter@{mod\_hyperparameter}!validate\_char\_list@{validate\_char\_list}}
+\index{validate\_char\_list@{validate\_char\_list}!mod\_hyperparameter@{mod\_hyperparameter}}
+\doxysubsubsection{\texorpdfstring{validate\_char\_list()}{validate\_char\_list()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+hyperparameter\+::validate\+\_\+char\+\_\+list (\begin{DoxyParamCaption}\item[{class(\mbox{\hyperlink{structmod__hyperparameter_1_1hparam__base}{hparam\+\_\+base}})}]{this,  }\item[{character(len=$\ast$)}]{hparam\+\_\+name,  }\item[{character(len=256)}]{hparam,  }\item[{character(len=256), dimension(\+:)}]{preset\+\_\+list,  }\item[{character(len=256), optional}]{exception }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to validate character hyperparameter. 
+
+
+\begin{DoxyParams}{引数}
+{\em hparam} & input hyperparameter \\
+\hline
+{\em min\+\_\+val} & minimum value \\
+\hline
+{\em max\+\_\+val} & maximum value \\
+\hline
+{\em exception} & exception value \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespacemod__hyperparameter_a9acaeaa8353fec34f4692ff400fd705f}\label{namespacemod__hyperparameter_a9acaeaa8353fec34f4692ff400fd705f}} 
+\index{mod\_hyperparameter@{mod\_hyperparameter}!validate\_int\_range@{validate\_int\_range}}
+\index{validate\_int\_range@{validate\_int\_range}!mod\_hyperparameter@{mod\_hyperparameter}}
+\doxysubsubsection{\texorpdfstring{validate\_int\_range()}{validate\_int\_range()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+hyperparameter\+::validate\+\_\+int\+\_\+range (\begin{DoxyParamCaption}\item[{class(\mbox{\hyperlink{structmod__hyperparameter_1_1hparam__base}{hparam\+\_\+base}})}]{this,  }\item[{character(len=$\ast$)}]{hparam\+\_\+name,  }\item[{integer(kind=8)}]{hparam,  }\item[{integer(kind=8)}]{min\+\_\+val,  }\item[{integer(kind=8)}]{max\+\_\+val,  }\item[{integer(kind=8), optional}]{exception }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to validate integer hyperparameter. 
+
+
+\begin{DoxyParams}{引数}
+{\em hparam} & input hyperparameter \\
+\hline
+{\em min\+\_\+val} & minimum value \\
+\hline
+{\em max\+\_\+val} & maximum value \\
+\hline
+{\em exception} & exception value \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespacemod__hyperparameter_a22941eab3463c97d0b71c4cf12a66e56}\label{namespacemod__hyperparameter_a22941eab3463c97d0b71c4cf12a66e56}} 
+\index{mod\_hyperparameter@{mod\_hyperparameter}!validate\_real\_range@{validate\_real\_range}}
+\index{validate\_real\_range@{validate\_real\_range}!mod\_hyperparameter@{mod\_hyperparameter}}
+\doxysubsubsection{\texorpdfstring{validate\_real\_range()}{validate\_real\_range()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+hyperparameter\+::validate\+\_\+real\+\_\+range (\begin{DoxyParamCaption}\item[{class(\mbox{\hyperlink{structmod__hyperparameter_1_1hparam__base}{hparam\+\_\+base}})}]{this,  }\item[{character(len=$\ast$)}]{hparam\+\_\+name,  }\item[{real(kind=8)}]{hparam,  }\item[{real(kind=8)}]{min\+\_\+val,  }\item[{real(kind=8)}]{max\+\_\+val,  }\item[{real(kind=8), optional}]{exception }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to validate real hyperparameter. 
+
+
+\begin{DoxyParams}{引数}
+{\em hparam} & input hyperparameter \\
+\hline
+{\em min\+\_\+val} & minimum value \\
+\hline
+{\em max\+\_\+val} & maximum value \\
+\hline
+{\em exception} & exception value \\
+\hline
+\end{DoxyParams}

@@ -1,0 +1,73 @@
+\hypertarget{interfacemod__linalg_1_1multi__mat__vec}{}\doxysection{インターフェース mod\+\_\+linalg\+::multi\+\_\+mat\+\_\+vec}
+\label{interfacemod__linalg_1_1multi__mat__vec}\index{mod\_linalg::multi\_mat\_vec@{mod\_linalg::multi\_mat\_vec}}
+
+
+An interface to call multi\+\_\+mat\+\_\+vec\+\_\+real32, multi\+\_\+mat\+\_\+vec\+\_\+real64, multi\+\_\+mat\+\_\+vec\+\_\+int32, multi\+\_\+mat\+\_\+vec\+\_\+int64  
+
+
+\doxysubsection*{公開メンバ関数}
+\begin{DoxyCompactItemize}
+\item 
+subroutine \mbox{\hyperlink{interfacemod__linalg_1_1multi__mat__vec_a086b2fa76704449347e7e2a32ebeebdb}{multi\+\_\+mat\+\_\+vec\+\_\+real32}} (matrix, input\+\_\+vector, output\+\_\+vector, n\+\_\+rows, n\+\_\+cols)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to multiply matrix(\+M,\+K) and vector(\+K). \end{DoxyCompactList}\item 
+\mbox{\hyperlink{interfacemod__linalg_1_1multi__mat__vec_a27cc732d14eea16a13c80f945a311982}{multi\+\_\+mat\+\_\+vec\+\_\+real64}}
+\item 
+\mbox{\hyperlink{interfacemod__linalg_1_1multi__mat__vec_a12a5c47b832b1dc72e5ca1cab36155e8}{multi\+\_\+mat\+\_\+vec\+\_\+int32}}
+\item 
+\mbox{\hyperlink{interfacemod__linalg_1_1multi__mat__vec_ac97d0443ae2f2a224f95574cfcf200dc}{multi\+\_\+mat\+\_\+vec\+\_\+int64}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{詳解}
+An interface to call multi\+\_\+mat\+\_\+vec\+\_\+real32, multi\+\_\+mat\+\_\+vec\+\_\+real64, multi\+\_\+mat\+\_\+vec\+\_\+int32, multi\+\_\+mat\+\_\+vec\+\_\+int64 
+
+\doxysubsection{メンバ関数/サブルーチン詳解}
+\mbox{\Hypertarget{interfacemod__linalg_1_1multi__mat__vec_a12a5c47b832b1dc72e5ca1cab36155e8}\label{interfacemod__linalg_1_1multi__mat__vec_a12a5c47b832b1dc72e5ca1cab36155e8}} 
+\index{mod\_linalg::multi\_mat\_vec@{mod\_linalg::multi\_mat\_vec}!multi\_mat\_vec\_int32@{multi\_mat\_vec\_int32}}
+\index{multi\_mat\_vec\_int32@{multi\_mat\_vec\_int32}!mod\_linalg::multi\_mat\_vec@{mod\_linalg::multi\_mat\_vec}}
+\doxysubsubsection{\texorpdfstring{multi\_mat\_vec\_int32()}{multi\_mat\_vec\_int32()}}
+{\footnotesize\ttfamily mod\+\_\+linalg\+::multi\+\_\+mat\+\_\+vec\+::multi\+\_\+mat\+\_\+vec\+\_\+int32}
+
+\mbox{\Hypertarget{interfacemod__linalg_1_1multi__mat__vec_ac97d0443ae2f2a224f95574cfcf200dc}\label{interfacemod__linalg_1_1multi__mat__vec_ac97d0443ae2f2a224f95574cfcf200dc}} 
+\index{mod\_linalg::multi\_mat\_vec@{mod\_linalg::multi\_mat\_vec}!multi\_mat\_vec\_int64@{multi\_mat\_vec\_int64}}
+\index{multi\_mat\_vec\_int64@{multi\_mat\_vec\_int64}!mod\_linalg::multi\_mat\_vec@{mod\_linalg::multi\_mat\_vec}}
+\doxysubsubsection{\texorpdfstring{multi\_mat\_vec\_int64()}{multi\_mat\_vec\_int64()}}
+{\footnotesize\ttfamily mod\+\_\+linalg\+::multi\+\_\+mat\+\_\+vec\+::multi\+\_\+mat\+\_\+vec\+\_\+int64}
+
+\mbox{\Hypertarget{interfacemod__linalg_1_1multi__mat__vec_a086b2fa76704449347e7e2a32ebeebdb}\label{interfacemod__linalg_1_1multi__mat__vec_a086b2fa76704449347e7e2a32ebeebdb}} 
+\index{mod\_linalg::multi\_mat\_vec@{mod\_linalg::multi\_mat\_vec}!multi\_mat\_vec\_real32@{multi\_mat\_vec\_real32}}
+\index{multi\_mat\_vec\_real32@{multi\_mat\_vec\_real32}!mod\_linalg::multi\_mat\_vec@{mod\_linalg::multi\_mat\_vec}}
+\doxysubsubsection{\texorpdfstring{multi\_mat\_vec\_real32()}{multi\_mat\_vec\_real32()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+linalg\+::multi\+\_\+mat\+\_\+vec\+::multi\+\_\+mat\+\_\+vec\+\_\+real32 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(n\+\_\+rows, n\+\_\+cols), intent(in)}]{matrix,  }\item[{real(kind=4), dimension(n\+\_\+cols), intent(in)}]{input\+\_\+vector,  }\item[{real(kind=4), dimension(n\+\_\+rows), intent(inout)}]{output\+\_\+vector,  }\item[{integer(kind=4), intent(in)}]{n\+\_\+rows,  }\item[{integer(kind=4), intent(in)}]{n\+\_\+cols }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to multiply matrix(\+M,\+K) and vector(\+K). 
+
+\begin{DoxyReturn}{戻り値}
+returns multiply matrix(\+M,\+K) and vector(\+K). 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em matrix} & input matrix \\
+\hline
+{\em input\+\_\+vector} & input vector \\
+\hline
+{\em output\+\_\+vector} & output vector \\
+\hline
+{\em n\+\_\+rows} & number of rows in the matrix and size of \textquotesingle{}output\+\_\+vector\textquotesingle{} \\
+\hline
+{\em n\+\_\+cols} & number of columns in the matrix and size of \textquotesingle{}input\+\_\+vector\textquotesingle{} \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{interfacemod__linalg_1_1multi__mat__vec_a27cc732d14eea16a13c80f945a311982}\label{interfacemod__linalg_1_1multi__mat__vec_a27cc732d14eea16a13c80f945a311982}} 
+\index{mod\_linalg::multi\_mat\_vec@{mod\_linalg::multi\_mat\_vec}!multi\_mat\_vec\_real64@{multi\_mat\_vec\_real64}}
+\index{multi\_mat\_vec\_real64@{multi\_mat\_vec\_real64}!mod\_linalg::multi\_mat\_vec@{mod\_linalg::multi\_mat\_vec}}
+\doxysubsubsection{\texorpdfstring{multi\_mat\_vec\_real64()}{multi\_mat\_vec\_real64()}}
+{\footnotesize\ttfamily mod\+\_\+linalg\+::multi\+\_\+mat\+\_\+vec\+::multi\+\_\+mat\+\_\+vec\+\_\+real64}
+
+
+
+次のファイルからインターフェースの詳解が抽出されました\+:\begin{DoxyCompactItemize}
+\item 
+linalg/\mbox{\hyperlink{mod__linalg_8f90}{mod\+\_\+linalg.\+f90}}\end{DoxyCompactItemize}

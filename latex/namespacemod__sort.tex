@@ -1,0 +1,423 @@
+\hypertarget{namespacemod__sort}{}\doxysection{mod\+\_\+sortモジュール}
+\label{namespacemod__sort}\index{mod\_sort@{mod\_sort}}
+
+
+\mbox{\hyperlink{class_a}{A}} module for sort functions.  
+
+
+\doxysubsection*{データ型}
+\begin{DoxyCompactItemize}
+\item 
+type \mbox{\hyperlink{structmod__sort_1_1work}{work}}
+\item 
+type \mbox{\hyperlink{structmod__sort_1_1empty__bucket}{empty\+\_\+bucket}}
+\item 
+interface \mbox{\hyperlink{interfacemod__sort_1_1pbucket__sort}{pbucket\+\_\+sort}}
+\item 
+interface \mbox{\hyperlink{interfacemod__sort_1_1pbucket__argsort}{pbucket\+\_\+argsort}}
+\item 
+interface \mbox{\hyperlink{interfacemod__sort_1_1insertion__sort}{insertion\+\_\+sort}}
+\begin{DoxyCompactList}\small\item\em An interface to call insertion\+\_\+sort\+\_\+r4, insertion\+\_\+sort\+\_\+r8, insertion\+\_\+sort\+\_\+i4, and insertion\+\_\+sort\+\_\+i8 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__sort_1_1insertion__argsort}{insertion\+\_\+argsort}}
+\begin{DoxyCompactList}\small\item\em An interface to call insertion\+\_\+argsort\+\_\+r4\+\_\+i4, insertion\+\_\+argsort\+\_\+r8\+\_\+i8, insertion\+\_\+argsort\+\_\+i4\+\_\+i4, and insertion\+\_\+argsort\+\_\+i8 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__sort_1_1quick__sort}{quick\+\_\+sort}}
+\begin{DoxyCompactList}\small\item\em An interface to call quick\+\_\+sort\+\_\+r4, quick\+\_\+sort\+\_\+r8, quick\+\_\+sort\+\_\+i4, and quick\+\_\+sort\+\_\+i8 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__sort_1_1quick__argsort}{quick\+\_\+argsort}}
+\begin{DoxyCompactList}\small\item\em An interface to call quick\+\_\+argsort\+\_\+r4\+\_\+i4, quick\+\_\+argsort\+\_\+r8\+\_\+i8, quick\+\_\+argsort\+\_\+i4\+\_\+i4, and quick\+\_\+argsort\+\_\+i8\+\_\+i8 \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__sort_1_1block__quick__sort}{block\+\_\+quick\+\_\+sort}}
+\begin{DoxyCompactList}\small\item\em An interface to \mbox{\hyperlink{interfacemod__sort_1_1block__quick__sort}{block\+\_\+quick\+\_\+sort}} \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__sort_1_1block__quick__argsort}{block\+\_\+quick\+\_\+argsort}}
+\begin{DoxyCompactList}\small\item\em An interface to \mbox{\hyperlink{interfacemod__sort_1_1block__quick__argsort}{block\+\_\+quick\+\_\+argsort}} \end{DoxyCompactList}\item 
+interface \mbox{\hyperlink{interfacemod__sort_1_1quick__select__lower}{quick\+\_\+select\+\_\+lower}}
+\item 
+interface \mbox{\hyperlink{interfacemod__sort_1_1quick__select__upper}{quick\+\_\+select\+\_\+upper}}
+\end{DoxyCompactItemize}
+\doxysubsection*{関数/サブルーチン}
+\begin{DoxyCompactItemize}
+\item 
+recursive subroutine \mbox{\hyperlink{namespacemod__sort_a1608b54977a58bd03a177b6301f865c3}{pbucket\+\_\+argsort\+\_\+r8}} (vector, indices, n\+\_\+samples, rec\+\_\+depth)
+\item 
+recursive subroutine \mbox{\hyperlink{namespacemod__sort_a92e0d2246708087381742b3813288762}{pbucket\+\_\+argsort\+\_\+new\+\_\+r8}} (vector, indices, n\+\_\+samples, rec\+\_\+depth)
+\item 
+recursive subroutine \mbox{\hyperlink{namespacemod__sort_a3bb584daa3bd31ee1587d07cd3a984a1}{pbucket\+\_\+sort\+\_\+r4}} (vector, n\+\_\+samples, rec\+\_\+depth)
+\item 
+recursive subroutine \mbox{\hyperlink{namespacemod__sort_abd9fc512f993a88acbdbae11f2abe0f6}{pbucket\+\_\+sort\+\_\+r8}} (vector, n\+\_\+samples, rec\+\_\+depth)
+\item 
+recursive subroutine \mbox{\hyperlink{namespacemod__sort_ac1ad389b993fdae2d952fd2e9ae88710}{pbucket\+\_\+sort\+\_\+old\+\_\+r8}} (vector, n\+\_\+samples, rec\+\_\+depth)
+\item 
+subroutine \mbox{\hyperlink{namespacemod__sort_a3b950d47682d346edc9b410a865888bd}{size\+\_\+up\+\_\+r4}} (this)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to size up work space for pseudo backet sort \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__sort_a84c5f245867193dcc6c41ad936b7515b}{sort\+\_\+r4}} (this)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to sort values and indices stored in \textquotesingle{}work\textquotesingle{} for pseudo bucket sort \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__sort_a38e74398fb8e33975494984820bbf579}{argsort\+\_\+r8}} (this)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to sort values and indices stored in \textquotesingle{}work\textquotesingle{} for pseudo bucket sort \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__sort_a285a051e67fa57597ac9e2f85f5f6af1}{init\+\_\+r4}} (this, num, n\+\_\+work\+\_\+space)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to initialize work space for pseudo backet sort \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__sort_acc8dd4e292e5e3def703735c5474f7c8}{init\+\_\+arg\+\_\+r8}} (this, num, n\+\_\+work\+\_\+space)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to initialize work space for pseudo backet argsort \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__sort_ac04ba0e95a4a35c2f3324538b85ea832}{append\+\_\+r4}} (this, tmp\+\_\+val)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to append value to work space for pseudo backet sort \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__sort_ac121b59dc8dc6e0eeba913fc97f60b81}{append\+\_\+arg\+\_\+r8}} (this, tmp\+\_\+val, tmp\+\_\+idx)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to append value and its index to work space for pseudo backet argsort \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__sort_af6524e27dad0658f0bfc56ca0657f89d}{insertion\+\_\+sort\+\_\+r4}} (vector, num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to sort the input vectors using insert sort \end{DoxyCompactList}\item 
+subroutine \mbox{\hyperlink{namespacemod__sort_abd1ab3d2648a0fe24705aa2383f992ec}{insertion\+\_\+argsort\+\_\+r4\+\_\+i4}} (vector1, vector2, num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to sort \textquotesingle{}vector2\textquotesingle{} according to \textquotesingle{}vector1\textquotesingle{} using insert sort \end{DoxyCompactList}\item 
+recursive subroutine \mbox{\hyperlink{namespacemod__sort_ac74216675d6a94888bd812b5226cd502}{quick\+\_\+sort\+\_\+r4}} (vector, num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to sort the input vector using quick sort (Insertion sort is also used for small vectors) \end{DoxyCompactList}\item 
+recursive subroutine \mbox{\hyperlink{namespacemod__sort_a98314bb849957f8523a4fcf44d74fe05}{quick\+\_\+argsort\+\_\+r4\+\_\+i4}} (vector1, vector2, num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to sort \textquotesingle{}vector2\textquotesingle{} according to \textquotesingle{}vector1\textquotesingle{} using quick sort (Insertion sort is also used for small vectors) \end{DoxyCompactList}\item 
+recursive subroutine \mbox{\hyperlink{namespacemod__sort_a7943ad6e3de430a68bdcef0f8af9459a}{block\+\_\+quick\+\_\+sort\+\_\+r4}} (vector, num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to sort the input vector using block quick sort (Insertion sort is also used for small vectors) \end{DoxyCompactList}\item 
+recursive subroutine \mbox{\hyperlink{namespacemod__sort_afc0f51be7761601d0d6b8c47c377ebd5}{block\+\_\+quick\+\_\+argsort\+\_\+r4\+\_\+i4}} (vector1, vector2, num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} subroutine to sort \textquotesingle{}vector2\textquotesingle{} according to \textquotesingle{}vector1\textquotesingle{} using block quick sort (Insertion sort is also used for small vectors) \end{DoxyCompactList}\item 
+recursive subroutine \mbox{\hyperlink{namespacemod__sort_a0ae713e0122cee0b9ba6c1e069c3993d}{quick\+\_\+select\+\_\+lower\+\_\+r8}} (val\+\_\+lower, vector, num\+\_\+all, num\+\_\+bottom)
+\begin{DoxyCompactList}\small\item\em Get the N-\/th smallest value \end{DoxyCompactList}\item 
+recursive subroutine \mbox{\hyperlink{namespacemod__sort_a2d11ba8ef20fdd420fa75bf231e4d73a}{quick\+\_\+select\+\_\+upper\+\_\+r8}} (val\+\_\+upper, vector, num\+\_\+all, num\+\_\+top)
+\begin{DoxyCompactList}\small\item\em Get the N-\/th bigget value \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{詳解}
+\mbox{\hyperlink{class_a}{A}} module for sort functions. 
+
+\doxysubsection{関数/サブルーチン詳解}
+\mbox{\Hypertarget{namespacemod__sort_ac121b59dc8dc6e0eeba913fc97f60b81}\label{namespacemod__sort_ac121b59dc8dc6e0eeba913fc97f60b81}} 
+\index{mod\_sort@{mod\_sort}!append\_arg\_r8@{append\_arg\_r8}}
+\index{append\_arg\_r8@{append\_arg\_r8}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{append\_arg\_r8()}{append\_arg\_r8()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+sort\+::append\+\_\+arg\+\_\+r8 (\begin{DoxyParamCaption}\item[{class(\mbox{\hyperlink{structmod__sort_1_1work}{work}})}]{this,  }\item[{real(kind=8)}]{tmp\+\_\+val,  }\item[{integer(kind=8)}]{tmp\+\_\+idx }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to append value and its index to work space for pseudo backet argsort 
+
+
+\begin{DoxyParams}{引数}
+{\em tmp\+\_\+val} & a value to be appended to work space \\
+\hline
+{\em tmp\+\_\+idx} & an index to be appended to work space \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespacemod__sort_ac04ba0e95a4a35c2f3324538b85ea832}\label{namespacemod__sort_ac04ba0e95a4a35c2f3324538b85ea832}} 
+\index{mod\_sort@{mod\_sort}!append\_r4@{append\_r4}}
+\index{append\_r4@{append\_r4}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{append\_r4()}{append\_r4()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+sort\+::append\+\_\+r4 (\begin{DoxyParamCaption}\item[{class(\mbox{\hyperlink{structmod__sort_1_1work}{work}})}]{this,  }\item[{real(kind=4)}]{tmp\+\_\+val }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to append value to work space for pseudo backet sort 
+
+
+\begin{DoxyParams}{引数}
+{\em tmp\+\_\+val} & a value to be appended to work space \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespacemod__sort_a38e74398fb8e33975494984820bbf579}\label{namespacemod__sort_a38e74398fb8e33975494984820bbf579}} 
+\index{mod\_sort@{mod\_sort}!argsort\_r8@{argsort\_r8}}
+\index{argsort\_r8@{argsort\_r8}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{argsort\_r8()}{argsort\_r8()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+sort\+::argsort\+\_\+r8 (\begin{DoxyParamCaption}\item[{class(\mbox{\hyperlink{structmod__sort_1_1work}{work}})}]{this }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to sort values and indices stored in \textquotesingle{}work\textquotesingle{} for pseudo bucket sort 
+
+\mbox{\Hypertarget{namespacemod__sort_afc0f51be7761601d0d6b8c47c377ebd5}\label{namespacemod__sort_afc0f51be7761601d0d6b8c47c377ebd5}} 
+\index{mod\_sort@{mod\_sort}!block\_quick\_argsort\_r4\_i4@{block\_quick\_argsort\_r4\_i4}}
+\index{block\_quick\_argsort\_r4\_i4@{block\_quick\_argsort\_r4\_i4}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{block\_quick\_argsort\_r4\_i4()}{block\_quick\_argsort\_r4\_i4()}}
+{\footnotesize\ttfamily recursive subroutine mod\+\_\+sort\+::block\+\_\+quick\+\_\+argsort\+\_\+r4\+\_\+i4 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(num), intent(inout)}]{vector1,  }\item[{integer(kind=4), dimension(num), intent(inout)}]{vector2,  }\item[{integer(kind=4), intent(in)}]{num }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to sort \textquotesingle{}vector2\textquotesingle{} according to \textquotesingle{}vector1\textquotesingle{} using block quick sort (Insertion sort is also used for small vectors) 
+
+
+\begin{DoxyParams}{引数}
+{\em vector} & a vector to be sorted \\
+\hline
+{\em indices} & a indices to be sorted accoring to \textquotesingle{}vector\textquotesingle{} \\
+\hline
+{\em num} & number of samples in vector \\
+\hline
+\end{DoxyParams}
+被呼び出し関係図\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=346pt]{namespacemod__sort_afc0f51be7761601d0d6b8c47c377ebd5_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{namespacemod__sort_a7943ad6e3de430a68bdcef0f8af9459a}\label{namespacemod__sort_a7943ad6e3de430a68bdcef0f8af9459a}} 
+\index{mod\_sort@{mod\_sort}!block\_quick\_sort\_r4@{block\_quick\_sort\_r4}}
+\index{block\_quick\_sort\_r4@{block\_quick\_sort\_r4}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{block\_quick\_sort\_r4()}{block\_quick\_sort\_r4()}}
+{\footnotesize\ttfamily recursive subroutine mod\+\_\+sort\+::block\+\_\+quick\+\_\+sort\+\_\+r4 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(num), intent(inout)}]{vector,  }\item[{integer(kind=4), intent(in)}]{num }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to sort the input vector using block quick sort (Insertion sort is also used for small vectors) 
+
+
+\begin{DoxyParams}{引数}
+{\em vector} & a vector to be sorted \\
+\hline
+{\em indices} & a indices to be sorted accoring to \textquotesingle{}vector\textquotesingle{} \\
+\hline
+{\em num} & number of samples in vector \\
+\hline
+\end{DoxyParams}
+被呼び出し関係図\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{namespacemod__sort_a7943ad6e3de430a68bdcef0f8af9459a_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{namespacemod__sort_acc8dd4e292e5e3def703735c5474f7c8}\label{namespacemod__sort_acc8dd4e292e5e3def703735c5474f7c8}} 
+\index{mod\_sort@{mod\_sort}!init\_arg\_r8@{init\_arg\_r8}}
+\index{init\_arg\_r8@{init\_arg\_r8}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{init\_arg\_r8()}{init\_arg\_r8()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+sort\+::init\+\_\+arg\+\_\+r8 (\begin{DoxyParamCaption}\item[{class(\mbox{\hyperlink{structmod__sort_1_1empty__bucket}{empty\+\_\+bucket}})}]{this,  }\item[{integer(kind=8)}]{num,  }\item[{integer(kind=8)}]{n\+\_\+work\+\_\+space }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to initialize work space for pseudo backet argsort 
+
+
+\begin{DoxyParams}{引数}
+{\em num} & number of samples \\
+\hline
+{\em n\+\_\+work\+\_\+space} & numnber of work spaces \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespacemod__sort_a285a051e67fa57597ac9e2f85f5f6af1}\label{namespacemod__sort_a285a051e67fa57597ac9e2f85f5f6af1}} 
+\index{mod\_sort@{mod\_sort}!init\_r4@{init\_r4}}
+\index{init\_r4@{init\_r4}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{init\_r4()}{init\_r4()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+sort\+::init\+\_\+r4 (\begin{DoxyParamCaption}\item[{class(\mbox{\hyperlink{structmod__sort_1_1empty__bucket}{empty\+\_\+bucket}})}]{this,  }\item[{integer(kind=4)}]{num,  }\item[{integer(kind=4)}]{n\+\_\+work\+\_\+space }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to initialize work space for pseudo backet sort 
+
+
+\begin{DoxyParams}{引数}
+{\em num} & number of samples \\
+\hline
+{\em n\+\_\+work\+\_\+space} & numnber of work spaces \\
+\hline
+\end{DoxyParams}
+被呼び出し関係図\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=330pt]{namespacemod__sort_a285a051e67fa57597ac9e2f85f5f6af1_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{namespacemod__sort_abd1ab3d2648a0fe24705aa2383f992ec}\label{namespacemod__sort_abd1ab3d2648a0fe24705aa2383f992ec}} 
+\index{mod\_sort@{mod\_sort}!insertion\_argsort\_r4\_i4@{insertion\_argsort\_r4\_i4}}
+\index{insertion\_argsort\_r4\_i4@{insertion\_argsort\_r4\_i4}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{insertion\_argsort\_r4\_i4()}{insertion\_argsort\_r4\_i4()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+sort\+::insertion\+\_\+argsort\+\_\+r4\+\_\+i4 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(num), intent(inout)}]{vector1,  }\item[{integer(kind=4), dimension(num), intent(inout)}]{vector2,  }\item[{integer(kind=4), intent(in)}]{num }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to sort \textquotesingle{}vector2\textquotesingle{} according to \textquotesingle{}vector1\textquotesingle{} using insert sort 
+
+
+\begin{DoxyParams}{引数}
+{\em vector} & a vector to be sorted \\
+\hline
+{\em indices} & a indices to be sorted according to vector \\
+\hline
+{\em num} & number of samples in vector \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespacemod__sort_af6524e27dad0658f0bfc56ca0657f89d}\label{namespacemod__sort_af6524e27dad0658f0bfc56ca0657f89d}} 
+\index{mod\_sort@{mod\_sort}!insertion\_sort\_r4@{insertion\_sort\_r4}}
+\index{insertion\_sort\_r4@{insertion\_sort\_r4}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{insertion\_sort\_r4()}{insertion\_sort\_r4()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+sort\+::insertion\+\_\+sort\+\_\+r4 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(num), intent(inout)}]{vector,  }\item[{integer(kind=4), intent(in)}]{num }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to sort the input vectors using insert sort 
+
+
+\begin{DoxyParams}{引数}
+{\em vector} & a vector to be sorted \\
+\hline
+{\em num} & number of samples in vector \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespacemod__sort_a92e0d2246708087381742b3813288762}\label{namespacemod__sort_a92e0d2246708087381742b3813288762}} 
+\index{mod\_sort@{mod\_sort}!pbucket\_argsort\_new\_r8@{pbucket\_argsort\_new\_r8}}
+\index{pbucket\_argsort\_new\_r8@{pbucket\_argsort\_new\_r8}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{pbucket\_argsort\_new\_r8()}{pbucket\_argsort\_new\_r8()}}
+{\footnotesize\ttfamily recursive subroutine mod\+\_\+sort\+::pbucket\+\_\+argsort\+\_\+new\+\_\+r8 (\begin{DoxyParamCaption}\item[{real(kind=8), dimension(n\+\_\+samples), intent(inout)}]{vector,  }\item[{integer(kind=8), dimension(n\+\_\+samples), intent(inout)}]{indices,  }\item[{integer(kind=8), intent(in)}]{n\+\_\+samples,  }\item[{integer(kind=8), intent(in), optional}]{rec\+\_\+depth }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespacemod__sort_a1608b54977a58bd03a177b6301f865c3}\label{namespacemod__sort_a1608b54977a58bd03a177b6301f865c3}} 
+\index{mod\_sort@{mod\_sort}!pbucket\_argsort\_r8@{pbucket\_argsort\_r8}}
+\index{pbucket\_argsort\_r8@{pbucket\_argsort\_r8}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{pbucket\_argsort\_r8()}{pbucket\_argsort\_r8()}}
+{\footnotesize\ttfamily recursive subroutine mod\+\_\+sort\+::pbucket\+\_\+argsort\+\_\+r8 (\begin{DoxyParamCaption}\item[{real(kind=8), dimension(n\+\_\+samples), intent(inout)}]{vector,  }\item[{integer(kind=8), dimension(n\+\_\+samples), intent(inout)}]{indices,  }\item[{integer(kind=8), intent(in)}]{n\+\_\+samples,  }\item[{integer(kind=8), intent(in), optional}]{rec\+\_\+depth }\end{DoxyParamCaption})}
+
+被呼び出し関係図\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{namespacemod__sort_a1608b54977a58bd03a177b6301f865c3_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{namespacemod__sort_ac1ad389b993fdae2d952fd2e9ae88710}\label{namespacemod__sort_ac1ad389b993fdae2d952fd2e9ae88710}} 
+\index{mod\_sort@{mod\_sort}!pbucket\_sort\_old\_r8@{pbucket\_sort\_old\_r8}}
+\index{pbucket\_sort\_old\_r8@{pbucket\_sort\_old\_r8}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{pbucket\_sort\_old\_r8()}{pbucket\_sort\_old\_r8()}}
+{\footnotesize\ttfamily recursive subroutine mod\+\_\+sort\+::pbucket\+\_\+sort\+\_\+old\+\_\+r8 (\begin{DoxyParamCaption}\item[{real(kind=8), dimension(n\+\_\+samples), intent(inout)}]{vector,  }\item[{integer(kind=8), intent(in)}]{n\+\_\+samples,  }\item[{integer(kind=8), intent(in), optional}]{rec\+\_\+depth }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespacemod__sort_a3bb584daa3bd31ee1587d07cd3a984a1}\label{namespacemod__sort_a3bb584daa3bd31ee1587d07cd3a984a1}} 
+\index{mod\_sort@{mod\_sort}!pbucket\_sort\_r4@{pbucket\_sort\_r4}}
+\index{pbucket\_sort\_r4@{pbucket\_sort\_r4}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{pbucket\_sort\_r4()}{pbucket\_sort\_r4()}}
+{\footnotesize\ttfamily recursive subroutine mod\+\_\+sort\+::pbucket\+\_\+sort\+\_\+r4 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(n\+\_\+samples), intent(inout)}]{vector,  }\item[{integer(kind=4), intent(in)}]{n\+\_\+samples,  }\item[{integer(kind=4), intent(in), optional}]{rec\+\_\+depth }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespacemod__sort_abd9fc512f993a88acbdbae11f2abe0f6}\label{namespacemod__sort_abd9fc512f993a88acbdbae11f2abe0f6}} 
+\index{mod\_sort@{mod\_sort}!pbucket\_sort\_r8@{pbucket\_sort\_r8}}
+\index{pbucket\_sort\_r8@{pbucket\_sort\_r8}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{pbucket\_sort\_r8()}{pbucket\_sort\_r8()}}
+{\footnotesize\ttfamily recursive subroutine mod\+\_\+sort\+::pbucket\+\_\+sort\+\_\+r8 (\begin{DoxyParamCaption}\item[{real(kind=8), dimension(n\+\_\+samples), intent(inout)}]{vector,  }\item[{integer(kind=8), intent(in)}]{n\+\_\+samples,  }\item[{integer(kind=8), intent(in), optional}]{rec\+\_\+depth }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{namespacemod__sort_a98314bb849957f8523a4fcf44d74fe05}\label{namespacemod__sort_a98314bb849957f8523a4fcf44d74fe05}} 
+\index{mod\_sort@{mod\_sort}!quick\_argsort\_r4\_i4@{quick\_argsort\_r4\_i4}}
+\index{quick\_argsort\_r4\_i4@{quick\_argsort\_r4\_i4}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{quick\_argsort\_r4\_i4()}{quick\_argsort\_r4\_i4()}}
+{\footnotesize\ttfamily recursive subroutine mod\+\_\+sort\+::quick\+\_\+argsort\+\_\+r4\+\_\+i4 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(num), intent(inout)}]{vector1,  }\item[{integer(kind=4), dimension(num), intent(inout)}]{vector2,  }\item[{integer(kind=4), intent(in)}]{num }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to sort \textquotesingle{}vector2\textquotesingle{} according to \textquotesingle{}vector1\textquotesingle{} using quick sort (Insertion sort is also used for small vectors) 
+
+
+\begin{DoxyParams}{引数}
+{\em vector} & a vector to be sorted \\
+\hline
+{\em indices} & a indices to be sorted accoring to \textquotesingle{}vector\textquotesingle{} \\
+\hline
+{\em num} & number of samples in vector \\
+\hline
+\end{DoxyParams}
+被呼び出し関係図\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{namespacemod__sort_a98314bb849957f8523a4fcf44d74fe05_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{namespacemod__sort_a0ae713e0122cee0b9ba6c1e069c3993d}\label{namespacemod__sort_a0ae713e0122cee0b9ba6c1e069c3993d}} 
+\index{mod\_sort@{mod\_sort}!quick\_select\_lower\_r8@{quick\_select\_lower\_r8}}
+\index{quick\_select\_lower\_r8@{quick\_select\_lower\_r8}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{quick\_select\_lower\_r8()}{quick\_select\_lower\_r8()}}
+{\footnotesize\ttfamily recursive subroutine mod\+\_\+sort\+::quick\+\_\+select\+\_\+lower\+\_\+r8 (\begin{DoxyParamCaption}\item[{real(kind=8), intent(inout)}]{val\+\_\+lower,  }\item[{real(kind=8), dimension(num\+\_\+all), intent(inout)}]{vector,  }\item[{integer(kind=8), intent(in)}]{num\+\_\+all,  }\item[{integer(kind=8), intent(inout)}]{num\+\_\+bottom }\end{DoxyParamCaption})}
+
+
+
+Get the N-\/th smallest value 
+
+\begin{DoxyReturn}{戻り値}
+return the N-\/th smallest value 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em the} & N-\/th smallest value \\
+\hline
+{\em vector} & input vector \\
+\hline
+{\em num\+\_\+all} & size of vector \\
+\hline
+{\em num\+\_\+bottom} & N from the smallest \\
+\hline
+\end{DoxyParams}
+被呼び出し関係図\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{namespacemod__sort_a0ae713e0122cee0b9ba6c1e069c3993d_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{namespacemod__sort_a2d11ba8ef20fdd420fa75bf231e4d73a}\label{namespacemod__sort_a2d11ba8ef20fdd420fa75bf231e4d73a}} 
+\index{mod\_sort@{mod\_sort}!quick\_select\_upper\_r8@{quick\_select\_upper\_r8}}
+\index{quick\_select\_upper\_r8@{quick\_select\_upper\_r8}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{quick\_select\_upper\_r8()}{quick\_select\_upper\_r8()}}
+{\footnotesize\ttfamily recursive subroutine mod\+\_\+sort\+::quick\+\_\+select\+\_\+upper\+\_\+r8 (\begin{DoxyParamCaption}\item[{real(kind=8), intent(inout)}]{val\+\_\+upper,  }\item[{real(kind=8), dimension(num\+\_\+all), intent(inout)}]{vector,  }\item[{integer(kind=8), intent(in)}]{num\+\_\+all,  }\item[{integer(kind=8), intent(inout)}]{num\+\_\+top }\end{DoxyParamCaption})}
+
+
+
+Get the N-\/th bigget value 
+
+\begin{DoxyReturn}{戻り値}
+return the N-\/th bigget value 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em the} & N-\/th bigget value \\
+\hline
+{\em vector} & input vector \\
+\hline
+{\em num\+\_\+all} & size of vector \\
+\hline
+{\em num\+\_\+bottom} & N from the bigget \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{namespacemod__sort_ac74216675d6a94888bd812b5226cd502}\label{namespacemod__sort_ac74216675d6a94888bd812b5226cd502}} 
+\index{mod\_sort@{mod\_sort}!quick\_sort\_r4@{quick\_sort\_r4}}
+\index{quick\_sort\_r4@{quick\_sort\_r4}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{quick\_sort\_r4()}{quick\_sort\_r4()}}
+{\footnotesize\ttfamily recursive subroutine mod\+\_\+sort\+::quick\+\_\+sort\+\_\+r4 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(num), intent(inout)}]{vector,  }\item[{integer(kind=4), intent(in)}]{num }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to sort the input vector using quick sort (Insertion sort is also used for small vectors) 
+
+
+\begin{DoxyParams}{引数}
+{\em vector} & a vector to be sorted \\
+\hline
+{\em num} & number of samples in vector \\
+\hline
+\end{DoxyParams}
+被呼び出し関係図\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=346pt]{namespacemod__sort_ac74216675d6a94888bd812b5226cd502_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{namespacemod__sort_a3b950d47682d346edc9b410a865888bd}\label{namespacemod__sort_a3b950d47682d346edc9b410a865888bd}} 
+\index{mod\_sort@{mod\_sort}!size\_up\_r4@{size\_up\_r4}}
+\index{size\_up\_r4@{size\_up\_r4}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{size\_up\_r4()}{size\_up\_r4()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+sort\+::size\+\_\+up\+\_\+r4 (\begin{DoxyParamCaption}\item[{class(\mbox{\hyperlink{structmod__sort_1_1work}{work}})}]{this }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to size up work space for pseudo backet sort 
+
+\mbox{\Hypertarget{namespacemod__sort_a84c5f245867193dcc6c41ad936b7515b}\label{namespacemod__sort_a84c5f245867193dcc6c41ad936b7515b}} 
+\index{mod\_sort@{mod\_sort}!sort\_r4@{sort\_r4}}
+\index{sort\_r4@{sort\_r4}!mod\_sort@{mod\_sort}}
+\doxysubsubsection{\texorpdfstring{sort\_r4()}{sort\_r4()}}
+{\footnotesize\ttfamily subroutine mod\+\_\+sort\+::sort\+\_\+r4 (\begin{DoxyParamCaption}\item[{class(\mbox{\hyperlink{structmod__sort_1_1work}{work}})}]{this }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} subroutine to sort values and indices stored in \textquotesingle{}work\textquotesingle{} for pseudo bucket sort 
+

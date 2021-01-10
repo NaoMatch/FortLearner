@@ -1,0 +1,994 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=9"/>
+<meta name="generator" content="Doxygen 1.9.1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>FortLearner: mod_sortモジュール</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<link href="doxygen.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr style="height: 56px;">
+  <td id="projectalign" style="padding-left: 0.5em;">
+   <div id="projectname">FortLearner
+   </div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 構築: Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'検索','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','検索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+</div><!-- top -->
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">データ型</a> &#124;
+<a href="#func-members">関数/サブルーチン</a>  </div>
+  <div class="headertitle">
+<div class="title">mod_sortモジュール</div>  </div>
+</div><!--header-->
+<div class="contents">
+
+<p><a class="el" href="class_a.html">A</a> module for sort functions.  
+<a href="namespacemod__sort.html#details">[詳解]</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+データ型</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">type &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__sort_1_1work.html">work</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">type &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmod__sort_1_1empty__bucket.html">empty_bucket</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__sort_1_1pbucket__sort.html">pbucket_sort</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__sort_1_1pbucket__argsort.html">pbucket_argsort</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__sort_1_1insertion__sort.html">insertion_sort</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">An interface to call insertion_sort_r4, insertion_sort_r8, insertion_sort_i4, and insertion_sort_i8  <a href="interfacemod__sort_1_1insertion__sort.html#details">[詳解]</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__sort_1_1insertion__argsort.html">insertion_argsort</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">An interface to call insertion_argsort_r4_i4, insertion_argsort_r8_i8, insertion_argsort_i4_i4, and insertion_argsort_i8  <a href="interfacemod__sort_1_1insertion__argsort.html#details">[詳解]</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__sort_1_1quick__sort.html">quick_sort</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">An interface to call quick_sort_r4, quick_sort_r8, quick_sort_i4, and quick_sort_i8  <a href="interfacemod__sort_1_1quick__sort.html#details">[詳解]</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__sort_1_1quick__argsort.html">quick_argsort</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">An interface to call quick_argsort_r4_i4, quick_argsort_r8_i8, quick_argsort_i4_i4, and quick_argsort_i8_i8  <a href="interfacemod__sort_1_1quick__argsort.html#details">[詳解]</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__sort_1_1block__quick__sort.html">block_quick_sort</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">An interface to <a class="el" href="interfacemod__sort_1_1block__quick__sort.html" title="An interface to block_quick_sort">block_quick_sort</a>  <a href="interfacemod__sort_1_1block__quick__sort.html#details">[詳解]</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__sort_1_1block__quick__argsort.html">block_quick_argsort</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">An interface to <a class="el" href="interfacemod__sort_1_1block__quick__argsort.html" title="An interface to block_quick_argsort">block_quick_argsort</a>  <a href="interfacemod__sort_1_1block__quick__argsort.html#details">[詳解]</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__sort_1_1quick__select__lower.html">quick_select_lower</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">interface &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interfacemod__sort_1_1quick__select__upper.html">quick_select_upper</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+関数/サブルーチン</h2></td></tr>
+<tr class="memitem:a1608b54977a58bd03a177b6301f865c3"><td class="memItemLeft" align="right" valign="top">recursive subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#a1608b54977a58bd03a177b6301f865c3">pbucket_argsort_r8</a> (vector, indices, n_samples, rec_depth)</td></tr>
+<tr class="separator:a1608b54977a58bd03a177b6301f865c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92e0d2246708087381742b3813288762"><td class="memItemLeft" align="right" valign="top">recursive subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#a92e0d2246708087381742b3813288762">pbucket_argsort_new_r8</a> (vector, indices, n_samples, rec_depth)</td></tr>
+<tr class="separator:a92e0d2246708087381742b3813288762"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bb584daa3bd31ee1587d07cd3a984a1"><td class="memItemLeft" align="right" valign="top">recursive subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#a3bb584daa3bd31ee1587d07cd3a984a1">pbucket_sort_r4</a> (vector, n_samples, rec_depth)</td></tr>
+<tr class="separator:a3bb584daa3bd31ee1587d07cd3a984a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd9fc512f993a88acbdbae11f2abe0f6"><td class="memItemLeft" align="right" valign="top">recursive subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#abd9fc512f993a88acbdbae11f2abe0f6">pbucket_sort_r8</a> (vector, n_samples, rec_depth)</td></tr>
+<tr class="separator:abd9fc512f993a88acbdbae11f2abe0f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1ad389b993fdae2d952fd2e9ae88710"><td class="memItemLeft" align="right" valign="top">recursive subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#ac1ad389b993fdae2d952fd2e9ae88710">pbucket_sort_old_r8</a> (vector, n_samples, rec_depth)</td></tr>
+<tr class="separator:ac1ad389b993fdae2d952fd2e9ae88710"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b950d47682d346edc9b410a865888bd"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#a3b950d47682d346edc9b410a865888bd">size_up_r4</a> (this)</td></tr>
+<tr class="memdesc:a3b950d47682d346edc9b410a865888bd"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to size up work space for pseudo backet sort  <a href="namespacemod__sort.html#a3b950d47682d346edc9b410a865888bd">[詳解]</a><br /></td></tr>
+<tr class="separator:a3b950d47682d346edc9b410a865888bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84c5f245867193dcc6c41ad936b7515b"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#a84c5f245867193dcc6c41ad936b7515b">sort_r4</a> (this)</td></tr>
+<tr class="memdesc:a84c5f245867193dcc6c41ad936b7515b"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to sort values and indices stored in 'work' for pseudo bucket sort  <a href="namespacemod__sort.html#a84c5f245867193dcc6c41ad936b7515b">[詳解]</a><br /></td></tr>
+<tr class="separator:a84c5f245867193dcc6c41ad936b7515b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38e74398fb8e33975494984820bbf579"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#a38e74398fb8e33975494984820bbf579">argsort_r8</a> (this)</td></tr>
+<tr class="memdesc:a38e74398fb8e33975494984820bbf579"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to sort values and indices stored in 'work' for pseudo bucket sort  <a href="namespacemod__sort.html#a38e74398fb8e33975494984820bbf579">[詳解]</a><br /></td></tr>
+<tr class="separator:a38e74398fb8e33975494984820bbf579"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a285a051e67fa57597ac9e2f85f5f6af1"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#a285a051e67fa57597ac9e2f85f5f6af1">init_r4</a> (this, num, n_work_space)</td></tr>
+<tr class="memdesc:a285a051e67fa57597ac9e2f85f5f6af1"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to initialize work space for pseudo backet sort  <a href="namespacemod__sort.html#a285a051e67fa57597ac9e2f85f5f6af1">[詳解]</a><br /></td></tr>
+<tr class="separator:a285a051e67fa57597ac9e2f85f5f6af1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acc8dd4e292e5e3def703735c5474f7c8"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#acc8dd4e292e5e3def703735c5474f7c8">init_arg_r8</a> (this, num, n_work_space)</td></tr>
+<tr class="memdesc:acc8dd4e292e5e3def703735c5474f7c8"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to initialize work space for pseudo backet argsort  <a href="namespacemod__sort.html#acc8dd4e292e5e3def703735c5474f7c8">[詳解]</a><br /></td></tr>
+<tr class="separator:acc8dd4e292e5e3def703735c5474f7c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac04ba0e95a4a35c2f3324538b85ea832"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#ac04ba0e95a4a35c2f3324538b85ea832">append_r4</a> (this, tmp_val)</td></tr>
+<tr class="memdesc:ac04ba0e95a4a35c2f3324538b85ea832"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to append value to work space for pseudo backet sort  <a href="namespacemod__sort.html#ac04ba0e95a4a35c2f3324538b85ea832">[詳解]</a><br /></td></tr>
+<tr class="separator:ac04ba0e95a4a35c2f3324538b85ea832"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac121b59dc8dc6e0eeba913fc97f60b81"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#ac121b59dc8dc6e0eeba913fc97f60b81">append_arg_r8</a> (this, tmp_val, tmp_idx)</td></tr>
+<tr class="memdesc:ac121b59dc8dc6e0eeba913fc97f60b81"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to append value and its index to work space for pseudo backet argsort  <a href="namespacemod__sort.html#ac121b59dc8dc6e0eeba913fc97f60b81">[詳解]</a><br /></td></tr>
+<tr class="separator:ac121b59dc8dc6e0eeba913fc97f60b81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6524e27dad0658f0bfc56ca0657f89d"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#af6524e27dad0658f0bfc56ca0657f89d">insertion_sort_r4</a> (vector, num)</td></tr>
+<tr class="memdesc:af6524e27dad0658f0bfc56ca0657f89d"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to sort the input vectors using insert sort  <a href="namespacemod__sort.html#af6524e27dad0658f0bfc56ca0657f89d">[詳解]</a><br /></td></tr>
+<tr class="separator:af6524e27dad0658f0bfc56ca0657f89d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd1ab3d2648a0fe24705aa2383f992ec"><td class="memItemLeft" align="right" valign="top">subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#abd1ab3d2648a0fe24705aa2383f992ec">insertion_argsort_r4_i4</a> (vector1, vector2, num)</td></tr>
+<tr class="memdesc:abd1ab3d2648a0fe24705aa2383f992ec"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to sort 'vector2' according to 'vector1' using insert sort  <a href="namespacemod__sort.html#abd1ab3d2648a0fe24705aa2383f992ec">[詳解]</a><br /></td></tr>
+<tr class="separator:abd1ab3d2648a0fe24705aa2383f992ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac74216675d6a94888bd812b5226cd502"><td class="memItemLeft" align="right" valign="top">recursive subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#ac74216675d6a94888bd812b5226cd502">quick_sort_r4</a> (vector, num)</td></tr>
+<tr class="memdesc:ac74216675d6a94888bd812b5226cd502"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to sort the input vector using quick sort (Insertion sort is also used for small vectors)  <a href="namespacemod__sort.html#ac74216675d6a94888bd812b5226cd502">[詳解]</a><br /></td></tr>
+<tr class="separator:ac74216675d6a94888bd812b5226cd502"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98314bb849957f8523a4fcf44d74fe05"><td class="memItemLeft" align="right" valign="top">recursive subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#a98314bb849957f8523a4fcf44d74fe05">quick_argsort_r4_i4</a> (vector1, vector2, num)</td></tr>
+<tr class="memdesc:a98314bb849957f8523a4fcf44d74fe05"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to sort 'vector2' according to 'vector1' using quick sort (Insertion sort is also used for small vectors)  <a href="namespacemod__sort.html#a98314bb849957f8523a4fcf44d74fe05">[詳解]</a><br /></td></tr>
+<tr class="separator:a98314bb849957f8523a4fcf44d74fe05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7943ad6e3de430a68bdcef0f8af9459a"><td class="memItemLeft" align="right" valign="top">recursive subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#a7943ad6e3de430a68bdcef0f8af9459a">block_quick_sort_r4</a> (vector, num)</td></tr>
+<tr class="memdesc:a7943ad6e3de430a68bdcef0f8af9459a"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to sort the input vector using block quick sort (Insertion sort is also used for small vectors)  <a href="namespacemod__sort.html#a7943ad6e3de430a68bdcef0f8af9459a">[詳解]</a><br /></td></tr>
+<tr class="separator:a7943ad6e3de430a68bdcef0f8af9459a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc0f51be7761601d0d6b8c47c377ebd5"><td class="memItemLeft" align="right" valign="top">recursive subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#afc0f51be7761601d0d6b8c47c377ebd5">block_quick_argsort_r4_i4</a> (vector1, vector2, num)</td></tr>
+<tr class="memdesc:afc0f51be7761601d0d6b8c47c377ebd5"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_a.html">A</a> subroutine to sort 'vector2' according to 'vector1' using block quick sort (Insertion sort is also used for small vectors)  <a href="namespacemod__sort.html#afc0f51be7761601d0d6b8c47c377ebd5">[詳解]</a><br /></td></tr>
+<tr class="separator:afc0f51be7761601d0d6b8c47c377ebd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ae713e0122cee0b9ba6c1e069c3993d"><td class="memItemLeft" align="right" valign="top">recursive subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#a0ae713e0122cee0b9ba6c1e069c3993d">quick_select_lower_r8</a> (val_lower, vector, num_all, num_bottom)</td></tr>
+<tr class="memdesc:a0ae713e0122cee0b9ba6c1e069c3993d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the N-th smallest value  <a href="namespacemod__sort.html#a0ae713e0122cee0b9ba6c1e069c3993d">[詳解]</a><br /></td></tr>
+<tr class="separator:a0ae713e0122cee0b9ba6c1e069c3993d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d11ba8ef20fdd420fa75bf231e4d73a"><td class="memItemLeft" align="right" valign="top">recursive subroutine&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacemod__sort.html#a2d11ba8ef20fdd420fa75bf231e4d73a">quick_select_upper_r8</a> (val_upper, vector, num_all, num_top)</td></tr>
+<tr class="memdesc:a2d11ba8ef20fdd420fa75bf231e4d73a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the N-th bigget value  <a href="namespacemod__sort.html#a2d11ba8ef20fdd420fa75bf231e4d73a">[詳解]</a><br /></td></tr>
+<tr class="separator:a2d11ba8ef20fdd420fa75bf231e4d73a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">詳解</h2>
+<div class="textblock"><p><a class="el" href="class_a.html">A</a> module for sort functions. </p>
+</div><h2 class="groupheader">関数/サブルーチン詳解</h2>
+<a id="ac121b59dc8dc6e0eeba913fc97f60b81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac121b59dc8dc6e0eeba913fc97f60b81">&#9670;&nbsp;</a></span>append_arg_r8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine mod_sort::append_arg_r8 </td>
+          <td>(</td>
+          <td class="paramtype">class(<a class="el" href="structmod__sort_1_1work.html">work</a>)&#160;</td>
+          <td class="paramname"><em>this</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(kind=8)&#160;</td>
+          <td class="paramname"><em>tmp_val</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8)&#160;</td>
+          <td class="paramname"><em>tmp_idx</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="class_a.html">A</a> subroutine to append value and its index to work space for pseudo backet argsort </p>
+<dl class="params"><dt>引数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tmp_val</td><td>a value to be appended to work space </td></tr>
+    <tr><td class="paramname">tmp_idx</td><td>an index to be appended to work space </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac04ba0e95a4a35c2f3324538b85ea832"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac04ba0e95a4a35c2f3324538b85ea832">&#9670;&nbsp;</a></span>append_r4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine mod_sort::append_r4 </td>
+          <td>(</td>
+          <td class="paramtype">class(<a class="el" href="structmod__sort_1_1work.html">work</a>)&#160;</td>
+          <td class="paramname"><em>this</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(kind=4)&#160;</td>
+          <td class="paramname"><em>tmp_val</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="class_a.html">A</a> subroutine to append value to work space for pseudo backet sort </p>
+<dl class="params"><dt>引数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tmp_val</td><td>a value to be appended to work space </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a38e74398fb8e33975494984820bbf579"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a38e74398fb8e33975494984820bbf579">&#9670;&nbsp;</a></span>argsort_r8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine mod_sort::argsort_r8 </td>
+          <td>(</td>
+          <td class="paramtype">class(<a class="el" href="structmod__sort_1_1work.html">work</a>)&#160;</td>
+          <td class="paramname"><em>this</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="class_a.html">A</a> subroutine to sort values and indices stored in 'work' for pseudo bucket sort </p>
+
+</div>
+</div>
+<a id="afc0f51be7761601d0d6b8c47c377ebd5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc0f51be7761601d0d6b8c47c377ebd5">&#9670;&nbsp;</a></span>block_quick_argsort_r4_i4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">recursive subroutine mod_sort::block_quick_argsort_r4_i4 </td>
+          <td>(</td>
+          <td class="paramtype">real(kind=4), dimension(num), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=4), dimension(num), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=4), intent(in)&#160;</td>
+          <td class="paramname"><em>num</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="class_a.html">A</a> subroutine to sort 'vector2' according to 'vector1' using block quick sort (Insertion sort is also used for small vectors) </p>
+<dl class="params"><dt>引数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vector</td><td>a vector to be sorted </td></tr>
+    <tr><td class="paramname">indices</td><td>a indices to be sorted accoring to 'vector' </td></tr>
+    <tr><td class="paramname">num</td><td>number of samples in vector </td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="dynheader">
+被呼び出し関係図:</div>
+<div class="dyncontent">
+<div class="center"><img src="namespacemod__sort_afc0f51be7761601d0d6b8c47c377ebd5_icgraph.png" border="0" usemap="#anamespacemod__sort_afc0f51be7761601d0d6b8c47c377ebd5_icgraph" alt=""/></div>
+<map name="anamespacemod__sort_afc0f51be7761601d0d6b8c47c377ebd5_icgraph" id="anamespacemod__sort_afc0f51be7761601d0d6b8c47c377ebd5_icgraph">
+<area shape="rect" title="A subroutine to sort &#39;vector2&#39; according to &#39;vector1&#39; using block quick sort (Insertion sort is also ..." alt="" coords="207,13,360,54"/>
+<area shape="rect" href="interfacemod__sort_1_1block__quick__argsort.html#a5ce04827d82d6e61be1e8ed94ebe3ccb" title="A subroutine to sort &#39;vector2&#39; according to &#39;vector1&#39; using block quick sort (Insertion sort is also ..." alt="" coords="5,5,159,61"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a7943ad6e3de430a68bdcef0f8af9459a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7943ad6e3de430a68bdcef0f8af9459a">&#9670;&nbsp;</a></span>block_quick_sort_r4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">recursive subroutine mod_sort::block_quick_sort_r4 </td>
+          <td>(</td>
+          <td class="paramtype">real(kind=4), dimension(num), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=4), intent(in)&#160;</td>
+          <td class="paramname"><em>num</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="class_a.html">A</a> subroutine to sort the input vector using block quick sort (Insertion sort is also used for small vectors) </p>
+<dl class="params"><dt>引数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vector</td><td>a vector to be sorted </td></tr>
+    <tr><td class="paramname">indices</td><td>a indices to be sorted accoring to 'vector' </td></tr>
+    <tr><td class="paramname">num</td><td>number of samples in vector </td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="dynheader">
+被呼び出し関係図:</div>
+<div class="dyncontent">
+<div class="center"><img src="namespacemod__sort_a7943ad6e3de430a68bdcef0f8af9459a_icgraph.png" border="0" usemap="#anamespacemod__sort_a7943ad6e3de430a68bdcef0f8af9459a_icgraph" alt=""/></div>
+<map name="anamespacemod__sort_a7943ad6e3de430a68bdcef0f8af9459a_icgraph" id="anamespacemod__sort_a7943ad6e3de430a68bdcef0f8af9459a_icgraph">
+<area shape="rect" title="A subroutine to sort the input vector using block quick sort (Insertion sort is also used for small v..." alt="" coords="228,5,381,47"/>
+<area shape="rect" href="interfacemod__sort_1_1block__quick__sort.html#abf740ed2cfde3dca5cc7a011adffa1eb" title="A subroutine to sort the input vector using block quick sort (Insertion sort is also used for small v..." alt="" coords="5,5,180,47"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="acc8dd4e292e5e3def703735c5474f7c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc8dd4e292e5e3def703735c5474f7c8">&#9670;&nbsp;</a></span>init_arg_r8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine mod_sort::init_arg_r8 </td>
+          <td>(</td>
+          <td class="paramtype">class(<a class="el" href="structmod__sort_1_1empty__bucket.html">empty_bucket</a>)&#160;</td>
+          <td class="paramname"><em>this</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8)&#160;</td>
+          <td class="paramname"><em>num</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8)&#160;</td>
+          <td class="paramname"><em>n_work_space</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="class_a.html">A</a> subroutine to initialize work space for pseudo backet argsort </p>
+<dl class="params"><dt>引数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">num</td><td>number of samples </td></tr>
+    <tr><td class="paramname">n_work_space</td><td>numnber of work spaces </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a285a051e67fa57597ac9e2f85f5f6af1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a285a051e67fa57597ac9e2f85f5f6af1">&#9670;&nbsp;</a></span>init_r4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine mod_sort::init_r4 </td>
+          <td>(</td>
+          <td class="paramtype">class(<a class="el" href="structmod__sort_1_1empty__bucket.html">empty_bucket</a>)&#160;</td>
+          <td class="paramname"><em>this</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=4)&#160;</td>
+          <td class="paramname"><em>num</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=4)&#160;</td>
+          <td class="paramname"><em>n_work_space</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="class_a.html">A</a> subroutine to initialize work space for pseudo backet sort </p>
+<dl class="params"><dt>引数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">num</td><td>number of samples </td></tr>
+    <tr><td class="paramname">n_work_space</td><td>numnber of work spaces </td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="dynheader">
+被呼び出し関係図:</div>
+<div class="dyncontent">
+<div class="center"><img src="namespacemod__sort_a285a051e67fa57597ac9e2f85f5f6af1_icgraph.png" border="0" usemap="#anamespacemod__sort_a285a051e67fa57597ac9e2f85f5f6af1_icgraph" alt=""/></div>
+<map name="anamespacemod__sort_a285a051e67fa57597ac9e2f85f5f6af1_icgraph" id="anamespacemod__sort_a285a051e67fa57597ac9e2f85f5f6af1_icgraph">
+<area shape="rect" title="A subroutine to initialize work space for pseudo backet sort" alt="" coords="220,13,339,39"/>
+<area shape="rect" href="structmod__sort_1_1empty__bucket.html#a302ec79ae44bb63d2447b5eb63680ecc" title=" " alt="" coords="5,5,172,47"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="abd1ab3d2648a0fe24705aa2383f992ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd1ab3d2648a0fe24705aa2383f992ec">&#9670;&nbsp;</a></span>insertion_argsort_r4_i4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine mod_sort::insertion_argsort_r4_i4 </td>
+          <td>(</td>
+          <td class="paramtype">real(kind=4), dimension(num), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=4), dimension(num), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=4), intent(in)&#160;</td>
+          <td class="paramname"><em>num</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="class_a.html">A</a> subroutine to sort 'vector2' according to 'vector1' using insert sort </p>
+<dl class="params"><dt>引数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vector</td><td>a vector to be sorted </td></tr>
+    <tr><td class="paramname">indices</td><td>a indices to be sorted according to vector </td></tr>
+    <tr><td class="paramname">num</td><td>number of samples in vector </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="af6524e27dad0658f0bfc56ca0657f89d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6524e27dad0658f0bfc56ca0657f89d">&#9670;&nbsp;</a></span>insertion_sort_r4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine mod_sort::insertion_sort_r4 </td>
+          <td>(</td>
+          <td class="paramtype">real(kind=4), dimension(num), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=4), intent(in)&#160;</td>
+          <td class="paramname"><em>num</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="class_a.html">A</a> subroutine to sort the input vectors using insert sort </p>
+<dl class="params"><dt>引数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vector</td><td>a vector to be sorted </td></tr>
+    <tr><td class="paramname">num</td><td>number of samples in vector </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a92e0d2246708087381742b3813288762"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92e0d2246708087381742b3813288762">&#9670;&nbsp;</a></span>pbucket_argsort_new_r8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">recursive subroutine mod_sort::pbucket_argsort_new_r8 </td>
+          <td>(</td>
+          <td class="paramtype">real(kind=8), dimension(n_samples), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8), dimension(n_samples), intent(inout)&#160;</td>
+          <td class="paramname"><em>indices</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8), intent(in)&#160;</td>
+          <td class="paramname"><em>n_samples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8), intent(in), optional&#160;</td>
+          <td class="paramname"><em>rec_depth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1608b54977a58bd03a177b6301f865c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1608b54977a58bd03a177b6301f865c3">&#9670;&nbsp;</a></span>pbucket_argsort_r8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">recursive subroutine mod_sort::pbucket_argsort_r8 </td>
+          <td>(</td>
+          <td class="paramtype">real(kind=8), dimension(n_samples), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8), dimension(n_samples), intent(inout)&#160;</td>
+          <td class="paramname"><em>indices</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8), intent(in)&#160;</td>
+          <td class="paramname"><em>n_samples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8), intent(in), optional&#160;</td>
+          <td class="paramname"><em>rec_depth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div class="dynheader">
+被呼び出し関係図:</div>
+<div class="dyncontent">
+<div class="center"><img src="namespacemod__sort_a1608b54977a58bd03a177b6301f865c3_icgraph.png" border="0" usemap="#anamespacemod__sort_a1608b54977a58bd03a177b6301f865c3_icgraph" alt=""/></div>
+<map name="anamespacemod__sort_a1608b54977a58bd03a177b6301f865c3_icgraph" id="anamespacemod__sort_a1608b54977a58bd03a177b6301f865c3_icgraph">
+<area shape="rect" title=" " alt="" coords="231,13,425,39"/>
+<area shape="rect" href="interfacemod__sort_1_1pbucket__argsort.html#afdc4209ea2506fe7ecfcbcda9657d618" title=" " alt="" coords="5,5,183,47"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="ac1ad389b993fdae2d952fd2e9ae88710"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1ad389b993fdae2d952fd2e9ae88710">&#9670;&nbsp;</a></span>pbucket_sort_old_r8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">recursive subroutine mod_sort::pbucket_sort_old_r8 </td>
+          <td>(</td>
+          <td class="paramtype">real(kind=8), dimension(n_samples), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8), intent(in)&#160;</td>
+          <td class="paramname"><em>n_samples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8), intent(in), optional&#160;</td>
+          <td class="paramname"><em>rec_depth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3bb584daa3bd31ee1587d07cd3a984a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3bb584daa3bd31ee1587d07cd3a984a1">&#9670;&nbsp;</a></span>pbucket_sort_r4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">recursive subroutine mod_sort::pbucket_sort_r4 </td>
+          <td>(</td>
+          <td class="paramtype">real(kind=4), dimension(n_samples), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=4), intent(in)&#160;</td>
+          <td class="paramname"><em>n_samples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=4), intent(in), optional&#160;</td>
+          <td class="paramname"><em>rec_depth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="abd9fc512f993a88acbdbae11f2abe0f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abd9fc512f993a88acbdbae11f2abe0f6">&#9670;&nbsp;</a></span>pbucket_sort_r8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">recursive subroutine mod_sort::pbucket_sort_r8 </td>
+          <td>(</td>
+          <td class="paramtype">real(kind=8), dimension(n_samples), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8), intent(in)&#160;</td>
+          <td class="paramname"><em>n_samples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8), intent(in), optional&#160;</td>
+          <td class="paramname"><em>rec_depth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a98314bb849957f8523a4fcf44d74fe05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98314bb849957f8523a4fcf44d74fe05">&#9670;&nbsp;</a></span>quick_argsort_r4_i4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">recursive subroutine mod_sort::quick_argsort_r4_i4 </td>
+          <td>(</td>
+          <td class="paramtype">real(kind=4), dimension(num), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=4), dimension(num), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=4), intent(in)&#160;</td>
+          <td class="paramname"><em>num</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="class_a.html">A</a> subroutine to sort 'vector2' according to 'vector1' using quick sort (Insertion sort is also used for small vectors) </p>
+<dl class="params"><dt>引数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vector</td><td>a vector to be sorted </td></tr>
+    <tr><td class="paramname">indices</td><td>a indices to be sorted accoring to 'vector' </td></tr>
+    <tr><td class="paramname">num</td><td>number of samples in vector </td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="dynheader">
+被呼び出し関係図:</div>
+<div class="dyncontent">
+<div class="center"><img src="namespacemod__sort_a98314bb849957f8523a4fcf44d74fe05_icgraph.png" border="0" usemap="#anamespacemod__sort_a98314bb849957f8523a4fcf44d74fe05_icgraph" alt=""/></div>
+<map name="anamespacemod__sort_a98314bb849957f8523a4fcf44d74fe05_icgraph" id="anamespacemod__sort_a98314bb849957f8523a4fcf44d74fe05_icgraph">
+<area shape="rect" title="A subroutine to sort &#39;vector2&#39; according to &#39;vector1&#39; using quick sort (Insertion sort is also used f..." alt="" coords="216,5,379,47"/>
+<area shape="rect" href="interfacemod__sort_1_1quick__argsort.html#a37d923fdac8e657bf2efa7668a4ce977" title="A subroutine to sort &#39;vector2&#39; according to &#39;vector1&#39; using quick sort (Insertion sort is also used f..." alt="" coords="5,5,168,47"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a0ae713e0122cee0b9ba6c1e069c3993d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ae713e0122cee0b9ba6c1e069c3993d">&#9670;&nbsp;</a></span>quick_select_lower_r8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">recursive subroutine mod_sort::quick_select_lower_r8 </td>
+          <td>(</td>
+          <td class="paramtype">real(kind=8), intent(inout)&#160;</td>
+          <td class="paramname"><em>val_lower</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(kind=8), dimension(num_all), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8), intent(in)&#160;</td>
+          <td class="paramname"><em>num_all</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8), intent(inout)&#160;</td>
+          <td class="paramname"><em>num_bottom</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the N-th smallest value </p>
+<dl class="section return"><dt>戻り値</dt><dd>return the N-th smallest value </dd></dl>
+<dl class="params"><dt>引数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">the</td><td>N-th smallest value </td></tr>
+    <tr><td class="paramname">vector</td><td>input vector </td></tr>
+    <tr><td class="paramname">num_all</td><td>size of vector </td></tr>
+    <tr><td class="paramname">num_bottom</td><td>N from the smallest </td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="dynheader">
+被呼び出し関係図:</div>
+<div class="dyncontent">
+<div class="center"><img src="namespacemod__sort_a0ae713e0122cee0b9ba6c1e069c3993d_icgraph.png" border="0" usemap="#anamespacemod__sort_a0ae713e0122cee0b9ba6c1e069c3993d_icgraph" alt=""/></div>
+<map name="anamespacemod__sort_a0ae713e0122cee0b9ba6c1e069c3993d_icgraph" id="anamespacemod__sort_a0ae713e0122cee0b9ba6c1e069c3993d_icgraph">
+<area shape="rect" title="Get the N&#45;th smallest value" alt="" coords="252,39,409,80"/>
+<area shape="rect" href="interfacemod__sort_1_1quick__select__lower.html#a785f8fde7207a09fb5b0d0aa99bc4307" title="Get the N&#45;th smallest value" alt="" coords="7,5,202,47"/>
+<area shape="rect" href="interfacemod__sort_1_1quick__select__upper.html#aa974500b3189aaa1ab8a5bcda409b9c6" title="Get the N&#45;th bigget value" alt="" coords="5,71,204,112"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a2d11ba8ef20fdd420fa75bf231e4d73a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d11ba8ef20fdd420fa75bf231e4d73a">&#9670;&nbsp;</a></span>quick_select_upper_r8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">recursive subroutine mod_sort::quick_select_upper_r8 </td>
+          <td>(</td>
+          <td class="paramtype">real(kind=8), intent(inout)&#160;</td>
+          <td class="paramname"><em>val_upper</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">real(kind=8), dimension(num_all), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8), intent(in)&#160;</td>
+          <td class="paramname"><em>num_all</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=8), intent(inout)&#160;</td>
+          <td class="paramname"><em>num_top</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the N-th bigget value </p>
+<dl class="section return"><dt>戻り値</dt><dd>return the N-th bigget value </dd></dl>
+<dl class="params"><dt>引数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">the</td><td>N-th bigget value </td></tr>
+    <tr><td class="paramname">vector</td><td>input vector </td></tr>
+    <tr><td class="paramname">num_all</td><td>size of vector </td></tr>
+    <tr><td class="paramname">num_bottom</td><td>N from the bigget </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ac74216675d6a94888bd812b5226cd502"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac74216675d6a94888bd812b5226cd502">&#9670;&nbsp;</a></span>quick_sort_r4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">recursive subroutine mod_sort::quick_sort_r4 </td>
+          <td>(</td>
+          <td class="paramtype">real(kind=4), dimension(num), intent(inout)&#160;</td>
+          <td class="paramname"><em>vector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">integer(kind=4), intent(in)&#160;</td>
+          <td class="paramname"><em>num</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="class_a.html">A</a> subroutine to sort the input vector using quick sort (Insertion sort is also used for small vectors) </p>
+<dl class="params"><dt>引数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">vector</td><td>a vector to be sorted </td></tr>
+    <tr><td class="paramname">num</td><td>number of samples in vector </td></tr>
+  </table>
+  </dd>
+</dl>
+<div class="dynheader">
+被呼び出し関係図:</div>
+<div class="dyncontent">
+<div class="center"><img src="namespacemod__sort_ac74216675d6a94888bd812b5226cd502_icgraph.png" border="0" usemap="#anamespacemod__sort_ac74216675d6a94888bd812b5226cd502_icgraph" alt=""/></div>
+<map name="anamespacemod__sort_ac74216675d6a94888bd812b5226cd502_icgraph" id="anamespacemod__sort_ac74216675d6a94888bd812b5226cd502_icgraph">
+<area shape="rect" title="A subroutine to sort the input vector using quick sort (Insertion sort is also used for small vectors..." alt="" coords="197,13,360,39"/>
+<area shape="rect" href="interfacemod__sort_1_1quick__sort.html#a2d29af0067ea90be6e6d3066451b21dc" title="A subroutine to sort the input vector using quick sort (Insertion sort is also used for small vectors..." alt="" coords="5,5,149,47"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a3b950d47682d346edc9b410a865888bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b950d47682d346edc9b410a865888bd">&#9670;&nbsp;</a></span>size_up_r4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine mod_sort::size_up_r4 </td>
+          <td>(</td>
+          <td class="paramtype">class(<a class="el" href="structmod__sort_1_1work.html">work</a>)&#160;</td>
+          <td class="paramname"><em>this</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="class_a.html">A</a> subroutine to size up work space for pseudo backet sort </p>
+
+</div>
+</div>
+<a id="a84c5f245867193dcc6c41ad936b7515b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84c5f245867193dcc6c41ad936b7515b">&#9670;&nbsp;</a></span>sort_r4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">subroutine mod_sort::sort_r4 </td>
+          <td>(</td>
+          <td class="paramtype">class(<a class="el" href="structmod__sort_1_1work.html">work</a>)&#160;</td>
+          <td class="paramname"><em>this</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p><a class="el" href="class_a.html">A</a> subroutine to sort values and indices stored in 'work' for pseudo bucket sort </p>
+
+</div>
+</div>
+</div><!-- contents -->
+<!-- start footer part -->
+<hr class="footer"/><address class="footer"><small>
+構築:&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
+</small></address>
+</body>
+</html>

@@ -1,0 +1,75 @@
+\hypertarget{interfacemod__common_1_1count__unique}{}\doxysection{インターフェース mod\+\_\+common\+::count\+\_\+unique}
+\label{interfacemod__common_1_1count__unique}\index{mod\_common::count\_unique@{mod\_common::count\_unique}}
+
+
+Interface to call count\+\_\+unique\+\_\+real32, count\+\_\+unique\+\_\+real64, count\+\_\+unique\+\_\+int32, count\+\_\+unique\+\_\+int64  
+
+
+\doxysubsection*{公開メンバ関数}
+\begin{DoxyCompactItemize}
+\item 
+integer(kind=4) function \mbox{\hyperlink{interfacemod__common_1_1count__unique_a2275406fa0836f346d6404a30e791cac}{count\+\_\+unique\+\_\+real32}} (vector, num)
+\begin{DoxyCompactList}\small\item\em \mbox{\hyperlink{class_a}{A}} function to count the unique values of the sorted 1-\/dim array \end{DoxyCompactList}\item 
+\mbox{\hyperlink{interfacemod__common_1_1count__unique_afb9887418819755977cb64274e0100c8}{count\+\_\+unique\+\_\+real64}}
+\item 
+\mbox{\hyperlink{interfacemod__common_1_1count__unique_a775d2d9605fa0dd288c7ed0f2ced2e73}{count\+\_\+unique\+\_\+int32}}
+\item 
+\mbox{\hyperlink{interfacemod__common_1_1count__unique_ae4a196fbaae1218e43fc342c8180ebed}{count\+\_\+unique\+\_\+int64}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{詳解}
+Interface to call count\+\_\+unique\+\_\+real32, count\+\_\+unique\+\_\+real64, count\+\_\+unique\+\_\+int32, count\+\_\+unique\+\_\+int64 
+
+\doxysubsection{メンバ関数/サブルーチン詳解}
+\mbox{\Hypertarget{interfacemod__common_1_1count__unique_a775d2d9605fa0dd288c7ed0f2ced2e73}\label{interfacemod__common_1_1count__unique_a775d2d9605fa0dd288c7ed0f2ced2e73}} 
+\index{mod\_common::count\_unique@{mod\_common::count\_unique}!count\_unique\_int32@{count\_unique\_int32}}
+\index{count\_unique\_int32@{count\_unique\_int32}!mod\_common::count\_unique@{mod\_common::count\_unique}}
+\doxysubsubsection{\texorpdfstring{count\_unique\_int32()}{count\_unique\_int32()}}
+{\footnotesize\ttfamily mod\+\_\+common\+::count\+\_\+unique\+::count\+\_\+unique\+\_\+int32}
+
+\mbox{\Hypertarget{interfacemod__common_1_1count__unique_ae4a196fbaae1218e43fc342c8180ebed}\label{interfacemod__common_1_1count__unique_ae4a196fbaae1218e43fc342c8180ebed}} 
+\index{mod\_common::count\_unique@{mod\_common::count\_unique}!count\_unique\_int64@{count\_unique\_int64}}
+\index{count\_unique\_int64@{count\_unique\_int64}!mod\_common::count\_unique@{mod\_common::count\_unique}}
+\doxysubsubsection{\texorpdfstring{count\_unique\_int64()}{count\_unique\_int64()}}
+{\footnotesize\ttfamily mod\+\_\+common\+::count\+\_\+unique\+::count\+\_\+unique\+\_\+int64}
+
+\mbox{\Hypertarget{interfacemod__common_1_1count__unique_a2275406fa0836f346d6404a30e791cac}\label{interfacemod__common_1_1count__unique_a2275406fa0836f346d6404a30e791cac}} 
+\index{mod\_common::count\_unique@{mod\_common::count\_unique}!count\_unique\_real32@{count\_unique\_real32}}
+\index{count\_unique\_real32@{count\_unique\_real32}!mod\_common::count\_unique@{mod\_common::count\_unique}}
+\doxysubsubsection{\texorpdfstring{count\_unique\_real32()}{count\_unique\_real32()}}
+{\footnotesize\ttfamily integer(kind=4) function mod\+\_\+common\+::count\+\_\+unique\+::count\+\_\+unique\+\_\+real32 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(num), intent(in)}]{vector,  }\item[{integer(kind=4), intent(in)}]{num }\end{DoxyParamCaption})}
+
+
+
+\mbox{\hyperlink{class_a}{A}} function to count the unique values of the sorted 1-\/dim array 
+
+\begin{DoxyReturn}{戻り値}
+returns number of unique values for 1-\/dim array 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{引数}
+{\em vector} & a sorted input 1-\/dim array \\
+\hline
+{\em num} & the size of input vector \\
+\hline
+\end{DoxyParams}
+呼び出し関係図\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{interfacemod__common_1_1count__unique_a2275406fa0836f346d6404a30e791cac_cgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{interfacemod__common_1_1count__unique_afb9887418819755977cb64274e0100c8}\label{interfacemod__common_1_1count__unique_afb9887418819755977cb64274e0100c8}} 
+\index{mod\_common::count\_unique@{mod\_common::count\_unique}!count\_unique\_real64@{count\_unique\_real64}}
+\index{count\_unique\_real64@{count\_unique\_real64}!mod\_common::count\_unique@{mod\_common::count\_unique}}
+\doxysubsubsection{\texorpdfstring{count\_unique\_real64()}{count\_unique\_real64()}}
+{\footnotesize\ttfamily mod\+\_\+common\+::count\+\_\+unique\+::count\+\_\+unique\+\_\+real64}
+
+
+
+次のファイルからインターフェースの詳解が抽出されました\+:\begin{DoxyCompactItemize}
+\item 
+common/\mbox{\hyperlink{mod__common_8f90}{mod\+\_\+common.\+f90}}\end{DoxyCompactItemize}

@@ -1,0 +1,32 @@
+\hypertarget{inc__covariance__matrix__of__matrix_8f90}{}\doxysection{math/include/stats\+\_\+covariance\+\_\+matrix\+\_\+of\+\_\+matrix/inc\+\_\+covariance\+\_\+matrix\+\_\+of\+\_\+matrix.f90 ファイル}
+\label{inc__covariance__matrix__of__matrix_8f90}\index{math/include/stats\_covariance\_matrix\_of\_matrix/inc\_covariance\_matrix\_of\_matrix.f90@{math/include/stats\_covariance\_matrix\_of\_matrix/inc\_covariance\_matrix\_of\_matrix.f90}}
+\doxysubsection*{関数/サブルーチン}
+\begin{DoxyCompactItemize}
+\item 
+subroutine \mbox{\hyperlink{inc__covariance__matrix__of__matrix_8f90_a616a932114271d53cd0fa4134fd23d6b}{covariance\+\_\+matrix\+\_\+of\+\_\+matrix\+\_\+real64}} (cov\+\_\+mat, matrix, n\+\_\+rows, n\+\_\+cols, means\+\_\+of\+\_\+matrix)
+\item 
+subroutine \mbox{\hyperlink{inc__covariance__matrix__of__matrix_8f90_afdcee37cba57d0e76c2c8a288fa5db92}{covariance\+\_\+matrix\+\_\+of\+\_\+matrix\+\_\+int32}} (cov\+\_\+mat, matrix, n\+\_\+rows, n\+\_\+cols, means\+\_\+of\+\_\+matrix)
+\item 
+subroutine \mbox{\hyperlink{inc__covariance__matrix__of__matrix_8f90_a3066070d59637dec802198d62b9341bb}{covariance\+\_\+matrix\+\_\+of\+\_\+matrix\+\_\+int64}} (cov\+\_\+mat, matrix, n\+\_\+rows, n\+\_\+cols, means\+\_\+of\+\_\+matrix)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{関数/サブルーチン詳解}
+\mbox{\Hypertarget{inc__covariance__matrix__of__matrix_8f90_afdcee37cba57d0e76c2c8a288fa5db92}\label{inc__covariance__matrix__of__matrix_8f90_afdcee37cba57d0e76c2c8a288fa5db92}} 
+\index{inc\_covariance\_matrix\_of\_matrix.f90@{inc\_covariance\_matrix\_of\_matrix.f90}!covariance\_matrix\_of\_matrix\_int32@{covariance\_matrix\_of\_matrix\_int32}}
+\index{covariance\_matrix\_of\_matrix\_int32@{covariance\_matrix\_of\_matrix\_int32}!inc\_covariance\_matrix\_of\_matrix.f90@{inc\_covariance\_matrix\_of\_matrix.f90}}
+\doxysubsubsection{\texorpdfstring{covariance\_matrix\_of\_matrix\_int32()}{covariance\_matrix\_of\_matrix\_int32()}}
+{\footnotesize\ttfamily subroutine covariance\+\_\+matrix\+\_\+of\+\_\+matrix\+\_\+int32 (\begin{DoxyParamCaption}\item[{real(kind=4), dimension(n\+\_\+cols,n\+\_\+cols), intent(inout)}]{cov\+\_\+mat,  }\item[{integer(kind=4), dimension(n\+\_\+rows, n\+\_\+cols), intent(in)}]{matrix,  }\item[{integer(kind=4), intent(in)}]{n\+\_\+rows,  }\item[{integer(kind=4), intent(in)}]{n\+\_\+cols,  }\item[{real(kind=4), dimension(n\+\_\+cols), optional}]{means\+\_\+of\+\_\+matrix }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{inc__covariance__matrix__of__matrix_8f90_a3066070d59637dec802198d62b9341bb}\label{inc__covariance__matrix__of__matrix_8f90_a3066070d59637dec802198d62b9341bb}} 
+\index{inc\_covariance\_matrix\_of\_matrix.f90@{inc\_covariance\_matrix\_of\_matrix.f90}!covariance\_matrix\_of\_matrix\_int64@{covariance\_matrix\_of\_matrix\_int64}}
+\index{covariance\_matrix\_of\_matrix\_int64@{covariance\_matrix\_of\_matrix\_int64}!inc\_covariance\_matrix\_of\_matrix.f90@{inc\_covariance\_matrix\_of\_matrix.f90}}
+\doxysubsubsection{\texorpdfstring{covariance\_matrix\_of\_matrix\_int64()}{covariance\_matrix\_of\_matrix\_int64()}}
+{\footnotesize\ttfamily subroutine covariance\+\_\+matrix\+\_\+of\+\_\+matrix\+\_\+int64 (\begin{DoxyParamCaption}\item[{real(kind=8), dimension(n\+\_\+cols,n\+\_\+cols), intent(inout)}]{cov\+\_\+mat,  }\item[{integer(kind=8), dimension(n\+\_\+rows, n\+\_\+cols), intent(in)}]{matrix,  }\item[{integer(kind=8), intent(in)}]{n\+\_\+rows,  }\item[{integer(kind=8), intent(in)}]{n\+\_\+cols,  }\item[{real(kind=8), dimension(n\+\_\+cols), optional}]{means\+\_\+of\+\_\+matrix }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{inc__covariance__matrix__of__matrix_8f90_a616a932114271d53cd0fa4134fd23d6b}\label{inc__covariance__matrix__of__matrix_8f90_a616a932114271d53cd0fa4134fd23d6b}} 
+\index{inc\_covariance\_matrix\_of\_matrix.f90@{inc\_covariance\_matrix\_of\_matrix.f90}!covariance\_matrix\_of\_matrix\_real64@{covariance\_matrix\_of\_matrix\_real64}}
+\index{covariance\_matrix\_of\_matrix\_real64@{covariance\_matrix\_of\_matrix\_real64}!inc\_covariance\_matrix\_of\_matrix.f90@{inc\_covariance\_matrix\_of\_matrix.f90}}
+\doxysubsubsection{\texorpdfstring{covariance\_matrix\_of\_matrix\_real64()}{covariance\_matrix\_of\_matrix\_real64()}}
+{\footnotesize\ttfamily subroutine covariance\+\_\+matrix\+\_\+of\+\_\+matrix\+\_\+real64 (\begin{DoxyParamCaption}\item[{real(kind=8), dimension(n\+\_\+cols,n\+\_\+cols), intent(inout)}]{cov\+\_\+mat,  }\item[{real(kind=8), dimension(n\+\_\+rows, n\+\_\+cols), intent(in)}]{matrix,  }\item[{integer(kind=8), intent(in)}]{n\+\_\+rows,  }\item[{integer(kind=8), intent(in)}]{n\+\_\+cols,  }\item[{real(kind=8), dimension(n\+\_\+cols), optional}]{means\+\_\+of\+\_\+matrix }\end{DoxyParamCaption})}
+
