@@ -18,7 +18,7 @@ module mod_hyperparameter
     end type
 
     ! Linear Regression
-    type hparam_linear_regression
+    type, extends(hparam_base) :: hparam_linear_regression
         logical(kind=4) :: fit_intercept=.true.
     end type hparam_linear_regression
 
