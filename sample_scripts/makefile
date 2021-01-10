@@ -10,6 +10,7 @@ run:
 	make main_inner_product
 	make main_inv_unit_lower_matrix
 	make main_is_sorted
+	make main_linear_regression
 	make main_mattxmat
 	make main_mean_variance_covariance
 	make main_most_left_bit_position
@@ -69,6 +70,24 @@ main_is_sorted:
 	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_is_sorted.f90 -o main_is_sorted.out
 	./main_is_sorted.out
 
+main_linear_regression:
+	gfortran -w \
+	../common/mod_const.f90 \
+	../common/mod_common.f90 \
+	../common/mod_timer.f90 \
+	../common/mod_random.f90 \
+	../common/mod_sort.f90 \
+	../linalg/mod_linalg.f90 \
+	../math/mod_stats.f90 \
+	../metric/mod_metric.f90 \
+	\
+	../hyperparameter/mod_hyperparameter.f90 \
+	\
+	../linear_regression/mod_linear_regression.f90 \
+	main_linear_regression.f90 \
+	-o main_linear_regression.out
+	./main_linear_regression.out
+
 main_math:
 	gfortran ../math/mod_math.f90 main_math.f90 -o main_math.out
 	./main_math.out
@@ -124,29 +143,3 @@ main_search:
 main_sort:
 	gfortran ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90 main_sort.f90 -o main_sort.out
 	./main_sort.out
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	# 
