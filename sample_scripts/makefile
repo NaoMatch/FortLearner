@@ -1,4 +1,5 @@
 run:
+	make main_cholesky_decomposition
 	make main_collect_unique_values
 	make main_count_unique
 	make main_get_abs_maxloc
@@ -22,6 +23,10 @@ run:
 	make main_search
 	make main_sort
 
+
+main_cholesky_decomposition:
+	gfortran -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../linalg/mod_linalg.f90 main_cholesky_decomposition.f90 -o main_cholesky_decomposition.out
+	./main_cholesky_decomposition.out
 
 main_collect_unique_values:
 	gfortran ../common/mod_const.f90 ../common/mod_common.f90 main_collect_unique_values.f90 -o main_collect_unique_values.out
