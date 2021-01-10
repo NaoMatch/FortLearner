@@ -38,4 +38,9 @@ program main_metric
     print*, "    ", metric%auc(y_true_i4, y_pred_r4)
 
 
+    print*, '============================================================='
+    print*, "LogLoss"
+    print*, "    ", metric%logloss(y_true_i4, y_pred_r4)
+
+
 end program main_metric

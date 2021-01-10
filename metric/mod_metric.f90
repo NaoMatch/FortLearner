@@ -13,6 +13,10 @@ module mod_metric
         procedure, pass :: auc_i8
         generic   :: auc => auc_i4, auc_i8
 
+        procedure, pass :: logloss_i4
+        procedure, pass :: logloss_i8
+        generic   :: logloss => logloss_i4, logloss_i8
+
         procedure, pass :: mean_square_error_r4
         procedure, pass :: mean_square_error_r8
         procedure, pass :: mean_square_error_i4
@@ -87,6 +91,23 @@ contains
         auc_i4 = tmp
     end function auc_i4
     include "./include/auc/inc_auc.f90"
+
+
+    !> A function to compute logloss
+    function logloss_i4(this, y_true, y_pred)
+        implicit none
+        class(metrics)  :: this
+        real(kind=4)    :: logloss_i4
+        integer(kind=4) :: y_true(:)
+        real(kind=4)    :: y_pred(:)
+
+        integer(kind=4) :: i, y_size_true, y_size_pred
+        real(kind=4)    :: label, proba, tmp
+        real(kind=4)    :: eposilon, one
+        include "./include/logloss/inc_logloss_detail.f90"
+        logloss_i4 = tmp / real(y_size_true, kind=kind(y_size_true))
+    end function logloss_i4
+    include "./include/logloss/inc_logloss.f90"
 
 
     !> A function to compute Mean Squared Error.
