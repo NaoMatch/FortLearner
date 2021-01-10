@@ -2,7 +2,10 @@
 Machine learning scripts for Fortranner.  
 
 ## requirement
-gfortran >= 7.4.0
+gfortran >= 7.4.0  
+doxygen  
+make  
+graphviz
 
 ## common
 common function and subroutines  
