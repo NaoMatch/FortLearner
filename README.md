@@ -5,7 +5,7 @@ Machine learning scripts for Fortranner.
 gfortran >= 7.4.0  
 
 # Implemented
-* Linear Regression
+* Linear Regression: see sample_scripts/main_linear_regression.f90
   * linear_regression
   * lasso_regression
   * ridge_regression
