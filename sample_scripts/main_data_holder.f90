@@ -49,9 +49,14 @@ program main_data_holder
     call dholder%preprocess_hist(max_bins=10_8, strategy="greedy")
 
     print*, '============================================================='
-    print*, "Histgram: greedy_modified"
-    call dholder%preprocess_hist(max_bins=10_8, strategy="greedy_modified")
+    print*, "Histgram: modified_greedy"
+    call dholder%preprocess_hist(max_bins=10_8, strategy="modified_greedy")
 
+
+    ! Error
+    ! print*, '============================================================='
+    ! print*, "Histgram: hogehoge"
+    ! call dholder%preprocess_hist(max_bins=10_8, strategy="hogehoge")
 
     
 
