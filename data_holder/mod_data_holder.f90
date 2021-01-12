@@ -34,10 +34,9 @@ module mod_data_holder
         logical(kind=4) :: is_preprocessed = f_
         logical(kind=4) :: is_random_rotation = f_
         logical(kind=4) :: is_presort = f_
+        integer(kind=8) :: n_samples
+        integer(kind=8) :: n_columns
         integer(kind=8) :: n_outputs
-        integer(kind=8) :: n_rows
-        integer(kind=8) :: n_cols
-        integer(kind=8) :: n_outs
         type(x_pointer) :: x_ptr
         type(y_pointer) :: y_ptr
         integer(kind=4), allocatable :: x_hist(:,:)
@@ -77,8 +76,8 @@ contains
 
         new_data_holder_r8_r8 % is_classification =  f_
         new_data_holder_r8_r8 % n_outputs         =  y_shape(2)
-        new_data_holder_r8_r8 % n_rows            =  x_shape(1)
-        new_data_holder_r8_r8 % n_cols            =  x_shape(2)
+        new_data_holder_r8_r8 % n_samples            =  x_shape(1)
+        new_data_holder_r8_r8 % n_columns            =  x_shape(2)
         new_data_holder_r8_r8 % x_ptr % x_r8_ptr => x
         new_data_holder_r8_r8 % y_ptr % y_r8_ptr => y
 
@@ -100,14 +99,14 @@ contains
         if (allocated(vector)) deallocate(vector)
         if (allocated(this%x_hist)) deallocate(this%x_hist)
 
-        allocate(this%disc%column_discretizers(this%n_cols))
-        allocate(vector(this%n_rows))
-        allocate(this%x_hist(this%n_rows, this%n_cols))
+        allocate(this%disc%column_discretizers(this%n_columns))
+        allocate(vector(this%n_samples))
+        allocate(this%x_hist(this%n_samples, this%n_columns))
 
-        do c=1, this%n_cols, 1
+        do c=1, this%n_columns, 1
             this%disc%column_discretizers(c) = column_discretizer(max_bins=max_bins, strategy=strategy)
             
-            do i=1, this%n_rows, 1
+            do i=1, this%n_samples, 1
                 vector(i) = this % x_ptr % x_r8_ptr(i, c)
             end do
 
@@ -125,18 +124,18 @@ contains
         integer(kind=8)    :: i, n
 
         if (allocated(this%works)) deallocate(this%works)
-        allocate(this%works(this%n_cols))
-        do i=1, this%n_cols, 1
+        allocate(this%works(this%n_columns))
+        do i=1, this%n_columns, 1
             if ( associated(this%x_ptr%x_r8_ptr) ) then
                 if (allocated(this%works(i)%x_r8)) deallocate(this%works(i)%x_r8)
-                allocate(this%works(i)%x_r8(this%n_rows))
-                do n=1, this%n_rows, 1
+                allocate(this%works(i)%x_r8(this%n_samples))
+                do n=1, this%n_samples, 1
                     this%works(i)%x_r8(n) = this%x_ptr%x_r8_ptr(n,i)
                 end do
             else
                 if (allocated(this%works(i)%x_r4)) deallocate(this%works(i)%x_r4)
-                allocate(this%works(i)%x_r4(this%n_rows))
-                do n=1, this%n_rows, 1
+                allocate(this%works(i)%x_r4(this%n_samples))
+                do n=1, this%n_samples, 1
                     this%works(i)%x_r4(n) = this%x_ptr%x_r4_ptr(n,i)
                 end do
             end if
@@ -151,28 +150,28 @@ contains
         integer(kind=8)    :: i, n
 
         if (allocated(this%works)) deallocate(this%works)
-        allocate(this%works(this%n_cols))
-        do i=1, this%n_cols, 1
+        allocate(this%works(this%n_columns))
+        do i=1, this%n_columns, 1
             if ( associated(this%x_ptr%x_r8_ptr) ) then
                 if (allocated(this%works(i)%x_r8)) deallocate(this%works(i)%x_r8)
                 if (allocated(this%works(i)%i_i8)) deallocate(this%works(i)%i_i8)
-                allocate(this%works(i)%x_r8(this%n_rows))
-                allocate(this%works(i)%i_i8(this%n_rows))
-                do n=1, this%n_rows, 1
+                allocate(this%works(i)%x_r8(this%n_samples))
+                allocate(this%works(i)%i_i8(this%n_samples))
+                do n=1, this%n_samples, 1
                     this%works(i)%x_r8(n) = this%x_ptr%x_r8_ptr(n,i)
                     this%works(i)%i_i8(n) = n
                 end do
-                call pbucket_argsort_r8(this%works(i)%x_r8, this%works(i)%i_i8, int(this%n_rows, kind=8))
+                call pbucket_argsort_r8(this%works(i)%x_r8, this%works(i)%i_i8, int(this%n_samples, kind=8))
             else
                 if (allocated(this%works(i)%x_r4)) deallocate(this%works(i)%x_r4)
                 if (allocated(this%works(i)%i_i4)) deallocate(this%works(i)%i_i4)
-                allocate(this%works(i)%x_r4(this%n_rows))
-                allocate(this%works(i)%i_i4(this%n_rows))
-                do n=1, this%n_rows, 1
+                allocate(this%works(i)%x_r4(this%n_samples))
+                allocate(this%works(i)%i_i4(this%n_samples))
+                do n=1, this%n_samples, 1
                     this%works(i)%x_r4(n) = this%x_ptr%x_r4_ptr(n,i)
                     this%works(i)%i_i4(n) = n
                 end do
-                call pbucket_argsort_r4(this%works(i)%x_r4, this%works(i)%i_i4, int(this%n_rows, kind=4))
+                call pbucket_argsort_r4(this%works(i)%x_r4, this%works(i)%i_i4, int(this%n_samples, kind=4))
             end if
         end do
     end subroutine preprocess_presort
@@ -187,26 +186,26 @@ contains
         integer(kind=8) :: i
 
         if (allocated(this%works)) deallocate(this%works)
-        allocate(this%works(this%n_cols))
+        allocate(this%works(this%n_columns))
         if ( associated(this%x_ptr%x_r8_ptr) ) then
-            allocate(rr_mat_r8(this%n_cols, this%n_cols))
-            call random_rotation(rr_mat_r8, this%n_cols)
+            allocate(rr_mat_r8(this%n_columns, this%n_columns))
+            call random_rotation(rr_mat_r8, this%n_columns)
 
-            do i=1, this%n_cols, 1
+            do i=1, this%n_columns, 1
                 if (allocated(this%works(i)%x_r8)) deallocate(this%works(i)%x_r8)
-                allocate(this%works(i)%x_r8(this%n_rows))
-                call multi_mat_vec(this%x_ptr%x_r8_ptr, rr_mat_r8(:,i), this%works(i)%x_r8, this%n_rows, this%n_cols)
+                allocate(this%works(i)%x_r8(this%n_samples))
+                call multi_mat_vec(this%x_ptr%x_r8_ptr, rr_mat_r8(:,i), this%works(i)%x_r8, this%n_samples, this%n_columns)
             end do
             this%rr_mat_r8 = rr_mat_r8
         else
-            allocate(rr_mat_r4(this%n_cols, this%n_cols))
-            call random_rotation(rr_mat_r4, int(this%n_cols, kind=4))
+            allocate(rr_mat_r4(this%n_columns, this%n_columns))
+            call random_rotation(rr_mat_r4, int(this%n_columns, kind=4))
 
-            do i=1, this%n_cols, 1
+            do i=1, this%n_columns, 1
                 if (allocated(this%works(i)%x_r4)) deallocate(this%works(i)%x_r4)
-                allocate(this%works(i)%x_r4(this%n_rows))
+                allocate(this%works(i)%x_r4(this%n_samples))
                 call multi_mat_vec(this%x_ptr%x_r4_ptr, rr_mat_r4(:,i), this%works(i)%x_r4, & 
-                        int(this%n_rows, kind=4), int(this%n_cols, kind=4))
+                        int(this%n_samples, kind=4), int(this%n_columns, kind=4))
             end do
             this%rr_mat_r4 = rr_mat_r4
         end if
