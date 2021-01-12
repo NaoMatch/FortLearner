@@ -40,6 +40,23 @@ main_count_unique:
 	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 main_count_unique.f90 -o main_count_unique.out
 	./main_count_unique.out
 
+main_data_holder:
+	gfortran -w -fbounds-check \
+	../common/mod_const.f90 \
+	../common/mod_common.f90 \
+	../common/mod_timer.f90 \
+	../common/mod_random.f90 \
+	../common/mod_sort.f90 \
+	../linalg/mod_linalg.f90 \
+	../math/mod_stats.f90 \
+	../hyperparameter/mod_hyperparameter.f90 \
+	../preprocessing/mod_discretizer.f90 \
+	../data_holder/mod_data_holder.f90 \
+	main_data_holder.f90 \
+	-o main_data_holder.out
+	./main_data_holder.out
+
+
 main_discretizer:
 	gfortran -w -w \
 	../common/mod_const.f90 \
