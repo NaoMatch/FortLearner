@@ -1,5 +1,7 @@
 program main_decision_tree
+    use mod_const
     use mod_metric
+    use mod_data_holder
     use mod_decision_tree
     implicit none
 
@@ -12,10 +14,13 @@ program main_decision_tree
     CHARACTER(len=256) :: file_name_x_test_csv, file_name_y_test_csv
     CHARACTER(len=256) :: file_name_x_test_bin, file_name_y_test_bin
     real(kind=8), ALLOCATABLE :: x_train(:,:), x_test(:,:)
-    real(kind=8), ALLOCATABLE :: y_train(:), y_test(:)
-    real(kind=8), ALLOCATABLE :: y_train_pred(:), y_test_pred(:)
+    real(kind=8), ALLOCATABLE :: y_train(:,:), y_test(:,:)
+    real(kind=8), ALLOCATABLE :: y_train_pred(:,:), y_test_pred(:,:)
     
-    type(metrics)           :: metric
+    type(metrics)                 :: metric
+    type(data_holder), target     :: dholder
+    type(data_holder), pointer    :: dholder_ptr
+    type(decision_tree_regressor) :: dt_reg
 
 
     print*, '============================================================='
@@ -54,14 +59,14 @@ program main_decision_tree
     call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
         n_samples_train, n_columns_train, skip_header, dtype_in, dtype_out)
     print*, "    y_train"
-    call read2bin_1d(file_name_y_train_csv, file_name_y_train_bin, &
-        n_samples_train, skip_header, dtype_in, dtype_out)
+    call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
+        n_samples_train, 1_8, skip_header, dtype_in, dtype_out)
     print*, "    x_test"
     call read2bin_2d(file_name_x_test_csv, file_name_x_test_bin, &
         n_samples_test, n_columns_test, skip_header, dtype_in, dtype_out)
     print*, "    y_test"
-    call read2bin_1d(file_name_y_test_csv, file_name_y_test_bin, &
-        n_samples_test, skip_header, dtype_in, dtype_out)
+    call read2bin_2d(file_name_y_test_csv, file_name_y_test_bin, &
+        n_samples_test, 1_8, skip_header, dtype_in, dtype_out)
 
 
     print*, '============================================================='
@@ -69,10 +74,33 @@ program main_decision_tree
     print*, "    x_train"
     call read_bin_2d(file_name_x_train_bin, x_train)
     print*, "    y_train"
-    call read_bin_1d(file_name_y_train_bin, y_train)
+    call read_bin_2d(file_name_y_train_bin, y_train)
     print*, "    x_test"
     call read_bin_2d(file_name_x_test_bin, x_test)
     print*, "    y_test"
-    call read_bin_1d(file_name_y_test_bin, y_test)
+    call read_bin_2d(file_name_y_test_bin, y_test)
+
+    print*, '============================================================='
+    print*, "data_holder"
+    dholder = data_holder(x_train, y_train)
+    dholder_ptr => dholder
+
+    print*, '============================================================='
+    print*, "FIT"
+    dt_reg = decision_tree_regressor(max_depth=115_8, boot_strap=f_, min_samples_leaf=5_8, &
+        fashion="best", max_features=huge(0_8))
+    call dt_reg%fit(dholder_ptr)
+
+    print*, '============================================================='
+    print*, "PREDICT TRAIN DATA"
+    y_train_pred = dt_reg%predict(x_train)
+    y_test_pred = dt_reg%predict(x_test)
+
+    print*, '============================================================='
+    print*, "METRICS"
+    print*, "    mse train: ", metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
+    print*, "    mse test:  ", metric%mean_square_error(y_test(:,1), y_test_pred(:,1))
+
+
 
 end program main_decision_tree
