@@ -102,6 +102,7 @@ contains
         preset_strategies(6) = "dpoptimal"
 
         call tmp%hparam%validate_int_range("max_bins", tmp%hparam%max_bins, 2_8, huge(1_8))
+        call tmp%hparam%validate_char_list("strategy", tmp%hparam%strategy, preset_strategies)
         tmp%hparam%strategy_int = tmp%hparam%convert_char_to_int(tmp%hparam%strategy, preset_strategies)
 
         new_discretizer = tmp
@@ -127,6 +128,7 @@ contains
         if ( present(strategy) ) tmp%hparam%strategy = strategy
 
         call tmp%hparam%validate_int_range("max_bins", tmp%hparam%max_bins, 2_8, huge(1_8))
+        call tmp%hparam%validate_char_list("strategy", tmp%hparam%strategy, preset_strategies)
         tmp%hparam%strategy_int = tmp%hparam%convert_char_to_int(tmp%hparam%strategy, preset_strategies)
 
         new_column_discretizer = tmp
