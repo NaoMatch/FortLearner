@@ -89,17 +89,18 @@ contains
         type(discretizer)   :: tmp
         integer(kind=8), optional  :: max_bins
         character(len=*), optional :: strategy
-        character(len=256) :: preset_strategies(6)
+        character(len=256) :: preset_strategies(5)
 
         if ( present(max_bins) ) tmp%hparam%max_bins = max_bins
         if ( present(strategy) ) tmp%hparam%strategy = strategy
 
+        tmp%hparam%algo_name = "dicretizer"
         preset_strategies(1) = "uniform"
         preset_strategies(2) = "quantile"
         preset_strategies(3) = "kmeans"
         preset_strategies(4) = "greedy"
         preset_strategies(5) = "modified_greedy"
-        preset_strategies(6) = "dpoptimal"
+        ! preset_strategies(6) = "dpoptimal"
 
         call tmp%hparam%validate_int_range("max_bins", tmp%hparam%max_bins, 2_8, huge(1_8))
         call tmp%hparam%validate_char_list("strategy", tmp%hparam%strategy, preset_strategies)
@@ -116,13 +117,14 @@ contains
         integer(kind=8), optional  :: max_bins
         character(len=*), optional :: strategy
 
-        character(len=256) :: preset_strategies(6)
+        character(len=256) :: preset_strategies(5)
+        tmp%hparam%algo_name = "dicretizer"
         preset_strategies(1) = "uniform"
         preset_strategies(2) = "quantile"
         preset_strategies(3) = "kmeans"
         preset_strategies(4) = "greedy"
         preset_strategies(5) = "modified_greedy"
-        preset_strategies(6) = "dpoptimal"
+        ! preset_strategies(6) = "dpoptimal"
 
         if ( present(max_bins) ) tmp%hparam%max_bins = max_bins
         if ( present(strategy) ) tmp%hparam%strategy = strategy
