@@ -62,7 +62,7 @@ module mod_hyperparameter
         integer(kind=8) :: min_samples_leaf         = 1 ! c
         integer(kind=8) :: max_features             = -1 ! c
         integer(kind=8) :: max_feature_use          = huge(0_8)
-        integer(kind=8) :: max_leaf_nodes           = 255_8 ! c
+        integer(kind=8) :: max_leaf_nodes           = huge(0_8) ! c
         integer(kind=8) :: fashion_int              = 10_8
         integer(kind=8) :: print_mod                = 1
         integer(kind=8) :: num_threads_in_node      = 4
