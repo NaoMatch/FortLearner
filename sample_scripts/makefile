@@ -2,6 +2,7 @@ run:
 	make main_cholesky_decomposition
 	make main_collect_unique_values
 	make main_count_unique
+	make main_decision_tree
 	make main_discretizer
 	make main_get_abs_maxloc
 	make main_get_minmax
