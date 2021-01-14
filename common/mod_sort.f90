@@ -30,7 +30,9 @@ module mod_sort
         ! procedure :: sort_i4
         ! procedure :: sort_i8
 
+        procedure :: append_arg_r4
         procedure :: append_arg_r8
+        procedure :: argsort_r4
         procedure :: argsort_r8
 
     end type work
@@ -45,12 +47,12 @@ module mod_sort
         procedure, pass :: init_r4
         procedure, pass :: init_r8
         ! generic         :: init => init_i4, init_i8, init_r4, init_r8
-        generic         :: init => init_r4
+        ! generic         :: init => init_r4
 
         ! procedure :: init_arg_i4
         ! procedure :: init_arg_i8
-        ! procedure :: init_arg_r4
-        procedure, pass :: init_arg_r8
+        procedure :: init_arg_r4
+        procedure :: init_arg_r8
     end type empty_bucket
 
 
@@ -63,7 +65,7 @@ module mod_sort
 
 
     interface pbucket_argsort
-        ! module procedure pbucket_argsort_r4
+        module procedure pbucket_argsort_r4
         module procedure pbucket_argsort_r8
         ! module procedure pbucket_argsort_i4
         ! module procedure pbucket_argsort_i8
@@ -133,6 +135,90 @@ module mod_sort
     end interface quick_select_upper
 
 contains
+
+    recursive subroutine pbucket_argsort_r4(vector, indices, n_samples, rec_depth)
+        real(kind=4), intent(inout)           :: vector(n_samples)
+        integer(kind=4), intent(inout)        :: indices(n_samples)
+        integer(kind=4), intent(in)           :: n_samples
+        integer(kind=4), optional, intent(in) :: rec_depth
+
+        integer(kind=4) :: rec_depth_opt
+        real(kind=4) :: v_min, v_max
+        integer(kind=4) :: n_samples_sqrt
+        integer(kind=4), allocatable :: indices_sampling(:)
+        real(kind=4), allocatable    :: values_sampling(:)
+        integer(kind=4) :: n_uniq
+        integer(kind=4) :: left_posi, n_buckets
+        real(kind=4)    :: diff, max_val
+        integer(kind=4) :: i, bucket_idx
+        real(kind=4) :: tmp_v, factor
+        integer(kind=4) :: tmp_i
+        type(empty_bucket) :: bucket
+        integer(kind=4) :: ini, fin, one
+
+        if (n_samples .eq. 0) return
+        rec_depth_opt = 0
+        if (present(rec_depth)) rec_depth_opt = rec_depth
+
+        ! call get_minmax(vector, n_samples, v_min, v_max)
+        v_min = minval(vector)
+        v_max = maxval(vector)
+        if (v_min .eq. v_max) return ! Fast Return
+
+        one = 1
+        n_samples_sqrt=sqrt(n_samples+0.0)
+        allocate(indices_sampling(n_samples_sqrt))
+        allocate(values_sampling(n_samples_sqrt))
+        call rand_integer(one, n_samples, indices_sampling, n_samples_sqrt) ! generate sample indices_sampling with duplication
+        values_sampling(:) = vector(indices_sampling)
+        call quick_sort(values_sampling, n_samples_sqrt)
+        n_uniq = count_unique(values_sampling, n_samples_sqrt)
+        if (n_uniq .le. 10) then
+            call quick_argsort(vector, indices, n_samples)
+            return
+        elseif (n_uniq .gt. int(n_samples_sqrt * 0.98)) then
+            left_posi = most_left_bit_position(n_uniq)
+            n_buckets = ibset(0_4, left_posi+1)
+        else
+            n_buckets = n_uniq
+        end if
+
+        ! Append Bucket
+        call bucket%init_arg_r4(n_samples, n_buckets)
+        diff = 1.0 / (v_max-v_min)
+        max_val = n_buckets-1.0
+        diff = diff * max_val
+        factor =  - v_min * diff + 1
+
+        do i=1, n_samples
+            tmp_v = vector(i)
+            tmp_i = indices(i)
+            bucket_idx = int( tmp_v * diff + factor, kind=4 )
+            call bucket % work_space(bucket_idx) % append_arg_r4(tmp_v, tmp_i)
+        end do
+
+        if (rec_depth_opt .le. max_rec_depth) then ! 0(Only One Time Recursion) is Best?
+            ini = 1
+            do i=1, n_buckets
+                fin = ini + bucket % work_space(i) % idx_i4 - 2
+                vector(ini:fin)  = bucket % work_space(i) % tmp_r4(1:bucket % work_space(i) % idx_i4-1)
+                indices(ini:fin) = bucket % work_space(i) % tmp_i4(1:bucket % work_space(i) % idx_i4-1)
+                call pbucket_argsort_r4(vector(ini:fin), indices(ini:fin), fin-ini+1, rec_depth_opt+1)
+                ini = fin + 1
+            end do
+        else
+            ! Sort Arrays
+            ini = 1
+            do i=1, n_buckets
+                fin = ini + bucket % work_space(i) % idx_i4 - 2
+                call bucket % work_space(i) % argsort_r4()
+                vector(ini:fin)  = bucket % work_space(i) % tmp_r4(1:bucket % work_space(i) % idx_i4-1)
+                indices(ini:fin) = bucket % work_space(i) % tmp_i4(1:bucket % work_space(i) % idx_i4-1)
+                ini = fin + 1
+            end do
+        end if
+    end subroutine pbucket_argsort_r4
+
 
     recursive subroutine pbucket_argsort_r8(vector, indices, n_samples, rec_depth)
         real(kind=8), intent(inout)           :: vector(n_samples)
@@ -665,6 +751,13 @@ contains
     end subroutine argsort_r8
 
 
+    subroutine argsort_r4(this)
+        implicit none
+        class(work) :: this
+        call quick_argsort(this % tmp_r4(1:this % idx_i4-1), this % tmp_i4(1:this % idx_i4-1), this % idx_i4-1)
+    end subroutine argsort_r4
+
+
     !> A subroutine to initialize work space for pseudo backet sort
     !! \param num number of samples
     !! \param n_work_space numnber of work spaces
@@ -712,6 +805,26 @@ contains
     end subroutine init_arg_r8
 
 
+    subroutine init_arg_r4(this, num, n_work_space)
+        implicit none
+        class(empty_bucket)  :: this
+        integer(kind=4)      :: num, n_work_space
+        integer(kind=4)      :: n_samples_per_buckets, i
+        n_samples_per_buckets = maxval((/ num/n_work_space, this%min_size_i4/))
+
+        if (allocated(this % work_space)) deallocate(this % work_space)
+        allocate(this % work_space(n_work_space))
+
+        do i=1, n_work_space
+            allocate(this % work_space(i) % tmp_r4(n_samples_per_buckets))
+            allocate(this % work_space(i) % tmp_i4(n_samples_per_buckets))
+            this % work_space(i) % idx_i4           = 1
+            this % work_space(i) % current_size_i4  = n_samples_per_buckets
+            this % work_space(i) % original_size_i4 = n_samples_per_buckets
+        end do
+    end subroutine init_arg_r4
+
+
     !> A subroutine to append value to work space for pseudo backet sort
     !! \param tmp_val a value to be appended to work space
     subroutine append_r4(this, tmp_val)
@@ -738,6 +851,18 @@ contains
         this % tmp_i8(this % idx_i8) = tmp_idx
         this % idx_i8 = this % idx_i8 + 1
     end subroutine append_arg_r8
+
+
+    subroutine append_arg_r4(this, tmp_val, tmp_idx)
+        implicit none
+        class(work) :: this
+        real(kind=4)   :: tmp_val
+        integer(kind=4)   :: tmp_idx
+        if ( this % idx_i4 .gt. this % current_size_i4 ) call this % size_up_r4()
+        this % tmp_r4(this % idx_i4) = tmp_val
+        this % tmp_i4(this % idx_i4) = tmp_idx
+        this % idx_i4 = this % idx_i4 + 1
+    end subroutine append_arg_r4
 
 
     !> A subroutine to sort the input vectors using insert sort

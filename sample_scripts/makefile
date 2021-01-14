@@ -2,6 +2,8 @@ run:
 	make main_cholesky_decomposition
 	make main_collect_unique_values
 	make main_count_unique
+	make main_decision_tree
+	make main_discretizer
 	make main_get_abs_maxloc
 	make main_get_minmax
 	make main_groupby
@@ -38,6 +40,65 @@ main_collect_unique_values:
 main_count_unique:
 	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 main_count_unique.f90 -o main_count_unique.out
 	./main_count_unique.out
+
+main_data_holder:
+	gfortran -w -fbounds-check \
+	../common/mod_const.f90 \
+	../common/mod_common.f90 \
+	../common/mod_timer.f90 \
+	../common/mod_random.f90 \
+	../common/mod_sort.f90 \
+	../linalg/mod_linalg.f90 \
+	../math/mod_stats.f90 \
+	../hyperparameter/mod_hyperparameter.f90 \
+	../preprocessing/mod_discretizer.f90 \
+	../data_holder/mod_data_holder.f90 \
+	main_data_holder.f90 \
+	-o main_data_holder.out
+	./main_data_holder.out
+
+
+main_decision_tree:
+	gfortran \
+	-w -O3 -unroll -fbounds-check \
+	../common/mod_const.f90 \
+	../common/mod_common.f90 \
+	../common/mod_timer.f90 \
+	../common/mod_random.f90 \
+	../common/mod_sort.f90 \
+	../math/mod_stats.f90 \
+	../metric/mod_metric.f90 \
+	../linalg/mod_linalg.f90 \
+	\
+	../hyperparameter/mod_hyperparameter.f90 \
+	../preprocessing/mod_discretizer.f90 \
+	../data_holder/mod_data_holder.f90 \
+	\
+	../decision_tree/mod_node.f90 \
+	../decision_tree/mod_splitter.f90 \
+	../decision_tree/mod_woodworking_tools.f90 \
+	../decision_tree/mod_base_tree.f90 \
+	../decision_tree/mod_decision_tree.f90 \
+	\
+	./main_decision_tree.f90 \
+	-o main_decision_tree.out
+	./main_decision_tree.out
+
+
+main_discretizer:
+	gfortran -w -w \
+	../common/mod_const.f90 \
+	../common/mod_common.f90 \
+	../common/mod_timer.f90 \
+	../common/mod_random.f90 \
+	../common/mod_sort.f90 \
+	../linalg/mod_linalg.f90 \
+	../math/mod_stats.f90 \
+	../hyperparameter/mod_hyperparameter.f90 \
+	../preprocessing/mod_discretizer.f90 \
+	main_discretizer.f90 \
+	-o main_discretizer.out
+	./main_discretizer.out
 
 main_get_abs_maxloc:
 	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 main_get_abs_maxloc.f90 -o main_get_abs_maxloc.out
