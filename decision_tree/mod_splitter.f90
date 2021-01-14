@@ -184,6 +184,7 @@ contains
 
         if ( count_eval .eq. 0 ) then
             node_ptr%is_terminal = t_
+            call node_ptr%hparam_check(hparam_ptr)
             return
         end if
 

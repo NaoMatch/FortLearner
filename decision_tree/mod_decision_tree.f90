@@ -41,6 +41,7 @@ contains
         character(len=256) :: fashion_list(5)
 
         tmp%is_axis_parallel = t_
+        tmp%hparam%algo_name = "decision_tree_regressor"
 
         fashion_list(1) = "best"
         fashion_list(2) = "depth"
@@ -56,11 +57,11 @@ contains
         if ( present(max_features) ) tmp%hparam%max_features = max_features
 
 
-        call tmp%hparam%validate_int_range("max_depth", tmp%hparam%max_depth, 1_8, huge(1_8))
-        call tmp%hparam%validate_int_range("max_leaf_nodes", tmp%hparam%max_depth, 2_8, huge(1_8))
+        call tmp%hparam%validate_int_range("max_depth",        tmp%hparam%max_depth,        1_8, huge(1_8))
+        call tmp%hparam%validate_int_range("max_leaf_nodes",   tmp%hparam%max_leaf_nodes,   2_8, huge(1_8))
         call tmp%hparam%validate_int_range("min_samples_leaf", tmp%hparam%min_samples_leaf, 1_8, huge(1_8))
-        call tmp%hparam%validate_char_list("fashion", tmp%hparam%fashion, fashion_list)
-        call tmp%hparam%validate_int_range("max_features", tmp%hparam%max_features, 1_8, huge(1_8))
+        call tmp%hparam%validate_char_list("fashion",          tmp%hparam%fashion,          fashion_list)
+        call tmp%hparam%validate_int_range("max_features",     tmp%hparam%max_features,     1_8, huge(1_8), exception=-1_8)
 
         tmp%hparam%fashion_int = tmp%hparam%convert_char_to_int(tmp%hparam%fashion, fashion_list)
         new_decision_tree_regressor = tmp
@@ -104,20 +105,21 @@ contains
 
         depth = 1
         do while (t_)
+            is_stop = f_
             if (allocated(selected_node_ptrs)) deallocate(selected_node_ptrs)
             allocate(selected_node_ptrs(0))
 
             call this%extract_split_node_ptrs_axis(selected_node_ptrs, depth)
             call splitter%split_decision_tree_regressor(selected_node_ptrs, data_holder_ptr, hparam_ptr)
-
             call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, this%is_classification)                    
 
             call this%induction_stop_check(hparam_ptr, is_stop)
             if (is_stop) exit
             depth = depth + 1
         end do
-
         call termination_node_ptr_axis(this%root_node_axis_ptr)
+        ! call this%print_info(this%root_node_axis_ptr)
+
         call this%postprocess(this%is_classification)
     end subroutine fit_decision_tree_regressor
 

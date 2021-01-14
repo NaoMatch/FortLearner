@@ -55,6 +55,8 @@ module mod_node
         type(node_axis), allocatable :: node_l
         type(node_axis), allocatable :: node_r
         type(node_axis), ALLOCATABLE :: node_c(:)
+    contains
+        procedure :: print_node_info_axis
     end type node_axis
 
     !> Node for OBLIQUE decision tree
@@ -117,6 +119,31 @@ contains
             return
         end if
     end subroutine hparam_check
+
+
+    subroutine print_node_info_axis(this)
+        implicit none
+        class(node_axis) :: this
+
+        ! if ( .not. this%is_terminal ) return
+
+        print*, "==========================================================================================="
+        print*, "==========================================================================================="
+        print*, "Depth:            ", this%depth
+        print*, "Is Terminal:      ", this%is_terminal
+        print*, "Is Trained:       ", this%is_trained
+        print*, "Split Feature ID: ", this%feature_id_
+        print*, "Split threshold:  ", this%threshold_
+        print*, "Node Label:       ", this%label_
+        print*, "Response:         ", this%response
+        print*, "Impurity:         ", this%impurity
+        print*, "Gain:             ", this%gain_best
+
+        print*, "No. Sample:       ", this%n_samples
+        print*, "No. Sample_left:  ", this%n_samples_l
+        print*, "No. Sample_right: ", this%n_samples_r
+        print*, "P = L + R:        ", this%n_samples .eq. this%n_samples_l + this%n_samples_r
+    end subroutine print_node_info_axis
 
 
 end module mod_node

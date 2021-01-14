@@ -287,7 +287,6 @@ contains
             call extract_best_split_node_axis(root_node_ptr%node_l, best_split_node_ptr)
             call extract_best_split_node_axis(root_node_ptr%node_r, best_split_node_ptr)
         else
-            
             if ( .not. root_node_ptr%is_terminal .and. .not. associated(best_split_node_ptr) ) then
                 best_split_node_ptr => root_node_ptr
             end if

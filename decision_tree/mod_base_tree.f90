@@ -41,9 +41,29 @@ module mod_base_tree
         ! procedure :: extract_split_node_ptrs_oblq
         procedure :: adopt_node_ptrs_axis
         ! procedure :: adopt_node_ptrs_oblq
+
+        procedure :: print_info
     end type base_tree
 
 contains
+
+
+    !> A subroutine to print node informations.
+    !! \param root_node_ptr_axis root node pointer of axis-parallel
+    recursive subroutine print_info(this, root_node_ptr_axis)
+        implicit none
+        class(base_tree) :: this
+        type(node_axis), pointer :: root_node_ptr_axis
+        type(node_axis), pointer :: node_l_ptr_axis, node_r_ptr_axis
+        print*, "print"
+        call root_node_ptr_axis%print_node_info_axis()
+        if ( allocated(root_node_ptr_axis%node_l) ) then
+            node_l_ptr_axis => root_node_ptr_axis%node_l
+            node_r_ptr_axis => root_node_ptr_axis%node_r
+            call this%print_info(node_l_ptr_axis)
+            call this%print_info(node_r_ptr_axis)
+        end if
+    end subroutine print_info
 
 
     !> A subtouine to fit regressor of 'classificaton and regression tree'. 
@@ -220,13 +240,16 @@ contains
 
         logical(kind=4)          :: is_hist_optional
         type(node_axis), pointer :: selected_node_ptr
-        integer(kind=8)          :: n
+        integer(kind=8)          :: n, n_nodes
 
         is_hist_optional = f_
         if (present(is_hist)) is_hist_optional = is_hist
 
         select case(this%hparam%fashion_int)
-            case(1_8) ! depth
+            case(1_8) ! best
+                ! print*, '============================================================='
+                ! call count_all_nodes_axis(this%root_node_axis_ptr, n_nodes, is_root=.true.)
+                ! print*, "No. Nodes: ", n_nodes
                 if ( associated(selected_node_ptr) ) nullify(selected_node_ptr)
                 call extract_best_split_node_axis(this%root_node_axis_ptr, selected_node_ptr)
                 call adopting_twins_axis(selected_node_ptr, data_holder_ptr, hparam_ptr, is_classification, &
@@ -292,7 +315,7 @@ contains
         implicit none
         type(train_results)   :: result
         real(kind=8), pointer :: x_ptr(:,:)
-        integer(kind=8)       :: indices(:)
+        integer(kind=8)       :: indices(n_samples)
         real(kind=8)          :: responses(:,:)
         integer(kind=8)       :: n_samples, n_outputs
         logical(kind=4)       :: is_root
@@ -326,7 +349,6 @@ contains
             idx = indices(i)
             tmp_f(i) = x_ptr(idx, fid)
         end do
-
         threshold = result%split_thresholds_(node_id)
 
         allocate(lt_thresholds(n_samples))
@@ -341,19 +363,16 @@ contains
             idx = indices(i)
             if (lt_thresholds(i)) then
                 indices_l(count_l) = idx
-                count_l = count_l + 1
+                count_l = count_l + 1_8
             else
                 indices_r(count_r) = idx
-                count_r = count_r + 1
+                count_r = count_r + 1_8
             end if
         end do
 
-        call predict_response_axis(result, x_ptr, indices_l, & 
-            responses, count_l-1, n_outputs, is_root=f_)
-        call predict_response_axis(result, x_ptr, indices_r, & 
-            responses, count_r-1, n_outputs, is_root=f_)
-
-        deallocate(indices_l, indices_r)
+        call predict_response_axis(result, x_ptr, indices_l, responses, count_l-1, n_outputs, is_root=f_)
+        call predict_response_axis(result, x_ptr, indices_r, responses, count_r-1, n_outputs, is_root=f_)
+        deallocate(indices_l, indices_r, tmp_f, lt_thresholds)
     end subroutine predict_response_axis
 
 
@@ -380,7 +399,11 @@ contains
             ! call count_all_nodes(node_oblq_ptr, n_nodes, is_root=t_)
             ! allocate(this%coefs_(n_nodes, this%n_columns_))
         end if
-        
+
+        if ( allocated(this%split_thresholds_) ) deallocate(this%split_thresholds_)
+        if ( allocated(this%is_terminals_) ) deallocate(this%is_terminals_)
+        if ( allocated(this%responses_) ) deallocate(this%responses_)
+
         allocate(this%split_thresholds_(n_nodes))
         allocate(this%is_terminals_(n_nodes))
         allocate(this%responses_(n_nodes, this%n_outputs_))

@@ -1,9 +1,12 @@
 program main_decision_tree
     use mod_const
+    use mod_timer
     use mod_metric
     use mod_data_holder
     use mod_decision_tree
     implicit none
+
+    integer(kind=8) :: date_value1(8), date_value2(8)
 
     integer(kind=8)    :: n_samples_train, n_columns_train
     integer(kind=8)    :: n_samples_test, n_columns_test
@@ -21,6 +24,9 @@ program main_decision_tree
     type(data_holder), target     :: dholder
     type(data_holder), pointer    :: dholder_ptr
     type(decision_tree_regressor) :: dt_reg
+    integer(kind=8)    :: i, n_leaf_nodes, max_leaf_nodes
+    integer(kind=8)    :: iter, max_iter
+
 
 
     print*, '============================================================='
@@ -87,8 +93,7 @@ program main_decision_tree
 
     print*, '============================================================='
     print*, "FIT"
-    dt_reg = decision_tree_regressor(max_depth=115_8, boot_strap=f_, min_samples_leaf=5_8, &
-        fashion="best", max_features=huge(0_8))
+    dt_reg = decision_tree_regressor(max_leaf_nodes=15_8, fashion="best")
     call dt_reg%fit(dholder_ptr)
 
     print*, '============================================================='
@@ -101,6 +106,17 @@ program main_decision_tree
     print*, "    mse train: ", metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
     print*, "    mse test:  ", metric%mean_square_error(y_test(:,1), y_test_pred(:,1))
 
-
+    print*, '============================================================='
+    print*, '============================================================='
+    print*, '============================================================='
+    print*, "BUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    dt_reg = decision_tree_regressor(max_leaf_nodes=20_8, fashion="best")
+    call dt_reg%fit(dholder_ptr)
+    y_train_pred = dt_reg%predict(x_train)
+    y_test_pred = dt_reg%predict(x_test)
+    print*, '============================================================='
+    print*, "METRICS"
+    print*, "    mse train: ", metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
+    print*, "    mse test:  ", metric%mean_square_error(y_test(:,1), y_test_pred(:,1))
 
 end program main_decision_tree

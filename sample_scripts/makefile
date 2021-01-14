@@ -59,7 +59,7 @@ main_data_holder:
 
 main_decision_tree:
 	gfortran \
-	-w -fbounds-check \
+	-w -O3 -unroll -fbounds-check \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
