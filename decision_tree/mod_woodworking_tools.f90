@@ -291,7 +291,7 @@ contains
                 best_split_node_ptr => root_node_ptr
             end if
 
-            if ( .not. root_node_ptr%is_terminal .and. root_node_ptr%gain_best .gt. best_split_node_ptr%gain_best & 
+            if ( .not. root_node_ptr%is_terminal .and. root_node_ptr%gain_best_w .gt. best_split_node_ptr%gain_best_w & 
                 .and. root_node_ptr%is_trained ) then
                 best_split_node_ptr => root_node_ptr
             end if
@@ -445,6 +445,8 @@ contains
             root_node_ptr%is_terminal = t_
             root_node_ptr%feature_id_ = -2
             root_node_ptr%threshold_ = 0d0
+            root_node_ptr%n_samples_l = 0_8
+            root_node_ptr%n_samples_r = 0_8
         end if
     end subroutine termination_node_ptr_axis
 

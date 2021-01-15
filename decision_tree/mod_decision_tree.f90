@@ -26,6 +26,7 @@ module mod_decision_tree
 
 contains
 
+
     function new_decision_tree_regressor(&
         max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features &
         )
@@ -56,7 +57,6 @@ contains
         if ( present(fashion) ) tmp%hparam%fashion = fashion
         if ( present(max_features) ) tmp%hparam%max_features = max_features
 
-
         call tmp%hparam%validate_int_range("max_depth",        tmp%hparam%max_depth,        1_8, huge(1_8))
         call tmp%hparam%validate_int_range("max_leaf_nodes",   tmp%hparam%max_leaf_nodes,   2_8, huge(1_8))
         call tmp%hparam%validate_int_range("min_samples_leaf", tmp%hparam%min_samples_leaf, 1_8, huge(1_8))
@@ -68,17 +68,15 @@ contains
     end function new_decision_tree_regressor
 
 
-
     !> A subtouine to fit regressor of 'decision_tree'. 
     !! \return returns fitted regressor tree
     !! \param data_holder_ptr pointer of data_holder 
-    subroutine fit_decision_tree_regressor(this, data_holder_ptr)
+    subroutine fit_decision_tree_regressor(this, data_holder_ptr, print_node)
         implicit none
-
-        integer(kind=8) :: date_value1(8), date_value2(8), time0
 
         class(decision_tree_regressor) :: this
         type(data_holder), pointer     :: data_holder_ptr
+        logical(kind=4), OPTIONAL      :: print_node
 
         type(node_axis), target            :: root_node
         type(hparam_decisiontree), target  :: hparam
@@ -88,8 +86,6 @@ contains
         logical(kind=4) :: is_stop
         type(node_splitter) :: splitter
         integer(kind=8) :: depth
-
-        time0 = 0d0
 
         call this%init(data_holder_ptr)
 
@@ -118,7 +114,12 @@ contains
             depth = depth + 1
         end do
         call termination_node_ptr_axis(this%root_node_axis_ptr)
-        ! call this%print_info(this%root_node_axis_ptr)
+        
+        if ( present(print_node) ) then
+            if ( print_node ) then
+                call this%print_info(this%root_node_axis_ptr)
+            end if
+        end if
 
         call this%postprocess(this%is_classification)
     end subroutine fit_decision_tree_regressor
