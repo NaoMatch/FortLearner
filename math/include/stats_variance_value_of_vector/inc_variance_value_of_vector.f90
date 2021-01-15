@@ -31,7 +31,7 @@ function variance_value_of_vector_real64(vector, num, mean_of_vector)
     do i=unroll+1, num
         tmp_sq_sum = tmp_sq_sum + vector(i) ** 2
     end do
-    variance_value_of_vector_real64 = tmp_sq_sum / dble(num-1)
+    variance_value_of_vector_real64 = tmp_sq_sum / dble(num)
 end function variance_value_of_vector_real64
 
 function variance_value_of_vector_int32(vector, num, mean_of_vector)

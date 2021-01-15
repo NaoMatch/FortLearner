@@ -269,7 +269,7 @@ contains
         real(kind=4)    :: tmp_sq_sums(7)
         real(kind=4)    :: tmp_variances(n_cols), tmp_inv
 
-        tmp_inv = 1.0 / float(n_rows-1)
+        tmp_inv = 1.0 / float(n_rows)
 
         if (present(means_of_matrix)) then
             means_of_matrix_opt = means_of_matrix

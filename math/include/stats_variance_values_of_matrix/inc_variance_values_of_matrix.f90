@@ -16,7 +16,7 @@ function variance_values_of_matrix_real64(matrix, n_rows, n_cols, means_of_matri
     else
         means_of_matrix_opt = mean(matrix, n_rows, n_cols)
     end if
-    tmp_inv = 1d0 / dble(n_rows-1)
+    tmp_inv = 1d0 / dble(n_rows)
 
     n_cols_unroll = n_cols - mod(n_cols, 7)
     do j=1, n_cols_unroll, 7
@@ -54,7 +54,7 @@ function variance_values_of_matrix_int32(matrix, n_rows, n_cols, means_of_matrix
     real(kind=4)    :: tmp_sq_sums(7)
     real(kind=4)    :: tmp_variances(n_cols), tmp_inv
 
-    tmp_inv = 1.0 / float(n_rows-1)
+    tmp_inv = 1.0 / float(n_rows)
 
     if (present(means_of_matrix)) then
         means_of_matrix_opt = means_of_matrix
@@ -98,7 +98,7 @@ function variance_values_of_matrix_int64(matrix, n_rows, n_cols, means_of_matrix
     real(kind=8)    :: tmp_sq_sums(7)
     real(kind=8)    :: tmp_variances(n_cols), tmp_inv
 
-    tmp_inv = 1d0 / dble(n_rows-1)
+    tmp_inv = 1d0 / dble(n_rows)
 
     if (present(means_of_matrix)) then
         means_of_matrix_opt = means_of_matrix

@@ -18,7 +18,8 @@ program main_decision_tree
     CHARACTER(len=256) :: file_name_x_test_bin, file_name_y_test_bin
     real(kind=8), ALLOCATABLE :: x_train(:,:), x_test(:,:)
     real(kind=8), ALLOCATABLE :: y_train(:,:), y_test(:,:)
-    real(kind=8), ALLOCATABLE :: y_train_pred(:,:), y_test_pred(:,:)
+    real(kind=8), ALLOCATABLE :: y_train_pred(:,:)
+    real(kind=8), ALLOCATABLE :: y_test_pred(:,:)
     
     type(metrics)                 :: metric
     type(data_holder), target     :: dholder
@@ -91,32 +92,14 @@ program main_decision_tree
     dholder = data_holder(x_train, y_train)
     dholder_ptr => dholder
 
-    print*, '============================================================='
-    print*, "FIT"
-    dt_reg = decision_tree_regressor(max_leaf_nodes=15_8, fashion="best")
-    call dt_reg%fit(dholder_ptr)
-
-    print*, '============================================================='
-    print*, "PREDICT TRAIN DATA"
-    y_train_pred = dt_reg%predict(x_train)
-    y_test_pred = dt_reg%predict(x_test)
-
-    print*, '============================================================='
-    print*, "METRICS"
-    print*, "    mse train: ", metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
-    print*, "    mse test:  ", metric%mean_square_error(y_test(:,1), y_test_pred(:,1))
-
-    print*, '============================================================='
-    print*, '============================================================='
-    print*, '============================================================='
-    print*, "BUG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    dt_reg = decision_tree_regressor(max_leaf_nodes=20_8, fashion="best")
-    call dt_reg%fit(dholder_ptr)
-    y_train_pred = dt_reg%predict(x_train)
-    y_test_pred = dt_reg%predict(x_test)
-    print*, '============================================================='
-    print*, "METRICS"
-    print*, "    mse train: ", metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
-    print*, "    mse test:  ", metric%mean_square_error(y_test(:,1), y_test_pred(:,1))
-
+    max_leaf_nodes = 100
+    do n_leaf_nodes=2, max_leaf_nodes
+        dt_reg = decision_tree_regressor(max_leaf_nodes=n_leaf_nodes, fashion="best")
+        call dt_reg%fit(dholder_ptr)
+        y_train_pred = dt_reg%predict(x_train)
+        y_test_pred = dt_reg%predict(x_test)
+        print*, "    mse train vs test: ", n_leaf_nodes, &
+            metric%mean_square_error(y_train(:,1), y_train_pred(:,1)), &
+            metric%mean_square_error(y_test(:,1), y_test_pred(:,1))
+    end do
 end program main_decision_tree

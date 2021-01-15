@@ -160,40 +160,40 @@ contains
                 this%root_node_axis_ptr%sum_p = sum(data_holder_ptr%y_ptr%y_r8_ptr, dim=1)
                 this%root_node_axis_ptr%response = mean(data_holder_ptr%y_ptr%y_r8_ptr, this%n_samples_, this%n_outputs_)
                 this%root_node_axis_ptr%impurity = sum(variance(data_holder_ptr%y_ptr%y_r8_ptr, this%n_samples_, this%n_outputs_, &
-                                                            this%root_node_axis_ptr%response)) / dble(this%n_outputs_)
+                                                        this%root_node_axis_ptr%response)) / dble(this%n_outputs_)
             end if
             this%root_node_axis_ptr%depth = 0_8 
             this%root_node_axis_ptr%n_columns = this%n_columns_
             this%root_node_axis_ptr%n_samples = this%n_samples_
         else
-            allocate(this%root_node_oblq_ptr%indices(this%n_samples_))
-            allocate(this%root_node_oblq_ptr%is_used(this%n_columns_))
-            allocate(this%root_node_oblq_ptr%is_useless(this%n_columns_))
-            allocate(this%root_node_oblq_ptr%sum_p(this%n_outputs_))
-            this%root_node_oblq_ptr%is_used = f_
-            this%root_node_oblq_ptr%is_useless = f_
-            allocate(this%root_node_oblq_ptr%coef_(this%n_columns_))
+            ! allocate(this%root_node_oblq_ptr%indices(this%n_samples_))
+            ! allocate(this%root_node_oblq_ptr%is_used(this%n_columns_))
+            ! allocate(this%root_node_oblq_ptr%is_useless(this%n_columns_))
+            ! allocate(this%root_node_oblq_ptr%sum_p(this%n_outputs_))
+            ! this%root_node_oblq_ptr%is_used = f_
+            ! this%root_node_oblq_ptr%is_useless = f_
+            ! allocate(this%root_node_oblq_ptr%coef_(this%n_columns_))
 
-            if ( this%hparam%boot_strap ) then
-                call rand_integer(1_8, this%n_samples_, this%root_node_oblq_ptr%indices, this%n_samples_)
-                call quick_sort(this%root_node_oblq_ptr%indices, this%n_samples_)
-            else
-                do i=1, this%n_samples_, 1
-                    this%root_node_oblq_ptr%indices(i) = i
-                end do
-            end if
+            ! if ( this%hparam%boot_strap ) then
+            !     call rand_integer(1_8, this%n_samples_, this%root_node_oblq_ptr%indices, this%n_samples_)
+            !     call quick_sort(this%root_node_oblq_ptr%indices, this%n_samples_)
+            ! else
+            !     do i=1, this%n_samples_, 1
+            !         this%root_node_oblq_ptr%indices(i) = i
+            !     end do
+            ! end if
 
-            if (is_classification) then
-                ! pass
-            else
-                this%root_node_oblq_ptr%sum_p = sum(data_holder_ptr%y_ptr%y_r8_ptr, dim=1)
-                this%root_node_oblq_ptr%response = mean(data_holder_ptr%y_ptr%y_r8_ptr, this%n_samples_, this%n_outputs_)
-                this%root_node_oblq_ptr%impurity = sum(variance(data_holder_ptr%y_ptr%y_r8_ptr, this%n_samples_, this%n_outputs_, &
-                                                            this%root_node_oblq_ptr%response)) / dble(this%n_outputs_)
-            end if
-            this%root_node_oblq_ptr%depth = 0_8 
-            this%root_node_oblq_ptr%n_columns = this%n_columns_
-            this%root_node_oblq_ptr%n_samples = this%n_samples_
+            ! if (is_classification) then
+            !     ! pass
+            ! else
+            !     this%root_node_oblq_ptr%sum_p = sum(data_holder_ptr%y_ptr%y_r8_ptr, dim=1)
+            !     this%root_node_oblq_ptr%response = mean(data_holder_ptr%y_ptr%y_r8_ptr, this%n_samples_, this%n_outputs_)
+            !     this%root_node_oblq_ptr%impurity = sum(variance(data_holder_ptr%y_ptr%y_r8_ptr, this%n_samples_, this%n_outputs_, &
+            !                                                 this%root_node_oblq_ptr%response)) / dble(this%n_outputs_)
+            ! end if
+            ! this%root_node_oblq_ptr%depth = 0_8 
+            ! this%root_node_oblq_ptr%n_columns = this%n_columns_
+            ! this%root_node_oblq_ptr%n_samples = this%n_samples_
         end if
     end subroutine init_root_node
 
@@ -327,11 +327,12 @@ contains
         real(kind=8), allocatable    :: res(:), tmp_f(:)
         logical(kind=4), allocatable :: lt_thresholds(:)
         integer(kind=8), allocatable :: indices_l(:), indices_r(:)
-        
-        if (n_samples .eq. 0) return
 
         if (is_root) node_id = 0_8
         node_id = node_id + 1_8
+        
+        if (n_samples .eq. 0 .and. result%is_terminals_(node_id)) return
+        if (n_samples .eq. 0) goto 999
 
         if ( result%is_terminals_(node_id) ) then
             allocate(res(result%n_outputs_))
@@ -357,6 +358,8 @@ contains
         count_r = n_samples - count_l
         allocate(indices_l(count_l))
         allocate(indices_r(count_r))
+        indices_l = -1_8
+        indices_r = -1_8
         count_l = 1_8
         count_r = 1_8
         do i=1, n_samples, 1
@@ -370,9 +373,17 @@ contains
             end if
         end do
 
+        999 continue
+        if ( .not. allocated(indices_l) .and. .not. allocated(indices_r)) then
+            count_l = 1_8
+            count_r = 1_8
+            allocate(indices_l(0_8))
+            allocate(indices_r(0_8))
+        end if
+
         call predict_response_axis(result, x_ptr, indices_l, responses, count_l-1, n_outputs, is_root=f_)
         call predict_response_axis(result, x_ptr, indices_r, responses, count_r-1, n_outputs, is_root=f_)
-        deallocate(indices_l, indices_r, tmp_f, lt_thresholds)
+        ! deallocate(indices_l, indices_r, tmp_f, lt_thresholds)
     end subroutine predict_response_axis
 
 
