@@ -92,14 +92,20 @@ program main_decision_tree
     dholder = data_holder(x_train, y_train)
     dholder_ptr => dholder
 
+    max_iter = 100
     max_leaf_nodes = 100
     do n_leaf_nodes=2, max_leaf_nodes
         dt_reg = decision_tree_regressor(max_leaf_nodes=n_leaf_nodes, fashion="best")
-        call dt_reg%fit(dholder_ptr)
+        call date_and_time(values=date_value1)
+        do iter=1, max_iter, 1
+            call dt_reg%fit(dholder_ptr)
+        end do
+        call date_and_time(values=date_value2)
         y_train_pred = dt_reg%predict(x_train)
         y_test_pred = dt_reg%predict(x_test)
         print*, "    mse train vs test: ", n_leaf_nodes, &
             metric%mean_square_error(y_train(:,1), y_train_pred(:,1)), &
-            metric%mean_square_error(y_test(:,1), y_test_pred(:,1))
+            metric%mean_square_error(y_test(:,1), y_test_pred(:,1)), &
+            time_diff(date_value1, date_value2)/dble(max_iter), "[msec]"
     end do
 end program main_decision_tree
