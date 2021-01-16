@@ -126,7 +126,7 @@ contains
 
             ! Sort response by feature
             ! call quick_argsort(tmp_f, sorted_indices, node_ptr%n_samples)
-            call pbucket_argsort_new_r8(tmp_f, sorted_indices, node_ptr%n_samples)
+            call pbucket_argsort(tmp_f, sorted_indices, node_ptr%n_samples)
             do i=1, node_ptr%n_samples
                 idx = sorted_indices(i)
                 tmp_y_copy(i,:) = tmp_y(idx,:)

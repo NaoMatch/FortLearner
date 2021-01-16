@@ -1,4 +1,4 @@
-subroutine cholesky_decomposition_modified_real64(matrix_lower, diagonal_elements, matrix, n_dim)
+subroutine cholesky_decomposition_modified_r8(matrix_lower, diagonal_elements, matrix, n_dim)
     implicit none
     real(kind=8), intent(inout) :: matrix_lower(n_dim, n_dim)
     real(kind=8), intent(inout) :: diagonal_elements(n_dim)
@@ -8,9 +8,9 @@ subroutine cholesky_decomposition_modified_real64(matrix_lower, diagonal_element
     real(kind=8)                :: tmp_sum, tmp_minus
 
     include "./include/linalg_cholesky_decomposition_modified/inc_cholesky_decomposition_modified_detail.f90"
-end subroutine cholesky_decomposition_modified_real64
+end subroutine cholesky_decomposition_modified_r8
 
-subroutine cholesky_decomposition_modified_int32(matrix_lower, diagonal_elements, matrix, n_dim)
+subroutine cholesky_decomposition_modified_i4(matrix_lower, diagonal_elements, matrix, n_dim)
     implicit none
     real(kind=4), intent(inout) :: matrix_lower(n_dim, n_dim)
     real(kind=4), intent(inout) :: diagonal_elements(n_dim)
@@ -20,9 +20,9 @@ subroutine cholesky_decomposition_modified_int32(matrix_lower, diagonal_elements
     real(kind=4)                :: tmp_sum, tmp_minus
 
     include "./include/linalg_cholesky_decomposition_modified/inc_cholesky_decomposition_modified_detail.f90"
-end subroutine cholesky_decomposition_modified_int32
+end subroutine cholesky_decomposition_modified_i4
 
-subroutine cholesky_decomposition_modified_int64(matrix_lower, diagonal_elements, matrix, n_dim)
+subroutine cholesky_decomposition_modified_i8(matrix_lower, diagonal_elements, matrix, n_dim)
     implicit none
     real(kind=8), intent(inout) :: matrix_lower(n_dim, n_dim)
     real(kind=8), intent(inout) :: diagonal_elements(n_dim)
@@ -32,4 +32,4 @@ subroutine cholesky_decomposition_modified_int64(matrix_lower, diagonal_elements
     real(kind=8)                :: tmp_sum, tmp_minus
 
     include "./include/linalg_cholesky_decomposition_modified/inc_cholesky_decomposition_modified_detail.f90"
-end subroutine cholesky_decomposition_modified_int64
+end subroutine cholesky_decomposition_modified_i8
