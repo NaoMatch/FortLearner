@@ -20,7 +20,7 @@ end do
 call quick_sort(values, n_sampling)
 n_unique = count_unique(values, n_sampling)
 if (n_unique .le. 10) then
-    call quick_sort(vector, n_samples)
+    call quick_argsort(vector, indices, n_samples)
     return
 elseif (n_unique .gt. int(n_samples * 0.98, kind=kind(n_unique))) then
     left_posi = most_left_bit_position(n_unique)
