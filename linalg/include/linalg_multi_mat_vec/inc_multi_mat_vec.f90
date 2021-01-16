@@ -1,4 +1,4 @@
-subroutine multi_mat_vec_real64(matrix, input_vector, output_vector, n_rows, n_cols)
+subroutine multi_mat_vec_r8(matrix, input_vector, output_vector, n_rows, n_cols)
     implicit none
     real(kind=8), intent(in)      :: matrix(n_rows, n_cols)
     real(kind=8), intent(in)      :: input_vector(n_cols)
@@ -10,9 +10,9 @@ subroutine multi_mat_vec_real64(matrix, input_vector, output_vector, n_rows, n_c
     output_vector = 0
 
     include "./include/linalg_multi_mat_vec/inc_multi_mat_vec_detail.f90"
-end subroutine multi_mat_vec_real64
+end subroutine multi_mat_vec_r8
 
-subroutine multi_mat_vec_int32(matrix, input_vector, output_vector, n_rows, n_cols)
+subroutine multi_mat_vec_i4(matrix, input_vector, output_vector, n_rows, n_cols)
     implicit none
     integer(kind=4), intent(in)      :: matrix(n_rows, n_cols)
     integer(kind=4), intent(in)      :: input_vector(n_cols)
@@ -24,9 +24,9 @@ subroutine multi_mat_vec_int32(matrix, input_vector, output_vector, n_rows, n_co
     output_vector = 0
 
     include "./include/linalg_multi_mat_vec/inc_multi_mat_vec_detail.f90"
-end subroutine multi_mat_vec_int32
+end subroutine multi_mat_vec_i4
 
-subroutine multi_mat_vec_int64(matrix, input_vector, output_vector, n_rows, n_cols)
+subroutine multi_mat_vec_i8(matrix, input_vector, output_vector, n_rows, n_cols)
     implicit none
     integer(kind=8), intent(in)      :: matrix(n_rows, n_cols)
     integer(kind=8), intent(in)      :: input_vector(n_cols)
@@ -38,4 +38,4 @@ subroutine multi_mat_vec_int64(matrix, input_vector, output_vector, n_rows, n_co
     output_vector = 0
 
     include "./include/linalg_multi_mat_vec/inc_multi_mat_vec_detail.f90"
-end subroutine multi_mat_vec_int64
+end subroutine multi_mat_vec_i8

@@ -21,42 +21,42 @@ module mod_stats
     !> Interface to call mean_value_of_vector_real32, mean_value_of_vector_real64, mean_value_of_vector_int32, mean_value_of_vector_int64
     interface mean  
         module procedure mean_value_of_vector_real32
-        module procedure mean_value_of_vector_real64     ! place in "./include/stats_mean_value_of_vector/inc_mean_value_of_vector.f90"
-        module procedure mean_value_of_vector_int32      ! place in "./include/stats_mean_value_of_vector/inc_mean_value_of_vector.f90"
-        module procedure mean_value_of_vector_int64      ! place in "./include/stats_mean_value_of_vector/inc_mean_value_of_vector.f90"
+        module procedure mean_value_of_vector_real64     ! place in "./include/stats/mean_value_of_vector/inc_mean_value_of_vector.f90"
+        module procedure mean_value_of_vector_int32      ! place in "./include/stats/mean_value_of_vector/inc_mean_value_of_vector.f90"
+        module procedure mean_value_of_vector_int64      ! place in "./include/stats/mean_value_of_vector/inc_mean_value_of_vector.f90"
 
         module procedure mean_values_of_matrix_real32
-        module procedure mean_values_of_matrix_real64     ! place in "./include/stats_mean_values_of_matrix/inc_mean_values_of_matrix.f90"
-        module procedure mean_values_of_matrix_int32      ! place in "./include/stats_mean_values_of_matrix/inc_mean_values_of_matrix.f90"
-        module procedure mean_values_of_matrix_int64      ! place in "./include/stats_mean_values_of_matrix/inc_mean_values_of_matrix.f90"
+        module procedure mean_values_of_matrix_real64     ! place in "./include/stats/mean_values_of_matrix/inc_mean_values_of_matrix.f90"
+        module procedure mean_values_of_matrix_int32      ! place in "./include/stats/mean_values_of_matrix/inc_mean_values_of_matrix.f90"
+        module procedure mean_values_of_matrix_int64      ! place in "./include/stats/mean_values_of_matrix/inc_mean_values_of_matrix.f90"
     end interface mean
 
     !> Interface to call variance_value_of_vector_real32, variance_value_of_vector_real64, variance_value_of_vector_int32, variance_value_of_vector_int64
     interface variance
         module procedure variance_value_of_vector_real32
-        module procedure variance_value_of_vector_real64     ! place in "./include/stats_variance_value_of_vector/inc_variance_value_of_vector.f90"
-        module procedure variance_value_of_vector_int32      ! place in "./include/stats_variance_value_of_vector/inc_variance_value_of_vector.f90"
-        module procedure variance_value_of_vector_int64      ! place in "./include/stats_variance_value_of_vector/inc_variance_value_of_vector.f90"
+        module procedure variance_value_of_vector_real64     ! place in "./include/stats/variance_value_of_vector/inc_variance_value_of_vector.f90"
+        module procedure variance_value_of_vector_int32      ! place in "./include/stats/variance_value_of_vector/inc_variance_value_of_vector.f90"
+        module procedure variance_value_of_vector_int64      ! place in "./include/stats/variance_value_of_vector/inc_variance_value_of_vector.f90"
 
         module procedure variance_values_of_matrix_real32
-        module procedure variance_values_of_matrix_real64     ! place in "./include/stats_variance_values_of_matrix/inc_variance_values_of_matrix.f90"
-        module procedure variance_values_of_matrix_int32      ! place in "./include/stats_variance_values_of_matrix/inc_variance_values_of_matrix.f90"
-        module procedure variance_values_of_matrix_int64      ! place in "./include/stats_variance_values_of_matrix/inc_variance_values_of_matrix.f90"
+        module procedure variance_values_of_matrix_real64     ! place in "./include/stats/variance_values_of_matrix/inc_variance_values_of_matrix.f90"
+        module procedure variance_values_of_matrix_int32      ! place in "./include/stats/variance_values_of_matrix/inc_variance_values_of_matrix.f90"
+        module procedure variance_values_of_matrix_int64      ! place in "./include/stats/variance_values_of_matrix/inc_variance_values_of_matrix.f90"
     end interface variance
 
     !> Interface to call covariance_value_of_vectors_real32, covariance_value_of_vectors_real64, covariance_value_of_vectors_int32, covariance_value_of_vectors_int64
     interface covariance
         module procedure covariance_value_of_vectors_real32
-        module procedure covariance_value_of_vectors_real64     ! place in "./include/stats_covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
-        module procedure covariance_value_of_vectors_int32      ! place in "./include/stats_covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
-        module procedure covariance_value_of_vectors_int64      ! place in "./include/stats_covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
+        module procedure covariance_value_of_vectors_real64     ! place in "./include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
+        module procedure covariance_value_of_vectors_int32      ! place in "./include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
+        module procedure covariance_value_of_vectors_int64      ! place in "./include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
     end interface covariance
 
     interface covariance_matrix
         module procedure covariance_matrix_of_matrix_real32
-        module procedure covariance_matrix_of_matrix_real64     ! place in "./include/stats_covariance_matrix_of_matrix/inc_covariance_matrix_of_matrix.f90"
-        module procedure covariance_matrix_of_matrix_int32      ! place in "./include/stats_covariance_matrix_of_matrix/inc_covariance_matrix_of_matrix.f90"
-        module procedure covariance_matrix_of_matrix_int64      ! place in "./include/stats_covariance_matrix_of_matrix/inc_covariance_matrix_of_matrix.f90"        
+        module procedure covariance_matrix_of_matrix_real64     ! place in "./include/stats/covariance_matrix_of_matrix/inc_covariance_matrix_of_matrix.f90"
+        module procedure covariance_matrix_of_matrix_int32      ! place in "./include/stats/covariance_matrix_of_matrix/inc_covariance_matrix_of_matrix.f90"
+        module procedure covariance_matrix_of_matrix_int64      ! place in "./include/stats/covariance_matrix_of_matrix/inc_covariance_matrix_of_matrix.f90"        
     end interface covariance_matrix
 
     interface groupby_sum
@@ -70,8 +70,6 @@ module mod_stats
 
     interface groupby_count
         module procedure groupby_count_r8
-        module procedure groupby_count_i8
-        module procedure groupby_count_fast_r8
     end interface groupby_count
 
 contains
@@ -142,7 +140,7 @@ contains
         end do
         mean_value_of_vector_real32 = tmp_sum / float(num)
     end function mean_value_of_vector_real32
-    include "./include/stats_mean_value_of_vector/inc_mean_value_of_vector.f90"
+    include "./include/stats/mean_value_of_vector/inc_mean_value_of_vector.f90"
 
 
     !> A function to calculate mean value of matrix, exactly equal to sum(matrix, dim=1)/N.
@@ -162,10 +160,10 @@ contains
         real(kind=4)    :: tmp_sums(7)
         real(kind=4)    :: tmp_means(n_cols), tmp_inv
 
-        include "./include/stats_mean_values_of_matrix/inc_mean_values_of_matrix_detail.f90"
+        include "./include/stats/mean_values_of_matrix/inc_mean_values_of_matrix_detail.f90"
         mean_values_of_matrix_real32 = tmp_means
     end function mean_values_of_matrix_real32
-    include "./include/stats_mean_values_of_matrix/inc_mean_values_of_matrix.f90"
+    include "./include/stats/mean_values_of_matrix/inc_mean_values_of_matrix.f90"
 
 
     !> A subroutine to get the minimum and maximum values from a 1-dim array at the same time. \n
@@ -183,9 +181,9 @@ contains
         real(kind=4)    :: tmp_val, tmp_min_val, tmp_max_val
         real(kind=4)    :: buffer(buffer_get_minmax)
         integer(kind=4) :: n, unroll, j
-        include "./include/stats_get_minmax/inc_get_minmax_detail.f90"
+        include "./include/stats/get_minmax/inc_get_minmax_detail.f90"
     end subroutine get_minmax_real32
-    include "./include/stats_get_minmax/inc_get_minmax.f90"
+    include "./include/stats/get_minmax/inc_get_minmax.f90"
 
 
     !> A subroutine to get the minimum and maximum values of a specified index of a 1-dim array at the same time. \n
@@ -247,7 +245,7 @@ contains
         end do
         variance_value_of_vector_real32 = tmp_sq_sum / float(num-1)
     end function variance_value_of_vector_real32
-    include "./include/stats_variance_value_of_vector/inc_variance_value_of_vector.f90"
+    include "./include/stats/variance_value_of_vector/inc_variance_value_of_vector.f90"
 
 
     !> A function to calculate variance values of matrix.
@@ -299,7 +297,7 @@ contains
         end do
         variance_values_of_matrix_real32 = tmp_variances
     end function variance_values_of_matrix_real32
-    include "./include/stats_variance_values_of_matrix/inc_variance_values_of_matrix.f90"
+    include "./include/stats/variance_values_of_matrix/inc_variance_values_of_matrix.f90"
 
 
     !> A function to calculate covariance of two imput vectors.
@@ -335,7 +333,7 @@ contains
         end do
         covariance_value_of_vectors_real32 = tmp_sum / float(num-1)
     end function covariance_value_of_vectors_real32
-    include "./include/stats_covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
+    include "./include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
 
 
     !> A subroutine to calculate covariance matrix of input matrix.
@@ -395,7 +393,7 @@ contains
             end do
         end do
     end subroutine covariance_matrix_of_matrix_real32
-    include "./include/stats_covariance_matrix_of_matrix/inc_covariance_matrix_of_matrix.f90"
+    include "./include/stats/covariance_matrix_of_matrix/inc_covariance_matrix_of_matrix.f90"
 
 
     !> A subroutine to calculate the total value of y for each unique value of x.
@@ -415,19 +413,23 @@ contains
 
         real(kind=8), allocatable :: x_copy(:), y_copy(:)
         real(kind=8)              :: sum_y
-        integer(kind=8)           :: n, i, i_start, i_stop
-        integer(kind=8), allocatable :: positions(:)
+        integer(kind=8)           :: n, i, i_start, i_stop, idx
+        integer(kind=8), allocatable :: positions(:), indices(:)
 
         if ( allocated(uniq_x) ) deallocate(uniq_x)
         if ( allocated(stat_y) ) deallocate(stat_y)
 
-        allocate(x_copy(n_samples), y_copy(n_samples))
+        allocate(x_copy(n_samples), y_copy(n_samples), indices(n_samples))
         do n=1, n_samples, 1
             x_copy(n) = x(n)
-            y_copy(n) = y(n)
+            indices(n) = n
+        end do
+        call quick_argsort(x_copy, indices, n_samples)
+        do n=1, n_samples, 1
+            idx = indices(n)
+            y_copy(n) = y(idx)
         end do
 
-        call quick_argsort(x_copy, y_copy, n_samples)
 
         allocate(uniq_x(0))
         allocate(positions(0))
@@ -453,6 +455,7 @@ contains
             stat_y = [stat_y, sum_y]
         end do
     end subroutine groupby_sum_r8
+
 
     subroutine groupby_sum_fast_r8(uniq_x, stat_x, x, n_samples)
         implicit none
@@ -520,19 +523,22 @@ contains
 
         real(kind=8), allocatable :: x_copy(:), y_copy(:)
         real(kind=8)              :: sum_y
-        integer(kind=8) :: n, i, i_start, i_stop
-        integer(kind=8), allocatable :: positions(:)
+        integer(kind=8) :: n, i, i_start, i_stop, idx
+        integer(kind=8), allocatable :: positions(:), indices(:)
 
         if ( allocated(uniq_x) ) deallocate(uniq_x)
         if ( allocated(stat_y) ) deallocate(stat_y)
 
-        allocate(x_copy(n_samples), y_copy(n_samples))
+        allocate(x_copy(n_samples), y_copy(n_samples), indices(n_samples))
         do n=1, n_samples, 1
             x_copy(n) = x(n)
-            y_copy(n) = y(n)
+            indices(n) = n
         end do
-
-        call quick_argsort(x_copy, y_copy, n_samples)
+        call quick_argsort(x_copy, indices, n_samples)
+        do n=1, n_samples, 1
+            idx = indices(n)
+            y_copy(n) = y(idx)
+        end do
 
         allocate(uniq_x(0))
         allocate(positions(0))
@@ -557,11 +563,6 @@ contains
             i_start = i_stop + 1
             stat_y = [stat_y, sum_y]
         end do
-
-        ! do n=1, size(uniq_x), 1
-        !     print*, uniq_x(n), positions(n), stat_y(n)
-        ! end do
-        ! print*, sum(y), sum(y_copy), sum(stat_y)
     end subroutine groupby_sq_sum_r8
 
 
@@ -572,97 +573,7 @@ contains
     !! \param stat_y statistical values of y for each unique values
     !! \param y input values to be aggregated
     !! \param n_samples number of samples of x and y
-    subroutine groupby_count_r8(uniq_x, x, stat_y, y, n_samples)
-        implicit none
-        real(kind=8), allocatable   :: uniq_x(:)
-        real(kind=8), intent(in)    :: x(n_samples)
-        integer(kind=8), allocatable   :: stat_y(:)
-        real(kind=8), intent(in)    :: y(n_samples)
-        integer(kind=8), intent(in) :: n_samples
-
-        real(kind=8), allocatable :: x_copy(:), y_copy(:)
-        real(kind=8)              :: sum_y
-        integer(kind=8) :: n, i, i_start, i_stop
-        integer(kind=8), allocatable :: positions(:)
-
-        if ( allocated(uniq_x) ) deallocate(uniq_x)
-        if ( allocated(stat_y) ) deallocate(stat_y)
-
-        allocate(x_copy(n_samples), y_copy(n_samples))
-        do n=1, n_samples, 1
-            x_copy(n) = x(n)
-            y_copy(n) = y(n)
-        end do
-
-        call quick_argsort(x_copy, y_copy, n_samples)
-
-        allocate(uniq_x(0))
-        allocate(positions(0))
-        uniq_x = [uniq_x, x_copy(1)]
-        do n=2, n_samples, 1
-            if ( x_copy(n-1) .ne. x_copy(n) ) then
-                uniq_x = [uniq_x, x_copy(n)]
-                positions = [positions, n-1]
-            end if
-        end do
-        positions = [positions, n_samples]
-
-        allocate(stat_y(0))
-        
-        i_start = 1
-        do n=1, size(positions), 1
-            sum_y = 0d0
-            stat_y = [stat_y, positions(n)-i_start+1]
-            i_start = positions(n)+1
-        end do
-    end subroutine groupby_count_r8
-
-    subroutine groupby_count_i8(uniq_x, x, stat_y, y, n_samples)
-        implicit none
-        integer(kind=8), allocatable   :: uniq_x(:)
-        integer(kind=8), intent(in)    :: x(n_samples)
-        integer(kind=8), allocatable   :: stat_y(:)
-        integer(kind=8), intent(in)    :: y(n_samples)
-        integer(kind=8), intent(in) :: n_samples
-
-        integer(kind=8), allocatable :: x_copy(:), y_copy(:)
-        integer(kind=8)              :: sum_y
-        integer(kind=8) :: n, i, i_start, i_stop
-        integer(kind=8), allocatable :: positions(:)
-
-        if ( allocated(uniq_x) ) deallocate(uniq_x)
-        if ( allocated(stat_y) ) deallocate(stat_y)
-
-        allocate(x_copy(n_samples), y_copy(n_samples))
-        do n=1, n_samples, 1
-            x_copy(n) = x(n)
-            y_copy(n) = y(n)
-        end do
-
-        call quick_argsort(x_copy, y_copy, n_samples)
-
-        allocate(uniq_x(0))
-        allocate(positions(0))
-        uniq_x = [uniq_x, x_copy(1)]
-        do n=2, n_samples, 1
-            if ( x_copy(n-1) .ne. x_copy(n) ) then
-                uniq_x = [uniq_x, x_copy(n)]
-                positions = [positions, n-1]
-            end if
-        end do
-        positions = [positions, n_samples]
-
-        allocate(stat_y(0))
-        
-        i_start = 1
-        do n=1, size(positions), 1
-            sum_y = 0d0
-            stat_y = [stat_y, positions(n)-i_start+1]
-            i_start = positions(n)+1
-        end do
-    end subroutine groupby_count_i8
-
-    subroutine groupby_count_fast_r8(uniq_x, stat_x, x, n_samples)
+    subroutine groupby_count_r8(uniq_x, stat_x, x, n_samples)
         implicit none
         real(kind=8), allocatable    :: uniq_x(:)
         integer(kind=8), allocatable :: stat_x(:)
@@ -702,6 +613,6 @@ contains
             stat_x(n) = positions(n)-i_start+1
             i_start = positions(n)+1
         end do
-    end subroutine groupby_count_fast_r8
+    end subroutine groupby_count_r8
 
 end module mod_stats

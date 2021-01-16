@@ -30,7 +30,6 @@ module mod_data_holder
 
     !> A type of Data holder in FortLearner
     type data_holder
-        logical(kind=4) :: is_classification
         logical(kind=4) :: is_preprocessed = f_
         logical(kind=4) :: is_random_rotation = f_
         logical(kind=4) :: is_presort = f_
@@ -55,6 +54,7 @@ module mod_data_holder
     !> Interface to data_holder.
     interface data_holder
         procedure :: new_data_holder_r8_r8
+        procedure :: new_data_holder_r8_i8
     end interface data_holder
 
 contains
@@ -74,15 +74,15 @@ contains
         x_shape = shape(x)
         y_shape = shape(y)
 
-        new_data_holder_r8_r8 % is_classification =  f_
         new_data_holder_r8_r8 % n_outputs         =  y_shape(2)
-        new_data_holder_r8_r8 % n_samples            =  x_shape(1)
-        new_data_holder_r8_r8 % n_columns            =  x_shape(2)
-        new_data_holder_r8_r8 % x_ptr % x_r8_ptr => x
-        new_data_holder_r8_r8 % y_ptr % y_r8_ptr => y
+        new_data_holder_r8_r8 % n_samples         =  x_shape(1)
+        new_data_holder_r8_r8 % n_columns         =  x_shape(2)
+        new_data_holder_r8_r8 % x_ptr % x_r8_ptr  => x
+        new_data_holder_r8_r8 % y_ptr % y_r8_ptr  => y
 
         new_data_holder_r8_r8 % is_preprocessed = f_
     end function new_data_holder_r8_r8
+    include "./include/new_data_holder/inc_new_data_holder.f90"
 
 
     !> A subroutine to build histgram, its strategy (how to discretize continuous values) depends on 'preprocessing::discretizer'
@@ -161,7 +161,7 @@ contains
                     this%works(i)%x_r8(n) = this%x_ptr%x_r8_ptr(n,i)
                     this%works(i)%i_i8(n) = n
                 end do
-                call pbucket_argsort_r8(this%works(i)%x_r8, this%works(i)%i_i8, int(this%n_samples, kind=8))
+                call pbucket_argsort(this%works(i)%x_r8, this%works(i)%i_i8, int(this%n_samples, kind=8))
             else
                 if (allocated(this%works(i)%x_r4)) deallocate(this%works(i)%x_r4)
                 if (allocated(this%works(i)%i_i4)) deallocate(this%works(i)%i_i4)
@@ -171,7 +171,7 @@ contains
                     this%works(i)%x_r4(n) = this%x_ptr%x_r4_ptr(n,i)
                     this%works(i)%i_i4(n) = n
                 end do
-                call pbucket_argsort_r4(this%works(i)%x_r4, this%works(i)%i_i4, int(this%n_samples, kind=4))
+                call pbucket_argsort(this%works(i)%x_r4, this%works(i)%i_i4, int(this%n_samples, kind=4))
             end if
         end do
     end subroutine preprocess_presort
