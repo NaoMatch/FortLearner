@@ -1,7 +1,6 @@
 !> A module for sort functions.
 module mod_sort
     use mod_common
-    use mod_math
     use mod_random
     implicit none
 
