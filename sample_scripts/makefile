@@ -216,5 +216,5 @@ main_search:
 	./main_search.out
 
 main_sort:
-	gfortran -w -fbounds-check ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90 main_sort.f90 -o main_sort.out
+	gfortran -w -O3 -unroll ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../math/mod_math.f90 ../common/mod_sort.f90 main_sort.f90 -o main_sort.out
 	./main_sort.out

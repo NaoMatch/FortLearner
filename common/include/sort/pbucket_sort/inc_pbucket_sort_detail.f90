@@ -9,6 +9,10 @@ if (present(rec_depth)) rec_depth_opt = rec_depth
 
 ! -----------------------------------------------------------------------
 n_sampling = sqrt(real(n_samples, kind=kind(n_sampling)))
+if ( n_sampling .eq. int(0, kind=kind(n_sampling)) ) then
+    call quick_sort(vector, n_samples)
+    return
+end if
 allocate(indices(n_sampling))
 allocate(values(n_sampling))
 call rand_integer(one, n_samples, indices, n_sampling)
@@ -43,16 +47,16 @@ diff = 1.0 / (vector_max-vector_min)
 max_val = n_buckets-1.0
 factor = diff * max_val
 diff = - vector_min * factor + 1
-n_samples_unroll = n_samples - mod(n_samples, 63)
+n_samples_unroll = n_samples - mod(n_samples, buffuer_size)
 
-do i=1, n_samples_unroll, 63
-    do k=0, 63-1, 1
+do i=1, n_samples_unroll, buffuer_size
+    do k=0, buffuer_size-1, 1
         tmp_v = vector(i+k)
         buffer_v(k+1) = tmp_v
         buffer_b(k+1) = int( tmp_v * factor + diff, kind=kind(bucket_idx))
     end do
 
-    do k=0, 63-1, 1
+    do k=0, buffuer_size-1, 1
         tmp_v = buffer_v(k+1)
         bucket_idx = buffer_b(k+1)
         cnt_b = counters(bucket_idx)
