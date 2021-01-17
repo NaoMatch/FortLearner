@@ -2,6 +2,7 @@
 module mod_linalg
     use mod_common
     use mod_const
+    use mod_stats
     implicit none
 
 
@@ -175,13 +176,19 @@ contains
     !! \param mat_in input matrix
     !! \param n_rows the number of rows of 'mat_in'
     !! \param n_cols the number of columns of 'mat_in'
-    subroutine mattxmat_r4(mat_out, mat_in, n_rows, n_cols, with_intercept)
+    subroutine mattxmat_r4(mat_out, mat_in, n_samples, n_columns, with_intercept)
         implicit none
-        real(kind=4), allocatable, intent(out) :: mat_out(:,:)
-        real(kind=4), intent(in)               :: mat_in(n_rows, n_cols)
-        integer(kind=4), intent(in)            :: n_rows, n_cols
+        real(kind=4), ALLOCATABLE, intent(inout) :: mat_out(:,:)
+        real(kind=4), intent(in)               :: mat_in(n_samples, n_columns)
+        integer(kind=4), intent(in)            :: n_samples, n_columns
         logical(kind=4), intent(in)            :: with_intercept
-        real(kind=4), allocatable              :: tmp_sum(:)
+        real(kind=4), allocatable              :: col_sums(:)
+        real(kind=4)                           :: tmp_sums(3), tmp_sum, tmp_val
+        integer(kind=4) :: buffer_size=3
+
+        integer(kind=4) :: i, j, k, l, one=1
+        integer(kind=4) :: n_columns_unroll, j_unroll
+        real(kind=4)    :: zero=0
         include "./include/linalg_mattxmat/inc_linalg_mattxmat_detail.f90"
     end subroutine mattxmat_r4
     include "./include/linalg_mattxmat/inc_linalg_mattxmat.f90"    

@@ -10,6 +10,13 @@ module mod_stats
         module procedure sum_up_left_with_indices_real32
     end interface sum_up_left
 
+    interface sum_of_matrix
+        module procedure sum_of_matrix_r4
+        module procedure sum_of_matrix_r8
+        module procedure sum_of_matrix_i4
+        module procedure sum_of_matrix_i8
+    end interface sum_of_matrix
+
     !> Interface to call get_minmax_real32, get_minmax_real64, get_minmax_int32, get_minmax_int64
     interface get_minmax
         module procedure get_minmax_real32
@@ -88,6 +95,20 @@ contains
         real(kind=4), intent(in)    :: threshold
         ! include "./include/common_get_minmax/inc_get_minmax_detail.f90"
     end subroutine sum_up_left_real32
+
+
+    subroutine sum_of_matrix_r4(sum_mat, matrix, n_samples, n_columns, dim)
+        implicit none
+        real(kind=4), allocatable, intent(inout) :: sum_mat(:)
+        real(kind=4), intent(in)                 :: matrix(n_samples, n_columns)
+        integer(kind=4), intent(in)              :: n_samples, n_columns
+        integer(kind=4), intent(in)              :: dim
+
+        integer(kind=4) :: i, j, k, one=1, two=2
+        real(kind=4) :: tmp_sum, zero=0.0
+        include "./include/stats/sum_of_matrix/inc_sum_of_matrix_detail.f90"
+    end subroutine sum_of_matrix_r4
+    include "./include/stats/sum_of_matrix/inc_sum_of_matrix.f90"    
 
 
     !> A subroutine to the sum of values less than or equal the threshold from a 1-dim array with position indices. \n
