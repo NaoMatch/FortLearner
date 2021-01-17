@@ -18,7 +18,6 @@ run:
 	make main_metric
 	make main_most_left_bit_position
 	make main_multi_mat_vec
-	make main_vector2sum1
 	make main_progress_bar
 	make main_rand_integer
 	make main_rand_normal
@@ -28,10 +27,15 @@ run:
 	make main_search
 	make main_sort
 	make main_sum_of_matrix
+	make main_vector2sum1
 
 
 main_cholesky_decomposition:
-	gfortran -w -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../linalg/mod_linalg.f90 main_cholesky_decomposition.f90 -o main_cholesky_decomposition.out
+	gfortran -w -unroll -O3 -ftree-vectorize \
+	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
+	../common/mod_random.f90 ../common/mod_sort.f90 \
+	../math/mod_stats.f90 ../linalg/mod_linalg.f90 \
+	main_cholesky_decomposition.f90 -o main_cholesky_decomposition.out
 	./main_cholesky_decomposition.out
 
 main_collect_unique_values:
@@ -122,11 +126,19 @@ main_identity:
 	./main_identity.out
 
 main_inner_product:
-	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 ../linalg/mod_linalg.f90 main_inner_product.f90 -o main_inner_product.out
+	gfortran -w -unroll -O3 -ftree-vectorize \
+	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
+	../common/mod_random.f90 ../common/mod_sort.f90 \
+	../math/mod_stats.f90 ../linalg/mod_linalg.f90 \
+	main_inner_product.f90 -o main_inner_product.out
 	./main_inner_product.out
 
 main_inv_unit_lower_matrix:
-	gfortran -w -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../linalg/mod_linalg.f90 main_inv_unit_lower_matrix.f90 -o main_inv_unit_lower_matrix.out
+	gfortran -w -unroll -O3 -ftree-vectorize \
+	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
+	../common/mod_random.f90 ../common/mod_sort.f90 \
+	../math/mod_stats.f90 ../linalg/mod_linalg.f90 \
+	main_inv_unit_lower_matrix.f90 -o main_inv_unit_lower_matrix.out
 	./main_inv_unit_lower_matrix.out
 
 main_is_sorted:
@@ -140,8 +152,8 @@ main_linear_regression:
 	../common/mod_timer.f90 \
 	../common/mod_random.f90 \
 	../common/mod_sort.f90 \
-	../linalg/mod_linalg.f90 \
 	../math/mod_stats.f90 \
+	../linalg/mod_linalg.f90 \
 	../metric/mod_metric.f90 \
 	\
 	../hyperparameter/mod_hyperparameter.f90 \
@@ -164,7 +176,7 @@ main_mattxmat:
 	./main_mattxmat.out
 
 main_mean_variance_covariance:
-	gfortran -w -fbounds-check -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_mean_variance_covariance.f90 -o main_mean_variance_covariance.out
+	gfortran -w -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_mean_variance_covariance.f90 -o main_mean_variance_covariance.out
 	./main_mean_variance_covariance.out
 
 main_metric:
@@ -185,12 +197,11 @@ main_most_left_bit_position:
 	./main_most_left_bit_position.out
 
 main_multi_mat_vec:
-	gfortran -w -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../linalg/mod_linalg.f90 main_multi_mat_vec.f90 -o main_multi_mat_vec.out
+	gfortran -w -unroll -O3 -ftree-vectorize \
+	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
+	../common/mod_random.f90 ../common/mod_sort.f90 \
+	../math/mod_stats.f90 ../linalg/mod_linalg.f90 main_multi_mat_vec.f90 -o main_multi_mat_vec.out
 	./main_multi_mat_vec.out
-
-main_vector2sum1:
-	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 ../linalg/mod_linalg.f90 main_vector2sum1.f90 -o main_vector2sum1.out
-	./main_vector2sum1.out
 
 main_progress_bar:
 	gfortran -w -fbounds-check ../common/mod_const.f90 ../common/mod_common.f90 main_progress_bar.f90 -o main_progress_bar.out
@@ -205,7 +216,11 @@ main_rand_normal:
 	./main_rand_normal.out
 
 main_random_rotation:
-	gfortran -w -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../linalg/mod_linalg.f90 main_random_rotation.f90 -o main_random_rotation.out
+	gfortran -w -unroll -O3 \
+	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
+	../common/mod_random.f90 ../common/mod_sort.f90 \
+	../math/mod_stats.f90 \
+	../linalg/mod_linalg.f90 main_random_rotation.f90 -o main_random_rotation.out
 	./main_random_rotation.out
 
 main_read2bin:
@@ -231,3 +246,13 @@ main_sum_of_matrix:
 	../math/mod_stats.f90 \
 	main_sum_of_matrix.f90 -o main_sum_of_matrix.out
 	./main_sum_of_matrix.out
+
+main_vector2sum1:
+	gfortran -w -unroll -O3 -ftree-vectorize \
+	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
+	../common/mod_random.f90 ../common/mod_sort.f90 \
+	../math/mod_stats.f90 \
+	../linalg/mod_linalg.f90 \
+	main_vector2sum1.f90 -o main_vector2sum1.out
+	./main_vector2sum1.out
+
