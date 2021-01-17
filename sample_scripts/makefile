@@ -27,6 +27,7 @@ run:
 	make main_search
 	make main_sort
 	make main_sum_of_matrix
+	make main_sum_up_left
 	make main_vector2sum1
 
 
@@ -246,6 +247,14 @@ main_sum_of_matrix:
 	../math/mod_stats.f90 \
 	main_sum_of_matrix.f90 -o main_sum_of_matrix.out
 	./main_sum_of_matrix.out
+
+main_sum_up_left:
+	gfortran -w -unroll -O3 -ftree-vectorize \
+	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
+	../common/mod_random.f90 ../common/mod_sort.f90 \
+	../math/mod_stats.f90 \
+	main_sum_up_left.f90 -o main_sum_up_left.out
+	./main_sum_up_left.out
 
 main_vector2sum1:
 	gfortran -w -unroll -O3 -ftree-vectorize \

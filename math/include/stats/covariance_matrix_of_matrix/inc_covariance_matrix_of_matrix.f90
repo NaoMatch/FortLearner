@@ -1,4 +1,4 @@
-subroutine covariance_matrix_of_matrix_real64(cov_mat, matrix, n_rows, n_cols, means_of_matrix)
+subroutine covariance_matrix_of_matrix_r8(cov_mat, matrix, n_rows, n_cols, means_of_matrix)
     implicit none
     real(kind=8), intent(inout) :: cov_mat(n_cols,n_cols)
     real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
@@ -48,9 +48,9 @@ subroutine covariance_matrix_of_matrix_real64(cov_mat, matrix, n_rows, n_cols, m
             cov_mat(j,i) = cov_mat(i,j)
         end do
     end do
-end subroutine covariance_matrix_of_matrix_real64
+end subroutine covariance_matrix_of_matrix_r8
 
-subroutine covariance_matrix_of_matrix_int32(cov_mat, matrix, n_rows, n_cols, means_of_matrix)
+subroutine covariance_matrix_of_matrix_i4(cov_mat, matrix, n_rows, n_cols, means_of_matrix)
     implicit none
     real(kind=4), intent(inout) :: cov_mat(n_cols,n_cols)
     integer(kind=4), intent(in)    :: matrix(n_rows, n_cols)
@@ -99,9 +99,9 @@ subroutine covariance_matrix_of_matrix_int32(cov_mat, matrix, n_rows, n_cols, me
         cov_mat(j,i) = cov_mat(i,j)
         end do
     end do
-end subroutine covariance_matrix_of_matrix_int32
+end subroutine covariance_matrix_of_matrix_i4
 
-subroutine covariance_matrix_of_matrix_int64(cov_mat, matrix, n_rows, n_cols, means_of_matrix)
+subroutine covariance_matrix_of_matrix_i8(cov_mat, matrix, n_rows, n_cols, means_of_matrix)
     implicit none
     real(kind=8), intent(inout) :: cov_mat(n_cols,n_cols)
     integer(kind=8), intent(in)    :: matrix(n_rows, n_cols)
@@ -149,4 +149,4 @@ subroutine covariance_matrix_of_matrix_int64(cov_mat, matrix, n_rows, n_cols, me
         cov_mat(j,i) = cov_mat(i,j)
         end do
     end do
-end subroutine covariance_matrix_of_matrix_int64
+end subroutine covariance_matrix_of_matrix_i8

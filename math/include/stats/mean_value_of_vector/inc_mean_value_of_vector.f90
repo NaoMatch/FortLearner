@@ -1,8 +1,8 @@
-function mean_value_of_vector_real64(vector, num)
+function mean_value_of_vector_r8(vector, num)
     implicit none
     real(kind=8), intent(in)      :: vector(num)
     integer(kind=8), intent(in) :: num
-    real(kind=8)                :: mean_value_of_vector_real64
+    real(kind=8)                :: mean_value_of_vector_r8
 
     real(kind=8)    :: tmp_sum
     real(kind=8)    :: buffer(15)
@@ -23,22 +23,22 @@ function mean_value_of_vector_real64(vector, num)
     do i=i_unroll+1, num, 1
         tmp_sum = tmp_sum + vector(i)
     end do
-    mean_value_of_vector_real64 = tmp_sum / dble(num)
-end function mean_value_of_vector_real64
+    mean_value_of_vector_r8 = tmp_sum / dble(num)
+end function mean_value_of_vector_r8
 
-function mean_value_of_vector_int32(vector, num)
+function mean_value_of_vector_i4(vector, num)
     implicit none
     integer(kind=4), intent(in) :: vector(num)
     integer(kind=4), intent(in) :: num
-    real(kind=4)                :: mean_value_of_vector_int32
-    mean_value_of_vector_int32 = float(sum(vector)) / float(num)
-end function mean_value_of_vector_int32
+    real(kind=4)                :: mean_value_of_vector_i4
+    mean_value_of_vector_i4 = float(sum(vector)) / float(num)
+end function mean_value_of_vector_i4
 
-function mean_value_of_vector_int64(vector, num)
+function mean_value_of_vector_i8(vector, num)
     implicit none
     integer(kind=8), intent(in) :: vector(num)
     integer(kind=8), intent(in) :: num
-    real(kind=8)                :: mean_value_of_vector_int64
-    mean_value_of_vector_int64 = dble(sum(vector)) / dble(num)
-end function mean_value_of_vector_int64
+    real(kind=8)                :: mean_value_of_vector_i8
+    mean_value_of_vector_i8 = dble(sum(vector)) / dble(num)
+end function mean_value_of_vector_i8
 

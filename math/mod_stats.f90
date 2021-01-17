@@ -4,10 +4,14 @@ module mod_stats
     use mod_sort
     implicit none
 
-    !> Interface to call sum_up_left_real32, sum_up_left_with_indices_real32
+    !> Interface to call sum_up_left_r4, sum_up_left_with_indices_real32
     interface sum_up_left
-        module procedure sum_up_left_real32
-        module procedure sum_up_left_with_indices_real32
+        module procedure sum_up_left_r4
+        module procedure sum_up_left_r8
+        module procedure sum_up_left_i4
+        module procedure sum_up_left_i4_r4_threshold
+        module procedure sum_up_left_i8
+        module procedure sum_up_left_i8_r8_threshold
     end interface sum_up_left
 
     interface sum_of_matrix
@@ -17,57 +21,57 @@ module mod_stats
         module procedure sum_of_matrix_i8
     end interface sum_of_matrix
 
-    !> Interface to call get_minmax_real32, get_minmax_real64, get_minmax_int32, get_minmax_int64
+    !> Interface to call get_minmax_r4, get_minmax_real64, get_minmax_int32, get_minmax_int64
     interface get_minmax
-        module procedure get_minmax_real32
-        module procedure get_minmax_real64
-        module procedure get_minmax_int32
-        module procedure get_minmax_int64
+        module procedure get_minmax_r4
+        module procedure get_minmax_r8
+        module procedure get_minmax_i4
+        module procedure get_minmax_i8
     end interface get_minmax
 
-    !> Interface to call mean_value_of_vector_real32, mean_value_of_vector_real64, mean_value_of_vector_int32, mean_value_of_vector_int64
+    !> Interface to call mean_value_of_vector_r4, mean_value_of_vector_r8, mean_value_of_vector_i4, mean_value_of_vector_i8
     interface mean  
-        module procedure mean_value_of_vector_real32
-        module procedure mean_value_of_vector_real64     ! place in "./include/stats/mean_value_of_vector/inc_mean_value_of_vector.f90"
-        module procedure mean_value_of_vector_int32      ! place in "./include/stats/mean_value_of_vector/inc_mean_value_of_vector.f90"
-        module procedure mean_value_of_vector_int64      ! place in "./include/stats/mean_value_of_vector/inc_mean_value_of_vector.f90"
+        module procedure mean_value_of_vector_r4
+        module procedure mean_value_of_vector_r8     ! place in "./include/stats/mean_value_of_vector/inc_mean_value_of_vector.f90"
+        module procedure mean_value_of_vector_i4      ! place in "./include/stats/mean_value_of_vector/inc_mean_value_of_vector.f90"
+        module procedure mean_value_of_vector_i8      ! place in "./include/stats/mean_value_of_vector/inc_mean_value_of_vector.f90"
 
-        module procedure mean_values_of_matrix_real32
-        module procedure mean_values_of_matrix_real64     ! place in "./include/stats/mean_values_of_matrix/inc_mean_values_of_matrix.f90"
-        module procedure mean_values_of_matrix_int32      ! place in "./include/stats/mean_values_of_matrix/inc_mean_values_of_matrix.f90"
-        module procedure mean_values_of_matrix_int64      ! place in "./include/stats/mean_values_of_matrix/inc_mean_values_of_matrix.f90"
+        module procedure mean_values_of_matrix_r4
+        module procedure mean_values_of_matrix_r8     ! place in "./include/stats/mean_values_of_matrix/inc_mean_values_of_matrix.f90"
+        module procedure mean_values_of_matrix_i4      ! place in "./include/stats/mean_values_of_matrix/inc_mean_values_of_matrix.f90"
+        module procedure mean_values_of_matrix_i8      ! place in "./include/stats/mean_values_of_matrix/inc_mean_values_of_matrix.f90"
     end interface mean
 
-    !> Interface to call variance_value_of_vector_real32, variance_value_of_vector_real64, variance_value_of_vector_int32, variance_value_of_vector_int64
+    !> Interface to call variance_value_of_vector_r4, variance_value_of_vector_r8, variance_value_of_vector_i4, variance_value_of_vector_i8
     interface variance
-        module procedure variance_value_of_vector_real32
-        module procedure variance_value_of_vector_real64     ! place in "./include/stats/variance_value_of_vector/inc_variance_value_of_vector.f90"
-        module procedure variance_value_of_vector_int32      ! place in "./include/stats/variance_value_of_vector/inc_variance_value_of_vector.f90"
-        module procedure variance_value_of_vector_int64      ! place in "./include/stats/variance_value_of_vector/inc_variance_value_of_vector.f90"
+        module procedure variance_value_of_vector_r4
+        module procedure variance_value_of_vector_r8     ! place in "./include/stats/variance_value_of_vector/inc_variance_value_of_vector.f90"
+        module procedure variance_value_of_vector_i4      ! place in "./include/stats/variance_value_of_vector/inc_variance_value_of_vector.f90"
+        module procedure variance_value_of_vector_i8      ! place in "./include/stats/variance_value_of_vector/inc_variance_value_of_vector.f90"
 
-        module procedure variance_values_of_matrix_real32
-        module procedure variance_values_of_matrix_real64     ! place in "./include/stats/variance_values_of_matrix/inc_variance_values_of_matrix.f90"
-        module procedure variance_values_of_matrix_int32      ! place in "./include/stats/variance_values_of_matrix/inc_variance_values_of_matrix.f90"
-        module procedure variance_values_of_matrix_int64      ! place in "./include/stats/variance_values_of_matrix/inc_variance_values_of_matrix.f90"
+        module procedure variance_values_of_matrix_r4
+        module procedure variance_values_of_matrix_r8     ! place in "./include/stats/variance_values_of_matrix/inc_variance_values_of_matrix.f90"
+        module procedure variance_values_of_matrix_i4      ! place in "./include/stats/variance_values_of_matrix/inc_variance_values_of_matrix.f90"
+        module procedure variance_values_of_matrix_i8      ! place in "./include/stats/variance_values_of_matrix/inc_variance_values_of_matrix.f90"
     end interface variance
 
-    !> Interface to call covariance_value_of_vectors_real32, covariance_value_of_vectors_real64, covariance_value_of_vectors_int32, covariance_value_of_vectors_int64
+    !> Interface to call covariance_value_of_vectors_r4, covariance_value_of_vectors_r8, covariance_value_of_vectors_i4, covariance_value_of_vectors_i8
     interface covariance
-        module procedure covariance_value_of_vectors_real32
-        module procedure covariance_value_of_vectors_real64     ! place in "./include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
-        module procedure covariance_value_of_vectors_int32      ! place in "./include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
-        module procedure covariance_value_of_vectors_int64      ! place in "./include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
+        module procedure covariance_value_of_vectors_r4
+        module procedure covariance_value_of_vectors_r8     ! place in "./include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
+        module procedure covariance_value_of_vectors_i4      ! place in "./include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
+        module procedure covariance_value_of_vectors_i8      ! place in "./include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
     end interface covariance
 
     interface covariance_matrix
-        module procedure covariance_matrix_of_matrix_real32
-        module procedure covariance_matrix_of_matrix_real64     ! place in "./include/stats/covariance_matrix_of_matrix/inc_covariance_matrix_of_matrix.f90"
-        module procedure covariance_matrix_of_matrix_int32      ! place in "./include/stats/covariance_matrix_of_matrix/inc_covariance_matrix_of_matrix.f90"
-        module procedure covariance_matrix_of_matrix_int64      ! place in "./include/stats/covariance_matrix_of_matrix/inc_covariance_matrix_of_matrix.f90"        
+        module procedure covariance_matrix_of_matrix_r4
+        module procedure covariance_matrix_of_matrix_r8     ! place in "./include/stats/covariance_matrix_of_matrix/inc_covariance_matrix_of_matrix.f90"
+        module procedure covariance_matrix_of_matrix_i4      ! place in "./include/stats/covariance_matrix_of_matrix/inc_covariance_matrix_of_matrix.f90"
+        module procedure covariance_matrix_of_matrix_i8      ! place in "./include/stats/covariance_matrix_of_matrix/inc_covariance_matrix_of_matrix.f90"        
     end interface covariance_matrix
 
     interface groupby_sum
-        module procedure groupby_sum_r8
+        module procedure groupby_sum_r8_r8
         module procedure groupby_sum_fast_r8
     end interface groupby_sum
 
@@ -87,14 +91,18 @@ contains
     !! \param vector input 1-dim vector
     !! \param num size of input 1-dim vector
     !! \param threshold threshold value
-    subroutine sum_up_left_real32(sum_left, vector, num, threshold)
+    function sum_up_left_r4(vector, threshold, n_samples)
         implicit none
-        real(kind=4), intent(out)   :: sum_left
-        real(kind=4), intent(in)    :: vector(num)
-        integer(kind=4), intent(in) :: num
+        real(kind=4)                :: sum_up_left_r4
+        real(kind=4), intent(in)    :: vector(n_samples)
         real(kind=4), intent(in)    :: threshold
-        ! include "./include/common_get_minmax/inc_get_minmax_detail.f90"
-    end subroutine sum_up_left_real32
+        integer(kind=4), intent(in) :: n_samples
+        integer(kind=4)             :: n, factor
+        real(kind=4)                :: val, tmp_sum, zero=0
+        include "./include/stats/sum_up_left/inc_sum_up_left_detail.f90"
+        sum_up_left_r4 = tmp_sum
+    end function sum_up_left_r4
+    include "./include/stats/sum_up_left/inc_sum_up_left.f90"
 
 
     subroutine sum_of_matrix_r4(sum_mat, matrix, n_samples, n_columns, dim)
@@ -111,34 +119,15 @@ contains
     include "./include/stats/sum_of_matrix/inc_sum_of_matrix.f90"    
 
 
-    !> A subroutine to the sum of values less than or equal the threshold from a 1-dim array with position indices. \n
-    !! \return returns the sum of values less than or equal the threshold.
-    !! \param vector input 1-dim vector
-    !! \param num size of input 1-dim vector
-    !! \param indices input 1-dim vector indices
-    !! \param n_idx size of input 1-dim vector indices, num >= n_idx
-    !! \param threshold threshold value
-    subroutine sum_up_left_with_indices_real32(sum_left, vector, num, indices, n_idx, threshold)
-        implicit none
-        real(kind=4), intent(out)   :: sum_left
-        real(kind=4), intent(in)    :: vector(num)
-        integer(kind=4), intent(in) :: num
-        integer(kind=4), intent(in) :: indices(n_idx)
-        integer(kind=4), intent(in) :: n_idx
-        real(kind=4), intent(in)    :: threshold
-        ! include "./include/common_get_minmax/inc_get_minmax_detail.f90"
-    end subroutine sum_up_left_with_indices_real32
-
-
     !> A function to calculate mean value of vector.
-    !! \return mean_value_of_vector_real32 mean value of vector
+    !! \return mean_value_of_vector_r4 mean value of vector
     !! \param vector input 1-dim vector
     !! \param num size to input vector
-    function mean_value_of_vector_real32(vector, num)
+    function mean_value_of_vector_r4(vector, num)
         implicit none
         real(kind=4), intent(in)      :: vector(num)
         integer(kind=4), intent(in) :: num
-        real(kind=4)                :: mean_value_of_vector_real32
+        real(kind=4)                :: mean_value_of_vector_r4
 
         real(kind=4)    :: tmp_sum
         real(kind=4)    :: buffer(31)
@@ -159,21 +148,21 @@ contains
         do i=i_unroll+1, num, 1
             tmp_sum = tmp_sum + vector(i)
         end do
-        mean_value_of_vector_real32 = tmp_sum / float(num)
-    end function mean_value_of_vector_real32
+        mean_value_of_vector_r4 = tmp_sum / float(num)
+    end function mean_value_of_vector_r4
     include "./include/stats/mean_value_of_vector/inc_mean_value_of_vector.f90"
 
 
     !> A function to calculate mean value of matrix, exactly equal to sum(matrix, dim=1)/N.
-    !! \return mean_values_of_matrix_real32 mean values of matrix
+    !! \return mean_values_of_matrix_r4 mean values of matrix
     !! \param matrix input 2-dim matrix
     !! \param n_rows number of rows of matrix
     !! \param n_cols number of columns of matrix
-    function mean_values_of_matrix_real32(matrix, n_rows, n_cols)
+    function mean_values_of_matrix_r4(matrix, n_rows, n_cols)
         implicit none
         real(kind=4), intent(in)    :: matrix(n_rows, n_cols)
         integer(kind=4), intent(in) :: n_rows, n_cols
-        real(kind=4)                :: mean_values_of_matrix_real32(n_cols)
+        real(kind=4)                :: mean_values_of_matrix_r4(n_cols)
 
         integer(kind=4) :: i, j, k
         real(kind=4)    :: tmp_sum
@@ -182,8 +171,8 @@ contains
         real(kind=4)    :: tmp_means(n_cols), tmp_inv
 
         include "./include/stats/mean_values_of_matrix/inc_mean_values_of_matrix_detail.f90"
-        mean_values_of_matrix_real32 = tmp_means
-    end function mean_values_of_matrix_real32
+        mean_values_of_matrix_r4 = tmp_means
+    end function mean_values_of_matrix_r4
     include "./include/stats/mean_values_of_matrix/inc_mean_values_of_matrix.f90"
 
 
@@ -193,7 +182,7 @@ contains
     !! \param max_val maximum value of the input vector
     !! \param vector input 1-dim vector
     !! \param num size of input 1-dim vector
-    subroutine get_minmax_real32(min_val, max_val, vector, num)
+    subroutine get_minmax_r4(min_val, max_val, vector, num)
         implicit none
         real(kind=4), intent(out)   :: min_val
         real(kind=4), intent(out)   :: max_val
@@ -203,7 +192,7 @@ contains
         real(kind=4)    :: buffer(buffer_get_minmax)
         integer(kind=4) :: n, unroll, j
         include "./include/stats/get_minmax/inc_get_minmax_detail.f90"
-    end subroutine get_minmax_real32
+    end subroutine get_minmax_r4
     include "./include/stats/get_minmax/inc_get_minmax.f90"
 
 
@@ -231,11 +220,11 @@ contains
     !! \param vector input 1-dim vector
     !! \param num size to input vector
     !! \return variance_real32 variance
-    function variance_value_of_vector_real32(vector, num, mean_of_vector)
+    function variance_value_of_vector_r4(vector, num, mean_of_vector)
         implicit none
         real(kind=4), intent(in)      :: vector(num)
         integer(kind=4), intent(in) :: num
-        real(kind=4)                :: variance_value_of_vector_real32
+        real(kind=4)                :: variance_value_of_vector_r4
         real(kind=4), optional      :: mean_of_vector
         real(kind=4)                :: mean_of_vector_opt, tmp_sq_sum, tmp
         real(kind=4)                :: buffer(31)
@@ -264,8 +253,8 @@ contains
         do i=unroll+1, num
             tmp_sq_sum = tmp_sq_sum + (vector(i)-mean_of_vector_opt) ** 2
         end do
-        variance_value_of_vector_real32 = tmp_sq_sum / float(num-1)
-    end function variance_value_of_vector_real32
+        variance_value_of_vector_r4 = tmp_sq_sum / float(num-1)
+    end function variance_value_of_vector_r4
     include "./include/stats/variance_value_of_vector/inc_variance_value_of_vector.f90"
 
 
@@ -275,11 +264,11 @@ contains
     !! \param n_rows number of rows of matrix
     !! \param n_cols number of columns of matrix
     !! \param means_of_matrix ***optional*** precomputed mean values of matrix
-    function variance_values_of_matrix_real32(matrix, n_rows, n_cols, means_of_matrix)
+    function variance_values_of_matrix_r4(matrix, n_rows, n_cols, means_of_matrix)
         implicit none
         real(kind=4), intent(in)    :: matrix(n_rows, n_cols)
         integer(kind=4), intent(in) :: n_rows, n_cols
-        real(kind=4)                :: variance_values_of_matrix_real32(n_cols)
+        real(kind=4)                :: variance_values_of_matrix_r4(n_cols)
         real(kind=4), optional      :: means_of_matrix(n_cols)
 
         integer(kind=4) :: i, j, k
@@ -316,8 +305,8 @@ contains
             end do
             tmp_variances(j) = tmp_sq_sum * tmp_inv
         end do
-        variance_values_of_matrix_real32 = tmp_variances
-    end function variance_values_of_matrix_real32
+        variance_values_of_matrix_r4 = tmp_variances
+    end function variance_values_of_matrix_r4
     include "./include/stats/variance_values_of_matrix/inc_variance_values_of_matrix.f90"
 
 
@@ -328,11 +317,11 @@ contains
     !! \param num size to input vector
     !! \param mean1 ***optional*** precomputed mean value of vector1
     !! \param mean2 ***optional*** precomputed mean value of vector2
-    function covariance_value_of_vectors_real32(vector1, vector2, num, mean1, mean2)
+    function covariance_value_of_vectors_r4(vector1, vector2, num, mean1, mean2)
         implicit none
         real(kind=4), intent(in)      :: vector1(num), vector2(num)
         integer(kind=4), intent(in) :: num
-        real(kind=4)                :: covariance_value_of_vectors_real32
+        real(kind=4)                :: covariance_value_of_vectors_r4
         real(kind=4), optional      :: mean1, mean2
         real(kind=4)                :: mean1_opt, mean2_opt, tmp_sum
         integer(kind=4)             :: i
@@ -352,8 +341,8 @@ contains
         do i=1, num, 1
             tmp_sum = tmp_sum + (vector1(i)-mean1_opt) * (vector2(i)-mean2_opt)
         end do
-        covariance_value_of_vectors_real32 = tmp_sum / float(num-1)
-    end function covariance_value_of_vectors_real32
+        covariance_value_of_vectors_r4 = tmp_sum / float(num-1)
+    end function covariance_value_of_vectors_r4
     include "./include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
 
 
@@ -365,7 +354,7 @@ contains
     !! \param n_cols number of columns of matrix
     !! \param mean1 ***optional*** precomputed mean value of vector1
     !! \param mean2 ***optional*** precomputed mean value of vector2
-    subroutine covariance_matrix_of_matrix_real32(cov_mat, matrix, n_rows, n_cols, means_of_matrix)
+    subroutine covariance_matrix_of_matrix_r4(cov_mat, matrix, n_rows, n_cols, means_of_matrix)
         implicit none
         real(kind=4), intent(inout) :: cov_mat(n_cols,n_cols)
         real(kind=4), intent(in)    :: matrix(n_rows, n_cols)
@@ -413,7 +402,7 @@ contains
             cov_mat(j,i) = cov_mat(i,j)
             end do
         end do
-    end subroutine covariance_matrix_of_matrix_real32
+    end subroutine covariance_matrix_of_matrix_r4
     include "./include/stats/covariance_matrix_of_matrix/inc_covariance_matrix_of_matrix.f90"
 
 
@@ -424,7 +413,7 @@ contains
     !! \param stat_y statistical values of y for each unique values
     !! \param y input values to be aggregated
     !! \param n_samples number of samples of x and y
-    subroutine groupby_sum_r8(uniq_x, x, stat_y, y, n_samples)
+    subroutine groupby_sum_r8_r8(uniq_x, x, stat_y, y, n_samples)
         implicit none
         real(kind=8), allocatable   :: uniq_x(:)
         real(kind=8), intent(in)    :: x(n_samples)
@@ -451,7 +440,6 @@ contains
             y_copy(n) = y(idx)
         end do
 
-
         allocate(uniq_x(0))
         allocate(positions(0))
         uniq_x = [uniq_x, x_copy(1)]
@@ -475,7 +463,7 @@ contains
             i_start = i_stop + 1
             stat_y = [stat_y, sum_y]
         end do
-    end subroutine groupby_sum_r8
+    end subroutine groupby_sum_r8_r8
 
 
     subroutine groupby_sum_fast_r8(uniq_x, stat_x, x, n_samples)

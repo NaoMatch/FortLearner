@@ -1,8 +1,8 @@
-function mean_values_of_matrix_real64(matrix, n_rows, n_cols)
+function mean_values_of_matrix_r8(matrix, n_rows, n_cols)
     implicit none
     real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
     integer(kind=8), intent(in) :: n_rows, n_cols
-    real(kind=8)                :: mean_values_of_matrix_real64(n_cols)
+    real(kind=8)                :: mean_values_of_matrix_r8(n_cols)
 
     integer(kind=8) :: i, j, k
     real(kind=8)    :: tmp_sum
@@ -12,14 +12,14 @@ function mean_values_of_matrix_real64(matrix, n_rows, n_cols)
     tmp_inv = 1.0 / dble(n_rows)
 
     include "./include/stats/mean_values_of_matrix/inc_mean_values_of_matrix_detail.f90"
-    mean_values_of_matrix_real64 = tmp_means
-end function mean_values_of_matrix_real64
+    mean_values_of_matrix_r8 = tmp_means
+end function mean_values_of_matrix_r8
 
-function mean_values_of_matrix_int32(matrix, n_rows, n_cols)
+function mean_values_of_matrix_i4(matrix, n_rows, n_cols)
     implicit none
     integer(kind=4), intent(in)    :: matrix(n_rows, n_cols)
     integer(kind=4), intent(in) :: n_rows, n_cols
-    real(kind=4)                :: mean_values_of_matrix_int32(n_cols)
+    real(kind=4)                :: mean_values_of_matrix_i4(n_cols)
 
     integer(kind=4) :: i, j, k
     real(kind=4)    :: tmp_sum
@@ -49,14 +49,14 @@ function mean_values_of_matrix_int32(matrix, n_rows, n_cols)
         end do
         tmp_means(j) = tmp_sum * tmp_inv
     end do
-    mean_values_of_matrix_int32 = tmp_means
-end function mean_values_of_matrix_int32
+    mean_values_of_matrix_i4 = tmp_means
+end function mean_values_of_matrix_i4
 
-function mean_values_of_matrix_int64(matrix, n_rows, n_cols)
+function mean_values_of_matrix_i8(matrix, n_rows, n_cols)
     implicit none
     integer(kind=8), intent(in)    :: matrix(n_rows, n_cols)
     integer(kind=8), intent(in) :: n_rows, n_cols
-    real(kind=8)                :: mean_values_of_matrix_int64(n_cols)
+    real(kind=8)                :: mean_values_of_matrix_i8(n_cols)
 
     integer(kind=8) :: i, j, k
     real(kind=8)    :: tmp_sum
@@ -86,5 +86,5 @@ function mean_values_of_matrix_int64(matrix, n_rows, n_cols)
         end do
         tmp_means(j) = tmp_sum * tmp_inv
     end do
-    mean_values_of_matrix_int64 = tmp_means
-end function mean_values_of_matrix_int64
+    mean_values_of_matrix_i8 = tmp_means
+end function mean_values_of_matrix_i8

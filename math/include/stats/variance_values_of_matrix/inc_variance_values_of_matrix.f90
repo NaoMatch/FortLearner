@@ -1,8 +1,8 @@
-function variance_values_of_matrix_real64(matrix, n_rows, n_cols, means_of_matrix)
+function variance_values_of_matrix_r8(matrix, n_rows, n_cols, means_of_matrix)
     implicit none
     real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
     integer(kind=8), intent(in) :: n_rows, n_cols
-    real(kind=8)                :: variance_values_of_matrix_real64(n_cols)
+    real(kind=8)                :: variance_values_of_matrix_r8(n_cols)
     real(kind=8), optional      :: means_of_matrix(n_cols)
 
     integer(kind=8) :: i, j, k
@@ -38,14 +38,14 @@ function variance_values_of_matrix_real64(matrix, n_rows, n_cols, means_of_matri
         end do
         tmp_variances(j) = tmp_sq_sum * tmp_inv
     end do
-    variance_values_of_matrix_real64 = tmp_variances
-end function variance_values_of_matrix_real64
+    variance_values_of_matrix_r8 = tmp_variances
+end function variance_values_of_matrix_r8
 
-function variance_values_of_matrix_int32(matrix, n_rows, n_cols, means_of_matrix)
+function variance_values_of_matrix_i4(matrix, n_rows, n_cols, means_of_matrix)
     implicit none
     integer(kind=4), intent(in)    :: matrix(n_rows, n_cols)
     integer(kind=4), intent(in) :: n_rows, n_cols
-    real(kind=4)                :: variance_values_of_matrix_int32(n_cols)
+    real(kind=4)                :: variance_values_of_matrix_i4(n_cols)
     real(kind=4), optional      :: means_of_matrix(n_cols)
 
     integer(kind=4) :: i, j, k
@@ -82,14 +82,14 @@ function variance_values_of_matrix_int32(matrix, n_rows, n_cols, means_of_matrix
         end do
         tmp_variances(j) = tmp_sq_sum * tmp_inv
     end do
-    variance_values_of_matrix_int32 = tmp_variances
-end function variance_values_of_matrix_int32
+    variance_values_of_matrix_i4 = tmp_variances
+end function variance_values_of_matrix_i4
 
-function variance_values_of_matrix_int64(matrix, n_rows, n_cols, means_of_matrix)
+function variance_values_of_matrix_i8(matrix, n_rows, n_cols, means_of_matrix)
     implicit none
     integer(kind=8), intent(in)    :: matrix(n_rows, n_cols)
     integer(kind=8), intent(in) :: n_rows, n_cols
-    real(kind=8)                :: variance_values_of_matrix_int64(n_cols)
+    real(kind=8)                :: variance_values_of_matrix_i8(n_cols)
     real(kind=8), optional      :: means_of_matrix(n_cols)
 
     integer(kind=8) :: i, j, k
@@ -126,5 +126,5 @@ function variance_values_of_matrix_int64(matrix, n_rows, n_cols, means_of_matrix
         end do
         tmp_variances(j) = tmp_sq_sum * tmp_inv
     end do
-    variance_values_of_matrix_int64 = tmp_variances
-end function variance_values_of_matrix_int64
+    variance_values_of_matrix_i8 = tmp_variances
+end function variance_values_of_matrix_i8
