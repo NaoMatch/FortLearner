@@ -71,8 +71,19 @@ module mod_stats
     end interface covariance_matrix
 
     interface groupby_sum
+        module procedure groupby_sum_r4_r4
+        module procedure groupby_sum_r4_i4
         module procedure groupby_sum_r8_r8
+        module procedure groupby_sum_r8_i8
+        module procedure groupby_sum_i4_r4
+        module procedure groupby_sum_i4_i4
+        module procedure groupby_sum_i8_r8
+        module procedure groupby_sum_i8_i8
+        
+        module procedure groupby_sum_fast_r4
         module procedure groupby_sum_fast_r8
+        module procedure groupby_sum_fast_i4
+        module procedure groupby_sum_fast_i8
     end interface groupby_sum
 
     interface groupby_sq_sum
@@ -80,7 +91,10 @@ module mod_stats
     end interface groupby_sq_sum
 
     interface groupby_count
+        module procedure groupby_count_r4
         module procedure groupby_count_r8
+        module procedure groupby_count_i4
+        module procedure groupby_count_i8
     end interface groupby_count
 
 contains
@@ -277,106 +291,38 @@ contains
     !! \param stat_y statistical values of y for each unique values
     !! \param y input values to be aggregated
     !! \param n_samples number of samples of x and y
-    subroutine groupby_sum_r8_r8(uniq_x, x, stat_y, y, n_samples)
+    subroutine groupby_sum_r4_r4(uniq_x, x, stat_y, y, n_samples)
         implicit none
-        real(kind=8), allocatable   :: uniq_x(:)
-        real(kind=8), intent(in)    :: x(n_samples)
-        real(kind=8), allocatable   :: stat_y(:)
-        real(kind=8), intent(in)    :: y(n_samples)
-        integer(kind=8), intent(in) :: n_samples
+        real(kind=4), allocatable   :: uniq_x(:)
+        real(kind=4), intent(in)    :: x(n_samples)
+        real(kind=4), allocatable   :: stat_y(:)
+        real(kind=4), intent(in)    :: y(n_samples)
+        integer(kind=4), intent(in) :: n_samples
 
-        real(kind=8), allocatable :: x_copy(:), y_copy(:)
-        real(kind=8)              :: sum_y
-        integer(kind=8)           :: n, i, i_start, i_stop, idx
-        integer(kind=8), allocatable :: positions(:), indices(:)
-
-        if ( allocated(uniq_x) ) deallocate(uniq_x)
-        if ( allocated(stat_y) ) deallocate(stat_y)
-
-        allocate(x_copy(n_samples), y_copy(n_samples), indices(n_samples))
-        do n=1, n_samples, 1
-            x_copy(n) = x(n)
-            indices(n) = n
-        end do
-        call quick_argsort(x_copy, indices, n_samples)
-        do n=1, n_samples, 1
-            idx = indices(n)
-            y_copy(n) = y(idx)
-        end do
-
-        allocate(uniq_x(0))
-        allocate(positions(0))
-        uniq_x = [uniq_x, x_copy(1)]
-        do n=2, n_samples, 1
-            if ( x_copy(n-1) .ne. x_copy(n) ) then
-                uniq_x = [uniq_x, x_copy(n)]
-                positions = [positions, n-1]
-            end if
-        end do
-        positions = [positions, n_samples]
-
-        allocate(stat_y(0))
-        
-        i_start = 1
-        do n=1, size(positions), 1
-            sum_y = 0d0
-            i_stop = positions(n)
-            do i=i_start,  i_stop, 1
-                sum_y = sum_y + y_copy(i)
-            end do
-            i_start = i_stop + 1
-            stat_y = [stat_y, sum_y]
-        end do
-    end subroutine groupby_sum_r8_r8
+        real(kind=4), allocatable :: x_copy(:)
+        real(kind=4), allocatable :: y_copy(:)
+        real(kind=4)              :: sum_y
+        integer(kind=4)           :: n, i, i_start, i_stop, idx
+        integer(kind=4), allocatable :: positions(:), indices(:)
+        include "./include/stats/groupby_sum/inc_groupby_sum_detail.f90"
+    end subroutine groupby_sum_r4_r4
+    include "./include/stats/groupby_sum/inc_groupby_sum.f90"
 
 
-    subroutine groupby_sum_fast_r8(uniq_x, stat_x, x, n_samples)
+    subroutine groupby_sum_fast_r4(uniq_x, stat_x, x, n_samples)
         implicit none
-        real(kind=8), allocatable   :: uniq_x(:)
-        real(kind=8), allocatable   :: stat_x(:)
-        real(kind=8), intent(in)    :: x(n_samples)
-        integer(kind=8), intent(in) :: n_samples
+        real(kind=4), allocatable   :: uniq_x(:)
+        real(kind=4), allocatable   :: stat_x(:)
+        real(kind=4), intent(in)    :: x(n_samples)
+        integer(kind=4), intent(in) :: n_samples
 
-        real(kind=8), allocatable :: x_copy(:)
-        real(kind=8)              :: sum_x
-        integer(kind=8)           :: n, i, i_start, i_stop, n_unique, idx
-        integer(kind=8), allocatable :: positions(:)
-
-        if ( allocated(uniq_x) ) deallocate(uniq_x)
-        if ( allocated(stat_x) ) deallocate(stat_x)
-
-        allocate(x_copy(n_samples))
-        do n=1, n_samples, 1
-            x_copy(n) = x(n)
-        end do
-        call quick_sort(x_copy, n_samples)
-        n_unique = count_unique(x_copy, n_samples)
-
-        allocate(uniq_x(n_unique))
-        allocate(positions(n_unique))
-        uniq_x(1) = x_copy(1)
-        idx = 2
-        do n=2, n_samples, 1
-            if ( x_copy(n-1) .ne. x_copy(n) ) then
-                uniq_x(idx) = x_copy(n)
-                positions(idx-1) = n-1
-                idx = idx + 1
-            end if
-        end do
-        positions(n_unique) = n_samples
-
-        allocate(stat_x(n_unique))        
-        i_start = 1
-        do n=1, size(positions), 1
-            sum_x = 0d0
-            i_stop = positions(n)
-            do i=i_start,  i_stop, 1
-                sum_x = sum_x + x_copy(i)
-            end do
-            stat_x(n) = sum_x
-            i_start = i_stop + 1
-        end do
-    end subroutine groupby_sum_fast_r8
+        real(kind=4), allocatable :: x_copy(:)
+        real(kind=4)              :: sum_x
+        integer(kind=4)           :: n, i, i_start, i_stop, n_unique, idx
+        integer(kind=4), allocatable :: positions(:)
+        include "./include/stats/groupby_sum/inc_groupby_sum_fast_detail.f90"
+    end subroutine groupby_sum_fast_r4
+    include "./include/stats/groupby_sum/inc_groupby_sum_fast.f90"
 
 
     !> A subroutine to calculate the squared value of y for each unique value of x.
@@ -446,46 +392,56 @@ contains
     !! \param stat_y statistical values of y for each unique values
     !! \param y input values to be aggregated
     !! \param n_samples number of samples of x and y
-    subroutine groupby_count_r8(uniq_x, stat_x, x, n_samples)
+    subroutine groupby_count_r4(uniq_x, stat_x, x, n_samples)
         implicit none
-        real(kind=8), allocatable    :: uniq_x(:)
-        integer(kind=8), allocatable :: stat_x(:)
-        real(kind=8), intent(in)     :: x(n_samples)
-        integer(kind=8), intent(in)  :: n_samples
+        real(kind=4), allocatable    :: uniq_x(:)
+        integer(kind=4), allocatable :: stat_x(:)
+        real(kind=4), intent(in)     :: x(n_samples)
+        integer(kind=4), intent(in)  :: n_samples
 
-        real(kind=8), allocatable :: x_copy(:)
-        integer(kind=8) :: n, i, i_start, i_stop, n_unique, idx
-        integer(kind=8), allocatable :: positions(:)
+        real(kind=4), allocatable :: x_copy(:)
+        integer(kind=4) :: n, i, i_start, i_stop, n_unique, idx
+        integer(kind=4), allocatable :: positions(:)
+        include "./include/stats/groupby_count/inc_groupby_count_detail.f90"
+    end subroutine groupby_count_r4
+    include "./include/stats/groupby_count/inc_groupby_count.f90"
 
-        if ( allocated(uniq_x) ) deallocate(uniq_x)
-        if ( allocated(stat_x) ) deallocate(stat_x)
+
+    subroutine groupby_mean_r4(uniq_x, x, stat_y, y, n_samples)
+        implicit none
+        real(kind=4), allocatable   :: uniq_x(:)
+        real(kind=4), intent(in)    :: x(n_samples)
+        real(kind=4), allocatable   :: stat_y(:)
+        real(kind=4), intent(in)    :: y(n_samples)
+        integer(kind=4), intent(in) :: n_samples
+
+        real(kind=4), allocatable    :: x_copy(:)
+        real(kind=4), allocatable    :: y_copy(:)
+        real(kind=4), allocatable    :: sum_y(:)
+        integer(kind=4), allocatable :: count_x(:)
+        integer(kind=4) :: n, u, n_unique_x
+        real(kind=4) :: kind_r
 
         allocate(x_copy(n_samples))
+        allocate(y_copy(n_samples))
         do n=1, n_samples, 1
             x_copy(n) = x(n)
+            y_copy(n) = y(n)
         end do
-        call quick_sort(x_copy, n_samples)
-        n_unique = count_unique(x_copy, n_samples)
+        call pbucket_argsort(x_copy, y_copy, n_samples)
 
-        allocate(uniq_x(n_unique))
-        allocate(positions(n_unique))
-        uniq_x(1) = x_copy(1)
-        idx = 2
-        do n=2, n_samples, 1
-            if ( x_copy(n-1) .ne. x_copy(n) ) then
-                uniq_x(idx) = x_copy(n)
-                positions(idx-1) = n-1
-                idx = idx + 1
+        call groupby_sum(uniq_x, x_copy, sum_y, y_copy, n_samples)
+        call groupby_count(uniq_x, count_x, x_copy, n_samples)
+
+        n_unique_x = size(uniq_x)
+        allocate(stat_y(n_unique_x))
+        do u=1, n_unique_x, 1
+            if ( count_x(u) .eq. 0 ) then
+                stat_y(u) = 0.0
+            else
+                stat_y(u) = real(sum_y(u), kind=kind(kind_r)) / real(count_x(u), kind=kind(kind_r))
             end if
         end do
-        positions(n_unique) = n_samples
-
-        allocate(stat_x(n_unique))        
-        i_start = 1
-        do n=1, size(positions), 1
-            stat_x(n) = positions(n)-i_start+1
-            i_start = positions(n)+1
-        end do
-    end subroutine groupby_count_r8
+    end subroutine groupby_mean_r4
 
 end module mod_stats
