@@ -1,6 +1,7 @@
 !> A module for sort functions.
 module mod_sort
     use mod_common
+    use mod_math
     use mod_random
     implicit none
 
@@ -306,7 +307,7 @@ contains
         integer(kind=4) :: n_samples_unroll
         real(kind=4) :: buffer_v(63)
         integer(kind=4) :: buffer_b(63)
-        integer(kind=4) :: min_remain
+        integer(kind=4) :: buffuer_size=63
         include "./include/sort/pbucket_sort/inc_pbucket_sort_detail.f90"
     end subroutine pbucket_sort_r4
     include "./include/sort/pbucket_sort/inc_pbucket_sort.f90"
@@ -346,10 +347,7 @@ contains
         integer(kind=4), allocatable :: tmp_y(:)
         integer(kind=4) :: k, j, ini, fin
         integer(kind=4) :: n_samples_unroll
-        real(kind=4) :: buffer_v(63)
-        integer(kind=4) :: buffer_b(63)
-        integer(kind=4) :: buffer_i(63), tmp_i
-        integer(kind=4) :: min_remain
+        integer(kind=4) :: tmp_i
         include "./include/sort/pbucket_argsort/inc_pbucket_argsort_detail.f90"
     end subroutine pbucket_argsort_r4_i4
     include "./include/sort/pbucket_argsort/inc_pbucket_argsort.f90"

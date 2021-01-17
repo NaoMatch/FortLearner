@@ -26,7 +26,7 @@ recursive subroutine pbucket_sort_r8(vector, n_samples, rec_depth)
     integer(kind=8) :: n_samples_unroll
     real(kind=8) :: buffer_v(63)
     integer(kind=8) :: buffer_b(63)
-    integer(kind=8) :: min_remain
+    integer(kind=8) :: buffuer_size=63
     include "./include/sort/pbucket_sort/inc_pbucket_sort_detail.f90"
 end subroutine pbucket_sort_r8
 
@@ -59,7 +59,7 @@ recursive subroutine pbucket_sort_i4(vector, n_samples, rec_depth)
     integer(kind=4) :: n_samples_unroll
     integer(kind=4) :: buffer_v(63)
     integer(kind=4) :: buffer_b(63)
-    integer(kind=4) :: min_remain
+    integer(kind=4) :: buffuer_size=63
     include "./include/sort/pbucket_sort/inc_pbucket_sort_detail.f90"
 end subroutine pbucket_sort_i4
 
@@ -92,6 +92,6 @@ recursive subroutine pbucket_sort_i8(vector, n_samples, rec_depth)
     integer(kind=8) :: n_samples_unroll
     integer(kind=8) :: buffer_v(63)
     integer(kind=8) :: buffer_b(63)
-    integer(kind=8) :: min_remain
+    integer(kind=8) :: buffuer_size=63
     include "./include/sort/pbucket_sort/inc_pbucket_sort_detail.f90"
 end subroutine pbucket_sort_i8

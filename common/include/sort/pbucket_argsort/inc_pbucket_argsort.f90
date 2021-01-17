@@ -27,10 +27,7 @@ recursive subroutine pbucket_argsort_r4_r4(vector, indices, n_samples, rec_depth
     real(kind=4), allocatable :: tmp_y(:)
     integer(kind=4) :: k, j, ini, fin
     integer(kind=4) :: n_samples_unroll
-    real(kind=4) :: buffer_v(63)
-    integer(kind=4) :: buffer_b(63)
-    real(kind=4) :: buffer_i(63), tmp_i
-    integer(kind=4) :: min_remain
+    real(kind=4) :: tmp_i
     include "./include/sort/pbucket_argsort/inc_pbucket_argsort_detail.f90"
 end subroutine pbucket_argsort_r4_r4
 
@@ -63,10 +60,7 @@ recursive subroutine pbucket_argsort_r8_i8(vector, indices, n_samples, rec_depth
     integer(kind=8), allocatable :: tmp_y(:)
     integer(kind=8) :: k, j, ini, fin
     integer(kind=8) :: n_samples_unroll
-    real(kind=8) :: buffer_v(63)
-    integer(kind=8) :: buffer_b(63)
-    integer(kind=8) :: buffer_i(63), tmp_i
-    integer(kind=8) :: min_remain
+    integer(kind=8) :: tmp_i
     include "./include/sort/pbucket_argsort/inc_pbucket_argsort_detail.f90"
 end subroutine pbucket_argsort_r8_i8
 
@@ -99,10 +93,7 @@ recursive subroutine pbucket_argsort_r8_r8(vector, indices, n_samples, rec_depth
     real(kind=8), allocatable :: tmp_y(:)
     integer(kind=8) :: k, j, ini, fin
     integer(kind=8) :: n_samples_unroll
-    real(kind=8) :: buffer_v(63)
-    integer(kind=8) :: buffer_b(63)
-    real(kind=8) :: buffer_i(63), tmp_i
-    integer(kind=8) :: min_remain
+    real(kind=8) :: tmp_i
     include "./include/sort/pbucket_argsort/inc_pbucket_argsort_detail.f90"
 end subroutine pbucket_argsort_r8_r8
 
@@ -135,10 +126,7 @@ recursive subroutine pbucket_argsort_i4_i4(vector, indices, n_samples, rec_depth
     integer(kind=4), allocatable :: tmp_y(:)
     integer(kind=4) :: k, j, ini, fin
     integer(kind=4) :: n_samples_unroll
-    integer(kind=4) :: buffer_v(63)
-    integer(kind=4) :: buffer_b(63)
-    integer(kind=4) :: buffer_i(63), tmp_i
-    integer(kind=4) :: min_remain
+    integer(kind=4) :: tmp_i
     include "./include/sort/pbucket_argsort/inc_pbucket_argsort_detail.f90"
 end subroutine pbucket_argsort_i4_i4
 
@@ -171,10 +159,7 @@ recursive subroutine pbucket_argsort_i4_r4(vector, indices, n_samples, rec_depth
     real(kind=4), allocatable :: tmp_y(:)
     integer(kind=4) :: k, j, ini, fin
     integer(kind=4) :: n_samples_unroll
-    integer(kind=4) :: buffer_v(63)
-    integer(kind=4) :: buffer_b(63)
-    real(kind=4) :: buffer_i(63), tmp_i
-    integer(kind=4) :: min_remain
+    real(kind=4) :: tmp_i
     include "./include/sort/pbucket_argsort/inc_pbucket_argsort_detail.f90"
 end subroutine pbucket_argsort_i4_r4
 
@@ -207,10 +192,7 @@ recursive subroutine pbucket_argsort_i8_i8(vector, indices, n_samples, rec_depth
     integer(kind=8), allocatable :: tmp_y(:)
     integer(kind=8) :: k, j, ini, fin
     integer(kind=8) :: n_samples_unroll
-    integer(kind=8) :: buffer_v(63)
-    integer(kind=8) :: buffer_b(63)
-    integer(kind=8) :: buffer_i(63), tmp_i
-    integer(kind=8) :: min_remain
+    integer(kind=8) :: tmp_i
     include "./include/sort/pbucket_argsort/inc_pbucket_argsort_detail.f90"
 end subroutine pbucket_argsort_i8_i8
 
@@ -243,9 +225,6 @@ recursive subroutine pbucket_argsort_i8_r8(vector, indices, n_samples, rec_depth
     real(kind=8), allocatable :: tmp_y(:)
     integer(kind=8) :: k, j, ini, fin
     integer(kind=8) :: n_samples_unroll
-    integer(kind=8) :: buffer_v(63)
-    integer(kind=8) :: buffer_b(63)
-    real(kind=8) :: buffer_i(63), tmp_i
-    integer(kind=8) :: min_remain
+    real(kind=8) :: tmp_i
     include "./include/sort/pbucket_argsort/inc_pbucket_argsort_detail.f90"
 end subroutine pbucket_argsort_i8_r8
