@@ -86,7 +86,6 @@ program main_mean_variance_covariance
     print*, "    My Function time[msec]:", time_diff(date_value1, date_value2)
     print*, "    variace:", var_vec
 
-
     print*, '============================================================='
     print*, "MATRIX Variance: NAIVE"
     call date_and_time(values=date_value1)
@@ -137,9 +136,8 @@ program main_mean_variance_covariance
     print*, "    My Function time[msec]:", time_diff(date_value1, date_value2)
     print*, "    covariace:", cocar_vec
 
-
     print*, '============================================================='
-    print*, "VECTOR COVariance: NAIVE"
+    print*, "MATRIX COVariance MATRIX: NAIVE"
     call date_and_time(values=date_value1)
     mean_cols = sum(matrix, dim=1) / dble(n_samples)
     covar_mat = 0d0

@@ -1,7 +1,7 @@
 min_val = huge(min_val)
 max_val = -huge(max_val)
-unroll = num - mod(num, buffer_get_minmax)
-do n=1, unroll, buffer_get_minmax
+n_samples_unroll = n_samples - mod(n_samples, buffer_get_minmax)
+do n=1, n_samples_unroll, buffer_get_minmax
     do j=0, buffer_get_minmax-1, 1
         buffer(j+1) = vector(n+j)
     end do
@@ -11,7 +11,7 @@ do n=1, unroll, buffer_get_minmax
     max_val = maxval((/max_val, tmp_max_val/))
 end do
 
-do n=unroll+1, num
+do n=n_samples_unroll+1, n_samples
     tmp_val = vector(n)
     min_val = minval((/min_val, tmp_val/))
     max_val = maxval((/max_val, tmp_val/))

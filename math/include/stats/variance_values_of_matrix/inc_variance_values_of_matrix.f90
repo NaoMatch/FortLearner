@@ -7,37 +7,11 @@ function variance_values_of_matrix_r8(matrix, n_rows, n_cols, means_of_matrix)
 
     integer(kind=8) :: i, j, k
     real(kind=8)    :: tmp_sq_sum, means_of_matrix_opt(n_cols)
-    integer(kind=8) :: n_cols_unroll
-    real(kind=8)    :: tmp_sq_sums(7)
+    integer(kind=8) :: n_cols_unroll, buffer_len=7
+    real(kind=8)    :: tmp_sq_sums(7), val
     real(kind=8)    :: tmp_variances(n_cols), tmp_inv, diff_factor
 
-    if (present(means_of_matrix)) then
-        means_of_matrix_opt = means_of_matrix
-    else
-        means_of_matrix_opt = mean(matrix, n_rows, n_cols)
-    end if
-    tmp_inv = 1d0 / dble(n_rows)
-
-    n_cols_unroll = n_cols - mod(n_cols, 7)
-    do j=1, n_cols_unroll, 7
-        tmp_sq_sums = 0
-        do i=1, n_rows
-            do k=0, 7-1, 1
-                tmp_sq_sums(k+1) = tmp_sq_sums(k+1) + (matrix(i,j+k) - means_of_matrix_opt(j+k)) ** 2d0
-            end do
-        end do
-
-        do k=0, 7-1, 1
-            tmp_variances(j+k) = tmp_sq_sums(k+1) * tmp_inv
-        end do
-    end do
-    do j=n_cols_unroll+1, n_cols
-        tmp_sq_sum = 0
-        do i=1, n_rows
-            tmp_sq_sum = tmp_sq_sum + (matrix(i,j) - means_of_matrix_opt(j)) ** 2d0
-        end do
-        tmp_variances(j) = tmp_sq_sum * tmp_inv
-    end do
+    include "./include/stats/variance_values_of_matrix/inc_variance_values_of_matrix_detail.f90"
     variance_values_of_matrix_r8 = tmp_variances
 end function variance_values_of_matrix_r8
 
@@ -50,38 +24,11 @@ function variance_values_of_matrix_i4(matrix, n_rows, n_cols, means_of_matrix)
 
     integer(kind=4) :: i, j, k
     real(kind=4)    :: tmp_sq_sum, means_of_matrix_opt(n_cols)
-    integer(kind=4) :: n_cols_unroll
-    real(kind=4)    :: tmp_sq_sums(7)
+    integer(kind=4) :: n_cols_unroll, buffer_len=7
+    real(kind=4)    :: tmp_sq_sums(7), val
     real(kind=4)    :: tmp_variances(n_cols), tmp_inv
 
-    tmp_inv = 1.0 / float(n_rows)
-
-    if (present(means_of_matrix)) then
-        means_of_matrix_opt = means_of_matrix
-    else
-        means_of_matrix_opt = mean(matrix, n_rows, n_cols)
-    end if
-
-    n_cols_unroll = n_cols - mod(n_cols, 7)
-    do j=1, n_cols_unroll, 7
-        tmp_sq_sums = 0
-        do i=1, n_rows
-            do k=0, 7-1, 1
-                tmp_sq_sums(k+1) = tmp_sq_sums(k+1) + (float(matrix(i,j+k)) - means_of_matrix_opt(j+k))**2.0
-            end do
-        end do
-
-        do k=0, 7-1, 1
-            tmp_variances(j+k) = tmp_sq_sums(k+1) * tmp_inv
-        end do
-    end do
-    do j=n_cols_unroll+1, n_cols
-        tmp_sq_sum = 0
-        do i=1, n_rows
-            tmp_sq_sum = tmp_sq_sum + (float(matrix(i,j)) - means_of_matrix_opt(j))**2.0
-        end do
-        tmp_variances(j) = tmp_sq_sum * tmp_inv
-    end do
+    include "./include/stats/variance_values_of_matrix/inc_variance_values_of_matrix_detail.f90"
     variance_values_of_matrix_i4 = tmp_variances
 end function variance_values_of_matrix_i4
 
@@ -94,37 +41,10 @@ function variance_values_of_matrix_i8(matrix, n_rows, n_cols, means_of_matrix)
 
     integer(kind=8) :: i, j, k
     real(kind=8)    :: tmp_sq_sum, means_of_matrix_opt(n_cols)
-    integer(kind=8) :: n_cols_unroll
-    real(kind=8)    :: tmp_sq_sums(7)
+    integer(kind=8) :: n_cols_unroll, buffer_len=7
+    real(kind=8)    :: tmp_sq_sums(7), val
     real(kind=8)    :: tmp_variances(n_cols), tmp_inv
 
-    tmp_inv = 1d0 / dble(n_rows)
-
-    if (present(means_of_matrix)) then
-        means_of_matrix_opt = means_of_matrix
-    else
-        means_of_matrix_opt = mean(matrix, n_rows, n_cols)
-    end if
-
-    n_cols_unroll = n_cols - mod(n_cols, 7)
-    do j=1, n_cols_unroll, 7
-        tmp_sq_sums = 0
-        do i=1, n_rows
-            do k=0, 7-1, 1
-                tmp_sq_sums(k+1) = tmp_sq_sums(k+1) + (dble(matrix(i,j+k)) - means_of_matrix_opt(j+k))**2d0
-            end do
-        end do
-
-        do k=0, 7-1, 1
-            tmp_variances(j+k) = tmp_sq_sums(k+1) * tmp_inv
-        end do
-    end do
-    do j=n_cols_unroll+1, n_cols
-        tmp_sq_sum = 0
-        do i=1, n_rows
-            tmp_sq_sum = tmp_sq_sum + (dble(matrix(i,j)) - means_of_matrix_opt(j))**2d0
-        end do
-        tmp_variances(j) = tmp_sq_sum * tmp_inv
-    end do
+    include "./include/stats/variance_values_of_matrix/inc_variance_values_of_matrix_detail.f90"
     variance_values_of_matrix_i8 = tmp_variances
 end function variance_values_of_matrix_i8
