@@ -4,6 +4,11 @@ Machine learning scripts for Fortranner.
 ## requirement
 gfortran >= 7.4.0  
 
+### option
+doxygen  
+make  
+graphviz
+
 # Implemented
 * Linear Regression: see sample_scripts/main_linear_regression.f90
   * linear_regression
@@ -12,8 +17,5 @@ gfortran >= 7.4.0
 * Decision Tree: see sample_sacripts/main_decision_tree.f90
   * decision_tree_regressor
 
-### option
-doxygen  
-make  
-graphviz
+
 
