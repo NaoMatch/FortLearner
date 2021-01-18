@@ -177,7 +177,9 @@ main_mattxmat:
 	./main_mattxmat.out
 
 main_mean_variance_covariance:
-	gfortran -w -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_mean_variance_covariance.f90 -o main_mean_variance_covariance.out
+	gfortran -w -unroll -O3 -ftree-vectorize -fbounds-check \
+	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90 \
+	../math/mod_stats.f90 main_mean_variance_covariance.f90 -o main_mean_variance_covariance.out
 	./main_mean_variance_covariance.out
 
 main_metric:
