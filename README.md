@@ -9,6 +9,8 @@ gfortran >= 7.4.0
   * linear_regression
   * lasso_regression
   * ridge_regression
+* Decision Tree: see sample_sacripts/main_decision_tree.f90
+  * decision_tree_regressor
 
 ### option
 doxygen  
