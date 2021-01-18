@@ -80,15 +80,43 @@ module mod_stats
         module procedure groupby_sum_i8_r8
         module procedure groupby_sum_i8_i8
         
-        module procedure groupby_sum_fast_r4
-        module procedure groupby_sum_fast_r8
-        module procedure groupby_sum_fast_i4
-        module procedure groupby_sum_fast_i8
+        module procedure groupby_sum_self_r4
+        module procedure groupby_sum_self_r8
+        module procedure groupby_sum_self_i4
+        module procedure groupby_sum_self_i8
     end interface groupby_sum
 
     interface groupby_sq_sum
-        module procedure groupby_sq_sum_r8
+        module procedure groupby_sq_sum_r4_i4
+        module procedure groupby_sq_sum_r4_r4
+        module procedure groupby_sq_sum_r8_i8
+        module procedure groupby_sq_sum_r8_r8
+        module procedure groupby_sq_sum_i4_i4
+        module procedure groupby_sq_sum_i4_r4
+        module procedure groupby_sq_sum_i8_i8
+        module procedure groupby_sq_sum_i8_r8
+
+        module procedure groupby_sq_sum_self_r4
+        module procedure groupby_sq_sum_self_r8
+        module procedure groupby_sq_sum_self_i4
+        module procedure groupby_sq_sum_self_i8
     end interface groupby_sq_sum
+
+    interface groupby_mean
+        module procedure groupby_mean_r4_i4
+        module procedure groupby_mean_r4_r4
+        module procedure groupby_mean_r8_i8
+        module procedure groupby_mean_r8_r8
+        module procedure groupby_mean_i4_i4
+        module procedure groupby_mean_i4_r4
+        module procedure groupby_mean_i8_i8
+        module procedure groupby_mean_i8_r8
+
+        module procedure groupby_mean_self_r4
+        module procedure groupby_mean_self_r8
+        module procedure groupby_mean_self_i4
+        module procedure groupby_mean_self_i8
+    end interface groupby_mean
 
     interface groupby_count
         module procedure groupby_count_r4
@@ -288,7 +316,7 @@ contains
     !! \return returns statistical values of y
     !! \param uniq_x unique values of x (sorted)
     !! \param x input values
-    !! \param stat_y statistical values of y for each unique values
+    !! \param stat_y statistical values of y for each unique values of x
     !! \param y input values to be aggregated
     !! \param n_samples number of samples of x and y
     subroutine groupby_sum_r4_r4(uniq_x, x, stat_y, y, n_samples)
@@ -309,7 +337,13 @@ contains
     include "./include/stats/groupby_sum/inc_groupby_sum.f90"
 
 
-    subroutine groupby_sum_fast_r4(uniq_x, stat_x, x, n_samples)
+    !> A subroutine to calculate the total value of x for each unique value of x.
+    !! \return returns statistical values of y
+    !! \param uniq_x unique values of x (sorted)
+    !! \param x input values
+    !! \param stat_x statistical values of x for each unique values of x
+    !! \param n_samples number of samples of x
+    subroutine groupby_sum_self_r4(uniq_x, stat_x, x, n_samples)
         implicit none
         real(kind=4), allocatable   :: uniq_x(:)
         real(kind=4), allocatable   :: stat_x(:)
@@ -320,69 +354,56 @@ contains
         real(kind=4)              :: sum_x
         integer(kind=4)           :: n, i, i_start, i_stop, n_unique, idx
         integer(kind=4), allocatable :: positions(:)
-        include "./include/stats/groupby_sum/inc_groupby_sum_fast_detail.f90"
-    end subroutine groupby_sum_fast_r4
-    include "./include/stats/groupby_sum/inc_groupby_sum_fast.f90"
+        include "./include/stats/groupby_sum/inc_groupby_sum_self_detail.f90"
+    end subroutine groupby_sum_self_r4
+    include "./include/stats/groupby_sum/inc_groupby_sum_self.f90"
 
 
     !> A subroutine to calculate the squared value of y for each unique value of x.
     !! \return returns statistical values of y
     !! \param uniq_x unique values of x (sorted)
     !! \param x input values
-    !! \param stat_y statistical values of y for each unique values
+    !! \param stat_y statistical values of y for each unique values of x
     !! \param y input values to be aggregated
     !! \param n_samples number of samples of x and y
-    subroutine groupby_sq_sum_r8(uniq_x, x, stat_y, y, n_samples)
+    subroutine groupby_sq_sum_r4_i4(uniq_x, x, stat_y, y, n_samples)
         implicit none
-        real(kind=8), allocatable   :: uniq_x(:)
-        real(kind=8), intent(in)    :: x(n_samples)
-        real(kind=8), allocatable   :: stat_y(:)
-        real(kind=8), intent(in)    :: y(n_samples)
-        integer(kind=8), intent(in) :: n_samples
+        real(kind=4), allocatable    :: uniq_x(:)
+        real(kind=4), intent(in)     :: x(n_samples)
+        integer(kind=4), allocatable :: stat_y(:)
+        integer(kind=4), intent(in)  :: y(n_samples)
+        integer(kind=4), intent(in)  :: n_samples
 
-        real(kind=8), allocatable :: x_copy(:), y_copy(:)
-        real(kind=8)              :: sum_y
-        integer(kind=8) :: n, i, i_start, i_stop, idx
-        integer(kind=8), allocatable :: positions(:), indices(:)
+        real(kind=4), allocatable    :: x_copy(:)
+        integer(kind=4), allocatable :: y_copy(:)
+        integer(kind=4)              :: sum_y
+        integer(kind=4)              :: n, i, i_start, i_stop, idx
+        integer(kind=4), allocatable :: positions(:)
+        include "./include/stats/groupby_sq_sum/inc_groupby_sq_sum_detail.f90"
+    end subroutine groupby_sq_sum_r4_i4
+    include "./include/stats/groupby_sq_sum/inc_groupby_sq_sum.f90"
 
-        if ( allocated(uniq_x) ) deallocate(uniq_x)
-        if ( allocated(stat_y) ) deallocate(stat_y)
 
-        allocate(x_copy(n_samples), y_copy(n_samples), indices(n_samples))
-        do n=1, n_samples, 1
-            x_copy(n) = x(n)
-            indices(n) = n
-        end do
-        call quick_argsort(x_copy, indices, n_samples)
-        do n=1, n_samples, 1
-            idx = indices(n)
-            y_copy(n) = y(idx)
-        end do
+    !> A subroutine to calculate the squared value of x for each unique values.
+    !! \return returns statistical values of x
+    !! \param uniq_x unique values of x (sorted)
+    !! \param stat_x statistical values of x for each unique values
+    !! \param x input values
+    !! \param n_samples number of samples of x and y
+    subroutine groupby_sq_sum_self_r4(uniq_x, stat_x, x, n_samples)
+        implicit none
+        real(kind=4), allocatable    :: uniq_x(:)
+        real(kind=4), allocatable    :: stat_x(:)
+        real(kind=4), intent(in)     :: x(n_samples)
+        integer(kind=4), intent(in)  :: n_samples
 
-        allocate(uniq_x(0))
-        allocate(positions(0))
-        uniq_x = [uniq_x, x_copy(1)]
-        do n=2, n_samples, 1
-            if ( x_copy(n-1) .ne. x_copy(n) ) then
-                uniq_x = [uniq_x, x_copy(n)]
-                positions = [positions, n-1]
-            end if
-        end do
-        positions = [positions, n_samples]
-
-        allocate(stat_y(0))
-        
-        i_start = 1
-        do n=1, size(positions), 1
-            sum_y = 0d0
-            i_stop = positions(n)
-            do i=i_start,  i_stop, 1
-                sum_y = sum_y + y_copy(i) ** 2d0
-            end do
-            i_start = i_stop + 1
-            stat_y = [stat_y, sum_y]
-        end do
-    end subroutine groupby_sq_sum_r8
+        real(kind=4), allocatable    :: x_copy(:)
+        real(kind=4)                 :: sum_x
+        integer(kind=4)              :: n, i, i_start, i_stop, idx
+        integer(kind=4), allocatable :: positions(:)
+        include "./include/stats/groupby_sq_sum/inc_groupby_sq_sum_self_detail.f90"
+    end subroutine groupby_sq_sum_self_r4
+    include "./include/stats/groupby_sq_sum/inc_groupby_sq_sum_self.f90"
 
 
     !> A subroutine to calculate the number of y for each unique value of x.
@@ -407,41 +428,52 @@ contains
     include "./include/stats/groupby_count/inc_groupby_count.f90"
 
 
-    subroutine groupby_mean_r4(uniq_x, x, stat_y, y, n_samples)
+    !> A subroutine to calculate mean of y for each unique value of x.
+    !! \return returns statistical values of y
+    !! \param uniq_x unique values of x (sorted)
+    !! \param x input values
+    !! \param stat_y statistical values of y for each unique values
+    !! \param y input values to be aggregated
+    !! \param n_samples number of samples of x and y
+    subroutine groupby_mean_r4_i4(uniq_x, x, stat_y, y, n_samples)
         implicit none
         real(kind=4), allocatable   :: uniq_x(:)
         real(kind=4), intent(in)    :: x(n_samples)
         real(kind=4), allocatable   :: stat_y(:)
-        real(kind=4), intent(in)    :: y(n_samples)
+        integer(kind=4), intent(in) :: y(n_samples)
         integer(kind=4), intent(in) :: n_samples
 
         real(kind=4), allocatable    :: x_copy(:)
-        real(kind=4), allocatable    :: y_copy(:)
-        real(kind=4), allocatable    :: sum_y(:)
+        integer(kind=4), allocatable :: y_copy(:)
+        integer(kind=4), allocatable :: sum_y(:)
         integer(kind=4), allocatable :: count_x(:)
-        integer(kind=4) :: n, u, n_unique_x
-        real(kind=4) :: kind_r
+        integer(kind=4) :: n, u, n_unique_x, zero_i
+        real(kind=4) :: kind_r, zero_r=0.0
+        include "./include/stats/groupby_mean/inc_groupby_mean_detail.f90"
+    end subroutine groupby_mean_r4_i4
+    include "./include/stats/groupby_mean/inc_groupby_mean.f90"
 
-        allocate(x_copy(n_samples))
-        allocate(y_copy(n_samples))
-        do n=1, n_samples, 1
-            x_copy(n) = x(n)
-            y_copy(n) = y(n)
-        end do
-        call pbucket_argsort(x_copy, y_copy, n_samples)
 
-        call groupby_sum(uniq_x, x_copy, sum_y, y_copy, n_samples)
-        call groupby_count(uniq_x, count_x, x_copy, n_samples)
+    !> A subroutine to calculate mean of x for each unique value.
+    !! \return returns statistical values of x
+    !! \param uniq_x unique values of x (sorted)
+    !! \param stat_x statistical values of x for each unique values
+    !! \param x input values
+    !! \param n_samples number of samples of x and y
+    subroutine groupby_mean_self_r4(uniq_x, stat_x, x, n_samples)
+        implicit none
+        real(kind=4), allocatable   :: uniq_x(:)
+        real(kind=4), allocatable   :: stat_x(:)
+        real(kind=4), intent(in)    :: x(n_samples)
+        integer(kind=4), intent(in) :: n_samples
 
-        n_unique_x = size(uniq_x)
-        allocate(stat_y(n_unique_x))
-        do u=1, n_unique_x, 1
-            if ( count_x(u) .eq. 0 ) then
-                stat_y(u) = 0.0
-            else
-                stat_y(u) = real(sum_y(u), kind=kind(kind_r)) / real(count_x(u), kind=kind(kind_r))
-            end if
-        end do
-    end subroutine groupby_mean_r4
+        real(kind=4), allocatable    :: x_copy(:)
+        real(kind=4), allocatable    :: sum_x(:)
+        integer(kind=4), allocatable :: count_x(:)
+        integer(kind=4) :: n, u, n_unique_x, zero_i
+        real(kind=4) :: kind_r, zero_r=0.0
+        include "./include/stats/groupby_mean/inc_groupby_mean_self_detail.f90"
+    end subroutine groupby_mean_self_r4
+    include "./include/stats/groupby_mean/inc_groupby_mean_self.f90"
 
 end module mod_stats

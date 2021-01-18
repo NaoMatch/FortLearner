@@ -17,7 +17,6 @@ run:
 	make main_mean_variance_covariance
 	make main_metric
 	make main_most_left_bit_position
-	\
 	make main_multi_mat_vec
 	make main_progress_bar
 	make main_rand_integer
@@ -26,8 +25,8 @@ run:
 	make main_read2bin
 	make main_roulette_selection
 	make main_search
-	make t
-	make main_sum_of_matrix\
+	make main_sort
+	make main_sum_of_matrix
 	make main_sum_up_left
 	make main_vector2sum1
 
@@ -178,7 +177,7 @@ main_mattxmat:
 	./main_mattxmat.out
 
 main_mean_variance_covariance:
-	gfortran -w -unroll -O3 -ftree-vectorize \
+	gfortran -w -unroll -O3 -ftree-vectorize -fbounds-check \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 main_mean_variance_covariance.f90 -o main_mean_variance_covariance.out
 	./main_mean_variance_covariance.out
