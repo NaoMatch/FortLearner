@@ -70,6 +70,7 @@ main_decision_tree:
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
+	../error/mod_error.f90 \
 	../common/mod_random.f90 \
 	../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
@@ -147,7 +148,7 @@ main_is_sorted:
 	./main_is_sorted.out
 
 main_linear_regression:
-	gfortran -w -w \
+	gfortran -w -fbounds-check \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \

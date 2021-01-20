@@ -1,6 +1,7 @@
 module mod_data_holder
     use mod_const
     use mod_common
+    use mod_error
     use mod_random
     use mod_linalg
     use mod_discretizer
@@ -36,6 +37,10 @@ module mod_data_holder
         integer(kind=8) :: n_samples
         integer(kind=8) :: n_columns
         integer(kind=8) :: n_outputs
+
+        integer(kind=8) :: x_shape(2)
+        integer(kind=8) :: y_shape(2)
+
         type(x_pointer) :: x_ptr
         type(y_pointer) :: y_ptr
         integer(kind=4), allocatable :: x_hist(:,:)
@@ -53,8 +58,8 @@ module mod_data_holder
 
     !> Interface to data_holder.
     interface data_holder
-        procedure :: new_data_holder_r8_r8
-        procedure :: new_data_holder_r8_i8
+        module procedure :: new_data_holder_r8_r8
+        module procedure :: new_data_holder_r8_i8
     end interface data_holder
 
 contains
@@ -70,13 +75,17 @@ contains
         real(kind=8), target :: y(:,:)
 
         integer(kind=8) :: x_shape(2), y_shape(2)
+        type(error)     :: err
 
         x_shape = shape(x)
         y_shape = shape(y)
+        call err % sample_size_mismatch(x_shape, "x", y_shape, "y", "data_holder")
 
         new_data_holder_r8_r8 % n_outputs         =  y_shape(2)
         new_data_holder_r8_r8 % n_samples         =  x_shape(1)
         new_data_holder_r8_r8 % n_columns         =  x_shape(2)
+        new_data_holder_r8_r8 % x_shape           =  x_shape
+        new_data_holder_r8_r8 % y_shape           =  y_shape
         new_data_holder_r8_r8 % x_ptr % x_r8_ptr  => x
         new_data_holder_r8_r8 % y_ptr % y_r8_ptr  => y
 
