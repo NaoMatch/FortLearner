@@ -127,7 +127,7 @@ main_identity:
 	./main_identity.out
 
 main_inner_product:
-	gfortran -w -unroll -O3 -ftree-vectorize \
+	gfortran -w -unroll -O2 \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 ../linalg/mod_linalg.f90 \
@@ -151,6 +151,7 @@ main_linear_regression:
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
+	../error/mod_error.f90 \
 	../common/mod_random.f90 \
 	../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
@@ -158,6 +159,8 @@ main_linear_regression:
 	../metric/mod_metric.f90 \
 	\
 	../hyperparameter/mod_hyperparameter.f90 \
+	../preprocessing/mod_discretizer.f90 \
+	../data_holder/mod_data_holder.f90 \
 	\
 	../linear_regression/mod_linear_regression.f90 \
 	main_linear_regression.f90 \
@@ -165,7 +168,11 @@ main_linear_regression:
 	./main_linear_regression.out
 
 main_math:
-	gfortran -w ../math/mod_math.f90 main_math.f90 -o main_math.out
+	gfortran -w \
+	../common/mod_const.f90 \
+	../common/mod_common.f90 \
+	../common/mod_timer.f90 \
+	../math/mod_math.f90 main_math.f90 -o main_math.out
 	./main_math.out
 
 main_mattxmat:
