@@ -2,23 +2,26 @@
 module mod_linear_regression
     use mod_common
     use mod_const
+    use mod_error
     use mod_stats
     use mod_hyperparameter
+    use mod_data_holder
     use mod_linalg
     implicit none
 
     !> Base Linear Regression Object
     type base_linear_regressor
+        character(len=256) :: algo_name
         logical(kind=4) :: is_simple
         logical(kind=4) :: is_trained
         real(kind=8)    :: coef_               ! For Simple Linear Regression
         real(kind=8), allocatable :: coefs_(:) ! For Multiple Linear Regression
         real(kind=8) :: intercept_             ! Intercept
-        integer(kind=8) :: n_dim_train=-1
+        integer(kind=8) :: n_columns=-1
     contains
+        procedure :: predict
         procedure :: predict_simple
         procedure :: predict_multiple
-        generic   :: predict => predict_simple, predict_multiple
     end type
 
 
@@ -26,9 +29,9 @@ module mod_linear_regression
     type, extends(base_linear_regressor) ::  linear_regression
         type(hparam_linear_regression) :: hparam 
     contains
-        procedure :: fit_simple_linear_regression
-        procedure :: fit_multiple_linear_regression
-        generic   :: fit => fit_simple_linear_regression, fit_multiple_linear_regression
+        procedure :: fit => fit_linear_regression
+        procedure :: fit_linear_regression_simple
+        procedure :: fit_linear_regression_multiple
     end type linear_regression
 
 
@@ -71,54 +74,6 @@ module mod_linear_regression
 
 contains
 
-    !> A function to predict trained simple linear regression, simple ridge regression model.
-    !! \return returns predicted values
-    !! \param x 1-dim variable
-    function predict_simple(this, x)
-        implicit none
-        class(base_linear_regressor) :: this
-        real(kind=8), intent(in) :: x(:)
-        real(kind=8), allocatable :: predict_simple(:)
-
-        integer(kind=8) :: num_x
-
-        if (this%is_trained .and. this%is_simple) then
-            num_x = size(x)
-            allocate(predict_simple(num_x))
-            predict_simple = x * this%coef_ + this%intercept_
-        else
-            stop "Simple Linear Regression model is not trained."
-        end if
-    end function predict_simple
-
-
-    !> A function to predict trained multiple linear regression, multiple ridge regression model.
-    !! \return returns predicted values
-    !! \param x N-dim variable
-    function predict_multiple(this, x)
-        implicit none
-        class(base_linear_regressor) :: this
-        real(kind=8), intent(in) :: x(:,:)
-        real(kind=8), allocatable :: predict_multiple(:)
-
-        integer(kind=8) :: x_shape(2)
-
-        if (this%is_trained) then
-            x_shape = shape(x)
-            if ( x_shape(2) .ne. this%n_dim_train ) goto 900
-
-            allocate(predict_multiple(x_shape(1)))
-            call multi_mat_vec(x, this%coefs_, predict_multiple, x_shape(1), x_shape(2))
-            predict_multiple = predict_multiple + this%intercept_
-        else
-            stop "Multiple Linear Regression model is not trained."
-        end if
-
-        return
-        900 continue
-        stop "Invalid Number of Columns."
-    end function predict_multiple
-
 
     !> A function to override 'linear_regression' object.
     !! \param fit_intercept whether to calculate intercept, default .true..
@@ -128,6 +83,8 @@ contains
         type(linear_regression)   :: new_linear_regression
         new_linear_regression%is_simple = f_
         new_linear_regression%is_trained = f_
+
+        new_linear_regression%algo_name = "linear_regression"
         if ( present(fit_intercept) ) new_linear_regression%hparam%fit_intercept = fit_intercept
     end function new_linear_regression
 
@@ -169,29 +126,51 @@ contains
     end function new_lasso_regression
 
 
+    !> A subroutine to fit linear regression.
+    !> If the number of columns is '1', call 'fit_linear_regression_simple'.
+    !> If the number of columns is greater than '1', call 'fit_linear_regression_multiple'.
+    !! \param data_holder_ptr a pointer of data_holder
+    subroutine fit_linear_regression(this, data_holder_ptr)
+        implicit none
+        class(linear_regression)   :: this
+        type(data_holder), pointer :: data_holder_ptr
+        integer(kind=8)            :: one_i8=1_8
+        type(error)                :: err
+        call err%only_accept_Nx1_matrix(data_holder_ptr%y_shape, "y", "linear_regression")
+
+        if ( data_holder_ptr%n_columns .eq. one_i8 ) then
+            call this%fit_linear_regression_simple(data_holder_ptr)
+        else
+            call this%fit_linear_regression_multiple(data_holder_ptr)
+        end if
+    end subroutine fit_linear_regression
+
+
     !> A subroutine to fit simple linear regression model.
-    !! \return returns trained model
-    !! \param x 1-dim variable
-    !! \param y 1-dim response
-    subroutine fit_simple_linear_regression(this, x, y)
+    subroutine fit_linear_regression_simple(this, data_holder_ptr)
         implicit none
         class(linear_regression) :: this
-        real(kind=8), intent(in) :: x(:)
-        real(kind=8), intent(in) :: y(:)
+        type(data_holder), pointer :: data_holder_ptr
 
-        integer(kind=8) :: num, num_x, num_y
-        real(kind=8) :: covar_xy, var_x
-        real(kind=8) :: mean_x, mean_y
+        integer(kind=8) :: n_samples, n_columns, one_i8=1_8, n
+        real(kind=8)    :: covar_xy
+        real(kind=8)    :: var_x, mean_x, mean_y
+        real(kind=8), ALLOCATABLE :: x_copy(:), y_copy(:)
 
-        num_x = size(x)
-        num_y = size(y)
-        if ( num_x .ne. num_y ) goto 900
-        num = num_x
+        n_samples = data_holder_ptr%n_samples
+        n_columns = data_holder_ptr%n_columns
 
-        covar_xy = covariance(x, y, num)
-        var_x = variance(x, num)
-        mean_x = mean(x, num)
-        mean_y = mean(y, num)
+        allocate(x_copy(n_samples))
+        allocate(y_copy(n_samples))
+        do n=1, n_samples, 1
+            x_copy(n) = data_holder_ptr%x_ptr%x_r8_ptr(n,1)
+            y_copy(n) = data_holder_ptr%y_ptr%y_r8_ptr(n,1)
+        end do
+
+        mean_x = mean(x_copy, n_samples)
+        mean_y = mean(y_copy, n_samples)
+        var_x = variance(x_copy, n_samples, mean_x)
+        covar_xy = covariance(x_copy, y_copy, n_samples, mean_x, mean_y)
 
         if ( this%hparam%fit_intercept ) then
             this%coef_ = covar_xy / var_x
@@ -205,10 +184,92 @@ contains
 
         this%is_simple = t_
         this%is_trained = t_
-        return
-        900 continue
-        stop "Size of x and y mismach."
-    end subroutine fit_simple_linear_regression
+    end subroutine fit_linear_regression_simple
+
+
+    !> A subroutine to fit multiple linear regression model.
+    subroutine fit_linear_regression_multiple(this, data_holder_ptr)
+        implicit none
+        class(linear_regression) :: this
+        type(data_holder), pointer :: data_holder_ptr
+
+        integer(kind=8)           :: n_samples, n_columns, n_columns_with
+        real(kind=8), allocatable :: mat_sq(:,:), mat_sq_inv(:,:)
+        real(kind=8), allocatable :: xy(:)
+        real(kind=8), allocatable :: mat_lower(:,:), diagonals(:)
+        real(kind=8), allocatable :: mat_lower_inv(:,:), diagonals_inv(:,:)
+        integer(kind=8)           :: i, j
+        real(kind=8)              :: tmp_sum
+        real(kind=8), allocatable :: weights(:) ! coefficients and intercept
+        type(error)               :: err
+
+        if ( allocated(this%coefs_) ) deallocate(this%coefs_)
+
+        n_samples = data_holder_ptr%n_samples
+        n_columns = data_holder_ptr%n_columns
+
+        ! Compute X^T X
+        call mattxmat(mat_sq, data_holder_ptr%x_ptr%x_r8_ptr, &
+            n_samples, n_columns, with_intercept=this%hparam%fit_intercept)
+
+        ! Cholesky decomposition of X^T X
+        n_columns_with = n_columns
+        if ( this%hparam%fit_intercept ) n_columns_with = n_columns_with + 1
+        allocate(mat_lower(n_columns_with, n_columns_with))
+        allocate(diagonals(n_columns_with))
+        call cholesky_decomposition_modified(mat_lower, diagonals, mat_sq, n_columns_with)
+
+        ! Compute inverse of unit lower triangular matrix
+        allocate(mat_lower_inv(n_columns_with, n_columns_with))
+        call inv_unit_lower_matrix(mat_lower_inv, mat_lower, n_columns_with)
+
+        ! Compute inverse of X^T X
+        allocate(mat_sq_inv(n_columns_with, n_columns_with))
+        allocate(diagonals_inv(n_columns_with, n_columns_with))
+        call identity(diagonals_inv, n_columns_with)
+        do i=1, n_columns_with, 1
+            diagonals_inv(i,i) = 1.0d0 / diagonals(i)
+        end do
+        mat_sq_inv = matmul(matmul(transpose(mat_lower_inv), diagonals_inv), mat_lower_inv)
+
+        ! Compute X^T Y
+        allocate(xy(n_columns_with))
+        xy = 0.0d0
+        do j=1, n_columns, 1
+            tmp_sum = 0.0d0
+            do i=1, n_samples, 1
+                tmp_sum = tmp_sum &
+                    + data_holder_ptr%x_ptr%x_r8_ptr(i,j) & 
+                    * data_holder_ptr%y_ptr%y_r8_ptr(i,1)
+            end do
+            xy(j) = tmp_sum
+        end do
+        if ( this%hparam%fit_intercept ) xy(n_columns_with) = sum(data_holder_ptr%y_ptr%y_r8_ptr)
+
+        ! Compute weights 
+        allocate(weights(n_columns_with))
+        do j=1, n_columns_with, 1
+            tmp_sum = 0.0d0
+            do i=1, n_columns_with, 1
+                tmp_sum = tmp_sum + mat_sq_inv(i,j) * xy(i)
+            end do
+            weights(j) = tmp_sum
+        end do
+
+        ! Store Training Results
+        allocate(this%coefs_(n_columns))
+        this%coefs_ = weights(1:n_columns)
+        this%intercept_ = 0d0
+        if ( this%hparam%fit_intercept ) this%intercept_ = weights(n_columns_with)
+
+        this%is_trained = t_
+        this%is_simple = f_
+    end subroutine fit_linear_regression_multiple
+
+
+
+
+
 
 
     !> A subroutine to fit simple ridge regression model.
@@ -287,94 +348,6 @@ contains
     end subroutine fit_simple_lasso_regression
 
 
-    !> A subroutine to fit multiple linear regression model.
-    !! \todo OPTIMIZATION !!!!!
-    !! \return returns trained model
-    !! \param x 2-dim variable
-    !! \param y 1-dim response
-    subroutine fit_multiple_linear_regression(this, x, y)
-        implicit none
-        class(linear_regression) :: this
-        real(kind=8), intent(in) :: x(:,:)
-        real(kind=8), intent(in) :: y(:)
-
-        integer(kind=8) :: n_rows, n_rows_x, n_rows_y, n_cols, n_cols_tmp
-        real(kind=8), allocatable :: mat_sq(:,:), mat_sq_inv(:,:)
-        real(kind=8), allocatable :: xy(:)
-        real(kind=8), allocatable :: mat_lower(:,:), diagonals(:)
-        real(kind=8), allocatable :: mat_lower_inv(:,:), diagonals_inv(:,:)
-        integer(kind=8)           :: i, j
-        real(kind=8)              :: tmp_sum
-        real(kind=8), allocatable :: weights(:) ! coefficients and intercept
-
-        if ( allocated(this%coefs_) ) deallocate(this%coefs_)
-        n_rows_x = size(x(:,1))
-        n_rows_y = size(y)
-        if ( n_rows_x .ne. n_rows_y ) goto 900
-        n_cols = size(x(1,:))
-        n_rows = n_rows_x
-        this%n_dim_train = n_cols
-
-        ! Compute X^T X
-        call mattxmat(mat_sq, x, n_rows, n_cols, with_intercept=this%hparam%fit_intercept)
-
-        ! Cholesky decomposition of X^T X
-        n_cols_tmp = n_cols
-        if ( this%hparam%fit_intercept ) n_cols_tmp = n_cols + 1
-        allocate(mat_lower(n_cols_tmp, n_cols_tmp))
-        allocate(diagonals(n_cols_tmp))
-        call cholesky_decomposition_modified(mat_lower, diagonals, mat_sq, n_cols_tmp)
-
-        ! Compute inverse of unit lower triangular matrix
-        allocate(mat_lower_inv(n_cols_tmp, n_cols_tmp))
-        call inv_unit_lower_matrix(mat_lower_inv, mat_lower, n_cols_tmp)
-
-        ! Compute inverse of X^T X
-        allocate(mat_sq_inv(n_cols_tmp, n_cols_tmp))
-        allocate(diagonals_inv(n_cols_tmp, n_cols_tmp))
-        call identity(diagonals_inv, n_cols_tmp)
-        do i=1, n_cols_tmp, 1
-            diagonals_inv(i,i) = 1.0d0 / diagonals(i)
-        end do
-        mat_sq_inv = matmul(matmul(transpose(mat_lower_inv), diagonals_inv), mat_lower_inv)
-
-        ! Compute X^T Y
-        allocate(xy(n_cols_tmp))
-        xy = 0.0d0
-        do j=1, n_cols, 1
-            tmp_sum = 0.0d0
-            do i=1, n_rows, 1
-                tmp_sum = tmp_sum + x(i,j) * y(i)
-            end do
-            xy(j) = tmp_sum
-        end do
-        if ( this%hparam%fit_intercept ) xy(n_cols_tmp) = sum(y)
-
-        ! Compute weights 
-        allocate(weights(n_cols_tmp))
-        do j=1, n_cols_tmp, 1
-            tmp_sum = 0.0d0
-            do i=1, n_cols_tmp, 1
-                tmp_sum = tmp_sum + mat_sq_inv(i,j) * xy(i)
-            end do
-            weights(j) = tmp_sum
-        end do
-
-        ! Store Training Results
-        allocate(this%coefs_(n_cols))
-        this%coefs_ = weights(1:n_cols)
-        this%intercept_ = 0d0
-        if ( this%hparam%fit_intercept ) this%intercept_ = weights(n_cols+1)
-
-        this%is_trained = t_
-        this%is_simple = f_
-
-        return
-        900 continue
-        stop "Size of x and y mismach."
-    end subroutine fit_multiple_linear_regression
-
-
     !> A subroutine to fit multiple linear regression model with L2 regularization.
     !! \todo OPTIMIZATION !!!!!
     !! \return returns trained model
@@ -401,7 +374,7 @@ contains
         if ( n_rows_x .ne. n_rows_y ) goto 900
         n_cols = size(x(1,:))
         n_rows = n_rows_x
-        this%n_dim_train = n_cols
+        this%n_columns = n_cols
 
         ! Compute X^T X
         call mattxmat(mat_sq, x, n_rows, n_cols, with_intercept=this%hparam%fit_intercept)
@@ -501,15 +474,15 @@ contains
         if ( n_rows_x .ne. n_rows_y ) goto 900
         n_cols = size(x(1,:))
         n_rows = n_rows_x
-        this%n_dim_train = n_cols
+        this%n_columns = n_cols
         n_rows_unroll = n_rows - mod(n_rows, 7)
 
 
         ! Compute sum(x^2, dim=1
         allocate(tmp_x(n_rows))
-        allocate(x_sq_sum(this%n_dim_train))
+        allocate(x_sq_sum(this%n_columns))
         x_sq_sum = 0
-        do j=1, this%n_dim_train, 1
+        do j=1, this%n_columns, 1
             tmp_sq_sum = 0
             do i=1, n_rows, 1
                 tmp = x(i,j)
@@ -519,7 +492,7 @@ contains
         end do
 
         ! x_sq_sum = 1d0 / x_sq_sum
-        do j=1, this%n_dim_train, 1
+        do j=1, this%n_columns, 1
             if ( x_sq_sum(j) .eq. 0 ) then
                 x_sq_sum(j) = 0
             else
@@ -529,22 +502,22 @@ contains
 
 
         ! Initialize weights
-        allocate(weights_old(this%n_dim_train))
-        allocate(weights(this%n_dim_train))
+        allocate(weights_old(this%n_columns))
+        allocate(weights(this%n_columns))
         weights = 0d0
         weights_old = weights
 
 
         ! Compute Intercept
         allocate(xw(n_rows))
-        call multi_mat_vec(x, weights, xw, n_rows, this%n_dim_train)
+        call multi_mat_vec(x, weights, xw, n_rows, this%n_columns)
         w0 = 0
         if ( this%hparam%fit_intercept ) w0 = sum(y-xw) / dble(n_rows)
 
 
         ! Iterate Cordinate Descent
         do iter=1, this%hparam%max_iter
-            do d=1, this%n_dim_train, 1
+            do d=1, this%n_columns, 1
                 tmp_w = weights(d)
                 if ( x_sq_sum(d) .eq. 0d0 ) cycle
 
@@ -640,5 +613,62 @@ contains
         900 continue
         stop "Size of x and y mismach."
     end subroutine fit_multiple_lasso_regression
+
+
+    !> A function to predict linear regression model
+    function predict(this, x)
+        class(base_linear_regressor) :: this
+        real(kind=8), intent(in)     :: x(:,:)
+        real(kind=8), allocatable    :: predict(:,:)
+        integer(kind=8)              :: x_shape(2), n_samples, n_columns, one_i8
+        type(error)                  :: err
+        call err%check_estimator_is_fitted(this%is_trained, this%algo_name)
+
+        x_shape = shape(x)
+        n_samples = x_shape(1)
+        n_columns = x_shape(2)
+
+        allocate(predict(n_samples,1))
+        if ( n_columns .eq. one_i8 ) then
+            call this%predict_simple(x, predict, n_samples)
+        else
+            call this%predict_multiple(x, predict, n_samples, n_columns)
+        end if
+    end function predict
+
+
+    !> A subroutine to predict trained simple linear regression, simple ridge regression model.
+    !! \return returns predicted values
+    !! \param x 1-dim variable
+    subroutine predict_simple(this, x, predict, n_samples)
+        implicit none
+        class(base_linear_regressor) :: this
+        real(kind=8), intent(in)     :: x(n_samples,1)
+        real(kind=8), intent(inout)  :: predict(n_samples,1)
+        integer(kind=8), intent(in)  :: n_samples
+        integer(kind=8) :: n
+
+        do n=1, n_samples, 1
+            predict(n,1) = x(n,1) * this%coef_ + this%intercept_
+        end do
+    end subroutine predict_simple
+
+
+    !> A subroutine to predict trained multiple linear regression, multiple ridge regression model.
+    !! \return returns predicted values
+    !! \param x N-dim variable
+    subroutine predict_multiple(this, x, predict, n_samples, n_columns)
+        implicit none
+        class(base_linear_regressor) :: this
+        real(kind=8), intent(in)     :: x(n_samples, n_columns)
+        real(kind=8), intent(inout)  :: predict(n_samples, 1)
+        integer(kind=8), intent(in)  :: n_samples, n_columns
+        integer(kind=8) :: n
+
+        call multi_mat_vec(x, this%coefs_, predict(:,1), n_samples, n_columns)
+        do n=1, n_samples, 1
+            predict(n,1) = predict(n,1) + this%intercept_
+        end do
+    end subroutine predict_multiple
 
 end module mod_linear_regression
