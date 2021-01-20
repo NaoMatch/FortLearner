@@ -1,6 +1,6 @@
 !> A module for simple functions.
 module mod_math
-
+    use mod_const
     implicit none
     
     !> An interface to call gini_i4, and gini_i8
@@ -22,6 +22,12 @@ module mod_math
         module procedure :: log2_i4
         module procedure :: log2_i8
     end interface log2
+
+    interface gamma
+        module procedure gamma_r4
+        module procedure gamma_r8
+    end interface gamma
+
 
 contains
 
@@ -69,6 +75,51 @@ contains
         log2_r4 = log(x)/log(2.0)
     end function log2_r4
     include "./include/math/log2/inc_log2.f90"
+
+
+    !> A function to compute Gamma Function.
+    !! \param x input value
+    recursive function gamma_r4(x) result(res)
+        real(kind=4) :: x
+        real(kind=4) :: res
+        real(kind=4) :: one_half = .5, one_r=1.0, two_r=2.0
+        real(kind=4) :: dummy_x=0.99999999999980993, t
+        integer(kind=4) :: n
+
+        if ( x .lt. one_half ) then
+            res = pi_ / sin(pi_ * x) / gamma(one_r - x)
+        else
+            x = x - one_r
+            do n=1, len_gamma_coefs_, 1
+                dummy_x = dummy_x + gamma_coefs_(n) / (x + n)
+            end do
+            t = x + len_gamma_coefs_ - one_half
+            res = sqrt(two_r * pi_) * t ** (x+one_half) * exp(-t) * dummy_x
+        end if
+    end function gamma_r4
+
+    recursive function gamma_r8(x) result(res)
+        real(kind=8) :: x
+        real(kind=8) :: res
+        real(kind=8) :: one_half = .5d0, one_r=1.0, two_r=2.0
+        real(kind=8) :: dummy_x=0.99999999999980993d0, t
+        integer(kind=8) :: n
+        integer(kind=8),save :: iter=0
+
+        if ( x .lt. one_half ) then
+            res = pi_ / ( sin(pi_ * x) * gamma(one_r - x) )
+            iter = iter + 1
+        else
+            x = x - one_r
+            do n=1, len_gamma_coefs_, 1
+                dummy_x = dummy_x + gamma_coefs_(n) / (x + n)
+            end do
+            t = x + len_gamma_coefs_ - one_half
+            res = sqrt(two_r * pi_) * t ** (x+one_half) * exp(-t) * dummy_x
+        end if
+    end function gamma_r8
+
+
 
 
 end module mod_math
