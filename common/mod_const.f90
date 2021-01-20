@@ -25,4 +25,16 @@ module mod_const
 
     integer(kind=8), parameter :: max_rec_depth = 0
 
+    real(kind=8), parameter :: gamma_coefs_(8) = (/& 
+        676.5203681218851d0 &
+        ,-1259.1392167224028d0 &
+        ,771.32342877765313d0 &
+        ,-176.61502916214059d0 &
+        ,12.507343278686905d0 &
+        ,-0.13857109526572012d0 &
+        ,9.9843695780195716d-6 &
+        ,1.5056327351493116d-7 &
+        /)
+    integer(kind=8), parameter :: len_gamma_coefs_ = 8_8
+
 end module mod_const
