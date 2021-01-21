@@ -16,6 +16,7 @@ graphviz
   * ridge_regression
 * Decision Tree: see sample_sacripts/main_decision_tree.f90
   * decision_tree_regressor
+  * extra_tree_regressor
   
 
 
