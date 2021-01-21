@@ -58,8 +58,8 @@ module mod_hyperparameter
         integer(kind=8) :: max_bins                 = 255 ! c
         integer(kind=8) :: strategy_int             = 1_8
         integer(kind=8) :: max_depth                = huge(0_8) ! c
-        integer(kind=8) :: min_samples_split        = 2 ! c
-        integer(kind=8) :: min_samples_leaf         = 1 ! c
+        integer(kind=8) :: min_samples_split        = 10 ! c
+        integer(kind=8) :: min_samples_leaf         = 5 ! c
         integer(kind=8) :: max_features             = -1 ! c
         integer(kind=8) :: max_feature_use          = huge(0_8)
         integer(kind=8) :: max_leaf_nodes           = huge(0_8) ! c

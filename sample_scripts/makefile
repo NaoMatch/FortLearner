@@ -66,7 +66,7 @@ main_data_holder:
 
 main_decision_tree:
 	gfortran \
-	-w -O3 -unroll \
+	-w -O3 -unroll -ftree-vectorize \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
@@ -85,7 +85,9 @@ main_decision_tree:
 	../decision_tree/mod_splitter.f90 \
 	../decision_tree/mod_woodworking_tools.f90 \
 	../decision_tree/mod_base_tree.f90 \
+	\
 	../decision_tree/mod_decision_tree.f90 \
+	../decision_tree/mod_extra_tree.f90 \
 	\
 	./main_decision_tree.f90 \
 	-o main_decision_tree.out
