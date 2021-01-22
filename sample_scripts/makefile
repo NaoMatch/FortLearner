@@ -31,6 +31,42 @@ run:
 	make main_sum_up_left
 	make main_vector2sum1
 
+run_utils:
+	make main_cholesky_decomposition
+	make main_collect_unique_values
+	make main_count_unique
+	make main_discretizer
+	make main_get_abs_maxloc
+	make main_get_minmax
+	make main_groupby
+	make main_hyperparameter
+	make main_identity
+	make main_inner_product
+	make main_inv_unit_lower_matrix
+	make main_is_sorted
+	make main_mattxmat
+	make main_mean_variance_covariance
+	make main_metric
+	make main_most_left_bit_position
+	make main_multi_mat_vec
+	make main_progress_bar
+	make main_rand_integer
+	make main_rand_normal
+	make main_random_rotation
+	make main_read2bin
+	make main_roulette_selection
+	make main_search
+	make main_sort
+	make main_sum_of_matrix
+	make main_sum_up_left
+	make main_vector2sum1
+
+run_ml:
+	make main_decision_tree
+	make main_forest
+	make main_linear_regression
+
+
 
 main_cholesky_decomposition:
 	gfortran -w -unroll -O3 -ftree-vectorize \
