@@ -4,6 +4,7 @@ run:
 	make main_count_unique
 	make main_decision_tree
 	make main_discretizer
+	make main_forest
 	make main_get_abs_maxloc
 	make main_get_minmax
 	make main_groupby
@@ -107,6 +108,36 @@ main_discretizer:
 	main_discretizer.f90 \
 	-o main_discretizer.out
 	./main_discretizer.out
+
+main_forest:
+	gfortran \
+	-w -O3 -unroll \
+	../common/mod_const.f90 \
+	../common/mod_common.f90 \
+	../common/mod_timer.f90 \
+	../error/mod_error.f90 \
+	../common/mod_random.f90 \
+	../common/mod_sort.f90 \
+	../math/mod_stats.f90 \
+	../metric/mod_metric.f90 \
+	../linalg/mod_linalg.f90 \
+	\
+	../hyperparameter/mod_hyperparameter.f90 \
+	../preprocessing/mod_discretizer.f90 \
+	../data_holder/mod_data_holder.f90 \
+	\
+	../decision_tree/mod_node.f90 \
+	../decision_tree/mod_splitter.f90 \
+	../decision_tree/mod_woodworking_tools.f90 \
+	../decision_tree/mod_base_tree.f90 \
+	../decision_tree/mod_decision_tree.f90 \
+	../decision_tree/mod_extra_tree.f90 \
+	\
+	../forest/mod_forest.f90 \
+	\
+	./main_forest.f90 \
+	-o main_forest.out
+	./main_forest.out
 
 main_get_abs_maxloc:
 	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 main_get_abs_maxloc.f90 -o main_get_abs_maxloc.out
