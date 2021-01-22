@@ -129,7 +129,7 @@ program main_forest
     dholder = data_holder(x_train, y_train)
     dholder_ptr => dholder
     
-    max_iter = 20
+    max_iter = 1
     max_leaf_nodes = 20
     do n_leaf_nodes=2, max_leaf_nodes
         dt_reg = decision_tree_regressor(max_leaf_nodes=n_leaf_nodes, fashion="best")
@@ -153,6 +153,7 @@ program main_forest
         y_test_pred_et = et_reg%predict(x_test)
         time_et = time_diff(date_value1, date_value2)
 
+
         rf_reg = random_forest_regressor(max_leaf_nodes=n_leaf_nodes, fashion="best")
         call date_and_time(values=date_value1)
         do iter=1, max_iter, 1
@@ -163,6 +164,7 @@ program main_forest
         y_test_pred_rf = rf_reg%predict(x_test)
         time_rf = time_diff(date_value1, date_value2)
 
+
         ets_reg = extra_trees_regressor(max_leaf_nodes=n_leaf_nodes, fashion="best")
         call date_and_time(values=date_value1)
         do iter=1, max_iter, 1
@@ -172,6 +174,7 @@ program main_forest
         y_train_pred_ets = ets_reg%predict(x_train)
         y_test_pred_ets = ets_reg%predict(x_test)
         time_ets = time_diff(date_value1, date_value2)
+
 
         print*, "    mse train vs test: ", n_leaf_nodes, &
             ! print*, '============================================================='
