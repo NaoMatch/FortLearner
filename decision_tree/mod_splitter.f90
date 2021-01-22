@@ -16,8 +16,8 @@ module mod_splitter
         procedure :: split_decision_tree_regressor
         procedure :: split_decision_tree_regressor_indivisuals
 
-        ! procedure :: split_extra_tree_regressor
-        ! procedure :: split_extra_tree_regressor_indivisuals
+        procedure :: split_extra_tree_regressor
+        procedure :: split_extra_tree_regressor_indivisuals
 
         ! procedure :: split_clouds_regressor
         ! procedure :: split_clouds_regressor_indivisuals
