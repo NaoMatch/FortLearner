@@ -291,7 +291,7 @@ contains
                 best_split_node_ptr => root_node_ptr
             end if
 
-            if ( .not. root_node_ptr%is_terminal .and. root_node_ptr%gain_best_w .gt. best_split_node_ptr%gain_best_w & 
+            if ( .not. root_node_ptr%is_terminal .and. root_node_ptr%gain_best .gt. best_split_node_ptr%gain_best & 
                 .and. root_node_ptr%is_trained ) then
                 best_split_node_ptr => root_node_ptr
             end if
