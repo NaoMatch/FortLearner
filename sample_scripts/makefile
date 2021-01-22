@@ -7,6 +7,7 @@ run:
 	make main_forest
 	make main_get_abs_maxloc
 	make main_get_minmax
+	make main_gradient_boosting_tree
 	make main_groupby
 	make main_hyperparameter
 	make main_identity
@@ -63,6 +64,7 @@ run_utils:
 
 run_ml:
 	make main_decision_tree
+	make main_gradient_boosting_tree
 	make main_forest
 	make main_linear_regression
 
@@ -182,6 +184,37 @@ main_get_abs_maxloc:
 main_get_minmax:
 	gfortran -w -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_get_minmax.f90 -o main_get_minmax.out
 	./main_get_minmax.out
+
+main_gradient_boosting_tree:
+	gfortran \
+	-w -O3 -unroll \
+	../common/mod_const.f90 \
+	../common/mod_common.f90 \
+	../common/mod_timer.f90 \
+	../error/mod_error.f90 \
+	../common/mod_random.f90 \
+	../common/mod_sort.f90 \
+	../math/mod_stats.f90 \
+	../metric/mod_metric.f90 \
+	../linalg/mod_linalg.f90 \
+	\
+	../hyperparameter/mod_hyperparameter.f90 \
+	../preprocessing/mod_discretizer.f90 \
+	../data_holder/mod_data_holder.f90 \
+	\
+	../decision_tree/mod_node.f90 \
+	../decision_tree/mod_splitter.f90 \
+	../decision_tree/mod_woodworking_tools.f90 \
+	../decision_tree/mod_base_tree.f90 \
+	../decision_tree/mod_decision_tree.f90 \
+	../decision_tree/mod_extra_tree.f90 \
+	\
+	../forest/mod_forest.f90 \
+	../boosting_trees/mod_gradient_boosting_tree.f90 \
+	\
+	./main_gradient_boosting_tree.f90 \
+	-o main_gradient_boosting_tree.out
+	./main_gradient_boosting_tree.out
 
 main_groupby:
 	gfortran -w -fbounds-check -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_groupby.f90 -o main_groupby.out
