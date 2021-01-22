@@ -17,7 +17,7 @@ graphviz
 * Decision Tree: see sample_scripts/main_decision_tree.f90
   * decision_tree_regressor
   * extra_tree_regressor
-* Tree Ensembles: see sample_scripts/main_forest.f90
+* Ensemble Trees: see sample_scripts/main_forest.f90
   * random_forest_regressor
   * extra_trees_regressor
 
