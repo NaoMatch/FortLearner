@@ -20,6 +20,9 @@ graphviz
 * Ensemble Trees: see sample_scripts/main_forest.f90
   * random_forest_regressor
   * extra_trees_regressor
+* Boosting Trees: see sample_scripts/main_gradient_boosting_tree.f90
+  * gradient_boosting_tree_regressor
+  * gradient_boosting_extra_tree_regressor
 
 
 
