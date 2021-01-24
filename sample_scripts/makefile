@@ -1,37 +1,6 @@
 run:
-	make main_cholesky_decomposition
-	make main_collect_unique_values
-	make main_count_unique
-	make main_decision_tree
-	make main_discretizer
-	make main_forest
-	make main_get_abs_maxloc
-	make main_get_minmax
-	make main_gradient_boosting_tree
-	make main_groupby
-	make main_hyperparameter
-	make main_identity
-	make main_inner_product
-	make main_inv_unit_lower_matrix
-	make main_is_sorted
-	make main_linear_regression
-	make main_mattxmat
-	make main_mean_variance_covariance
-	make main_metric
-	make main_most_left_bit_position
-	make main_multi_mat_vec
-	make main_pca
-	make main_progress_bar
-	make main_rand_integer
-	make main_rand_normal
-	make main_random_rotation
-	make main_read2bin
-	make main_roulette_selection
-	make main_search
-	make main_sort
-	make main_sum_of_matrix
-	make main_sum_up_left
-	make main_vector2sum1
+	make run_utils
+	make run_ml
 
 run_utils:
 	make main_cholesky_decomposition
@@ -57,6 +26,7 @@ run_utils:
 	make main_random_rotation
 	make main_read2bin
 	make main_roulette_selection
+	make main_scaler
 	make main_search
 	make main_sort
 	make main_sum_of_matrix
@@ -355,6 +325,25 @@ main_read2bin:
 main_roulette_selection:
 	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_random.f90 main_roulette_selection.f90 -o main_roulette_selection.out
 	./main_roulette_selection.out
+
+main_scaler:
+	gfortran -w -w -fbounds-check \
+	../common/mod_const.f90 \
+	../common/mod_common.f90 \
+	../common/mod_timer.f90 \
+	../error/mod_error.f90 \
+	../common/mod_random.f90 \
+	../common/mod_sort.f90 \
+	\
+	../linalg/mod_linalg.f90 \
+	../math/mod_stats.f90 \
+	../hyperparameter/mod_hyperparameter.f90 \
+	../preprocessing/mod_discretizer.f90 \
+	../preprocessing/mod_scaler.f90 \
+	main_scaler.f90 \
+	-o main_scaler.out
+	./main_scaler.out
+
 
 main_search:
 	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 main_search.f90 -o main_search.out
