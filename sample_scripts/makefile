@@ -20,6 +20,7 @@ run:
 	make main_metric
 	make main_most_left_bit_position
 	make main_multi_mat_vec
+	make main_pca
 	make main_progress_bar
 	make main_rand_integer
 	make main_rand_normal
@@ -62,12 +63,13 @@ run_utils:
 	make main_sum_up_left
 	make main_vector2sum1
 
+
 run_ml:
 	make main_decision_tree
 	make main_gradient_boosting_tree
 	make main_forest
 	make main_linear_regression
-
+	make main_pca
 
 
 main_cholesky_decomposition:
@@ -319,6 +321,17 @@ main_progress_bar:
 	gfortran -w -fbounds-check ../common/mod_const.f90 ../common/mod_common.f90 main_progress_bar.f90 -o main_progress_bar.out
 	./main_progress_bar.out
 
+main_pca:
+	gfortran -w -unroll -O3 -ftree-vectorize -fbounds-check \
+	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
+	../common/mod_random.f90 ../error/mod_error.f90 ../common/mod_sort.f90 \
+	../math/mod_stats.f90 \
+	../linalg/mod_linalg.f90 ../linalg/mod_eig.f90 \
+	../decomposition/mod_pca.f90 \
+	main_pca.f90 -o main_pca.out
+	./main_pca.out
+
+	
 main_rand_integer:
 	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_random.f90 main_rand_integer.f90 -o main_rand_integer.out
 	./main_rand_integer.out
