@@ -23,6 +23,8 @@ graphviz
 * Boosting Trees: see sample_scripts/main_gradient_boosting_tree.f90
   * gradient_boosting_tree_regressor
   * gradient_boosting_extra_tree_regressor
+* Dimensionality Reduction: see sample_scripts/main_pca.f90
+  * pca
 
 
 
