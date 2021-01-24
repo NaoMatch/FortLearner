@@ -44,9 +44,12 @@ graphviz
     * CART-LC
     * OC1
     * householder cart
+* Ensemble Trees
+   * DeepForest
 * Gradient Boosting Decision Tree
   * Axis-Parallel
     * Xgboost
     * LightGBM
     * CatBoost
+    * SCORE: Selective Cascade of Residual ExtraTrees
 * Multi-Layer Perceptron
