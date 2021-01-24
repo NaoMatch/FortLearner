@@ -25,6 +25,28 @@ graphviz
   * gradient_boosting_extra_tree_regressor
 * Dimensionality Reduction: see sample_scripts/main_pca.f90
   * pca
-
-
-
+  
+  
+# ToDo
+* Linear Model
+  * sgd_regressor
+  * logistic_regression
+* Decision Tree
+  * Axis-Parallel
+    * clouds
+    * sliq
+  * Oblique
+    * weighted oblique decision tree
+    * simulated annealing decision tree
+    * rotation tree
+    * random rotation tree
+    * soft decision tree
+    * CART-LC
+    * OC1
+    * householder cart
+* Gradient Boosting Decision Tree
+  * Axis-Parallel
+    * Xgboost
+    * LightGBM
+    * CatBoost
+* Multi-Layer Perceptron
