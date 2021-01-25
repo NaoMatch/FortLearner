@@ -54,9 +54,9 @@ contains
         integer(kind=8) :: n_samples_train, n_samples_valid
         integer(kind=8), ALLOCATABLE :: indices_train(:), indices_valid(:), indices_all(:)
         real(kind=8), allocatable :: x_valid(:,:), y_pred_valid(:), y_true_valid(:), x_sample(:)
-        real(kind=8) :: n_samples_train_inv, y_sample
-        real(kind=8) :: update_b
-        real(kind=8), allocatable :: update_w(:)
+        real(kind=8) :: n_samples_train_inv, y_sample, learning_rate
+        real(kind=8) :: update_b, best_intercept_, best_loss, current_loss
+        real(kind=8), allocatable :: update_w(:), best_coefs_(:)
 
         n_samples = data_holder_ptr%n_samples
         n_columns = data_holder_ptr%n_columns
@@ -97,6 +97,9 @@ contains
         print*, '============================================================='
         print*, "START"
         allocate(x_sample(n_columns))
+        allocate(best_coefs_(n_columns))
+        best_loss = huge(0d0)
+        learning_rate = this%hparam%learning_rate_initial
         do epoch=1, this%hparam%max_iter, 1
             call permutation(indices_train, n_samples_train)
             do batch=1, n_samples_train, 1
@@ -104,21 +107,30 @@ contains
                 x_sample(:) = data_holder_ptr%x_ptr%x_r8_ptr(idx,:)
                 y_sample    = data_holder_ptr%y_ptr%y_r8_ptr(idx,1)
 
-                update_b = & 
-                    - (y_sample - sum(x_sample*this%coefs_) - this%intercept_) & 
-                    * n_samples_train_inv
+                update_b = - y_sample + sum(x_sample*this%coefs_) + this%intercept_
                 update_w = x_sample * update_b
-                this%coefs_     = this%coefs_     - this%hparam%learning_rate_initial * update_w
-                this%intercept_ = this%intercept_ - this%hparam%learning_rate_initial * update_b
+
+                call meupdate(update_w, n_columns, top_k=.1d0)
+                this%coefs_     = this%coefs_     - learning_rate * update_w
+                this%intercept_ = this%intercept_ - learning_rate * update_b
             end do
             call multi_mat_vec(x_valid, this%coefs_, y_pred_valid, n_samples_valid, n_columns)
             
             do batch=1, n_samples_valid, 1
                 y_pred_valid(batch) = y_pred_valid(batch) + this%intercept_
             end do
-            print*, metric%mean_square_error(y_true_valid, y_pred_valid)
+            current_loss = metric%mean_square_error(y_true_valid, y_pred_valid)
+            if ( best_loss .gt. current_loss ) then
+                best_loss = current_loss
+                best_coefs_ = this%coefs_
+                best_intercept_ = this%intercept_
+            end if
+            print*, epoch, current_loss, best_loss, learning_rate
+            learning_rate = this%hparam%learning_rate_initial / epoch**this%hparam%power_t
         end do
 
+        this%coefs_ = best_coefs_ 
+        this%intercept_ = best_intercept_ 
         this%n_columns = n_columns
         this%is_fitted = t_
     end subroutine fit_sgd_regressor
@@ -147,5 +159,30 @@ contains
         end do
     end function predict_sgd_regressor
 
+
+    subroutine meupdate(vector, n_samples, top_k)
+        implicit none
+        real(kind=8) :: vector(n_samples)
+        integer(kind=8) :: n_samples
+        real(kind=8) :: top_k
+
+        real(kind=8), ALLOCATABLE :: vector_abs(:)
+        integer(kind=8), ALLOCATABLE :: indices(:)
+        integer(kind=8) :: i, n_samples_top_k, idx
+
+        n_samples_top_k = minval((/int(n_samples * top_k, kind=kind(top_k)), 1_8/))
+        allocate(vector_abs(n_samples))
+        allocate(indices(n_samples))
+        do i=1, n_samples, 1
+            vector_abs(i) = abs(vector(i))
+            indices(i) = i
+        end do
+        call quick_argsort(vector_abs, indices, n_samples)
+
+        do i=1, n_samples_top_k, 1
+            idx = indices(i)
+            vector(idx) = 0d0
+        end do
+    end subroutine meupdate
 
 end module mod_sgd_estimator
