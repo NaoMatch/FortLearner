@@ -40,6 +40,7 @@ run_ml:
 	make main_forest
 	make main_linear_regression
 	make main_pca
+	make main_sgd_regressor
 
 
 main_cholesky_decomposition:
@@ -348,6 +349,29 @@ main_scaler:
 main_search:
 	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 main_search.f90 -o main_search.out
 	./main_search.out
+
+main_sgd_regressor:
+	gfortran \
+	-w -fbounds-check \
+	../common/mod_const.f90 \
+	../common/mod_common.f90 \
+	../common/mod_timer.f90 \
+	../error/mod_error.f90 \
+	../common/mod_random.f90 \
+	../common/mod_sort.f90 \
+	../math/mod_stats.f90 \
+	../metric/mod_metric.f90 \
+	../linalg/mod_linalg.f90 \
+	\
+	../hyperparameter/mod_hyperparameter.f90 \
+	../preprocessing/mod_discretizer.f90 \
+	../preprocessing/mod_scaler.f90 \
+	../data_holder/mod_data_holder.f90 \
+	\
+	../linear_regression/mod_linear_regression.f90 \
+	../sgd_estimator/mod_sgd_estimator.f90 \
+	main_sgd_regressor.f90 -o main_sgd_regressor.out
+	./main_sgd_regressor.out
 
 main_sort:
 	gfortran -w -O3 -unroll ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../math/mod_math.f90 ../common/mod_sort.f90 main_sort.f90 -o main_sort.out
