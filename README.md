@@ -14,6 +14,8 @@ graphviz
   * linear_regression
   * lasso_regression
   * ridge_regression
+* Stochastic Gradient Descent: see sample_scripts/main_sgd_regressor.f90
+  * sgd_regressor
 * Decision Tree: see sample_scripts/main_decision_tree.f90
   * decision_tree_regressor
   * extra_tree_regressor
@@ -29,7 +31,6 @@ graphviz
   
 # ToDo
 * Linear Model
-  * sgd_regressor
   * logistic_regression
 * Decision Tree
   * Axis-Parallel
