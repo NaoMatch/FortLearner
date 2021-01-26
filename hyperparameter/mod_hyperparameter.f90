@@ -91,21 +91,24 @@ module mod_hyperparameter
 
     type, extends(hparam_base) :: hparam_sgd_estimator
         character(len=256) :: loss = "squared_loss"
-        character(len=256) :: penalty = "l2"
-        real(kind=8)       :: alpha = 0.0001d0
-        real(kind=8)       :: l1_ratio = 0.15d0
-        logical(kind=4)    :: fit_intercept = t_
-        integer(kind=8)    :: max_iter=1000_8
-        real(kind=8)       :: tolerance = 0.0001d0
-        logical(kind=4)    :: shuffle = t_
-        integer(kind=4)    :: verbose = 0_8
+        integer(kind=8)    :: loss_int=1_8 !
+        character(len=256) :: penalty = "l2" !
+        integer(kind=8)    :: penalty_int=2_8 !
+        real(kind=8)       :: alpha = 0.0001d0 !
+        real(kind=8)       :: l1_ratio = 0.15d0 !
+        logical(kind=4)    :: fit_intercept = t_  !
+        integer(kind=8)    :: max_iter=1000_8 !
+        real(kind=8)       :: tolerance = 0.001d0 !
+        logical(kind=4)    :: shuffle = t_ !
+        integer(kind=4)    :: verbose = 0_8 !
         real(kind=8)       :: epsilon = 0.1d0
-        character(len=256) :: learning_rate = "constant"
-        real(kind=8)       :: learning_rate_initial = 0.01d0
-        real(kind=8)       :: power_t = 0.25d0
-        logical(kind=4)    :: early_stopping = f_
-        real(kind=8)       :: validation_fraction = 0.01d0
-        integer(kind=8)    :: n_iter_no_change=10_8
+        character(len=256) :: learning_rate = "invscaling" !
+        integer(kind=8)    :: learning_rate_int = 2_8 !
+        real(kind=8)       :: learning_rate_initial = 0.01d0 !
+        real(kind=8)       :: power_t = 0.25d0 !
+        logical(kind=4)    :: early_stopping = f_ !
+        real(kind=8)       :: validation_fraction = 0.1d0 !
+        integer(kind=8)    :: n_iter_no_change=10_8 !
     end type hparam_sgd_estimator
 
 contains
