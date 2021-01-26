@@ -352,7 +352,7 @@ main_search:
 
 main_sgd_regressor:
 	gfortran \
-	-w -fbounds-check \
+	-w -unroll -O3 \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
