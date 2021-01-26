@@ -10,22 +10,15 @@ module mod_sgd_estimator
     use mod_hyperparameter
     use mod_data_holder
     implicit none
-    
-    type loss
-        integer(kind=8) :: loss_type
-    contains
-        ! procedure :: compute
-        ! procedure :: dcompute
-    end type loss
 
 
     type sgd_regressor
-        logical(kind=4) :: is_fitted=f_
+        logical(kind=4)    :: verbose=f_
+        logical(kind=4)    :: is_fitted=f_
         character(len=256) :: algo_name="sgd_regressor"
-        integer(kind=8) :: n_columns
+        integer(kind=8)    :: n_columns
         real(kind=8), allocatable :: coefs_(:)
-        real(kind=8) :: intercept_
-
+        real(kind=8)       :: intercept_
         type(hparam_sgd_estimator) :: hparam
     contains
         procedure :: fit => fit_sgd_regressor
@@ -38,8 +31,68 @@ module mod_sgd_estimator
 
 contains
 
-    function new_sgd_regressor()
-        type(sgd_regressor) :: new_sgd_regressor
+    function new_sgd_regressor(&
+            loss, &
+            max_iter, &
+            learning_rate, &
+            learning_rate_initial, &
+            tolerance, &
+            power_t, &
+            alpha, &
+            penalty, &
+            l1_ratio, &
+            fit_intercept, &
+            verbose)
+        type(sgd_regressor)        :: new_sgd_regressor, tmp
+
+        character(len=*), optional :: loss
+        integer(kind=8), optional  :: max_iter
+        character(len=*), optional :: learning_rate
+        real(kind=8), optional     :: learning_rate_initial
+        real(kind=8), optional     :: tolerance
+        real(kind=8), optional     :: power_t
+        real(kind=8), optional     :: alpha
+        character(len=*), optional :: penalty
+        real(kind=8), optional     :: l1_ratio
+        logical(kind=4), optional  :: fit_intercept
+        logical(kind=4), optional  :: verbose
+
+        character(len=256) :: loss_preset(1), lr_methods_preset(2), pnlty_methods_preset(3)
+        tmp%hparam%algo_name = "sgd_regressor"
+        
+        loss_preset(1)       = "squared_loss"
+        lr_methods_preset(1) = "constant"
+        lr_methods_preset(2) = "invscaling"
+        pnlty_methods_preset(1) = "l1"
+        pnlty_methods_preset(2) = "l2"
+        pnlty_methods_preset(3) = "elasticnet"
+
+        if (present(loss)) tmp%hparam%loss = loss
+        if (present(max_iter)) tmp%hparam%max_iter = max_iter
+        if (present(learning_rate)) tmp%hparam%learning_rate = learning_rate
+        if (present(learning_rate_initial)) tmp%hparam%learning_rate_initial = learning_rate_initial
+        if (present(tolerance)) tmp%hparam%tolerance = tolerance
+        if (present(power_t)) tmp%hparam%power_t = power_t
+        if (present(alpha)) tmp%hparam%alpha = alpha
+        if (present(penalty)) tmp%hparam%penalty = penalty
+        if (present(l1_ratio)) tmp%hparam%l1_ratio = l1_ratio
+        if (present(fit_intercept)) tmp%hparam%fit_intercept = fit_intercept
+        if (present(verbose)) tmp%verbose = verbose
+
+        call tmp%hparam%validate_int_range("max_iter", tmp%hparam%max_iter, 1_8, huge(0_8))
+        call tmp%hparam%validate_real_range("learning_rate_initial", tmp%hparam%learning_rate_initial, 1d-10, huge(0d0))
+        call tmp%hparam%validate_real_range("tolerance", tmp%hparam%tolerance, 1d-10, huge(0d0))
+        call tmp%hparam%validate_real_range("power_t", tmp%hparam%power_t, 0d0, 1d0)
+        call tmp%hparam%validate_real_range("alpha", tmp%hparam%alpha, 1d-10, 1d0)
+        call tmp%hparam%validate_real_range("l1_ratio", tmp%hparam%l1_ratio, 1d-10, 1d0)
+
+        call tmp%hparam%validate_char_list("loss", tmp%hparam%loss, loss_preset)
+        call tmp%hparam%validate_char_list("learning_rate", tmp%hparam%learning_rate, lr_methods_preset)
+        call tmp%hparam%validate_char_list("penalty", tmp%hparam%penalty, pnlty_methods_preset)
+        tmp%hparam%learning_rate_int = tmp%hparam%convert_char_to_int(tmp%hparam%learning_rate, lr_methods_preset)
+        tmp%hparam%penalty_int       = tmp%hparam%convert_char_to_int(tmp%hparam%penalty, pnlty_methods_preset)
+
+        new_sgd_regressor = tmp
     end function new_sgd_regressor
 
 
@@ -57,6 +110,7 @@ contains
         real(kind=8) :: n_samples_train_inv, y_sample, learning_rate
         real(kind=8) :: update_b, best_intercept_, best_loss, current_loss
         real(kind=8), allocatable :: update_w(:), best_coefs_(:)
+        integer(kind=8) :: count_no_change
 
         n_samples = data_holder_ptr%n_samples
         n_columns = data_holder_ptr%n_columns
@@ -70,9 +124,13 @@ contains
         allocate(this%coefs_(n_columns))
         allocate(update_w(n_columns))
         call random_number(this%coefs_)
-        call random_number(this%intercept_)
         this%coefs_(:)  = 2d0 * this%coefs_(:)  - 1d0
-        this%intercept_ = 2d0 * this%intercept_ - 1d0
+
+        this%intercept_ = 0d0
+        if (this%hparam%fit_intercept) then
+            call random_number(this%intercept_)
+            this%intercept_ = 2d0 * this%intercept_ - 1d0
+        end if
 
         print*, '============================================================='
         print*, "Train Test Split"
@@ -100,19 +158,29 @@ contains
         allocate(best_coefs_(n_columns))
         best_loss = huge(0d0)
         learning_rate = this%hparam%learning_rate_initial
+        count_no_change = 0_8
+
         do epoch=1, this%hparam%max_iter, 1
-            call permutation(indices_train, n_samples_train)
+            if (this%hparam%shuffle) call permutation(indices_train, n_samples_train)
             do batch=1, n_samples_train, 1
                 idx = indices_train(batch)
                 x_sample(:) = data_holder_ptr%x_ptr%x_r8_ptr(idx,:)
                 y_sample    = data_holder_ptr%y_ptr%y_r8_ptr(idx,1)
 
                 update_b = - y_sample + sum(x_sample*this%coefs_) + this%intercept_
-                update_w = x_sample * update_b
+                if ( this%hparam%penalty_int .eq. 1_8 ) then
+                    update_w = x_sample * update_b + this%hparam%alpha * sign(1d0, this%coefs_)
+                elseif ( this%hparam%penalty_int .eq. 2_8 ) then
+                    update_w = x_sample * update_b + this%hparam%alpha * this%coefs_
+                elseif ( this%hparam%penalty_int .eq. 3_8 ) then
+                    update_w = x_sample * update_b & 
+                        + this%hparam%alpha * this%hparam%l1_ratio * sign(1d0, this%coefs_) & 
+                        + this%hparam%alpha * (1d0-this%hparam%l1_ratio) * this%coefs_
+                end if
 
-                call meupdate(update_w, n_columns, top_k=.1d0)
+                ! call meupdate(update_w, n_columns, top_k=.5d0)
                 this%coefs_     = this%coefs_     - learning_rate * update_w
-                this%intercept_ = this%intercept_ - learning_rate * update_b
+                if (this%hparam%fit_intercept) this%intercept_ = this%intercept_ - learning_rate * update_b
             end do
             call multi_mat_vec(x_valid, this%coefs_, y_pred_valid, n_samples_valid, n_columns)
             
@@ -124,9 +192,16 @@ contains
                 best_loss = current_loss
                 best_coefs_ = this%coefs_
                 best_intercept_ = this%intercept_
+                count_no_change = 0_8
+            elseif (this%hparam%tolerance .lt. abs(best_loss-current_loss) ) then
+                count_no_change = count_no_change + 1
             end if
-            print*, epoch, current_loss, best_loss, learning_rate
-            learning_rate = this%hparam%learning_rate_initial / epoch**this%hparam%power_t
+
+            if ( count_no_change .ge. this%hparam%n_iter_no_change ) exit
+            if (this%verbose) print*, epoch, current_loss, best_loss, learning_rate, count_no_change
+            if (this%hparam%learning_rate_int .eq. 2_8) then
+                learning_rate = this%hparam%learning_rate_initial / epoch**this%hparam%power_t
+            end if
         end do
 
         this%coefs_ = best_coefs_ 
