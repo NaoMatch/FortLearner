@@ -31,10 +31,10 @@ program main_sgd_regressor
 
     print*, '============================================================='
     print*, "Input Data Shape: "
-    n_samples_train  = 7654_8
-    n_samples_test   = 957_8
-    n_columns_train  = 4_8
-    n_columns_test   = 4_8
+    n_samples_train  = 17010_8
+    n_samples_test   = 2127_8
+    n_columns_train  = 81_8
+    n_columns_test   = 81_8
     skip_header = t_
     dtype_in = "r"
     dtype_out = "r"
@@ -46,49 +46,79 @@ program main_sgd_regressor
 
     print*, '============================================================='
     print*, "File Names: "
-    file_name_x_train_csv = "./input/Combined_Cycle_x_train.csv"
-    file_name_y_train_csv = "./input/Combined_Cycle_y_train.csv"
-    file_name_x_train_bin = "./input/Combined_Cycle_x_train.bin"
-    file_name_y_train_bin = "./input/Combined_Cycle_y_train.bin"
-    file_name_x_test_csv  = "./input/Combined_Cycle_x_test.csv"
-    file_name_y_test_csv  = "./input/Combined_Cycle_y_test.csv"
-    file_name_x_test_bin  = "./input/Combined_Cycle_x_test.bin"
-    file_name_y_test_bin  = "./input/Combined_Cycle_y_test.bin"
+    file_name_x_train_csv = "./input/SuperConductivity_x_train.csv"
+    file_name_y_train_csv = "./input/SuperConductivity_y_train.csv"
+    file_name_x_train_bin = "./input/SuperConductivity_x_train.bin"
+    file_name_y_train_bin = "./input/SuperConductivity_y_train.bin"
+    file_name_x_test_csv  = "./input/SuperConductivity_x_test.csv"
+    file_name_y_test_csv  = "./input/SuperConductivity_y_test.csv"
+    file_name_x_test_bin  = "./input/SuperConductivity_x_test.bin"
+    file_name_y_test_bin  = "./input/SuperConductivity_y_test.bin"
     print*, "   x_train csv -> bin: ", trim(file_name_x_train_csv), " -> ", trim(file_name_x_train_bin)
     print*, "   y_train csv -> bin: ", trim(file_name_y_train_csv), " -> ", trim(file_name_y_train_bin)
     print*, "   x_test  csv -> bin: ", trim(file_name_x_test_csv),  " -> ", trim(file_name_x_test_bin)
     print*, "   y_test  csv -> bin: ", trim(file_name_y_test_csv),  " -> ", trim(file_name_y_test_bin)
 
+    ! print*, '============================================================='
+    ! print*, "Input Data Shape: "
+    ! n_samples_train  = 7654_8
+    ! n_samples_test   = 957_8
+    ! n_columns_train  = 4_8
+    ! n_columns_test   = 4_8
+    ! skip_header = t_
+    ! dtype_in = "r"
+    ! dtype_out = "r"
+    ! print*, "    train (row x col): ", n_samples_train, n_columns_train
+    ! print*, "    test  (row x col): ", n_samples_test, n_columns_test
+    ! print*, "    skip header:       ", skip_header
+    ! print*, "    data type input:   ", dtype_in
+    ! print*, "    data type output:  ", dtype_out
 
-    print*, '============================================================='
-    print*, "Input Data Shape: "
-    n_samples_train  = 824_8
-    n_samples_test   = 103_8
-    n_columns_train  = 8_8
-    n_columns_test   = 8_8
-    skip_header = t_
-    dtype_in = "r"
-    dtype_out = "r"
-    print*, "    train (row x col): ", n_samples_train, n_columns_train
-    print*, "    test  (row x col): ", n_samples_test, n_columns_test
-    print*, "    skip header:       ", skip_header
-    print*, "    data type input:   ", dtype_in
-    print*, "    data type output:  ", dtype_out
+    ! print*, '============================================================='
+    ! print*, "File Names: "
+    ! file_name_x_train_csv = "./input/Combined_Cycle_x_train.csv"
+    ! file_name_y_train_csv = "./input/Combined_Cycle_y_train.csv"
+    ! file_name_x_train_bin = "./input/Combined_Cycle_x_train.bin"
+    ! file_name_y_train_bin = "./input/Combined_Cycle_y_train.bin"
+    ! file_name_x_test_csv  = "./input/Combined_Cycle_x_test.csv"
+    ! file_name_y_test_csv  = "./input/Combined_Cycle_y_test.csv"
+    ! file_name_x_test_bin  = "./input/Combined_Cycle_x_test.bin"
+    ! file_name_y_test_bin  = "./input/Combined_Cycle_y_test.bin"
+    ! print*, "   x_train csv -> bin: ", trim(file_name_x_train_csv), " -> ", trim(file_name_x_train_bin)
+    ! print*, "   y_train csv -> bin: ", trim(file_name_y_train_csv), " -> ", trim(file_name_y_train_bin)
+    ! print*, "   x_test  csv -> bin: ", trim(file_name_x_test_csv),  " -> ", trim(file_name_x_test_bin)
+    ! print*, "   y_test  csv -> bin: ", trim(file_name_y_test_csv),  " -> ", trim(file_name_y_test_bin)
 
-    print*, '============================================================='
-    print*, "File Names: "
-    file_name_x_train_csv = "./input/Concrete_x_train.csv"
-    file_name_y_train_csv = "./input/Concrete_y_train.csv"
-    file_name_x_train_bin = "./input/Concrete_x_train.bin"
-    file_name_y_train_bin = "./input/Concrete_y_train.bin"
-    file_name_x_test_csv  = "./input/Concrete_x_test.csv"
-    file_name_y_test_csv  = "./input/Concrete_y_test.csv"
-    file_name_x_test_bin  = "./input/Concrete_x_test.bin"
-    file_name_y_test_bin  = "./input/Concrete_y_test.bin"
-    print*, "   x_train csv -> bin: ", trim(file_name_x_train_csv), " -> ", trim(file_name_x_train_bin)
-    print*, "   y_train csv -> bin: ", trim(file_name_y_train_csv), " -> ", trim(file_name_y_train_bin)
-    print*, "   x_test  csv -> bin: ", trim(file_name_x_test_csv),  " -> ", trim(file_name_x_test_bin)
-    print*, "   y_test  csv -> bin: ", trim(file_name_y_test_csv),  " -> ", trim(file_name_y_test_bin)
+
+    ! print*, '============================================================='
+    ! print*, "Input Data Shape: "
+    ! n_samples_train  = 824_8
+    ! n_samples_test   = 103_8
+    ! n_columns_train  = 8_8
+    ! n_columns_test   = 8_8
+    ! skip_header = t_
+    ! dtype_in = "r"
+    ! dtype_out = "r"
+    ! print*, "    train (row x col): ", n_samples_train, n_columns_train
+    ! print*, "    test  (row x col): ", n_samples_test, n_columns_test
+    ! print*, "    skip header:       ", skip_header
+    ! print*, "    data type input:   ", dtype_in
+    ! print*, "    data type output:  ", dtype_out
+
+    ! print*, '============================================================='
+    ! print*, "File Names: "
+    ! file_name_x_train_csv = "./input/Concrete_x_train.csv"
+    ! file_name_y_train_csv = "./input/Concrete_y_train.csv"
+    ! file_name_x_train_bin = "./input/Concrete_x_train.bin"
+    ! file_name_y_train_bin = "./input/Concrete_y_train.bin"
+    ! file_name_x_test_csv  = "./input/Concrete_x_test.csv"
+    ! file_name_y_test_csv  = "./input/Concrete_y_test.csv"
+    ! file_name_x_test_bin  = "./input/Concrete_x_test.bin"
+    ! file_name_y_test_bin  = "./input/Concrete_y_test.bin"
+    ! print*, "   x_train csv -> bin: ", trim(file_name_x_train_csv), " -> ", trim(file_name_x_train_bin)
+    ! print*, "   y_train csv -> bin: ", trim(file_name_y_train_csv), " -> ", trim(file_name_y_train_bin)
+    ! print*, "   x_test  csv -> bin: ", trim(file_name_x_test_csv),  " -> ", trim(file_name_x_test_bin)
+    ! print*, "   y_test  csv -> bin: ", trim(file_name_y_test_csv),  " -> ", trim(file_name_y_test_bin)
 
     print*, '============================================================='
     print*, "CSV to Binary"
@@ -132,7 +162,14 @@ program main_sgd_regressor
 
     print*, '============================================================='
     print*, "Fit: SGDRegressor"
-    sgd_reg = sgd_regressor()
+    sgd_reg = sgd_regressor(&
+        max_iter=10000_8, &
+        learning_rate="invscaling", &
+        learning_rate_initial=0.0001d0, &
+        alpha=0.01d0, & 
+        penalty="elasticnet", &
+        l1_ratio=0.9d0, &
+        verbose=t_, fit_intercept=f_)
     call sgd_reg%fit(dholder_ptr)
 
     print*, '============================================================='
