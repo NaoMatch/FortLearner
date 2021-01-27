@@ -1,5 +1,6 @@
 program main_decision_tree
     use mod_const
+    use mod_random
     use mod_timer
     use mod_metric
     use mod_data_holder
@@ -21,6 +22,7 @@ program main_decision_tree
     real(kind=8), ALLOCATABLE :: y_train(:,:), y_test(:,:)
     real(kind=8), ALLOCATABLE :: y_train_pred_dt(:,:), y_test_pred_dt(:,:)
     real(kind=8), ALLOCATABLE :: y_train_pred_et(:,:), y_test_pred_et(:,:)
+    integer(kind=8), ALLOCATABLE :: feature_indices(:), feature_indices_scanning_range(:)
     
     type(metrics)                 :: metric
     type(data_holder), target     :: dholder
@@ -125,12 +127,24 @@ program main_decision_tree
     dholder = data_holder(x_train, y_train)
     dholder_ptr => dholder
 
-    max_iter = 20
+    print*, '============================================================='
+    print*, "Feature Indices"
+    allocate(feature_indices(n_columns_train))
+    allocate(feature_indices_scanning_range(2))
+    do i=1, n_columns_train, 1
+        feature_indices(i) = i
+    end do
+    feature_indices_scanning_range = (/2,4/)
+
+    max_iter = 10
     max_leaf_nodes = 20
-    do n_leaf_nodes=2, max_leaf_nodes
+    do n_leaf_nodes=5, max_leaf_nodes
         dt_reg = decision_tree_regressor(max_leaf_nodes=n_leaf_nodes, fashion="best")
         call date_and_time(values=date_value1)
         do iter=1, max_iter, 1
+            ! call dt_reg%fit(dholder_ptr, & 
+            !     feature_indices=feature_indices, & 
+            !     feature_indices_scanning_range=feature_indices_scanning_range)
             call dt_reg%fit(dholder_ptr)
         end do
         call date_and_time(values=date_value2)
@@ -142,6 +156,9 @@ program main_decision_tree
         et_reg = extra_tree_regressor(max_leaf_nodes=n_leaf_nodes, fashion="best", n_repeats=1_8)
         call date_and_time(values=date_value1)
         do iter=1, max_iter, 1
+            ! call et_reg%fit(dholder_ptr, & 
+            !     feature_indices=feature_indices, & 
+            !     feature_indices_scanning_range=feature_indices_scanning_range)
             call et_reg%fit(dholder_ptr)
         end do
         call date_and_time(values=date_value2)
