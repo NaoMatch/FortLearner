@@ -9,7 +9,9 @@ module mod_error
         procedure, pass :: check_number_of_features_mismatch_i8
         generic :: check_number_of_features_mismatch => check_number_of_features_mismatch_i4, check_number_of_features_mismatch_i8
         procedure :: only_accept_Nx1_matrix
-        procedure :: sample_size_mismatch
+        procedure, pass :: sample_size_mismatch_matrix
+        procedure, pass :: sample_size_mismatch_vector
+        generic :: sample_size_mismatch => sample_size_mismatch_vector, sample_size_mismatch_matrix
     end type
 
 contains
@@ -78,7 +80,22 @@ contains
     end subroutine only_accept_Nx1_matrix
 
 
-    subroutine sample_size_mismatch(this, shape_x, variable_name_x, shape_y, variable_name_y, function_name)
+    subroutine sample_size_mismatch_vector(this, n_samples_x, variable_name_x, n_samples_y, variable_name_y, function_name)
+        implicit none
+        class(error)     :: this
+        integer(kind=8)  :: n_samples_x, n_samples_y
+        character(len=*) :: variable_name_x, variable_name_y
+        character(len=*) :: function_name
+        character(len=512) :: err_msg
+
+        if (n_samples_x .ne. n_samples_y) then
+            err_msg = "ShapeMismatch: The number of samples for " // trim(variable_name_x) // " and " // trim(variable_name_y)
+            err_msg = trim(err_msg) // " must be the same in " // trim(function_name) // "."
+            stop trim(err_msg)
+        end if
+    end subroutine sample_size_mismatch_vector
+
+    subroutine sample_size_mismatch_matrix(this, shape_x, variable_name_x, shape_y, variable_name_y, function_name)
         implicit none
         class(error)     :: this
         integer(kind=8)  :: shape_x(2), shape_y(2)
@@ -91,6 +108,6 @@ contains
             err_msg = trim(err_msg) // " must be the same in " // trim(function_name) // "."
             stop trim(err_msg)
         end if
-    end subroutine sample_size_mismatch
+    end subroutine sample_size_mismatch_matrix
 
 end module mod_error
