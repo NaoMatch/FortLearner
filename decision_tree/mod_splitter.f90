@@ -37,19 +37,27 @@ contains
 
     !> A subroutine to split node by very tradisional way.
     !> L. Breiman, J. Friedman, R. Olshen, and C. Stone, “Classification and Regression Trees”, Wadsworth, Belmont, CA, 1984.
-    subroutine split_decision_tree_regressor(this, node_ptrs, data_holder_ptr, hparam_ptr)
+    subroutine split_decision_tree_regressor(this, node_ptrs, data_holder_ptr, hparam_ptr, & 
+        n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
         implicit none
         class(node_splitter)               :: this
         type(node_axis_ptr), intent(inout) :: node_ptrs(:)
         type(data_holder), pointer         :: data_holder_ptr
         type(hparam_decisiontree), pointer :: hparam_ptr
+        integer(kind=8), intent(in)        :: n_columns
+        integer(kind=8), intent(inout)     :: feature_indices(n_columns)
+        integer(kind=8), intent(in)        :: feature_indices_scanning_range(2)
+        logical(kind=4), intent(in)        :: is_permute_per_node
+
         integer(kind=8) :: n
 
         if ( size(node_ptrs) .eq. 1 ) then
-            call this%split_decision_tree_regressor_indivisuals(node_ptrs(1)%node_ptr, data_holder_ptr, hparam_ptr)
+            call this%split_decision_tree_regressor_indivisuals(node_ptrs(1)%node_ptr, data_holder_ptr, hparam_ptr, &
+                n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
         else
             do n=1, size(node_ptrs), 1
-                call this%split_decision_tree_regressor_indivisuals(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr)
+                call this%split_decision_tree_regressor_indivisuals(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr, &
+                    n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
             end do
         end if
     end subroutine split_decision_tree_regressor
@@ -57,12 +65,17 @@ contains
 
     !> A subroutine to split node by very tradisional way.
     !> L. Breiman, J. Friedman, R. Olshen, and C. Stone, “Classification and Regression Trees”, Wadsworth, Belmont, CA, 1984.
-    subroutine split_decision_tree_regressor_indivisuals(this, node_ptr, data_holder_ptr, hparam_ptr)
+    subroutine split_decision_tree_regressor_indivisuals(this, node_ptr, data_holder_ptr, hparam_ptr, &
+        n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
         implicit none
         class(node_splitter)               :: this
         type(node_axis), intent(inout)     :: node_ptr
         type(data_holder), pointer         :: data_holder_ptr
         type(hparam_decisiontree), pointer :: hparam_ptr
+        integer(kind=8), intent(in)        :: n_columns
+        integer(kind=8), intent(inout)     :: feature_indices(n_columns)
+        integer(kind=8), intent(in)        :: feature_indices_scanning_range(2)
+        logical(kind=4), intent(in)        :: is_permute_per_node
 
         real(kind=8) :: n_rows_inv, n_outs_inv
         real(kind=8), allocatable :: res_l(:), res_r(:), sum_l(:), sum_r(:), avg_l(:), avg_r(:)
@@ -71,8 +84,9 @@ contains
         integer(kind=8) :: i_start, i_stop, fid, f, i, j, best_fid
         integer(kind=8) :: count_l, count_r, idx, count_eval
         integer(kind=8) :: n_samples_l, n_samples_r
+        integer(kind=8) :: ini_f_idx, fin_f_idx
         real(kind=8), allocatable :: tmp_f(:), tmp_y(:,:), tmp_f_copy(:), tmp_y_copy(:,:)
-        integer(kind=8), allocatable :: feature_ids(:), sorted_indices(:)
+        integer(kind=8), allocatable :: sorted_indices(:)
 
         allocate(tot_p(data_holder_ptr%n_outputs))
         allocate(tot_l(data_holder_ptr%n_outputs))
@@ -99,20 +113,17 @@ contains
         allocate(tmp_f(node_ptr%n_samples))
         allocate(tmp_f_copy(node_ptr%n_samples))
         allocate(sorted_indices(node_ptr%n_samples))
-        allocate(feature_ids(node_ptr%n_columns))
-
-        do i=1, node_ptr%n_columns, 1
-            feature_ids(i) = i
-        end do
-        call permutation(feature_ids, node_ptr%n_columns)
 
         do i=1, node_ptr%n_samples, 1
             idx = node_ptr%indices(i)
             tmp_y(i,:) = data_holder_ptr%y_ptr%y_r8_ptr(idx,:)
         end do
+        if (is_permute_per_node) call permutation(feature_indices, n_columns)
 
-        do f=1, node_ptr%n_columns, 1
-            fid = feature_ids(f)
+        ini_f_idx = feature_indices_scanning_range(1)
+        fin_f_idx = feature_indices_scanning_range(2)
+        do f=ini_f_idx, fin_f_idx, 1
+            fid = feature_indices(f)
             ! Useless or Used Feature Skip
             if ( node_ptr%is_useless(fid) ) cycle
             if ( node_ptr%is_used(fid) .and. hparam_ptr%skip_used_features ) cycle
@@ -212,33 +223,43 @@ contains
 
 
     !> A subroutine to split node by extremely randomized way.
-    subroutine split_extra_tree_regressor(this, node_ptrs, data_holder_ptr, hparam_ptr)
+    subroutine split_extra_tree_regressor(this, node_ptrs, data_holder_ptr, hparam_ptr, & 
+        n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
         implicit none
         class(node_splitter)               :: this
         type(node_axis_ptr), intent(inout) :: node_ptrs(:)
         type(data_holder), pointer         :: data_holder_ptr
         type(hparam_decisiontree), pointer :: hparam_ptr
+        integer(kind=8), intent(in)        :: n_columns
+        integer(kind=8), intent(inout)     :: feature_indices(n_columns)
+        integer(kind=8), intent(in)        :: feature_indices_scanning_range(2)
+        logical(kind=4), intent(in)        :: is_permute_per_node
         integer(kind=8) :: n
 
         if ( size(node_ptrs) .eq. 1 ) then
-            call this%split_extra_tree_regressor_indivisuals(node_ptrs(1)%node_ptr, data_holder_ptr, hparam_ptr)
+            call this%split_extra_tree_regressor_indivisuals(node_ptrs(1)%node_ptr, data_holder_ptr, hparam_ptr, &
+                n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
         else
             do n=1, size(node_ptrs), 1
-                call this%split_extra_tree_regressor_indivisuals(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr)
+                call this%split_extra_tree_regressor_indivisuals(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr, &
+                    n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
             end do
         end if
     end subroutine split_extra_tree_regressor
 
 
     !> A subroutine to split node by extremely randomized way.
-    subroutine split_extra_tree_regressor_indivisuals(this, node_ptr, data_holder_ptr, hparam_ptr)
+    subroutine split_extra_tree_regressor_indivisuals(this, node_ptr, data_holder_ptr, hparam_ptr, &
+        n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
         implicit none
         class(node_splitter)               :: this
         type(node_axis), pointer           :: node_ptr
         type(data_holder), pointer         :: data_holder_ptr
         type(hparam_decisiontree), pointer :: hparam_ptr
-
-        integer(kind=8) :: date_value1(8), date_value2(8), time1, time2, time3
+        integer(kind=8), intent(in)        :: n_columns
+        integer(kind=8), intent(inout)     :: feature_indices(n_columns)
+        integer(kind=8), intent(in)        :: feature_indices_scanning_range(2)
+        logical(kind=4), intent(in)        :: is_permute_per_node
 
         real(kind=8) :: n_rows_inv, n_outs_inv
         real(kind=8), allocatable :: res_l(:), res_r(:), sum_l(:), sum_r(:), avg_l(:), avg_r(:)
@@ -250,11 +271,9 @@ contains
         real(kind=8), allocatable :: tmp_f(:), tmp_y(:,:), tmp_f_copy(:)
         integer(kind=8), allocatable :: feature_ids(:), indices(:)
         integer(kind=8) :: factor
+        integer(kind=8) :: ini_f_idx, fin_f_idx
         real(kind=8) :: min_val, max_val, rand_val, threshold
 
-        time1 = 0
-        time2 = 0
-        time3 = 0
         allocate(tot_p(data_holder_ptr%n_outputs))
         allocate(tot_l(data_holder_ptr%n_outputs))
         allocate(tot_r(data_holder_ptr%n_outputs))
@@ -276,18 +295,17 @@ contains
         allocate(tmp_f(node_ptr%n_samples))
         allocate(indices(node_ptr%n_samples))
         allocate(feature_ids(node_ptr%n_columns))
-        do i=1, node_ptr%n_columns, 1
-            feature_ids(i) = i
-        end do
-        call permutation(feature_ids, node_ptr%n_columns)
+        if (is_permute_per_node) call permutation(feature_indices, n_columns)
 
         do i=1, node_ptr%n_samples, 1
             idx = node_ptr%indices(i)
             tmp_y(i,:) = data_holder_ptr%y_ptr%y_r8_ptr(idx,:)
         end do
 
-        do f=1, node_ptr%n_columns, 1
-            fid = feature_ids(f)
+        ini_f_idx = feature_indices_scanning_range(1)
+        fin_f_idx = feature_indices_scanning_range(2)
+        do f=ini_f_idx, fin_f_idx, 1
+            fid = feature_indices(f)
             ! Useless or Used Feature Skip
             if ( node_ptr%is_useless(fid) ) cycle
             if ( node_ptr%is_used(fid) .and. hparam_ptr%skip_used_features ) cycle
