@@ -1,6 +1,0 @@
-<map id="mod_hyperparameter::hparam_linear_regression" name="mod_hyperparameter::hparam_linear_regression">
-<area shape="rect" id="node1" title=" " alt="" coords="197,39,376,80"/>
-<area shape="rect" id="node3" href="$structmod__hyperparameter_1_1hparam__lasso__regression.html" title=" " alt="" coords="424,5,603,47"/>
-<area shape="rect" id="node4" href="$structmod__hyperparameter_1_1hparam__ridge__regression.html" title=" " alt="" coords="426,71,601,112"/>
-<area shape="rect" id="node2" href="$structmod__hyperparameter_1_1hparam__base.html" title=" " alt="" coords="5,39,149,80"/>
-</map>

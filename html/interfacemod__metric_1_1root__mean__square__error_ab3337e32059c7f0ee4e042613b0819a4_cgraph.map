@@ -1,5 +1,0 @@
-<map id="mod_metric::root_mean_square_error::root_mean_square_error_real32" name="mod_metric::root_mean_square_error::root_mean_square_error_real32">
-<area shape="rect" id="node1" title="A function to compute Root Mean Squared Error." alt="" coords="5,31,176,87"/>
-<area shape="rect" id="node2" href="$namespacemod__metric.html#af19129b612655c004b6e64dc41ce5d85" title="A function to compute Mean Squared Error." alt="" coords="224,5,400,47"/>
-<area shape="rect" id="node3" href="$namespacemod__metric.html#a06ea5020a1401b7502b9e5bf5621b86b" title="A function to compute Root Mean Squared Error." alt="" coords="233,71,391,112"/>
-</map>

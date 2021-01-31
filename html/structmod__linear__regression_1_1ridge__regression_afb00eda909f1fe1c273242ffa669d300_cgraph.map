@@ -1,5 +1,0 @@
-<map id="mod_linear_regression::ridge_regression::fit" name="mod_linear_regression::ridge_regression::fit">
-<area shape="rect" id="node1" title=" " alt="" coords="5,50,157,91"/>
-<area shape="rect" id="node2" href="$namespacemod__linear__regression.html#ab7df70edef23cb5b48f691f9575df2a4" title="A subroutine to fit multiple linear regression model with L2 regularization." alt="" coords="223,5,375,61"/>
-<area shape="rect" id="node3" href="$namespacemod__linear__regression.html#a8250e4a60968c615c15276f388f4116d" title="A subroutine to fit simple ridge regression model." alt="" coords="205,86,392,127"/>
-</map>
