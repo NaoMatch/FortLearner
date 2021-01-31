@@ -36,6 +36,7 @@ run_utils:
 
 run_ml:
 	make main_decision_tree
+	make main_deep_forest
 	make main_gradient_boosting_tree
 	make main_forest
 	make main_linear_regression
@@ -103,6 +104,39 @@ main_decision_tree:
 	./main_decision_tree.f90 \
 	-o main_decision_tree.out
 	./main_decision_tree.out
+
+main_deep_forest:
+	gfortran \
+	-w -O3 -unroll -fopenmp \
+	../common/mod_const.f90 \
+	../common/mod_common.f90 \
+	../common/mod_timer.f90 \
+	../error/mod_error.f90 \
+	../common/mod_random.f90 \
+	../common/mod_sort.f90 \
+	../math/mod_stats.f90 \
+	../metric/mod_metric.f90 \
+	../linalg/mod_linalg.f90 \
+	\
+	../hyperparameter/mod_hyperparameter.f90 \
+	../preprocessing/mod_discretizer.f90 \
+	../data_holder/mod_data_holder.f90 \
+	\
+	../decision_tree/mod_node.f90 \
+	../decision_tree/mod_splitter.f90 \
+	../decision_tree/mod_woodworking_tools.f90 \
+	../decision_tree/mod_base_tree.f90 \
+	../decision_tree/mod_decision_tree.f90 \
+	../decision_tree/mod_extra_tree.f90 \
+	\
+	../boosting_trees/mod_gradient_boosting_tree.f90 \
+	\
+	../forest/mod_forest.f90 \
+	../forest/mod_deep_forest.f90 \
+	\
+	./main_deep_forest.f90 \
+	-o main_deep_forest.out
+	./main_deep_forest.out
 
 
 main_discretizer:
