@@ -1,4 +1,7 @@
 n_columns = data_holder_ptr%n_columns
+if (allocated(feature_indices_)) deallocate(feature_indices_)
+if (allocated(feature_indices_scanning_range_)) deallocate(feature_indices_scanning_range_)
+
 allocate(feature_indices_(n_columns))
 allocate(feature_indices_scanning_range_(2))
 if ( present(feature_indices) ) then
