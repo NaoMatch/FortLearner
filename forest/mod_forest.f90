@@ -1,4 +1,5 @@
 module mod_forest
+    !$ use omp_lib
     use mod_const
     use mod_decision_tree
     use mod_extra_tree
@@ -134,42 +135,67 @@ contains
     end function new_extra_trees_regressor
 
 
-    subroutine fit_random_forest_regressor(this, data_holder_ptr)
+    subroutine fit_random_forest_regressor(this, data_holder_ptr, &
+        feature_indices, feature_indices_scanning_range)
         implicit none
         class(random_forest_regressor) :: this
         type(data_holder), pointer     :: data_holder_ptr
-        integer(kind=8) :: n
+        integer(kind=8), optional      :: feature_indices(:)
+        integer(kind=8), optional      :: feature_indices_scanning_range(2)
+
+        integer(kind=8) :: n, n_columns
+        logical(kind=4) :: is_permute_per_node
+        integer(kind=8), allocatable :: feature_indices_(:), feature_indices_scanning_range_(:)
+        type(decision_tree_regressor) :: dt
+
+        include "../decision_tree/include/set_feature_indices_and_scanning_range.f90"
 
         if (allocated(this%trees)) deallocate(this%trees)
         allocate(this%trees(this%hparam%n_estimators))
 
-        ! print*, '============================================================='
         if (this%hparam%max_features .eq. huge(0_8)) then
             this%hparam%max_features = int(sqrt(data_holder_ptr%n_columns+0d0), kind=8)
         end if
 
         this%n_estimators_ = this%hparam%n_estimators
         this%n_outputs_ = data_holder_ptr%n_outputs
-
+        !$omp parallel private(dt) shared(data_holder_ptr)
+        !$omp do 
         do n=1, this%hparam%n_estimators, 1
-            this%trees(n) = decision_tree_regressor( &
+            dt = decision_tree_regressor( &
                 max_depth = this%hparam%max_depth, &
                 boot_strap = this%hparam%boot_strap, &
                 max_leaf_nodes = this%hparam%max_leaf_nodes, &
                 min_samples_leaf = this%hparam%min_samples_leaf, &
                 fashion = this%hparam%fashion, &
                 max_features = this%hparam%max_features &
-            )
-            call this%trees(n)%fit(data_holder_ptr)
+                )
+            ! call dt%fit(data_holder_ptr)
+            call dt%fit(data_holder_ptr, &
+                feature_indices = feature_indices_, & 
+                feature_indices_scanning_range = feature_indices_scanning_range_&
+                )
+            this % trees(n) = dt
         end do
+        !$omp end do
+        !$omp end parallel
     end subroutine fit_random_forest_regressor
 
 
-    subroutine fit_extra_trees_regressor(this, data_holder_ptr)
+    subroutine fit_extra_trees_regressor(this, data_holder_ptr, &
+        feature_indices, feature_indices_scanning_range)
         implicit none
         class(extra_trees_regressor) :: this
         type(data_holder), pointer     :: data_holder_ptr
-        integer(kind=8) :: n
+        integer(kind=8), optional      :: feature_indices(:)
+        integer(kind=8), optional      :: feature_indices_scanning_range(2)
+
+        integer(kind=8) :: n, n_columns
+        logical(kind=4) :: is_permute_per_node
+        integer(kind=8), allocatable :: feature_indices_(:), feature_indices_scanning_range_(:)
+        type(extra_tree_regressor) :: et
+
+        include "../decision_tree/include/set_feature_indices_and_scanning_range.f90"
 
         if (allocated(this%trees)) deallocate(this%trees)
         allocate(this%trees(this%hparam%n_estimators))
@@ -177,17 +203,26 @@ contains
         this%n_estimators_ = this%hparam%n_estimators
         this%n_outputs_ = data_holder_ptr%n_outputs
 
+        !$omp parallel private(et) shared(data_holder_ptr)
+        !$omp do 
         do n=1, this%hparam%n_estimators, 1
-            this%trees(n) = extra_tree_regressor( &
+            et = extra_tree_regressor( &
                 max_depth = this%hparam%max_depth, &
                 boot_strap = this%hparam%boot_strap, &
                 max_leaf_nodes = this%hparam%max_leaf_nodes, &
                 min_samples_leaf = this%hparam%min_samples_leaf, &
                 fashion = this%hparam%fashion, &
                 max_features = this%hparam%max_features &
-            )
-            call this%trees(n)%fit(data_holder_ptr)
+                )
+            ! call this%trees(n)%fit(data_holder_ptr)
+            call et%fit(data_holder_ptr, &
+                feature_indices = feature_indices_, & 
+                feature_indices_scanning_range = feature_indices_scanning_range_&
+                )
+            this % trees(n) = et
         end do
+        !$omp end do
+        !$omp end parallel
     end subroutine fit_extra_trees_regressor
 
 
