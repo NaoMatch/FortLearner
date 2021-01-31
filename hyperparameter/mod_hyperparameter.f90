@@ -67,6 +67,11 @@ module mod_hyperparameter
         integer(kind=8) :: print_mod                = 1
         integer(kind=8) :: num_threads_in_node      = 4
         integer(kind=8) :: num_threads_in_forest    = 4
+        integer(kind=8) :: step_size_for_multi_grain = 1
+        integer(kind=8) :: min_columns_in_grain     = 5
+        integer(kind=8) :: n_cascades               = 2
+        integer(kind=8) :: n_forest_per_layer       = 2
+        real(kind=8), ALLOCATABLE :: feature_fractions(:)
         real(kind=8)    :: learning_rate            = .1
         real(kind=8)    :: learning_rate_layer      = .1
         real(kind=8)    :: drop_rate                = .9
