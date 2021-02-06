@@ -157,20 +157,20 @@ program main_decision_tree
     ! print*, "   x_test  csv -> bin: ", trim(file_name_x_test_csv),  " -> ", trim(file_name_x_test_bin)
     ! print*, "   y_test  csv -> bin: ", trim(file_name_y_test_csv),  " -> ", trim(file_name_y_test_bin)
 
-    ! print*, '============================================================='
-    ! print*, "CSV to Binary"
-    ! print*, "    x_train"
-    ! call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
-    !     n_samples_train, n_columns_train, skip_header, dtype_in, dtype_out)
-    ! print*, "    y_train"
-    ! call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
-    !     n_samples_train, 1_8, skip_header, dtype_in, dtype_out)
-    ! print*, "    x_test"
-    ! call read2bin_2d(file_name_x_test_csv, file_name_x_test_bin, &
-    !     n_samples_test, n_columns_test, skip_header, dtype_in, dtype_out)
-    ! print*, "    y_test"
-    ! call read2bin_2d(file_name_y_test_csv, file_name_y_test_bin, &
-    !     n_samples_test, 1_8, skip_header, dtype_in, dtype_out)
+    print*, '============================================================='
+    print*, "CSV to Binary"
+    print*, "    x_train"
+    call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
+        n_samples_train, n_columns_train, skip_header, dtype_in, dtype_out)
+    print*, "    y_train"
+    call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
+        n_samples_train, 1_8, skip_header, dtype_in, dtype_out)
+    print*, "    x_test"
+    call read2bin_2d(file_name_x_test_csv, file_name_x_test_bin, &
+        n_samples_test, n_columns_test, skip_header, dtype_in, dtype_out)
+    print*, "    y_test"
+    call read2bin_2d(file_name_y_test_csv, file_name_y_test_bin, &
+        n_samples_test, 1_8, skip_header, dtype_in, dtype_out)
 
 
     print*, '============================================================='
