@@ -67,6 +67,7 @@ contains
         call tmp%hparam%validate_int_range("n_repeats",        tmp%hparam%n_repeats,        1_8, huge(1_8))
 
         tmp%hparam%fashion_int = tmp%hparam%convert_char_to_int(tmp%hparam%fashion, fashion_list)
+        tmp%is_hist = f_
         new_extra_tree_regressor = tmp
     end function new_extra_tree_regressor
 

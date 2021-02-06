@@ -81,6 +81,7 @@ contains
 
         tmp%hparam%fashion_int = tmp%hparam%convert_char_to_int(tmp%hparam%fashion, fashion_list)
         tmp%hparam%strategy_int = tmp%hparam%convert_char_to_int(tmp%hparam%strategy, strategy_list)
+        tmp%is_hist = t_
         new_clouds_regressor = tmp
     end function new_clouds_regressor
 
@@ -123,6 +124,7 @@ contains
 
         ! print*, "check"
         hparam = this%hparam
+        hparam%max_bins = extract_max_bins(data_holder_ptr%disc)
         hparam_ptr => hparam
         call this%root_node_axis_ptr%hparam_check(hparam_ptr)
         call this%induction_stop_check(hparam_ptr, is_stop)
@@ -148,15 +150,49 @@ contains
         end do
         call termination_node_ptr_axis(this%root_node_axis_ptr)
         
+
+        call this%postprocess(this%is_classification)
+        call convert_thresholds_discretized_to_raw(& 
+            this%results%split_thresholds_, this%results%split_features_, this%results%is_terminals_, &
+            data_holder_ptr%disc)
+
         if ( present(print_node) ) then
             if ( print_node ) then
                 call this%print_info(this%root_node_axis_ptr)
             end if
         end if
-
-        call this%postprocess(this%is_classification)
     end subroutine fit_clouds_regressor
 
+
+    function extract_max_bins(disc)
+        implicit none
+        type(discretizer), intent(in) :: disc
+        integer(kind=8)               :: extract_max_bins
+        integer(kind=8)               :: n_disc, d
+        extract_max_bins = 0_8
+        n_disc = size(disc%column_discretizers)
+        do d=1, n_disc, 1
+            extract_max_bins = maxval((/ extract_max_bins, size(disc%column_discretizers(d)%thresholds_)+0_8 /))
+        end do
+    end function extract_max_bins
+
+
+
+    subroutine convert_thresholds_discretized_to_raw(thresholds, feature_ids, is_terminals, disc)
+        implicit none
+        real(kind=8), intent(inout)   :: thresholds(:)
+        integer(kind=8), intent(in)   :: feature_ids(:)
+        logical(kind=4), intent(in)   :: is_terminals(:)
+        type(discretizer), intent(in) :: disc
+        integer(kind=8) :: threshold_idx, feature_idx, i
+
+        do i=1, size(thresholds), 1
+            if ( is_terminals(i) ) cycle
+            threshold_idx = int(thresholds(i), kind=kind(threshold_idx))
+            feature_idx = feature_ids(i)
+            thresholds(i) = disc%column_discretizers(feature_idx)%thresholds_(threshold_idx)
+        end do
+    end subroutine 
 
 
 
