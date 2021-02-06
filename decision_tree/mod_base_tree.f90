@@ -12,6 +12,7 @@ module mod_base_tree
     type base_tree
         logical(kind=4)                  :: is_trained = f_
         logical(kind=4)                  :: is_axis_parallel = t_
+        logical(kind=4)                  :: is_hist=f_
         type(hparam_decisiontree)        :: hparam
         ! Axis-Parallel
         type(node_axis), pointer         :: root_node_axis_ptr
@@ -144,6 +145,7 @@ contains
             allocate(this%root_node_axis_ptr%sum_p(this%n_outputs_))
             this%root_node_axis_ptr%is_used = f_
             this%root_node_axis_ptr%is_useless = f_
+            this%root_node_axis_ptr%is_hist = this%is_hist
 
             if ( this%hparam%boot_strap ) then
                 call rand_integer(1_8, this%n_samples_, this%root_node_axis_ptr%indices, this%n_samples_)
