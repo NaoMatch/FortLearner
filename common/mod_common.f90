@@ -277,7 +277,7 @@ contains
         real(kind=4), intent(in)    :: value
         integer(kind=4) :: i, tmp
         include "./include/common/linear_search/inc_linear_search_detail.f90"
-        tmp = linear_search_r4
+        linear_search_r4 = tmp
     end function linear_search_r4
     include "./include/common/linear_search/inc_linear_search.f90"
 

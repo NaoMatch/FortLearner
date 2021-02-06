@@ -1,3 +1,4 @@
+idx = n_samples
 call random_number(rand)
 cumsum = real(0.0, kind=kind(cumsum))
 if (reverse) then

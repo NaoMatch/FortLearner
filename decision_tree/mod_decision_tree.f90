@@ -65,6 +65,7 @@ contains
         call tmp%hparam%validate_int_range("max_features",     tmp%hparam%max_features,     1_8, huge(1_8), exception=-1_8)
 
         tmp%hparam%fashion_int = tmp%hparam%convert_char_to_int(tmp%hparam%fashion, fashion_list)
+        tmp%is_hist = f_
         new_decision_tree_regressor = tmp
     end function new_decision_tree_regressor
 

@@ -6,4 +6,5 @@ function roulette_selection_r8(vector, n_samples, reverse)
     integer(kind=8) :: idx, i
     real(kind=8) :: rand, cumsum
     include "./include/random/roulette_selection/inc_roulette_selection_detail.f90"
+    roulette_selection_r8 = idx
 end function roulette_selection_r8
