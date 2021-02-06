@@ -19,9 +19,11 @@ graphviz
 * Decision Tree: see sample_scripts/main_decision_tree.f90
   * decision_tree_regressor
   * extra_tree_regressor
+  * clouds_regressor
 * Ensemble Trees: see sample_scripts/main_forest.f90
   * random_forest_regressor
   * extra_trees_regressor
+  * deep_forest_regressor(?)
 * Boosting Trees: see sample_scripts/main_gradient_boosting_tree.f90
   * gradient_boosting_tree_regressor
   * gradient_boosting_extra_tree_regressor
@@ -34,7 +36,6 @@ graphviz
   * logistic_regression
 * Decision Tree
   * Axis-Parallel
-    * clouds
     * sliq
   * Oblique
     * weighted oblique decision tree
@@ -46,7 +47,6 @@ graphviz
     * OC1
     * householder cart
 * Ensemble Trees
-   * DeepForest
 * Gradient Boosting Decision Tree
   * Axis-Parallel
     * Xgboost
