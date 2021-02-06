@@ -1,5 +1,6 @@
 module mod_woodworking_tools
     use mod_node
+    use mod_timer
     implicit none
     
     !> A type to store training results.
@@ -185,11 +186,18 @@ contains
         logical(kind=4)           :: is_classification
         logical(kind=4), optional :: is_hist
 
+        integer(kind=8) :: date_value1(8), date_value2(8)
         type(node_axis), target :: node_axis_l, node_axis_r
         integer(kind=8) :: i, cnt_l, cnt_r, cls, idx, fid
-        real(kind=8), allocatable :: f(:)
+        real(kind=8), allocatable :: f(:), tmp_y(:,:)
         real(kind=8) :: avg, imp
         logical(kind=4) :: is_hist_optional
+        integer(kind=8) :: n_samples_unroll, n_columns_unroll, j, jk, ik, k, row_idx, bin_idx, row_idx_next
+        integer(kind=4) :: counter, factor
+        integer(kind=8), save :: tot_time=0
+        real(kind=8), ALLOCATABLE :: tmp_r(:)
+        integer(kind=4), ALLOCATABLE :: bin_indices(:)
+        if (node_ptr%depth .eq. 0_8) tot_time = 0
 
         if ( node_ptr%is_terminal ) return
 
@@ -268,6 +276,85 @@ contains
             imp = imp + sum((data_holder_ptr%y_ptr%y_r8_ptr(idx,:) - node_axis_r%response) ** 2d0)
         end do
         node_axis_r%impurity = imp / dble(node_axis_r%n_samples) / dble(node_ptr%n_outputs)
+
+        if (allocated(data_holder_ptr%x_hist)) then
+            ! --------------------------------------------------------------------------------------
+            ! --------------------------------------------------------------------------------------
+            ! Transposed
+            allocate(bin_indices(node_ptr%n_columns))
+            allocate(tmp_y(node_ptr%n_samples, node_ptr%n_outputs))
+            allocate(tmp_r(node_ptr%n_outputs))
+
+            allocate(node_axis_l%hist_self_count(node_ptr%n_columns, hparam_ptr%max_bins))
+            allocate(node_axis_r%hist_self_count(node_ptr%n_columns, hparam_ptr%max_bins))
+            node_axis_l%hist_self_count = 0
+            node_axis_l%hist_self_count = 0
+
+            allocate(node_axis_l%hist_self_sum_y(node_ptr%n_columns, hparam_ptr%max_bins, data_holder_ptr%n_outputs))
+            allocate(node_axis_r%hist_self_sum_y(node_ptr%n_columns, hparam_ptr%max_bins, data_holder_ptr%n_outputs))
+            node_axis_l%hist_self_sum_y = 0d0
+            node_axis_l%hist_self_sum_y = 0d0
+
+            call date_and_time(values=date_value1)
+            do i=1, node_axis_l%n_samples, 1
+                row_idx = node_axis_l%indices(i)
+                tmp_r = data_holder_ptr%y_ptr%y_r8_ptr(row_idx,:)
+                bin_indices = data_holder_ptr % x_hist_row(row_idx) % i_i4
+                do j=1, node_axis_l%n_columns, 1
+                    bin_idx = bin_indices(j)
+                    node_axis_l%hist_self_sum_y(j,bin_idx,:) = node_axis_l%hist_self_sum_y(j,bin_idx,:) + tmp_r
+                    node_axis_l%hist_self_count(j,bin_idx)   = node_axis_l%hist_self_count(j,bin_idx) + 1_4
+                end do
+            end do
+            call date_and_time(values=date_value2)
+
+            do i=1, hparam_ptr%max_bins, 1
+                do j=1, node_ptr%n_columns, 1
+                    node_axis_r%hist_self_sum_y(j,i,:) = node_ptr%hist_self_sum_y(j,i,:) - node_axis_l%hist_self_sum_y(j,i,:)
+                    node_axis_r%hist_self_count(j,i)   = node_ptr%hist_self_count(j,i)   - node_axis_l%hist_self_count(j,i)
+                end do
+            end do
+
+            ! --------------------------------------------------------------------------------------
+            ! --------------------------------------------------------------------------------------
+            ! Normal
+            ! allocate(bin_indices(node_ptr%n_columns))
+            ! allocate(tmp_y(node_ptr%n_samples, node_ptr%n_outputs))
+            ! allocate(tmp_r(node_ptr%n_outputs))
+
+            ! allocate(node_axis_l%hist_self_count(hparam_ptr%max_bins, node_ptr%n_columns))
+            ! allocate(node_axis_r%hist_self_count(hparam_ptr%max_bins, node_ptr%n_columns))
+            ! node_axis_l%hist_self_count = 0
+            ! node_axis_l%hist_self_count = 0
+
+            ! allocate(node_axis_l%hist_self_sum_y(hparam_ptr%max_bins, node_ptr%n_columns, data_holder_ptr%n_outputs))
+            ! allocate(node_axis_r%hist_self_sum_y(hparam_ptr%max_bins, node_ptr%n_columns, data_holder_ptr%n_outputs))
+            ! node_axis_l%hist_self_sum_y = 0d0
+            ! node_axis_l%hist_self_sum_y = 0d0
+
+            ! call date_and_time(values=date_value1)
+            ! do i=1, node_axis_l%n_samples, 1
+            !     row_idx = node_axis_l%indices(i)
+            !     tmp_r = data_holder_ptr%y_ptr%y_r8_ptr(row_idx,:)
+            !     bin_indices = data_holder_ptr % x_hist_row(row_idx) % i_i4
+            !     do j=1, node_axis_l%n_columns, 1
+            !         bin_idx = bin_indices(j)
+            !         node_axis_l%hist_self_sum_y(bin_idx,j,:) = node_axis_l%hist_self_sum_y(bin_idx,j,:) + tmp_r
+            !         node_axis_l%hist_self_count(bin_idx,j)   = node_axis_l%hist_self_count(bin_idx,j) + 1_4
+            !     end do
+            ! end do
+            ! call date_and_time(values=date_value2)
+
+            ! do j=1, node_ptr%n_columns, 1
+            !     do i=1, hparam_ptr%max_bins, 1
+            !         node_axis_r%hist_self_sum_y(i,j,:) = node_ptr%hist_self_sum_y(i,j,:) - node_axis_l%hist_self_sum_y(i,j,:)
+            !         node_axis_r%hist_self_count(i,j)   = node_ptr%hist_self_count(i,j)   - node_axis_l%hist_self_count(i,j)
+            !     end do
+            ! end do
+
+            tot_time = tot_time + time_diff(date_value1, date_value2)
+        end if
+        ! print*, tot_time, "[msec]"
 
         node_ptr%node_l = node_axis_l
         node_ptr%node_r = node_axis_r
