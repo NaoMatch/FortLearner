@@ -7,7 +7,7 @@ module mod_node
     use mod_stats
     use mod_discretizer
     implicit none
-    
+
     type node_original
         ! Basic Information
         logical(kind=4)              :: is_trained        = f_
@@ -55,6 +55,9 @@ module mod_node
         type(node_axis), allocatable :: node_l
         type(node_axis), allocatable :: node_r
         type(node_axis), ALLOCATABLE :: node_c(:)
+        ! Histogram Pointers
+        real(kind=8), ALLOCATABLE :: hist_self_sum_y(:,:,:)
+        integer(kind=4), ALLOCATABLE :: hist_self_count(:,:)
     contains
         procedure :: print_node_info_axis
     end type node_axis
