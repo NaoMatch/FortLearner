@@ -12,6 +12,7 @@ module mod_node
         ! Basic Information
         logical(kind=4)              :: is_trained        = f_
         logical(kind=4)              :: is_terminal       = f_
+        logical(kind=4)              :: is_hist
         integer(kind=8)              :: n_outputs         = 0   ! Number of outputs
         integer(kind=8)              :: eval_counter      = 0   ! If there is no valid split(eval_counter=0), STOP Partition!
         integer(kind=8)              :: depth             = 0  ! If max_depth <= depth, STOP Partition!
