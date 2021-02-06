@@ -19,6 +19,8 @@ module mod_data_holder
     type x_pointer
         real(kind=4), pointer :: x_r4_ptr(:,:)
         real(kind=8), pointer :: x_r8_ptr(:,:)
+        integer(kind=4), pointer :: x_i4_ptr(:,:)
+        integer(kind=8), pointer :: x_i8_ptr(:,:)
     end type x_pointer
 
     !> Objective variable pointer
@@ -34,6 +36,7 @@ module mod_data_holder
         logical(kind=4) :: is_preprocessed = f_
         logical(kind=4) :: is_random_rotation = f_
         logical(kind=4) :: is_presort = f_
+        logical(kind=4) :: is_hist = f_
         integer(kind=8) :: n_samples
         integer(kind=8) :: n_columns
         integer(kind=8) :: n_outputs
@@ -50,6 +53,8 @@ module mod_data_holder
         real(kind=8), allocatable :: rr_mat_r8(:,:)
 
         type(discretizer) :: disc
+        ! 
+        type(work_space), allocatable :: x_hist_row(:)
     contains
         procedure :: preprocess_store_colwise
         procedure :: preprocess_random_rotate
@@ -58,6 +63,7 @@ module mod_data_holder
 
     !> Interface to data_holder.
     interface data_holder
+        module procedure :: new_data_holder_i4_r4
         module procedure :: new_data_holder_r8_r8
         module procedure :: new_data_holder_r8_i8
     end interface data_holder
@@ -100,29 +106,35 @@ contains
         class(data_holder)           :: this
         integer(kind=8), intent(in)  :: max_bins
         character(len=*), intent(in) :: strategy
-        integer(kind=8) :: c, i
+        integer(kind=8) :: c, i, j
+        integer(kind=8) :: n_samples, n_columns
 
-        real(kind=8), allocatable :: vector(:)
-
-        if (allocated(this%disc%column_discretizers)) deallocate(this%disc%column_discretizers)
-        if (allocated(vector)) deallocate(vector)
+        ! print*, "is_hist", this%is_hist
+        if (this%is_hist) return
+        ! print*, "allocated(this%x_hist)", allocated(this%x_hist)
         if (allocated(this%x_hist)) deallocate(this%x_hist)
 
-        allocate(this%disc%column_discretizers(this%n_columns))
-        allocate(vector(this%n_samples))
-        allocate(this%x_hist(this%n_samples, this%n_columns))
+        n_samples = this % n_samples
+        n_columns = this % n_columns
+        allocate(this%x_hist(n_samples, n_columns))
+        ! print*, "shape(this%x_hist)", shape(this%x_hist)
 
-        do c=1, this%n_columns, 1
-            this%disc%column_discretizers(c) = column_discretizer(max_bins=max_bins, strategy=strategy)
-            
-            do i=1, this%n_samples, 1
-                vector(i) = this % x_ptr % x_r8_ptr(i, c)
+        ! print*, "set discretizer"
+        this%disc = discretizer(max_bins, strategy)
+        ! print*, "fit discretizer"
+        call this%disc%fit(this % x_ptr % x_r8_ptr)
+        ! print*, "  done"
+        ! print*, "transform"
+        this%x_hist = this%disc%transform(this % x_ptr % x_r8_ptr)
+        allocate(this%x_hist_row(this%n_samples))
+        do i=1, this%n_samples, 1
+            allocate(this%x_hist_row(i)%i_i4(this%n_columns))
+            do j=1, this%n_columns, 1
+                this%x_hist_row(i)%i_i4(j) = this%x_hist(i,j)
             end do
-
-            call this%disc%column_discretizers(c)%fit(vector)
-
-            this%x_hist(:,c) = this%disc%column_discretizers(c)%transform(vector)
         end do
+        ! print*, "finish"
+        this%is_hist = t_
     end subroutine preprocess_hist
 
 
