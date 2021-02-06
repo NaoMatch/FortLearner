@@ -108,7 +108,7 @@ main_decision_tree:
 
 main_deep_forest:
 	gfortran \
-	-w -O3 -unroll -fopenmp \
+	-w -O3 -unroll \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
