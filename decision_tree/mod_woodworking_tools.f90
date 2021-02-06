@@ -7,7 +7,7 @@ module mod_woodworking_tools
     type train_results
         integer(kind=8)           :: n_columns_
         integer(kind=8)           :: n_outputs_
-        real(kind=8), allocatable :: split_features_(:)
+        integer(kind=8), allocatable :: split_features_(:)
         real(kind=8), allocatable :: coefs_(:,:)
         real(kind=8), allocatable :: split_thresholds_(:)
         real(kind=8), allocatable :: intercepts_(:)
@@ -212,6 +212,7 @@ contains
         allocate(node_axis_l%is_useless(data_holder_ptr%n_columns))
         node_axis_l%is_used = node_ptr%is_used
         node_axis_l%is_useless = node_ptr%is_useless
+        node_axis_l%is_hist = node_ptr%is_hist
         node_axis_l%depth = node_ptr%depth+1
         node_axis_l%n_columns = node_ptr%n_columns
         ! node_axis_l%n_classes = node_ptr%n_classes
@@ -225,6 +226,7 @@ contains
         allocate(node_axis_r%is_useless(data_holder_ptr%n_columns))
         node_axis_r%is_used = node_ptr%is_used
         node_axis_r%is_useless = node_ptr%is_useless
+        node_axis_r%is_hist = node_ptr%is_hist
         node_axis_r%depth = node_ptr%depth+1
         node_axis_r%n_columns = node_ptr%n_columns
         ! node_axis_r%n_classes = node_ptr%n_classes
@@ -277,7 +279,7 @@ contains
         end do
         node_axis_r%impurity = imp / dble(node_axis_r%n_samples) / dble(node_ptr%n_outputs)
 
-        if (allocated(data_holder_ptr%x_hist)) then
+        if (allocated(data_holder_ptr%x_hist) .and. node_ptr%is_hist ) then
             ! --------------------------------------------------------------------------------------
             ! --------------------------------------------------------------------------------------
             ! Transposed
