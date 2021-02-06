@@ -53,4 +53,5 @@ graphviz
     * LightGBM
     * CatBoost
     * SCORE: Selective Cascade of Residual ExtraTrees
+    * NGBoost
 * Multi-Layer Perceptron
