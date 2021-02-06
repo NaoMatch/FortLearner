@@ -34,7 +34,7 @@ module mod_deep_forest
         type(hparam_decisiontree) :: hparam
     contains
         procedure :: fit_mgrain => fit_mgrain_df_regressor
-        procedure :: predict    => predict_df_regressor
+        ! procedure :: predict    => predict_df_regressor
     end type deep_forest_regressor
 
 
