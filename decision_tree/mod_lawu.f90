@@ -1,4 +1,4 @@
-module mod_clouds
+module mod_lawu
     use mod_const
     use mod_common
     use mod_error
@@ -14,19 +14,21 @@ module mod_clouds
     use mod_base_tree
     implicit none
 
-    type, extends(base_tree) ::  clouds_regressor
+    !> Extended type of regressor of 'classificaton and regression tree'
+    type, extends(base_tree) :: lawu_regressor
         logical(kind=4) :: is_classification=f_
     contains
-        procedure :: fit => fit_clouds_regressor
-    end type clouds_regressor
-    
-    interface clouds_regressor
-        module procedure :: new_clouds_regressor
-    end interface clouds_regressor
+        procedure :: fit => fit_lawu_regressor
+    end type lawu_regressor
+
+    interface lawu_regressor
+        procedure :: new_lawu_regressor
+    end interface lawu_regressor
 
 contains
 
-    function new_clouds_regressor(&
+    function new_lawu_regressor(&
+        learning_rate_layer, &
         max_bins, &
         max_depth, &
         boot_strap, &
@@ -36,8 +38,9 @@ contains
         max_features, &
         strategy)
         implicit none
-        type(clouds_regressor) :: new_clouds_regressor
-        type(clouds_regressor) :: tmp
+        type(lawu_regressor) :: new_lawu_regressor
+        type(lawu_regressor) :: tmp
+        real(kind=8), optional :: learning_rate_layer
         integer(kind=8), optional :: max_bins
         integer(kind=8), optional :: max_depth
         logical(kind=4), optional :: boot_strap
@@ -49,7 +52,7 @@ contains
         character(len=256) :: fashion_list(5), strategy_list(5)
 
         tmp%is_axis_parallel = t_
-        tmp%hparam%algo_name = "clouds_regressor"
+        tmp%hparam%algo_name = "lawu_regressor"
 
         fashion_list(1) = "best"
         fashion_list(2) = "depth"
@@ -63,6 +66,7 @@ contains
         strategy_list(4) = "greedy"
         strategy_list(5) = "modified_greedy"
 
+        if ( present(learning_rate_layer) ) tmp%hparam%learning_rate_layer = learning_rate_layer
         if ( present(max_bins) ) tmp%hparam%max_bins = max_bins
         if ( present(max_depth) ) tmp%hparam%max_depth = max_depth
         if ( present(boot_strap) ) tmp%hparam%boot_strap = boot_strap
@@ -72,6 +76,7 @@ contains
         if ( present(max_features) ) tmp%hparam%max_features = max_features
         if ( present(strategy) ) tmp%hparam%strategy = strategy
 
+        call tmp%hparam%validate_real_range("learning_rate_layer", tmp%hparam%learning_rate_layer, 1d-10, 1d0)
         call tmp%hparam%validate_int_range("max_bins",        tmp%hparam%max_bins,        2_8, huge(1_8))
         call tmp%hparam%validate_int_range("max_depth",        tmp%hparam%max_depth,        1_8, huge(1_8))
         call tmp%hparam%validate_int_range("max_leaf_nodes",   tmp%hparam%max_leaf_nodes,   2_8, huge(1_8))
@@ -82,17 +87,17 @@ contains
         tmp%hparam%fashion_int = tmp%hparam%convert_char_to_int(tmp%hparam%fashion, fashion_list)
         tmp%hparam%strategy_int = tmp%hparam%convert_char_to_int(tmp%hparam%strategy, strategy_list)
         tmp%is_hist = t_
-        tmp%is_layer_wise_sum = f_
-        tmp%lr_layer = 0d0
-        new_clouds_regressor = tmp
-    end function new_clouds_regressor
+        tmp%lr_layer = tmp%hparam%learning_rate_layer
+        tmp%is_layer_wise_sum = t_
+        new_lawu_regressor = tmp
+    end function new_lawu_regressor
 
 
-    subroutine fit_clouds_regressor(this, data_holder_ptr, print_node, &
+    subroutine fit_lawu_regressor(this, data_holder_ptr, print_node, &
         feature_indices, feature_indices_scanning_range)
         implicit none
 
-        class(clouds_regressor) :: this
+        class(lawu_regressor) :: this
         type(data_holder), pointer     :: data_holder_ptr
         logical(kind=4), OPTIONAL      :: print_node
         integer(kind=8), optional      :: feature_indices(:)
@@ -106,9 +111,11 @@ contains
 
         logical(kind=4) :: is_stop
         type(node_splitter) :: splitter
-        integer(kind=8) :: depth, n_columns, n, i
+        integer(kind=8) :: depth, n_columns, n, i, idx, j
         integer(kind=8), allocatable :: feature_indices_(:), feature_indices_scanning_range_(:)
         integer(kind=4), allocatable :: column_copy(:)
+        real(kind=8), allocatable, target :: y_copy(:,:), y_current_pred(:,:), mean_y(:), y_target(:,:), res_y(:), sum_y(:)
+        real(kind=8), allocatable :: y_pred(:,:)
 
         ! print*, "feature"
         include "./include/set_feature_indices_and_scanning_range.f90"
@@ -132,6 +139,20 @@ contains
         call this%induction_stop_check(hparam_ptr, is_stop)
         if ( is_stop ) return
 
+        ! 
+        allocate(sum_y(data_holder_ptr%n_outputs))
+        allocate(res_y(data_holder_ptr%n_outputs))
+        allocate(mean_y(data_holder_ptr%n_outputs))
+        allocate(y_copy(data_holder_ptr%n_samples, data_holder_ptr%n_outputs))
+        allocate(y_target(data_holder_ptr%n_samples, data_holder_ptr%n_outputs))
+        allocate(y_current_pred(data_holder_ptr%n_samples, data_holder_ptr%n_outputs))
+        allocate(y_pred(data_holder_ptr%n_samples, data_holder_ptr%n_outputs))
+        mean_y(:) = mean(data_holder_ptr%y_ptr%y_r8_ptr, data_holder_ptr%n_samples, data_holder_ptr%n_outputs)
+        do n=1, data_holder_ptr%n_samples, 1
+            y_copy(n,:) = data_holder_ptr%y_ptr%y_r8_ptr(n,:)
+            y_current_pred(n,:) = mean_y(:)
+        end do
+
         ! print*, "start"
         depth = 1
         do while (t_)
@@ -141,29 +162,45 @@ contains
             allocate(selected_node_ptrs(0))
 
             call this%extract_split_node_ptrs_axis(selected_node_ptrs, depth)
+
+            do n=1, size(selected_node_ptrs), 1
+                res_y(:) = selected_node_ptrs(n) % node_ptr % response(:)
+                do i=1, selected_node_ptrs(n) % node_ptr % n_samples, 1
+                    idx = selected_node_ptrs(n) % node_ptr % indices(i)
+                    y_current_pred(idx,:) = y_current_pred(idx,:) + this%lr_layer*res_y
+                    data_holder_ptr % y_ptr % y_r8_ptr(idx,:) = y_copy(idx,:) - y_current_pred(idx,:)
+                end do
+            end do
+
             call splitter%split_clouds_regressor(selected_node_ptrs, data_holder_ptr, hparam_ptr, &
                 n_columns, feature_indices_, feature_indices_scanning_range_, is_permute_per_node)
+
             call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, &
-                this%is_classification, this%lr_layer, is_hist=t_)
+                this%is_classification, this%lr_layer, is_hist=this%is_hist)
 
             call this%induction_stop_check(hparam_ptr, is_stop)
             if (is_stop) exit
             depth = depth + 1
         end do
         call termination_node_ptr_axis(this%root_node_axis_ptr)
-        
-
-        call this%postprocess(this%is_classification)
-        call convert_thresholds_discretized_to_raw(& 
-            this%results%split_thresholds_, this%results%split_features_, this%results%is_terminals_, &
-            data_holder_ptr%disc)
 
         if ( present(print_node) ) then
             if ( print_node ) then
                 call this%print_info(this%root_node_axis_ptr)
             end if
         end if
-    end subroutine fit_clouds_regressor
+        call this%postprocess(this%is_classification)
+        call convert_thresholds_discretized_to_raw(& 
+            this%results%split_thresholds_, this%results%split_features_, this%results%is_terminals_, &
+            data_holder_ptr%disc)
 
 
-end module mod_clouds
+        if (allocated(this%mean_y)) deallocate(this%mean_y)
+        allocate(this%mean_y(data_holder_ptr%n_outputs))
+        this%mean_y = mean_y
+        do n=1, data_holder_ptr%n_samples, 1
+            data_holder_ptr%y_ptr%y_r8_ptr(n,:) = y_copy(n,:)
+        end do
+    end subroutine fit_lawu_regressor
+
+end module mod_lawu

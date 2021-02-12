@@ -73,7 +73,7 @@ module mod_hyperparameter
         integer(kind=8) :: n_forest_per_layer       = 2
         real(kind=8), ALLOCATABLE :: feature_fractions(:)
         real(kind=8)    :: learning_rate            = .1
-        real(kind=8)    :: learning_rate_layer      = .1
+        real(kind=8)    :: learning_rate_layer      = .9d0
         real(kind=8)    :: drop_rate                = .9
         real(kind=8)    :: update_ratio             = .9
         real(kind=8)    :: momentum                 = .9

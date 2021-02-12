@@ -482,7 +482,8 @@ contains
         gain_best = - huge(0d0)
         n_rows_inv = 1d0 / dble(node_ptr%n_samples)
         n_outs_inv = 1d0 / dble(node_ptr%n_outputs)
-        tot_p = node_ptr%sum_p
+        ! tot_p = node_ptr%sum_p
+        ! tot_p = sum(data_holder_ptr%y_ptr%y_r8_ptr(node_ptr%indices,:), dim=1)
         count_eval = 0_8
 
         i_start = hparam_ptr%min_samples_leaf
@@ -501,6 +502,7 @@ contains
             idx = node_ptr%indices(i)
             tmp_y(i,:) = data_holder_ptr%y_ptr%y_r8_ptr(idx,:)
         end do
+        tot_p(:) = sum(tmp_y, dim=1)
 
         if ( .not. allocated(node_ptr%hist_self_sum_y) ) then
             ! ---------------------------------------------------------------------------------------------
@@ -558,6 +560,8 @@ contains
         n_samples_unroll = node_ptr%n_samples - mod(node_ptr%n_samples, buffer_len)
         do f=ini_f_idx, fin_f_idx, 1
             fid = feature_indices(f)
+            ! print*, '============================================================='
+            ! print*, "FeatureID: ", fid
             ! Useless or Used Feature Skip
             if ( node_ptr%is_useless(fid) ) cycle
             if ( node_ptr%is_used(fid) .and. hparam_ptr%skip_used_features ) cycle
@@ -568,6 +572,7 @@ contains
                 ! Transposed
                 tot_l = tot_l + node_ptr%hist_self_sum_y(fid,b,:)
                 count_l = count_l + node_ptr%hist_self_count(fid,b)
+                if (count_l .eq. 0_8) cycle
 
                 ! Normal
                 ! tot_l = tot_l + node_ptr%hist_self_sum_y(b,fid,:)
@@ -576,11 +581,17 @@ contains
 
                 tot_r = tot_p - tot_l
                 count_r = node_ptr%n_samples - count_l
+                if (count_r .eq. 0_8) exit
 
                 avg_l = tot_l / dble(count_l)
                 avg_r = tot_r / dble(count_r)
-
                 gain = dble(count_l*count_r)*n_rows_inv * sum( (avg_l-avg_r)**2d0 ) * n_outs_inv
+                ! print*,    real(tot_p), " : ", &
+                !     real(avg_l), real(count_l), &
+                !     " : ", real(avg_r), real(count_r), &
+                !     " : ", real(gain), real(gain_best), &
+                !     " : ", real(res_l), real(res_r), &
+                !     " : ", tot_l, tot_r
 
                 if (gain_best .lt. gain) then
                     gain_best = gain
