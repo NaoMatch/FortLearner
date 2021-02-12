@@ -20,6 +20,7 @@ graphviz
   * decision_tree_regressor
   * extra_tree_regressor
   * clouds_regressor
+  * lawu_regressor
 * Ensemble Trees: see sample_scripts/main_forest.f90
   * random_forest_regressor
   * extra_trees_regressor
