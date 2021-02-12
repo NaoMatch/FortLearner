@@ -13,6 +13,7 @@ module mod_base_tree
         logical(kind=4)                  :: is_trained = f_
         logical(kind=4)                  :: is_axis_parallel = t_
         logical(kind=4)                  :: is_hist=f_
+        logical(kind=4)                  :: is_layer_wise_sum=f_
         type(hparam_decisiontree)        :: hparam
         ! Axis-Parallel
         type(node_axis), pointer         :: root_node_axis_ptr
@@ -27,6 +28,8 @@ module mod_base_tree
         real(kind=8), allocatable        :: responses_(:,:)
         ! 
         type(train_results) :: results
+        real(kind=8), allocatable        :: mean_y(:)
+        real(kind=8)                     :: lr_layer
 
         integer(kind=8) :: n_samples_
         integer(kind=8) :: n_columns_
@@ -231,13 +234,14 @@ contains
     !! \param data_holder_ptr pointer of 'data_holder'
     !! \param hparam_ptr pointer of decision tree hyperparameter
     !! \param is_classification classification tree or not
-    subroutine adopt_node_ptrs_axis(this, node_ptrs, data_holder_ptr, hparam_ptr, is_classification, is_hist)
+    subroutine adopt_node_ptrs_axis(this, node_ptrs, data_holder_ptr, hparam_ptr, is_classification, lr_layer, is_hist)
         implicit none
         class(base_tree) :: this
         type(node_axis_ptr), allocatable, intent(inout) :: node_ptrs(:)
         type(data_holder), pointer                      :: data_holder_ptr
         type(hparam_decisiontree), pointer              :: hparam_ptr
         logical(kind=4)                                 :: is_classification
+        real(kind=8)                                    :: lr_layer
         logical(kind=4), optional                       :: is_hist
 
         logical(kind=4)          :: is_hist_optional
@@ -255,11 +259,11 @@ contains
                 if ( associated(selected_node_ptr) ) nullify(selected_node_ptr)
                 call extract_best_split_node_axis(this%root_node_axis_ptr, selected_node_ptr)
                 call adopting_twins_axis(selected_node_ptr, data_holder_ptr, hparam_ptr, is_classification, &
-                    is_hist=is_hist_optional)
+                    this%lr_layer, is_hist=is_hist_optional)
             case(2_8:5_8) ! others
                 do n=1, size(node_ptrs), 1
                     call adopting_twins_axis(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr, & 
-                        is_classification, is_hist=is_hist_optional)
+                        is_classification, this%lr_layer, is_hist=is_hist_optional)
                 end do
         end select
     end subroutine adopt_node_ptrs_axis
@@ -293,9 +297,16 @@ contains
 
         x_ptr => x
         predict_response = 0d0
+        if (this%is_layer_wise_sum) then
+            do i=1, n_samples, 1
+                predict_response(i,:) = this%mean_y(:)
+            end do
+        end if
         if (this%is_axis_parallel) then
             call predict_response_axis(this%results, x_ptr, indices, & 
-                predict_response, n_samples, this%n_outputs_, is_root=t_)
+                predict_response, n_samples, this%n_outputs_, is_root=t_, & 
+                is_layer_wise_sum=this%is_layer_wise_sum, &
+                lr_layer=this%lr_layer)
         else
             ! call predict_response_oblq(this%results, x_ptr, indices, & 
             !     predict_response, n_samples, this%n_outputs_, is_root=t_)
@@ -313,7 +324,8 @@ contains
     !! \param n_samples n_samplesber of samples in current path
     !! \param n_outputs n_samplesber of outputs
     !! \param is_root is root node or not
-    recursive subroutine predict_response_axis(result, x_ptr, indices, responses, n_samples, n_outputs, is_root)
+    recursive subroutine predict_response_axis(result, x_ptr, indices, responses, n_samples, n_outputs, &
+        is_root, is_layer_wise_sum, lr_layer)
         implicit none
         type(train_results)   :: result
         real(kind=8), pointer :: x_ptr(:,:)
@@ -321,6 +333,8 @@ contains
         real(kind=8)          :: responses(:,:)
         integer(kind=8)       :: n_samples, n_outputs
         logical(kind=4)       :: is_root
+        logical(kind=4)       :: is_layer_wise_sum
+        real(kind=8)          :: lr_layer
 
         integer(kind=8), save        :: node_id
         integer(kind=8)              :: idx, i, fid
@@ -336,14 +350,24 @@ contains
         if (n_samples .eq. 0 .and. result%is_terminals_(node_id)) return
         if (n_samples .eq. 0) goto 999
 
-        if ( result%is_terminals_(node_id) ) then
+        if (is_layer_wise_sum) then
             allocate(res(result%n_outputs_))
-            res = result%responses_(node_id,:)
+            res = lr_layer * result%responses_(node_id,:)
             do i=1, n_samples
                 idx = indices(i)
-                responses(idx,:) = res
+                responses(idx,:) = responses(idx,:) + res
             end do
-            return
+            if (result%is_terminals_(node_id)) return
+        else
+            if ( result%is_terminals_(node_id) ) then
+                allocate(res(result%n_outputs_))
+                res = result%responses_(node_id,:)
+                do i=1, n_samples
+                    idx = indices(i)
+                    responses(idx,:) = res
+                end do
+                return
+            end if
         end if
 
         allocate(tmp_f(n_samples))
@@ -383,8 +407,10 @@ contains
             allocate(indices_r(0_8))
         end if
 
-        call predict_response_axis(result, x_ptr, indices_l, responses, count_l-1, n_outputs, is_root=f_)
-        call predict_response_axis(result, x_ptr, indices_r, responses, count_r-1, n_outputs, is_root=f_)
+        call predict_response_axis(result, x_ptr, indices_l, responses, count_l-1, n_outputs, & 
+            is_root=f_, is_layer_wise_sum=is_layer_wise_sum, lr_layer=lr_layer)
+        call predict_response_axis(result, x_ptr, indices_r, responses, count_r-1, n_outputs, &
+            is_root=f_, is_layer_wise_sum=is_layer_wise_sum, lr_layer=lr_layer)
         ! deallocate(indices_l, indices_r, tmp_f, lt_thresholds)
     end subroutine predict_response_axis
 
