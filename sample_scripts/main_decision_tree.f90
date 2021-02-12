@@ -7,9 +7,10 @@ program main_decision_tree
     use mod_decision_tree
     use mod_extra_tree
     use mod_clouds
+    use mod_lawu
     implicit none
 
-    integer(kind=8) :: date_value1(8), date_value2(8), time_dt, time_et, time_cl
+    integer(kind=8) :: date_value1(8), date_value2(8), time_dt, time_et, time_cl, time_lw
 
     integer(kind=8)    :: n_samples_train, n_columns_train
     integer(kind=8)    :: n_samples_test, n_columns_test
@@ -24,6 +25,7 @@ program main_decision_tree
     real(kind=8), ALLOCATABLE :: y_train_pred_dt(:,:), y_test_pred_dt(:,:)
     real(kind=8), ALLOCATABLE :: y_train_pred_et(:,:), y_test_pred_et(:,:)
     real(kind=8), ALLOCATABLE :: y_train_pred_cl(:,:), y_test_pred_cl(:,:)
+    real(kind=8), ALLOCATABLE :: y_train_pred_lw(:,:), y_test_pred_lw(:,:)
     integer(kind=8), ALLOCATABLE :: feature_indices(:), feature_indices_scanning_range(:)
     
     type(metrics)                 :: metric
@@ -32,38 +34,40 @@ program main_decision_tree
     type(decision_tree_regressor) :: dt_reg
     type(extra_tree_regressor)    :: et_reg
     type(clouds_regressor)        :: cl_reg
+    type(lawu_regressor)          :: lw_reg
+
     integer(kind=8)    :: i, n_leaf_nodes, max_leaf_nodes
-    integer(kind=8)    :: iter, max_iter
+    integer(kind=8)    :: iter, max_iter, power
 
-    print*, '============================================================='
-    print*, "Input Data Shape: "
-    n_samples_train  = 501808
-    n_samples_test   = 501808
-    n_columns_train  = 310_8
-    n_columns_test   = 310_8
-    skip_header = t_
-    dtype_in = "r"
-    dtype_out = "r"
-    print*, "    train (row x col): ", n_samples_train, n_columns_train
-    print*, "    test  (row x col): ", n_samples_test, n_columns_test
-    print*, "    skip header:       ", skip_header
-    print*, "    data type input:   ", dtype_in
-    print*, "    data type output:  ", dtype_out
+    ! print*, '============================================================='
+    ! print*, "Input Data Shape: "
+    ! n_samples_train  = 501808
+    ! n_samples_test   = 501808
+    ! n_columns_train  = 310_8
+    ! n_columns_test   = 310_8
+    ! skip_header = t_
+    ! dtype_in = "r"
+    ! dtype_out = "r"
+    ! print*, "    train (row x col): ", n_samples_train, n_columns_train
+    ! print*, "    test  (row x col): ", n_samples_test, n_columns_test
+    ! print*, "    skip header:       ", skip_header
+    ! print*, "    data type input:   ", dtype_in
+    ! print*, "    data type output:  ", dtype_out
 
-    print*, '============================================================='
-    print*, "File Names: "
-    file_name_x_train_csv = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_feature.csv"
-    file_name_y_train_csv = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_target.csv"
-    file_name_x_train_bin = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_feature.bin"
-    file_name_y_train_bin = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_target.bin"
-    file_name_x_test_csv = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_feature.csv"
-    file_name_y_test_csv = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_target.csv"
-    file_name_x_test_bin = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_feature.bin"
-    file_name_y_test_bin = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_target.bin"
-    print*, "   x_train csv -> bin: ", trim(file_name_x_train_csv), " -> ", trim(file_name_x_train_bin)
-    print*, "   y_train csv -> bin: ", trim(file_name_y_train_csv), " -> ", trim(file_name_y_train_bin)
-    print*, "   x_test  csv -> bin: ", trim(file_name_x_test_csv),  " -> ", trim(file_name_x_test_bin)
-    print*, "   y_test  csv -> bin: ", trim(file_name_y_test_csv),  " -> ", trim(file_name_y_test_bin)
+    ! print*, '============================================================='
+    ! print*, "File Names: "
+    ! file_name_x_train_csv = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_feature.csv"
+    ! file_name_y_train_csv = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_target.csv"
+    ! file_name_x_train_bin = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_feature.bin"
+    ! file_name_y_train_bin = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_target.bin"
+    ! file_name_x_test_csv = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_feature.csv"
+    ! file_name_y_test_csv = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_target.csv"
+    ! file_name_x_test_bin = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_feature.bin"
+    ! file_name_y_test_bin = "../../Numerai/latest_numerai_datasets (1)/numerai_training_data_target.bin"
+    ! print*, "   x_train csv -> bin: ", trim(file_name_x_train_csv), " -> ", trim(file_name_x_train_bin)
+    ! print*, "   y_train csv -> bin: ", trim(file_name_y_train_csv), " -> ", trim(file_name_y_train_bin)
+    ! print*, "   x_test  csv -> bin: ", trim(file_name_x_test_csv),  " -> ", trim(file_name_x_test_bin)
+    ! print*, "   y_test  csv -> bin: ", trim(file_name_y_test_csv),  " -> ", trim(file_name_y_test_bin)
 
     print*, '============================================================='
     print*, "Input Data Shape: "
@@ -200,7 +204,8 @@ program main_decision_tree
 
     max_iter = 1
     max_leaf_nodes = 40
-    do n_leaf_nodes=5, max_leaf_nodes
+    do power=2, 12, 1
+        n_leaf_nodes = 2**power
         ! print*, "decision_tree_regressor"
         dt_reg = decision_tree_regressor(max_leaf_nodes=n_leaf_nodes, fashion="best")
         call date_and_time(values=date_value1)
@@ -208,7 +213,7 @@ program main_decision_tree
             ! call dt_reg%fit(dholder_ptr, & 
             !     feature_indices=feature_indices, & 
             !     feature_indices_scanning_range=feature_indices_scanning_range)
-            call dt_reg%fit(dholder_ptr)
+            call dt_reg%fit(dholder_ptr, print_node=f_)
         end do
         call date_and_time(values=date_value2)
         y_train_pred_dt = dt_reg%predict(x_train)
@@ -230,7 +235,7 @@ program main_decision_tree
         time_et = time_diff(date_value1, date_value2)
 
         ! print*, "clouds_regressor"
-        cl_reg = clouds_regressor(max_leaf_nodes=n_leaf_nodes, fashion="best", max_bins=127_8, strategy="quantile")
+        cl_reg = clouds_regressor(max_leaf_nodes=n_leaf_nodes, fashion="best", max_bins=255_8, strategy="quantile")
         call cl_reg%fit(dholder_ptr, print_node=f_)
         call date_and_time(values=date_value1)
         do iter=1, max_iter, 1
@@ -245,7 +250,24 @@ program main_decision_tree
         y_test_pred_cl = cl_reg%predict(x_test)
         time_cl = time_diff(date_value1, date_value2)
 
-        print*, "    mse train vs test: ", n_leaf_nodes, &
+        ! print*, "lawu_regressor"
+        lw_reg = lawu_regressor(&
+            max_leaf_nodes=n_leaf_nodes, fashion="best", max_bins=255_8, strategy="quantile", &
+            learning_rate_layer=.9d0)
+        call date_and_time(values=date_value1)
+        do iter=1, max_iter, 1
+            ! dholder = data_holder(x_train, y_train)
+            ! call lw_reg%fit(dholder_ptr, & 
+            !     feature_indices=feature_indices, & 
+            !     feature_indices_scanning_range=feature_indices_scanning_range)
+            call lw_reg%fit(dholder_ptr, print_node=f_)
+        end do
+        call date_and_time(values=date_value2)
+        y_train_pred_lw = lw_reg%predict(x_train)
+        y_test_pred_lw  = lw_reg%predict(x_test)
+        time_lw         = time_diff(date_value1, date_value2)
+
+        print*, "    mse train vs test: ", int(n_leaf_nodes), &
             ! print*, '============================================================='
             ! real(metric%mean_square_error(y_train(:,1), y_train_pred_dt(:,1))), &
             real(metric%mean_square_error(y_test(:,1), y_test_pred_dt(:,1))), &
@@ -257,7 +279,10 @@ program main_decision_tree
             ! print*, '============================================================='
             ! real(metric%mean_square_error(y_train(:,1), y_train_pred_cl(:,1))), &
             real(metric%mean_square_error(y_test(:,1), y_test_pred_cl(:,1))), &
-            real(time_cl/dble(max_iter)), "[msec]"
-
+            real(time_cl/dble(max_iter)), "[msec]", &
+            ! print*, '============================================================='
+            ! real(metric%mean_square_error(y_train(:,1), y_train_pred_cl(:,1))), &
+            real(metric%mean_square_error(y_test(:,1), y_test_pred_lw(:,1))), &
+            real(time_lw/dble(max_iter)), "[msec]"
     end do
 end program main_decision_tree
