@@ -178,12 +178,13 @@ contains
     !! \param data_holder_ptr data_holder pointer
     !! \param hparam_ptr decision tree hyperparameter pointer
     !! \param is_classification classification task or not
-    subroutine adopting_twins_axis(node_ptr, data_holder_ptr, hparam_ptr, is_classification, is_hist)
+    subroutine adopting_twins_axis(node_ptr, data_holder_ptr, hparam_ptr, is_classification, lr_layer, is_hist)
         implicit none
         type(node_axis), pointer :: node_ptr
         type(data_holder), pointer :: data_holder_ptr
         type(hparam_decisiontree), pointer :: hparam_ptr
         logical(kind=4)           :: is_classification
+        real(kind=8)              :: lr_layer
         logical(kind=4), optional :: is_hist
 
         integer(kind=8) :: date_value1(8), date_value2(8)
@@ -290,17 +291,17 @@ contains
             allocate(node_axis_l%hist_self_count(node_ptr%n_columns, hparam_ptr%max_bins))
             allocate(node_axis_r%hist_self_count(node_ptr%n_columns, hparam_ptr%max_bins))
             node_axis_l%hist_self_count = 0
-            node_axis_l%hist_self_count = 0
+            node_axis_r%hist_self_count = 0
 
             allocate(node_axis_l%hist_self_sum_y(node_ptr%n_columns, hparam_ptr%max_bins, data_holder_ptr%n_outputs))
             allocate(node_axis_r%hist_self_sum_y(node_ptr%n_columns, hparam_ptr%max_bins, data_holder_ptr%n_outputs))
             node_axis_l%hist_self_sum_y = 0d0
-            node_axis_l%hist_self_sum_y = 0d0
+            node_axis_r%hist_self_sum_y = 0d0
 
             call date_and_time(values=date_value1)
             do i=1, node_axis_l%n_samples, 1
                 row_idx = node_axis_l%indices(i)
-                tmp_r = data_holder_ptr%y_ptr%y_r8_ptr(row_idx,:)
+                tmp_r = data_holder_ptr%y_ptr%y_r8_ptr(row_idx,:) - lr_layer * node_axis_l % response
                 bin_indices = data_holder_ptr % x_hist_row(row_idx) % i_i4
                 do j=1, node_axis_l%n_columns, 1
                     bin_idx = bin_indices(j)
@@ -308,14 +309,28 @@ contains
                     node_axis_l%hist_self_count(j,bin_idx)   = node_axis_l%hist_self_count(j,bin_idx) + 1_4
                 end do
             end do
+            if (lr_layer .ne. 0d0) then
+                do i=1, node_axis_r%n_samples, 1
+                    row_idx = node_axis_r%indices(i)
+                    tmp_r = data_holder_ptr%y_ptr%y_r8_ptr(row_idx,:) - lr_layer * node_axis_r % response
+                    bin_indices = data_holder_ptr % x_hist_row(row_idx) % i_i4
+                    do j=1, node_axis_r%n_columns, 1
+                        bin_idx = bin_indices(j)
+                        node_axis_r%hist_self_sum_y(j,bin_idx,:) = node_axis_r%hist_self_sum_y(j,bin_idx,:) + tmp_r
+                        node_axis_r%hist_self_count(j,bin_idx)   = node_axis_r%hist_self_count(j,bin_idx) + 1_4
+                    end do
+                end do
+            else
+                do i=1, hparam_ptr%max_bins, 1
+                    do j=1, node_ptr%n_columns, 1
+                        node_axis_r%hist_self_sum_y(j,i,:) = node_ptr%hist_self_sum_y(j,i,:) - node_axis_l%hist_self_sum_y(j,i,:)
+                        node_axis_r%hist_self_count(j,i)   = node_ptr%hist_self_count(j,i)   - node_axis_l%hist_self_count(j,i)
+                    end do
+                end do
+            end if
+
             call date_and_time(values=date_value2)
 
-            do i=1, hparam_ptr%max_bins, 1
-                do j=1, node_ptr%n_columns, 1
-                    node_axis_r%hist_self_sum_y(j,i,:) = node_ptr%hist_self_sum_y(j,i,:) - node_axis_l%hist_self_sum_y(j,i,:)
-                    node_axis_r%hist_self_count(j,i)   = node_ptr%hist_self_count(j,i)   - node_axis_l%hist_self_count(j,i)
-                end do
-            end do
 
             ! --------------------------------------------------------------------------------------
             ! --------------------------------------------------------------------------------------
@@ -539,5 +554,34 @@ contains
         end if
     end subroutine termination_node_ptr_axis
 
+    function extract_max_bins(disc)
+        implicit none
+        type(discretizer), intent(in) :: disc
+        integer(kind=8)               :: extract_max_bins
+        integer(kind=8)               :: n_disc, d
+        extract_max_bins = 0_8
+        n_disc = size(disc%column_discretizers)
+        do d=1, n_disc, 1
+            extract_max_bins = maxval((/ extract_max_bins, size(disc%column_discretizers(d)%thresholds_)+0_8 /))
+        end do
+    end function extract_max_bins
+
+
+
+    subroutine convert_thresholds_discretized_to_raw(thresholds, feature_ids, is_terminals, disc)
+        implicit none
+        real(kind=8), intent(inout)   :: thresholds(:)
+        integer(kind=8), intent(in)   :: feature_ids(:)
+        logical(kind=4), intent(in)   :: is_terminals(:)
+        type(discretizer), intent(in) :: disc
+        integer(kind=8) :: threshold_idx, feature_idx, i
+
+        do i=1, size(thresholds), 1
+            if ( is_terminals(i) ) cycle
+            threshold_idx = int(thresholds(i), kind=kind(threshold_idx))
+            feature_idx = feature_ids(i)
+            thresholds(i) = disc%column_discretizers(feature_idx)%thresholds_(threshold_idx)
+        end do
+    end subroutine 
 
 end module mod_woodworking_tools
