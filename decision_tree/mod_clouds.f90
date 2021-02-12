@@ -82,6 +82,8 @@ contains
         tmp%hparam%fashion_int = tmp%hparam%convert_char_to_int(tmp%hparam%fashion, fashion_list)
         tmp%hparam%strategy_int = tmp%hparam%convert_char_to_int(tmp%hparam%strategy, strategy_list)
         tmp%is_hist = t_
+        tmp%is_layer_wise_sum = f_
+        tmp%lr_layer = 0d0
         new_clouds_regressor = tmp
     end function new_clouds_regressor
 
@@ -142,7 +144,7 @@ contains
             call splitter%split_clouds_regressor(selected_node_ptrs, data_holder_ptr, hparam_ptr, &
                 n_columns, feature_indices_, feature_indices_scanning_range_, is_permute_per_node)
             call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, &
-                this%is_classification, is_hist=t_)
+                this%is_classification, this%lr_layer, is_hist=t_)
 
             call this%induction_stop_check(hparam_ptr, is_stop)
             if (is_stop) exit
@@ -162,38 +164,6 @@ contains
             end if
         end if
     end subroutine fit_clouds_regressor
-
-
-    function extract_max_bins(disc)
-        implicit none
-        type(discretizer), intent(in) :: disc
-        integer(kind=8)               :: extract_max_bins
-        integer(kind=8)               :: n_disc, d
-        extract_max_bins = 0_8
-        n_disc = size(disc%column_discretizers)
-        do d=1, n_disc, 1
-            extract_max_bins = maxval((/ extract_max_bins, size(disc%column_discretizers(d)%thresholds_)+0_8 /))
-        end do
-    end function extract_max_bins
-
-
-
-    subroutine convert_thresholds_discretized_to_raw(thresholds, feature_ids, is_terminals, disc)
-        implicit none
-        real(kind=8), intent(inout)   :: thresholds(:)
-        integer(kind=8), intent(in)   :: feature_ids(:)
-        logical(kind=4), intent(in)   :: is_terminals(:)
-        type(discretizer), intent(in) :: disc
-        integer(kind=8) :: threshold_idx, feature_idx, i
-
-        do i=1, size(thresholds), 1
-            if ( is_terminals(i) ) cycle
-            threshold_idx = int(thresholds(i), kind=kind(threshold_idx))
-            feature_idx = feature_ids(i)
-            thresholds(i) = disc%column_discretizers(feature_idx)%thresholds_(threshold_idx)
-        end do
-    end subroutine 
-
 
 
 end module mod_clouds
