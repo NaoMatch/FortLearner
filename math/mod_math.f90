@@ -28,6 +28,11 @@ module mod_math
         module procedure gamma_r8
     end interface gamma
 
+    interface sigmoid
+        module procedure sigmoid_r4
+        module procedure sigmoid_r8
+    end interface sigmoid
+
 
 contains
 
@@ -120,6 +125,13 @@ contains
     end function gamma_r8
 
 
-
+    !> A function to compute sigmoid
+    !! \param x input value
+    elemental function sigmoid_r4(x)
+        real(kind=4), intent(in) :: x
+        real(kind=4)             :: sigmoid_r4
+        sigmoid_r4 = 1.0 / (1.0 + exp(-x))
+    end function sigmoid_r4
+    include "./include/math/sigmoid/inc_sigmoid.f90"
 
 end module mod_math
