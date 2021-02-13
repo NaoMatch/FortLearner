@@ -36,7 +36,7 @@ run_utils:
 
 run_ml:
 	make main_decision_tree
-	make main_deep_forest
+	# make main_deep_forest
 	make main_gradient_boosting_tree
 	make main_forest
 	make main_linear_regression
@@ -130,6 +130,8 @@ main_deep_forest:
 	../decision_tree/mod_base_tree.f90 \
 	../decision_tree/mod_decision_tree.f90 \
 	../decision_tree/mod_extra_tree.f90 \
+	../decision_tree/mod_clouds.f90 \
+	../decision_tree/mod_lawu.f90 \
 	\
 	../boosting_trees/mod_gradient_boosting_tree.f90 \
 	\
@@ -217,6 +219,8 @@ main_gradient_boosting_tree:
 	../decision_tree/mod_base_tree.f90 \
 	../decision_tree/mod_decision_tree.f90 \
 	../decision_tree/mod_extra_tree.f90 \
+	../decision_tree/mod_clouds.f90 \
+	../decision_tree/mod_lawu.f90 \
 	\
 	../forest/mod_forest.f90 \
 	../boosting_trees/mod_gradient_boosting_tree.f90 \
