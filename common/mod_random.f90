@@ -10,6 +10,13 @@ module mod_random
         module procedure rand_normal_1d_r8
     end interface ! rand_normal
 
+    interface rand_uniform
+        module procedure rand_uniform_r4
+        module procedure rand_uniform_r8
+        module procedure rand_uniform_1d_r4
+        module procedure rand_uniform_1d_r8
+    end interface rand_uniform
+
     !> Interface to call permutation_r4, permutation_r8, permutation_i4, permutation_i8
     interface permutation
         module procedure permutation_r4
@@ -74,6 +81,20 @@ contains
         include "./include/random/rand_normal/inc_rand_normal_detail.f90"
     end subroutine rand_normal_1d_r4
     include "./include/random/rand_normal/inc_rand_normal.f90"
+
+
+    !> A subroutine to generate uniformly distributed random number of 1-dim.
+    !! \return vector input 1-dim vector
+    !! \param num size of input 1-dim vector
+    subroutine rand_uniform_1d_r4(vector, min_val, max_val, num)
+        implicit none
+        real(kind=4), intent(inout) :: vector(num)
+        real(kind=4), intent(in)    :: min_val, max_val
+        integer(kind=4), intent(in) :: num
+        call random_number(vector)
+        vector = (max_val-min_val) * vector + min_val
+    end subroutine rand_uniform_1d_r4
+    include "./include/random/rand_uniform/inc_rand_uniform.f90"
 
 
     !> A subroutine to randomly permutate input vector
