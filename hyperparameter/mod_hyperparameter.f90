@@ -116,6 +116,13 @@ module mod_hyperparameter
         integer(kind=8)    :: n_iter_no_change=10_8 !
     end type hparam_sgd_estimator
 
+    type, extends(hparam_base) :: hparam_logistic_regression
+        character(len=256) :: penalty = "l2"
+        real(kind=8) :: lambda = 1d-3
+        real(kind=8) :: tolerance = 1d-2
+        integer(kind=8) :: max_iteration=500_8
+    end type hparam_logistic_regression
+
 contains
 
     !> A subroutine to validate character hyperparameter.
