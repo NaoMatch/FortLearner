@@ -40,6 +40,7 @@ run_ml:
 	make main_gradient_boosting_tree
 	make main_forest
 	make main_linear_regression
+	make main_logistic_regression
 	make main_pca
 	make main_sgd_regressor
 
@@ -281,6 +282,28 @@ main_linear_regression:
 	main_linear_regression.f90 \
 	-o main_linear_regression.out
 	./main_linear_regression.out
+
+main_logistic_regression:
+	gfortran -w -fbounds-check \
+	../common/mod_const.f90 \
+	../common/mod_common.f90 \
+	../common/mod_timer.f90 \
+	../math/mod_math.f90 \
+	../error/mod_error.f90 \
+	../common/mod_random.f90 \
+	../common/mod_sort.f90 \
+	../math/mod_stats.f90 \
+	../linalg/mod_linalg.f90 \
+	../metric/mod_metric.f90 \
+	\
+	../hyperparameter/mod_hyperparameter.f90 \
+	../preprocessing/mod_discretizer.f90 \
+	../data_holder/mod_data_holder.f90 \
+	\
+	../logistic_regression/mod_logistic_regression.f90 \
+	main_logistic_regression.f90 \
+	-o main_logistic_regression.out
+	./main_logistic_regression.out
 
 main_math:
 	gfortran -w \
