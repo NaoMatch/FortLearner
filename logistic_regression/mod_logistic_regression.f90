@@ -142,8 +142,9 @@ contains
         integer(kind=8) :: i, j, k, label
         real(kind=8)    :: tmp_hess, proba
 
+        ! Wights x Weights
         do k=1, n_columns, 1
-            do j=1, n_columns, 1
+            do j=k, n_columns, 1
                 tmp_hess = 0d0
                 do i=1, n_samples, 1
                     proba = probas(i,1)
@@ -152,17 +153,31 @@ contains
                         * data_holder_ptr%x_ptr%x_r8_ptr(i,j) * data_holder_ptr%x_ptr%x_r8_ptr(i,k)
                 end do
                 hess(j,k) = tmp_hess
+                hess(k,j) = tmp_hess
             end do
         end do
 
+        ! Wights x Bias
+        do j=1, n_columns, 1
+            tmp_hess = 0d0
+            do i=1, n_samples, 1
+                proba = probas(i,1)
+                tmp_hess = tmp_hess &
+                    + proba * (1d0-proba) &
+                    * data_holder_ptr%x_ptr%x_r8_ptr(i,j)
+            end do
+            hess(j,n_columns+1) = tmp_hess
+            hess(n_columns+1,j) = tmp_hess
+        end do
+
+        ! Bias x Bias
         tmp_hess = 0d0
         do i=1, n_samples, 1
             proba = probas(i,1)
             tmp_hess = tmp_hess + proba * (1d0-proba)
         end do
+        hess(n_columns+1,n_columns+1) = tmp_hess
 
-        hess(:,n_columns+1) = tmp_hess
-        hess(n_columns+1,:) = tmp_hess
         hess = hess / dble(n_samples)
     end subroutine compute_hess
 
