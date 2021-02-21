@@ -20,6 +20,7 @@ module mod_logistic_regression
         procedure :: compute_loss
         procedure :: compute_grad
         procedure :: compute_hess
+        procedure :: compute_hess_x_vector
     end type logistic_regression
     
     interface logistic_regression
@@ -136,11 +137,16 @@ contains
         class(logistic_regression)  :: this
         real(kind=8), intent(inout) :: hess(n_columns+1, n_columns+1)
         type(data_holder), pointer  :: data_holder_ptr
-        real(kind=8), intent(in)    :: probas(n_samples, 1_8)
+        real(kind=8), intent(inout) :: probas(n_samples, 1_8)
         integer(kind=8), intent(in) :: n_samples, n_columns
 
         integer(kind=8) :: i, j, k, label
         real(kind=8)    :: tmp_hess, proba
+
+        do i=1, n_samples, 1
+            proba = probas(i,1)
+            probas(i,1) = proba * (1d0-proba)
+        end do
 
         ! Wights x Weights
         do k=1, n_columns, 1
@@ -149,7 +155,7 @@ contains
                 do i=1, n_samples, 1
                     proba = probas(i,1)
                     tmp_hess = tmp_hess &
-                        + proba * (1d0-proba) &
+                        + proba &
                         * data_holder_ptr%x_ptr%x_r8_ptr(i,j) * data_holder_ptr%x_ptr%x_r8_ptr(i,k)
                 end do
                 hess(j,k) = tmp_hess
@@ -163,8 +169,7 @@ contains
             do i=1, n_samples, 1
                 proba = probas(i,1)
                 tmp_hess = tmp_hess &
-                    + proba * (1d0-proba) &
-                    * data_holder_ptr%x_ptr%x_r8_ptr(i,j)
+                    + proba * data_holder_ptr%x_ptr%x_r8_ptr(i,j)
             end do
             hess(j,n_columns+1) = tmp_hess
             hess(n_columns+1,j) = tmp_hess
@@ -174,12 +179,56 @@ contains
         tmp_hess = 0d0
         do i=1, n_samples, 1
             proba = probas(i,1)
-            tmp_hess = tmp_hess + proba * (1d0-proba)
+            tmp_hess = tmp_hess + proba
         end do
         hess(n_columns+1,n_columns+1) = tmp_hess
 
         hess = hess / dble(n_samples)
     end subroutine compute_hess
+
+
+    subroutine compute_hess_x_vector(this, hess_x_vector, vector, val, data_holder_ptr, probas, n_samples, n_columns)
+        implicit none
+        class(logistic_regression)  :: this
+        real(kind=8), intent(inout) :: hess_x_vector(n_columns+1)
+        real(kind=8), intent(inout) :: vector(n_columns), val
+        type(data_holder), pointer  :: data_holder_ptr
+        real(kind=8), intent(inout) :: probas(n_samples, 1_8)
+        integer(kind=8), intent(in) :: n_samples, n_columns
+
+        integer(kind=8) :: i, j, k, label
+        real(kind=8)    :: tmp_hess_x_vector, proba
+        real(kind=8), ALLOCATABLE :: mat_vec(:)
+
+
+        do i=1, n_samples, 1
+            proba = probas(i,1)
+            probas(i,1) = proba * (1d0-proba)
+        end do
+
+        allocate( (n_samples))
+        call multi_mat_vec(data_holder_ptr%x_ptr%x_r8_ptr, vector, mat_vec, n_samples, n_columns)
+        do i=1, n_samples, 1
+            mat_vec(i) = mat_vec(i) + val
+        end do
+
+        do j=1, n_columns, 1
+            tmp_hess_x_vector = 0d0
+            do i=1, n_samples, 1
+                tmp_hess_x_vector = tmp_hess_x_vector & 
+                    + data_holder_ptr%x_ptr%x_r8_ptr(i,j) * probas(i,1) * mat_vec(i)
+            end do
+            hess_x_vector(j) = tmp_hess_x_vector
+        end do
+
+        tmp_hess_x_vector = 0d0
+        do i=1, n_samples, 1
+            tmp_hess_x_vector = tmp_hess_x_vector + probas(i,1) * mat_vec(i)
+        end do
+        hess_x_vector(n_columns+1) = tmp_hess_x_vector
+
+        hess_x_vector = hess_x_vector / dble(n_samples)
+    end subroutine compute_hess_x_vector
 
 
     subroutine fit_logistic_regression(this, data_holder_ptr)
@@ -216,6 +265,7 @@ contains
             probas = this%predict(data_holder_ptr%x_ptr%x_r8_ptr)
             call this%compute_grad(grad, data_holder_ptr, probas, n_samples, n_columns)
             norm_grad = inner_product(grad, grad, n_columns+1_8)
+            print*, metric%auc(data_holder_ptr%y_ptr%y_i8_ptr(:,1), probas(:,1)), norm_grad
             if (norm_grad .le. this%hparam%tolerance) return
             call this%compute_hess(hess, data_holder_ptr, probas, n_samples, n_columns)
             call inversion(hess_inv, hess, n_columns+1)
@@ -223,7 +273,6 @@ contains
 
             this%thetas_    = this%thetas_    - alpha * theta_update(1:n_columns)
             this%intercept_ = this%intercept_ - alpha * theta_update(n_columns+1)
-            print*, metric%auc(data_holder_ptr%y_ptr%y_i8_ptr(:,1), probas(:,1)), norm_grad, alpha
         end do
     end subroutine fit_logistic_regression
     
