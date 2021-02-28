@@ -55,6 +55,17 @@ module mod_common
         module procedure identity_i8  ! place in "./include/common_identity/inc_identity.f90"
     end interface identity
 
+    interface ifdealloc
+        module procedure ifdealloc_vec_r4
+        module procedure ifdealloc_vec_r8
+        module procedure ifdealloc_vec_i4
+        module procedure ifdealloc_vec_i8
+        module procedure ifdealloc_mat_r4
+        module procedure ifdealloc_mat_r8
+        module procedure ifdealloc_mat_i4
+        module procedure ifdealloc_mat_i8
+    end interface ifdealloc
+
     !> Interface to call is_sorted_r4, is_sorted_real64, is_sorted_int32, is_sorted_int64
     interface is_sorted
         module procedure is_sorted_r4
@@ -240,6 +251,14 @@ contains
         include "./include/common/identity/inc_identity_detail.f90"
     end subroutine identity_r4
     include "./include/common/identity/inc_identity.f90"
+
+
+    !> A subroutine to force to deallocate
+    subroutine ifdealloc_vec_r4(vector)
+        real(kind=4), allocatable, intent(inout) :: vector(:)
+        if (allocated(vector)) deallocate(vector)
+    end subroutine ifdealloc_vec_r4
+    include "./include/common/ifdealloc/inc_ifdealloc.f90"
 
 
     !> A function to check if the one-dim array is sorted or not
