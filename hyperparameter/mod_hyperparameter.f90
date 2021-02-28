@@ -119,7 +119,7 @@ module mod_hyperparameter
     type, extends(hparam_base) :: hparam_logistic_regression
         character(len=256) :: penalty = "l2"
         real(kind=8) :: lambda = 1d-3
-        real(kind=8) :: tolerance = 1d-2
+        real(kind=8) :: tolerance = 1d-4
         integer(kind=8) :: max_iteration=500_8
     end type hparam_logistic_regression
 
