@@ -88,20 +88,17 @@ program main_logistic_regression
     dholder = data_holder(x_train, y_train)
     dholder_ptr => dholder
 
-    lr = logistic_regression(penalty="l2", lambda=1d-10, tolerance=1d-2)
+    lr = logistic_regression(penalty="l2", lambda=1d-10, tolerance=1d-4)
 
-    max_iter=100
-    do iter=1, max_iter, 1
-        call date_and_time(values=date_value1)  
-        call lr%fit(dholder_ptr)
-        call date_and_time(values=date_value2)
-        y_train_pred = lr%predict(x_train)
-        y_test_pred = lr%predict(x_test)
+    call date_and_time(values=date_value1)  
+    call lr%fit(dholder_ptr)
+    call date_and_time(values=date_value2)
+    y_train_pred = lr%predict(x_train)
+    y_test_pred = lr%predict(x_test)
 
-        print*, time_diff(date_value1, date_value2), &
-                metric%auc_i8(y_train(:,1), y_train_pred(:,1)), &
-                metric%auc_i8(y_test(:,1), y_test_pred(:,1))
-    end do
+    print*, time_diff(date_value1, date_value2), &
+            metric%auc_i8(y_train(:,1), y_train_pred(:,1)), &
+            metric%auc_i8(y_test(:,1), y_test_pred(:,1))
 
 
     
