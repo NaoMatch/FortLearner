@@ -9,6 +9,7 @@ program main_logistic_regression
     implicit none
 
     integer(kind=8) :: date_value1(8), date_value2(8), time_dt, time_et, time_cl, time_lw
+    integer(kind=8)    :: iter, max_iter
 
     integer(kind=8)    :: n_samples_train, n_columns_train
     integer(kind=8)    :: n_samples_test, n_columns_test
@@ -21,7 +22,6 @@ program main_logistic_regression
     real(kind=8), ALLOCATABLE, target :: x_train(:,:), x_test(:,:)
     integer(kind=8), ALLOCATABLE, target :: y_train(:,:), y_test(:,:)
     real(kind=8), ALLOCATABLE, target :: y_train_pred(:,:), y_test_pred(:,:)
-
     type(metrics)     :: metric
     type(data_holder), target     :: dholder
     type(data_holder), pointer    :: dholder_ptr
@@ -29,8 +29,8 @@ program main_logistic_regression
 
     print*, '============================================================='
     print*, "Input Data Shape: "
-    n_samples_train  = 500000_8
-    n_samples_test   = 500000_8
+    n_samples_train  = 900000_8
+    n_samples_test   = 100000_8
     n_columns_train  = 28_8
     n_columns_test   = 28_8
     skip_header = f_
@@ -89,12 +89,20 @@ program main_logistic_regression
     dholder_ptr => dholder
 
     lr = logistic_regression(penalty="l2", lambda=1d-10, tolerance=1d-2)
-    call lr%fit(dholder_ptr)
-    y_train_pred = lr%predict(x_train)
-    y_test_pred = lr%predict(x_test)
 
-    print*, metric%auc_i8(y_train(:,1), y_train_pred(:,1))
-    print*, metric%auc_i8(y_test(:,1), y_test_pred(:,1))
+    max_iter=100
+    do iter=1, max_iter, 1
+        call date_and_time(values=date_value1)  
+        call lr%fit(dholder_ptr)
+        call date_and_time(values=date_value2)
+        y_train_pred = lr%predict(x_train)
+        y_test_pred = lr%predict(x_test)
+
+        print*, time_diff(date_value1, date_value2), &
+                metric%auc_i8(y_train(:,1), y_train_pred(:,1)), &
+                metric%auc_i8(y_test(:,1), y_test_pred(:,1))
+    end do
+
 
     
 
