@@ -38,6 +38,10 @@ module mod_linalg
         module procedure :: inv_unit_lower_matrix_i8
     end interface inv_unit_lower_matrix
 
+    interface inversion
+        module procedure :: inversion_r8
+    end interface inversion
+
     !> Interface to call mattxmat_r4, mattxmat_r8, mattxmat_i4, mattxmat_i8
     interface mattxmat
         module procedure mattxmat_r4
@@ -168,6 +172,38 @@ contains
         include "./include/linalg_inv_unit_lower_matrix/inc_inv_unit_lower_matrix_detail.f90"
     end subroutine inv_unit_lower_matrix_r4
     include "./include/linalg_inv_unit_lower_matrix/inc_inv_unit_lower_matrix.f90"
+
+
+    !> A subroutine to calculate positive definite symmetric matrix inversion
+    !! \param mat_inv inversion of input matrix 'mat'
+    !! \param mat input matrix
+    !! \param n_columns rank of 'mat'
+    subroutine inversion_r8(mat_inv, mat, n_columns)
+        implicit none
+        real(kind=8), intent(inout) :: mat_inv(n_columns,n_columns)
+        real(kind=8), intent(in)    :: mat(n_columns,n_columns)
+        integer(kind=8)             :: n_columns
+
+        real(kind=8), allocatable :: mat_lower(:,:), diagonals(:)
+        real(kind=8), allocatable :: mat_lower_inv(:,:), diagonals_inv(:,:)
+        integer(kind=8) :: i
+
+        allocate(mat_lower(n_columns, n_columns))
+        allocate(diagonals(n_columns))
+        call cholesky_decomposition_modified(mat_lower, diagonals, mat, n_columns)
+
+        ! Compute inverse of unit lower triangular matrix
+        allocate(mat_lower_inv(n_columns, n_columns))
+        call inv_unit_lower_matrix(mat_lower_inv, mat_lower, n_columns)
+
+        ! Compute inverse of X^T X
+        allocate(diagonals_inv(n_columns, n_columns))
+        call identity(diagonals_inv, n_columns)
+        do i=1, n_columns, 1
+            diagonals_inv(i,i) = 1.0d0 / diagonals(i)
+        end do
+        mat_inv = matmul(matmul(transpose(mat_lower_inv), diagonals_inv), mat_lower_inv)
+    end subroutine inversion_r8
 
 
     !> A subroutine to compute the product of tranposed matrix and original matrix
