@@ -1,10 +1,11 @@
 module mod_logistic_regression
+    use mod_const
     use mod_common,         only: ifdealloc, identity
     use mod_random,         only: rand_uniform
     use mod_math,           only: sigmoid
     use mod_metric,         only: metrics
     use mod_hyperparameter, only: hparam_logistic_regression
-    use mod_linalg,         only: multi_mat_vec, cholesky_decomposition_modified, inv_unit_lower_matrix, inner_product
+    use mod_linalg,         only: multi_mat_vec, inner_product
     use mod_error,          only: error
     use mod_data_holder,    only: data_holder
     implicit none
@@ -21,6 +22,9 @@ module mod_logistic_regression
         procedure :: compute_grad
         procedure :: compute_hess
         procedure :: compute_hess_x_vector
+        procedure :: conjugate_gradient
+        procedure :: armijo_condition
+        procedure :: wolfe_condition
     end type logistic_regression
     
     interface logistic_regression
@@ -137,16 +141,11 @@ contains
         class(logistic_regression)  :: this
         real(kind=8), intent(inout) :: hess(n_columns+1, n_columns+1)
         type(data_holder), pointer  :: data_holder_ptr
-        real(kind=8), intent(inout) :: probas(n_samples, 1_8)
+        real(kind=8), intent(in)    :: probas(n_samples, 1_8)
         integer(kind=8), intent(in) :: n_samples, n_columns
 
         integer(kind=8) :: i, j, k, label
         real(kind=8)    :: tmp_hess, proba
-
-        do i=1, n_samples, 1
-            proba = probas(i,1)
-            probas(i,1) = proba * (1d0-proba)
-        end do
 
         ! Wights x Weights
         do k=1, n_columns, 1
@@ -193,20 +192,14 @@ contains
         real(kind=8), intent(inout) :: hess_x_vector(n_columns+1)
         real(kind=8), intent(inout) :: vector(n_columns), val
         type(data_holder), pointer  :: data_holder_ptr
-        real(kind=8), intent(inout) :: probas(n_samples, 1_8)
+        real(kind=8), intent(in)    :: probas(n_samples, 1_8)
         integer(kind=8), intent(in) :: n_samples, n_columns
 
         integer(kind=8) :: i, j, k, label
         real(kind=8)    :: tmp_hess_x_vector, proba
         real(kind=8), ALLOCATABLE :: mat_vec(:)
 
-
-        do i=1, n_samples, 1
-            proba = probas(i,1)
-            probas(i,1) = proba * (1d0-proba)
-        end do
-
-        allocate( (n_samples))
+        allocate(mat_vec(n_samples))
         call multi_mat_vec(data_holder_ptr%x_ptr%x_r8_ptr, vector, mat_vec, n_samples, n_columns)
         do i=1, n_samples, 1
             mat_vec(i) = mat_vec(i) + val
@@ -237,10 +230,10 @@ contains
         type(data_holder), pointer :: data_holder_ptr
         type(error) :: err
         integer(kind=8) :: n_samples, n_columns
-        real(kind=8), allocatable :: probas(:,:), grad(:), hess(:,:), hess_inv(:,:)
-        real(kind=8), allocatable :: theta_update(:)
-        integer(kind=8) :: iter
-        real(kind=8)    :: norm_grad, alpha
+        real(kind=8), allocatable :: probas(:,:), grad(:), hess(:,:), hess_inv(:,:), p_psq(:,:)
+        real(kind=8), allocatable :: theta_update(:), tmp(:,:), tmp_T(:,:)
+        integer(kind=8) :: iter, i
+        real(kind=8)    :: norm_grad, alpha, proba
         type(metrics)   :: metric
 
         this%n_columns_train = data_holder_ptr%n_columns
@@ -255,54 +248,190 @@ contains
         call err%is_binary_labels(data_holder_ptr%y_ptr%y_i8_ptr, n_samples, this%hparam%algo_name)
 
         allocate(probas(n_samples, 1))
+        allocate(p_psq(n_samples, 1))
         allocate(theta_update(n_columns+1))
         allocate(grad(n_columns+1))
         allocate(hess(n_columns+1, n_columns+1))
         allocate(hess_inv(n_columns+1, n_columns+1))
+        allocate(tmp(n_columns+1,1))
+        allocate(tmp_t(1,n_columns+1))
 
-        alpha=.2d0
         do iter=1, this%hparam%max_iteration, 1
+            alpha=1d0
             probas = this%predict(data_holder_ptr%x_ptr%x_r8_ptr)
             call this%compute_grad(grad, data_holder_ptr, probas, n_samples, n_columns)
             norm_grad = inner_product(grad, grad, n_columns+1_8)
-            print*, metric%auc(data_holder_ptr%y_ptr%y_i8_ptr(:,1), probas(:,1)), norm_grad
+            ! print*, metric%auc(data_holder_ptr%y_ptr%y_i8_ptr(:,1), probas(:,1)), norm_grad
             if (norm_grad .le. this%hparam%tolerance) return
-            call this%compute_hess(hess, data_holder_ptr, probas, n_samples, n_columns)
-            call inversion(hess_inv, hess, n_columns+1)
-            call multi_mat_vec(hess_inv, grad, theta_update, n_columns+1, n_columns+1)
+
+            do i=1, n_samples, 1
+                proba = probas(i,1)
+                p_psq(i,1) = proba * (1d0-proba)
+            end do
+            call this%compute_hess(hess, data_holder_ptr, p_psq, n_samples, n_columns)
+            call RANDOM_NUMBER(tmp)
+            tmp_t = transpose(tmp)
+            if ( all(matmul(tmp_t, matmul(hess, tmp)) .le. 0d0) ) then
+                call rand_uniform(this%thetas_,    -1d0, 1d0, n_columns)
+                call rand_uniform(this%intercept_, -1d0, 1d0)
+                cycle
+            end if
+            call this%conjugate_gradient(theta_update, data_holder_ptr, grad, hess, p_psq, n_samples, n_columns)
+            ! call this%armijo_condition(alpha, theta_update, data_holder_ptr, probas, n_samples, n_columns)
+            call this%wolfe_condition(alpha, theta_update, data_holder_ptr, probas, n_samples, n_columns)
 
             this%thetas_    = this%thetas_    - alpha * theta_update(1:n_columns)
             this%intercept_ = this%intercept_ - alpha * theta_update(n_columns+1)
         end do
     end subroutine fit_logistic_regression
-    
 
-    subroutine inversion(mat_inv, mat, n_columns)
+
+    subroutine conjugate_gradient(this, theta_update, data_holder_ptr, grad, hess, probas, n_samples, n_columns)
         implicit none
-        real(kind=8), intent(inout) :: mat_inv(n_columns,n_columns)
-        real(kind=8), intent(in)    :: mat(n_columns,n_columns)
-        integer(kind=8)             :: n_columns
+        class(logistic_regression)             :: this
+        real(kind=8), intent(inout)            :: theta_update(n_columns+1)
+        type(data_holder), pointer, intent(in) :: data_holder_ptr
+        real(kind=8), intent(in)               :: grad(n_columns+1)
+        real(kind=8), intent(in)               :: hess(n_columns+1,n_columns+1)
+        real(kind=8), intent(in)               :: probas(n_samples,1)
+        integer(kind=8), intent(in)            :: n_samples, n_columns
 
-        real(kind=8), allocatable :: mat_lower(:,:), diagonals(:)
-        real(kind=8), allocatable :: mat_lower_inv(:,:), diagonals_inv(:,:)
-        integer(kind=8) :: i
+        real(kind=8), allocatable :: t(:), r(:), p(:) ! thetas_ and intercept_
+        real(kind=8), allocatable :: h_v(:) ! hessian x arbitrary vector
+        integer(kind=8) :: iter, i, j
+        real(kind=8) :: alpha_i, beta_i, tmp
+        real(kind=8) :: r_sq_old, r_sq_new
 
-        allocate(mat_lower(n_columns, n_columns))
-        allocate(diagonals(n_columns))
-        call cholesky_decomposition_modified(mat_lower, diagonals, mat, n_columns)
+        allocate(t(n_columns+1), r(n_columns+1), p(n_columns+1))
+        allocate(h_v(n_columns+1))
 
-        ! Compute inverse of unit lower triangular matrix
-        allocate(mat_lower_inv(n_columns, n_columns))
-        call inv_unit_lower_matrix(mat_lower_inv, mat_lower, n_columns)
+        call rand_uniform(t, -1d0, 1d0, n_columns)
 
-        ! Compute inverse of X^T X
-        allocate(diagonals_inv(n_columns, n_columns))
-        call identity(diagonals_inv, n_columns)
-        do i=1, n_columns, 1
-            diagonals_inv(i,i) = 1.0d0 / diagonals(i)
+        do j=1, n_columns+1, 1
+            tmp = 0d0
+            do i=1, n_columns+1, 1
+                tmp = tmp + hess(i,j) * t(i)
+            end do
+            h_v(j) = tmp
         end do
-        mat_inv = matmul(matmul(transpose(mat_lower_inv), diagonals_inv), mat_lower_inv)
-    end subroutine 
+        r = grad - h_v
+        p = r
+        r_sq_old = inner_product(r, r, n_columns+1_8)
+        do iter=1, this%hparam%max_iteration, 1
+            do j=1, n_columns+1, 1
+                tmp = 0d0
+                do i=1, n_columns+1, 1
+                    tmp = tmp + hess(i,j) * p(i)
+                end do
+                h_v(j) = tmp
+            end do
+            alpha_i = r_sq_old / inner_product(h_v, p, n_columns+1_8)
+            t = t + alpha_i * p
+            r = r - alpha_i * h_v
+
+            r_sq_new = inner_product(r, r, n_columns+1_8)
+            beta_i = r_sq_new / r_sq_old
+            if ( r_sq_new .le. 1d-6 ) exit
+            p = r + alpha_i * p
+            r_sq_old = r_sq_new
+        end do
+        theta_update = t
+    end subroutine conjugate_gradient
+
+
+    subroutine armijo_condition(this, alpha, theta_update, data_holder_ptr, probas, n_samples, n_columns)
+        implicit none
+        class(logistic_regression)  :: this
+        real(kind=8), intent(inout) :: alpha
+        real(kind=8), intent(in)    :: theta_update(n_columns+1)
+        type(data_holder), pointer  :: data_holder_ptr
+        real(kind=8), intent(inout) :: probas(n_samples,1)
+        integer(kind=8), intent(in) :: n_samples, n_columns
+
+        real(kind=8), parameter :: xi1=0.001d0
+        real(kind=8), parameter :: xi2=0.9d0
+        real(kind=8), parameter :: tau=0.6d0
+        real(kind=8), ALLOCATABLE :: theta_fix(:)
+        real(kind=8) :: intercept_fix
+
+        real(kind=8) :: lhs_a, rhs_a
+        real(kind=8) :: tmp_1, tmp_2
+        real(kind=8) :: grad(n_columns+1)
+
+        theta_fix = this%thetas_
+        intercept_fix = this%intercept_
+        tmp_1 = this%compute_loss(data_holder_ptr, probas, n_samples)
+
+        call this%compute_grad(grad, data_holder_ptr, probas, n_samples, n_columns)
+        tmp_2 = inner_product(grad, theta_update, n_columns+1)
+
+        do while (t_)
+            this%thetas_ = theta_fix - alpha * theta_update(1:n_columns)
+            this%intercept_ = intercept_fix - alpha * theta_update(n_columns+1)
+
+            probas = this%predict(data_holder_ptr%x_ptr%x_r8_ptr)
+            lhs_a = this%compute_loss(data_holder_ptr, probas, n_samples)
+            rhs_a = tmp_1 - xi1 * alpha * tmp_2
+
+            if ( lhs_a .gt. rhs_a ) then
+                alpha = alpha * tau
+            else
+                exit
+            end if
+        end do
+        this%thetas_ = theta_fix
+        this%intercept_ = intercept_fix
+    end subroutine armijo_condition
+
+
+    subroutine wolfe_condition(this, alpha, theta_update, data_holder_ptr, probas, n_samples, n_columns)
+        implicit none
+        class(logistic_regression)  :: this
+        real(kind=8), intent(inout) :: alpha
+        real(kind=8), intent(in)    :: theta_update(n_columns+1)
+        type(data_holder), pointer  :: data_holder_ptr
+        real(kind=8), intent(inout) :: probas(n_samples,1)
+        integer(kind=8), intent(in) :: n_samples, n_columns
+
+        real(kind=8), parameter :: xi1=0.001d0
+        real(kind=8), parameter :: xi2=0.9d0
+        real(kind=8), parameter :: tau=0.6d0
+        real(kind=8), ALLOCATABLE :: theta_fix(:)
+        real(kind=8) :: intercept_fix
+
+        real(kind=8) :: lhs_a, rhs_a
+        real(kind=8) :: lhs_w, rhs_w
+        real(kind=8) :: tmp_1, tmp_2
+        real(kind=8) :: grad(n_columns+1)
+
+        theta_fix = this%thetas_
+        intercept_fix = this%intercept_
+        tmp_1 = this%compute_loss(data_holder_ptr, probas, n_samples)
+
+        call this%compute_grad(grad, data_holder_ptr, probas, n_samples, n_columns)
+        tmp_2 = inner_product(grad, theta_update, n_columns+1)
+
+        do while (t_)
+            this%thetas_ = theta_fix - alpha * theta_update(1:n_columns)
+            this%intercept_ = intercept_fix - alpha * theta_update(n_columns+1)
+            probas = this%predict(data_holder_ptr%x_ptr%x_r8_ptr)
+
+            lhs_a = this%compute_loss(data_holder_ptr, probas, n_samples)
+            rhs_a = tmp_1 - xi1 * alpha * tmp_2
+
+            call this%compute_grad(grad, data_holder_ptr, probas, n_samples, n_columns)
+            lhs_w = sum(theta_update * grad)
+            rhs_w = xi2 * tmp_2
+
+            if ( all((/lhs_a .gt. rhs_a, lhs_w .lt. rhs_w/)) ) then
+                alpha = alpha * tau
+            else
+                exit
+            end if
+        end do
+        this%thetas_ = theta_fix
+        this%intercept_ = intercept_fix
+    end subroutine wolfe_condition
 
 
 end module mod_logistic_regression
