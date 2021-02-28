@@ -284,7 +284,7 @@ main_linear_regression:
 	./main_linear_regression.out
 
 main_logistic_regression:
-	gfortran -w -fbounds-check \
+	gfortran -w -O3 \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
