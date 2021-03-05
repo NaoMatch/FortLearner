@@ -20,6 +20,7 @@ run_utils:
 	make main_metric
 	make main_most_left_bit_position
 	make main_multi_mat_vec
+	make main_optimize
 	make main_progress_bar
 	make main_rand_integer
 	make main_rand_normal
@@ -350,6 +351,24 @@ main_multi_mat_vec:
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 ../linalg/mod_linalg.f90 main_multi_mat_vec.f90 -o main_multi_mat_vec.out
 	./main_multi_mat_vec.out
+
+main_optimize:
+	gfortran -O2 -fbounds-check -w \
+	../common/mod_const.f90 \
+	../common/mod_common.f90 \
+	../common/mod_timer.f90 \
+	../math/mod_math.f90 \
+	../error/mod_error.f90 \
+	../common/mod_random.f90 \
+	../common/mod_sort.f90 \
+	../math/mod_stats.f90 \
+	../linalg/mod_linalg.f90 \
+	../metric/mod_metric.f90 \
+	\
+	../optimization/mod_optimization.f90 \
+	main_optimize.f90 \
+	-o main_optimize.out
+	./main_optimize.out
 
 main_progress_bar:
 	gfortran -w -fbounds-check ../common/mod_const.f90 ../common/mod_common.f90 main_progress_bar.f90 -o main_progress_bar.out
