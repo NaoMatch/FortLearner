@@ -25,7 +25,7 @@ program main_logistic_regression
     type(metrics)     :: metric
     type(data_holder), target     :: dholder
     type(data_holder), pointer    :: dholder_ptr
-    type(logistic_regression) :: lr
+    type(logistic_regression) :: lr, lr_new
 
     print*, '============================================================='
     print*, "Input Data Shape: "
@@ -89,7 +89,6 @@ program main_logistic_regression
     dholder_ptr => dholder
 
     lr = logistic_regression(penalty="l2", lambda=1d-10, tolerance=1d-4)
-
     call date_and_time(values=date_value1)  
     call lr%fit(dholder_ptr)
     call date_and_time(values=date_value2)
@@ -100,7 +99,15 @@ program main_logistic_regression
             metric%auc_i8(y_train(:,1), y_train_pred(:,1)), &
             metric%auc_i8(y_test(:,1), y_test_pred(:,1))
 
+    lr_new = logistic_regression(penalty="l2", lambda=1d-10, tolerance=1d-4)
+    call date_and_time(values=date_value1)  
+    call lr_new%fit_new(dholder_ptr)
+    call date_and_time(values=date_value2)
+    y_train_pred = lr_new%predict(x_train)
+    y_test_pred = lr_new%predict(x_test)
 
-    
+    print*, time_diff(date_value1, date_value2), &
+            metric%auc_i8(y_train(:,1), y_train_pred(:,1)), &
+            metric%auc_i8(y_test(:,1), y_test_pred(:,1))
 
 end program main_logistic_regression
