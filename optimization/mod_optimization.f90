@@ -1,5 +1,6 @@
 module mod_optimization
-    use mod_linalg, only: multi_mat_vec, inversion
+    use mod_timer
+    use mod_linalg, only: multi_mat_vec, inner_product, inversion
     implicit none
     
     type line_search
@@ -38,12 +39,13 @@ module mod_optimization
 contains
 
 
-    subroutine armijo_condition(this, alpha, theta, theta_update, loss, grad)
+    subroutine armijo_condition(this, alpha, theta, theta_update, loss_ini, loss, grad_ini, grad)
         implicit none
         class(line_search) :: this
         real(kind=8), intent(inout) :: alpha
         real(kind=8), intent(in)    :: theta(:)
         real(kind=8), intent(in)    :: theta_update(:)
+        real(kind=8), intent(in)    :: loss_ini, grad_ini(:)
         interface
             function loss(x)
                 real(kind=8) :: loss
@@ -67,8 +69,8 @@ contains
         real(kind=8) :: tmp_1, tmp_2
 
         theta0 = theta
-        tmp_1 = loss(theta0)
-        tmp_2 = sum(grad(theta0)**2d0)
+        tmp_1 = loss_ini
+        tmp_2 = sum(grad_ini**2d0)
 
         do while (.true.)
             theta0 = theta - alpha * theta_update
@@ -130,7 +132,7 @@ contains
 
         type(line_search) :: ls
 
-        real(kind=8) :: alpha
+        real(kind=8) :: alpha, loss_ini
         real(kind=8), allocatable :: x0(:), x0_update(:)
         integer(kind=8) :: iter, n_variables
 
@@ -138,12 +140,12 @@ contains
 
         allocate(x0(n_variables), x0_update(n_variables))
         x0 = x_ini
-
         do iter=1, this%max_iter, 1
+            loss_ini = loss(x0)
             alpha = 1d0
             x0_update = grad(x0)
             if ( sum(abs(grad(x0))) .le. this%tolerance ) exit
-            call ls%armijo_condition(alpha, x0, x0_update, loss, grad)
+            call ls%armijo_condition(alpha, x0, x0_update, loss_ini, loss, x0_update, grad)
             x0 = x0 - alpha * x0_update
         end do
         optimize_steepest_descent = x0
@@ -176,8 +178,9 @@ contains
         end interface
 
         type(line_search) :: ls
+        integer(kind=8) :: date_value1(8), date_value2(8), tot_grad, tot_hess, tot_inv, tot_armi
 
-        real(kind=8) :: alpha
+        real(kind=8) :: alpha, loss_ini, norm_grad
         real(kind=8), allocatable :: x0(:), x0_update(:)
         real(kind=8), allocatable :: hess0(:,:), hess0_inv(:,:), grad0(:)
         integer(kind=8) :: iter, n_variables
@@ -187,19 +190,41 @@ contains
         allocate(hess0_inv(n_variables,n_variables))
         x0 = x_ini
 
+        tot_grad = 0
+        tot_hess = 0
+        tot_inv = 0
+        tot_armi = 0
+
         do iter=1, this%max_iter, 1
+            loss_ini = loss(x0)
             alpha = 1d0
+            call date_and_time(values=date_value1)
             grad0 = grad(x0)
-            if ( sum(abs(grad0)) .le. this%tolerance ) exit
+            call date_and_time(values=date_value2)
+            tot_grad = tot_grad + time_diff(date_value1, date_value2)
+
+            norm_grad = inner_product(grad0, grad0, n_variables)
+            if ( norm_grad .le. this%tolerance ) exit
+
+            call date_and_time(values=date_value1)
             hess0 = hess(x0)
+            call date_and_time(values=date_value2)
+            tot_hess = tot_hess + time_diff(date_value1, date_value2)
+
+            call date_and_time(values=date_value1)
             call inversion(hess0_inv, hess0, n_variables)
-            call multi_mat_vec(hess0, grad0, x0_update, n_variables, n_variables)
-            call ls%armijo_condition(alpha, x0, x0_update, loss, grad)
+            call date_and_time(values=date_value2)
+            tot_inv = tot_inv + time_diff(date_value1, date_value2)
+
+            call multi_mat_vec(hess0_inv, grad0, x0_update, n_variables, n_variables)
+            call date_and_time(values=date_value1)
+            call ls%armijo_condition(alpha, x0, x0_update, loss_ini, loss, grad0, grad)
+            call date_and_time(values=date_value2)
+            tot_armi = tot_armi + time_diff(date_value1, date_value2)
             x0 = x0 - alpha * x0_update
+            print*, "NEW: Grad, Hess, Inv, Armijo: ", iter, tot_grad, tot_hess, tot_inv, tot_armi
         end do
         optimize_newton_method = x0
     end function optimize_newton_method
-
-
 
 end module mod_optimization
