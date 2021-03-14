@@ -285,7 +285,7 @@ main_linear_regression:
 	./main_linear_regression.out
 
 main_logistic_regression:
-	gfortran -w -O3 \
+	gfortran -w -O3 -ftree-vectorize \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
@@ -300,6 +300,8 @@ main_logistic_regression:
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
 	../data_holder/mod_data_holder.f90 \
+	\
+	../optimization/mod_optimization.f90 \
 	\
 	../logistic_regression/mod_logistic_regression.f90 \
 	main_logistic_regression.f90 \
@@ -366,6 +368,11 @@ main_optimize:
 	../metric/mod_metric.f90 \
 	\
 	../optimization/mod_optimization.f90 \
+	\
+	../hyperparameter/mod_hyperparameter.f90 \
+	../preprocessing/mod_discretizer.f90 \
+	../data_holder/mod_data_holder.f90 \
+	\
 	main_optimize.f90 \
 	-o main_optimize.out
 	./main_optimize.out
