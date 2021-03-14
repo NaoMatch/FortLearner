@@ -14,7 +14,7 @@ graphviz
   * linear_regression
   * lasso_regression
   * ridge_regression
-* Logistic Regression: see sample_scripts/main_logistic_regression.g90
+* Logistic Regression: see sample_scripts/main_logistic_regression.f90
   * logistic_regression
 * Stochastic Gradient Descent: see sample_scripts/main_sgd_regressor.f90
   * sgd_regressor
