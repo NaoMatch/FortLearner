@@ -1,3 +1,4 @@
+!> A module for gradient boosting tree
 module mod_gradient_boosting_tree
     use mod_const
     use mod_common
@@ -10,6 +11,7 @@ module mod_gradient_boosting_tree
     use mod_lawu
     implicit none
 
+    !> A type for gradient boosting tree whose base estimator is 'decision_tree_regressor'
     type gradient_boosting_tree_regressor
         logical(kind=4) :: is_axis_parallel
         real(kind=8), allocatable :: y_train_mean(:)
@@ -26,6 +28,7 @@ module mod_gradient_boosting_tree
         procedure :: new_gradient_boosting_tree_regressor
     end interface gradient_boosting_tree_regressor
 
+    !> A type for gradient boosting tree whose base estimator is 'extra_tree_regressor'
     type gradient_boosting_extra_tree_regressor
         logical(kind=4) :: is_axis_parallel
         real(kind=8), allocatable :: y_train_mean(:)
@@ -42,6 +45,7 @@ module mod_gradient_boosting_tree
         procedure :: new_gradient_boosting_extra_tree_regressor
     end interface gradient_boosting_extra_tree_regressor
 
+    !> A type for gradient boosting tree whose base estimator is 'clouds_regressor'
     type gradient_boosting_clouds_regressor
         logical(kind=4) :: is_axis_parallel
         real(kind=8), allocatable :: y_train_mean(:)
@@ -58,6 +62,7 @@ module mod_gradient_boosting_tree
         procedure :: new_gradient_boosting_clouds_regressor
     end interface gradient_boosting_clouds_regressor
 
+    !> A type for gradient boosting tree whose base estimator is 'lawu_regressor'
     type gradient_boosting_lawu_regressor
         logical(kind=4) :: is_axis_parallel
         real(kind=8), allocatable :: y_train_mean(:)
@@ -77,6 +82,15 @@ module mod_gradient_boosting_tree
 contains
 
 
+    !> A function to override gradient_boosting_tree_regressor.
+    !! \param n_estimator number of estimators
+    !! \param learning_rate learning rate for each tree
+    !! \param max_depth max depth
+    !! \param boot_strap boot strap sampling
+    !! \param max_leaf_nodes maximum number of leaf node
+    !! \param min_samples_leaf minimum number of samples in node
+    !! \param fashion how to split node
+    !! \param max_features maximum number of features in node split phase
     function new_gradient_boosting_tree_regressor(&
         n_estimators, learning_rate, &
         max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features &
@@ -126,6 +140,15 @@ contains
     end function new_gradient_boosting_tree_regressor
 
 
+    !> A function to override gradient_boosting_extra_tree_regressor.
+    !! \param n_estimator number of estimators
+    !! \param learning_rate learning rate for each tree
+    !! \param max_depth max depth
+    !! \param boot_strap boot strap sampling
+    !! \param max_leaf_nodes maximum number of leaf node
+    !! \param min_samples_leaf minimum number of samples in node
+    !! \param fashion how to split node
+    !! \param max_features maximum number of features in node split phase
     function new_gradient_boosting_extra_tree_regressor(&
         n_estimators, learning_rate, &
         max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features &
@@ -175,6 +198,17 @@ contains
     end function new_gradient_boosting_extra_tree_regressor
 
 
+    !> A function to override new_gradient_boosting_clouds_regressor.
+    !! \param max_bins maximum number of bins
+    !! \param strategy splitting strategy
+    !! \param n_estimator number of estimators
+    !! \param learning_rate learning rate for each tree
+    !! \param max_depth max depth
+    !! \param boot_strap boot strap sampling
+    !! \param max_leaf_nodes maximum number of leaf node
+    !! \param min_samples_leaf minimum number of samples in node
+    !! \param fashion how to split node
+    !! \param max_features maximum number of features in node split phase
     function new_gradient_boosting_clouds_regressor(&
         max_bins, strategy, &
         n_estimators, learning_rate, &
@@ -239,6 +273,18 @@ contains
     end function new_gradient_boosting_clouds_regressor
 
 
+    !> A function to override new_gradient_boosting_clouds_regressor.
+    !! \param max_bins maximum number of bins
+    !! \param strategy splitting strategy
+    !! \param n_estimator number of estimators
+    !! \param learning_rate learning rate for each tree
+    !! \param learning_rate_layer learning rate for each layer in a tree
+    !! \param max_depth max depth
+    !! \param boot_strap boot strap sampling
+    !! \param max_leaf_nodes maximum number of leaf node
+    !! \param min_samples_leaf minimum number of samples in node
+    !! \param fashion how to split node
+    !! \param max_features maximum number of features in node split phase
     function new_gradient_boosting_lawu_regressor(&
         max_bins, strategy, &
         n_estimators, learning_rate, learning_rate_layer, &
@@ -306,6 +352,8 @@ contains
     end function new_gradient_boosting_lawu_regressor
 
 
+    !> A subroutine to fit gradient_boosting_tree_regressor.
+    !! \param data_holder_ptr pointer of data_holder
     subroutine fit_gradient_boosting_tree_regressor(this, data_holder_ptr)
         implicit none
         class(gradient_boosting_tree_regressor) :: this
@@ -376,6 +424,8 @@ contains
     end subroutine fit_gradient_boosting_tree_regressor
 
 
+    !> A subroutine to fit gradient_boosting_extra_tree_regressor.
+    !! \param data_holder_ptr pointer of data_holder
     subroutine fit_gradient_boosting_extra_tree_regressor(this, data_holder_ptr)
         implicit none
         class(gradient_boosting_extra_tree_regressor) :: this
@@ -445,7 +495,8 @@ contains
         end do
     end subroutine fit_gradient_boosting_extra_tree_regressor
 
-
+    !> A subroutine to fit gradient_boosting_clouds_regressor.
+    !! \param data_holder_ptr pointer of data_holder
     subroutine fit_gradient_boosting_clouds_regressor(this, data_holder_ptr)
         implicit none
         class(gradient_boosting_clouds_regressor) :: this
@@ -518,6 +569,8 @@ contains
     end subroutine fit_gradient_boosting_clouds_regressor
 
 
+    !> A subroutine to fit gradient_boosting_lawu_regressor.
+    !! \param data_holder_ptr pointer of data_holder
     subroutine fit_gradient_boosting_lawu_regressor(this, data_holder_ptr)
         implicit none
         class(gradient_boosting_lawu_regressor) :: this
@@ -591,6 +644,8 @@ contains
     end subroutine fit_gradient_boosting_lawu_regressor
 
 
+    !> A function to predict for gradient_boosting_tree_regressor.
+    !! \param x input data
     function predict_gradient_boosting_tree_regressor(this, x)
         implicit none
         class(gradient_boosting_tree_regressor) :: this
@@ -612,6 +667,8 @@ contains
     end function predict_gradient_boosting_tree_regressor
 
 
+    !> A function to predict for gradient_boosting_extra_tree_regressor.
+    !! \param x input data
     function predict_gradient_boosting_extra_tree_regressor(this, x)
         implicit none
         class(gradient_boosting_extra_tree_regressor) :: this
@@ -632,6 +689,9 @@ contains
         end do
     end function predict_gradient_boosting_extra_tree_regressor
 
+
+    !> A function to predict for gradient_boosting_clouds_regressor.
+    !! \param x input data
     function predict_gradient_boosting_clouds_regressor(this, x)
         implicit none
         class(gradient_boosting_clouds_regressor) :: this
@@ -652,6 +712,9 @@ contains
         end do
     end function predict_gradient_boosting_clouds_regressor
 
+
+    !> A function to predict for gradient_boosting_lawu_regressor.
+    !! \param x input data
     function predict_gradient_boosting_lawu_regressor(this, x)
         implicit none
         class(gradient_boosting_lawu_regressor) :: this
@@ -671,5 +734,6 @@ contains
                 + this%ltrees(n)%predict(x) * this%hparam%learning_rate
         end do
     end function predict_gradient_boosting_lawu_regressor
+
 
 end module mod_gradient_boosting_tree
