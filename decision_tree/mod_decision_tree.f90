@@ -27,7 +27,13 @@ module mod_decision_tree
 
 contains
 
-
+    !> A function to override decision_tree_regressor.
+    !! \param max_depth max depth
+    !! \param boot_strap boot strap sampling
+    !! \param max_leaf_nodes maximum number of leaf node
+    !! \param min_samples_leaf minimum number of samples in node
+    !! \param fashion how to split node
+    !! \param max_features maximum number of features in node split phase
     function new_decision_tree_regressor(&
         max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features &
         )

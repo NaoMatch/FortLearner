@@ -403,6 +403,7 @@ contains
     end subroutine split_extra_tree_regressor_indivisuals
 
 
+    !> A subroutine to split node by 'clouds'.
     subroutine split_clouds_regressor(this, node_ptrs, data_holder_ptr, hparam_ptr, &
         n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
         implicit none

@@ -533,7 +533,7 @@ contains
     end subroutine extract_largetst_sample_node_ptr_axis
 
 
-    !> A subroutine to ,,,
+    !> A subroutine that replaces information to become a leaf node
     !! \param root_node_ptr root node pointer
     recursive subroutine termination_node_ptr_axis(root_node_ptr)
         implicit none
@@ -554,6 +554,9 @@ contains
         end if
     end subroutine termination_node_ptr_axis
 
+
+    !> A function to extract maximum number of bins
+    !! \param disc dicretizer
     function extract_max_bins(disc)
         implicit none
         type(discretizer), intent(in) :: disc
@@ -567,7 +570,11 @@ contains
     end function extract_max_bins
 
 
-
+    !> A subroutine to discretized threshold to original threshold values.
+    !! \param thresholds original threshold values
+    !! \param feature_ids split feature ids
+    !! \param is_terminal is terminal or not
+    !! \param disc discretizer
     subroutine convert_thresholds_discretized_to_raw(thresholds, feature_ids, is_terminals, disc)
         implicit none
         real(kind=8), intent(inout)   :: thresholds(:)

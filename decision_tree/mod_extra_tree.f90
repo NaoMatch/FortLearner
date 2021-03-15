@@ -26,7 +26,14 @@ module mod_extra_tree
 
 contains
 
-
+    !> A function to override clouds_regressor.
+    !! \param max_depth max depth
+    !! \param boot_strap boot strap sampling
+    !! \param max_leaf_nodes maximum number of leaf node
+    !! \param min_samples_leaf minimum number of samples in node
+    !! \param fashion how to split node
+    !! \param max_features maximum number of features in node split phase
+    !! \param n_repeats number of iterations to find the best split extremely randomly
     function new_extra_tree_regressor(&
         max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features, n_repeats &
         )
@@ -77,6 +84,9 @@ contains
     !> A subtouine to fit regressor of 'extra_tree'. 
     !! \return returns fitted regressor tree
     !! \param data_holder_ptr pointer of data_holder 
+    !! \param print_node ***OPTIONAL*** if True, print node informations
+    !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
+    !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
     subroutine fit_extra_tree_regressor(this, data_holder_ptr, print_node, &
         feature_indices, feature_indices_scanning_range)
         implicit none
@@ -138,5 +148,6 @@ contains
 
         call this%postprocess(this%is_classification)
     end subroutine fit_extra_tree_regressor
+
 
 end module mod_extra_tree

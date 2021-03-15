@@ -14,6 +14,7 @@ module mod_clouds
     use mod_base_tree
     implicit none
 
+    !> Extended type of regressor of 'clouds'
     type, extends(base_tree) ::  clouds_regressor
         logical(kind=4) :: is_classification=f_
     contains
@@ -26,6 +27,15 @@ module mod_clouds
 
 contains
 
+    !> A function to override clouds_regressor.
+    !! \param max_bins maximum number of bins
+    !! \param max_depth max depth
+    !! \param boot_strap boot strap sampling
+    !! \param max_leaf_nodes maximum number of leaf node
+    !! \param min_samples_leaf minimum number of samples in node
+    !! \param fashion how to split node
+    !! \param max_features maximum number of features in node split phase
+    !! \param strategy splitting strategy
     function new_clouds_regressor(&
         max_bins, &
         max_depth, &
@@ -88,6 +98,12 @@ contains
     end function new_clouds_regressor
 
 
+    !> A subtouine to fit regressor of 'clouds'. 
+    !! \return returns fitted regressor tree
+    !! \param data_holder_ptr pointer of data_holder 
+    !! \param print_node ***OPTIONAL*** if True, print node informations
+    !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
+    !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
     subroutine fit_clouds_regressor(this, data_holder_ptr, print_node, &
         feature_indices, feature_indices_scanning_range)
         implicit none

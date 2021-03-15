@@ -125,6 +125,7 @@ contains
     end subroutine hparam_check
 
 
+    !> A subroutine to print node informations
     subroutine print_node_info_axis(this)
         implicit none
         class(node_axis) :: this

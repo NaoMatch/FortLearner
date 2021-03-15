@@ -27,6 +27,16 @@ module mod_lawu
 
 contains
 
+    !> A function to override clouds_regressor.
+    !! \param learning_rate_layer learning rate per layer
+    !! \param max_bins maximum number of bins
+    !! \param max_depth max depth
+    !! \param boot_strap boot strap sampling
+    !! \param max_leaf_nodes maximum number of leaf node
+    !! \param min_samples_leaf minimum number of samples in node
+    !! \param fashion how to split node
+    !! \param max_features maximum number of features in node split phase
+    !! \param strategy splitting strategy
     function new_lawu_regressor(&
         learning_rate_layer, &
         max_bins, &
@@ -93,6 +103,12 @@ contains
     end function new_lawu_regressor
 
 
+    !> A subtouine to fit regressor of 'lawu'. 
+    !! \return returns fitted regressor tree
+    !! \param data_holder_ptr pointer of data_holder 
+    !! \param print_node ***OPTIONAL*** if True, print node informations
+    !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
+    !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
     subroutine fit_lawu_regressor(this, data_holder_ptr, print_node, &
         feature_indices, feature_indices_scanning_range)
         implicit none
@@ -202,5 +218,6 @@ contains
             data_holder_ptr%y_ptr%y_r8_ptr(n,:) = y_copy(n,:)
         end do
     end subroutine fit_lawu_regressor
+
 
 end module mod_lawu
