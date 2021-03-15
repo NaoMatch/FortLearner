@@ -36,11 +36,11 @@ program main_optimize
 
 
     steep = steepest_descent()
-    x_min = steep%optimize(n_vars0, x_ini=x_ini, loss=loss_, grad=grad_)
+    x_min = steep%optimize(x_ini=x_ini, loss=loss_, grad=grad_)
     print*, "Steepest: ", x_min
 
     newton = newton_method()
-    x_min = newton%optimize(n_vars0, x_ini=x_ini, loss=loss_, grad=grad_, hess=hess_)
+    x_min = newton%optimize(x_ini=x_ini, loss=loss_, grad=grad_, hess=hess_)
     print*, "Newton: ", x_min
 
 
