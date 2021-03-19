@@ -40,6 +40,7 @@ graphviz
 * Decision Tree
   * Axis-Parallel
     * sliq
+    * residual likelihood tree
   * Oblique
     * weighted oblique decision tree
     * simulated annealing decision tree
