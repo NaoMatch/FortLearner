@@ -9,7 +9,7 @@ module mod_logistic_regression
     use mod_linalg,         only: multi_mat_vec, inner_product, inversion
     use mod_error,          only: error
     use mod_data_holder,    only: data_holder
-    use mod_optimization,   only: steepest_descent, newton_method
+    use mod_optimization,   only: steepest_descent, newton_method, bfgs
     implicit none
 
     type logistic_regression
@@ -24,6 +24,7 @@ module mod_logistic_regression
         procedure :: predict => predict_logistic_regression
         procedure :: fit     => fit_logistic_regression
         procedure :: fit_new => fit_new_logistic_regression
+        procedure :: fit_bfgs => fit_bfgs_logistic_regression
         procedure :: compute_loss
         procedure :: loss
         procedure :: compute_grad
@@ -42,6 +43,7 @@ module mod_logistic_regression
 
 
     type(logistic_regression) :: lr_temp
+    type(logistic_regression) :: lr_temp2
 
 contains
 
@@ -505,6 +507,67 @@ contains
             lr_hess_ = lr_temp%hess(x)
         end function lr_hess_
     end subroutine fit_new_logistic_regression
+
+
+    subroutine fit_bfgs_logistic_regression(this, data_holder_ptr)
+        implicit none
+        class(logistic_regression) :: this
+        type(logistic_regression)  :: lr
+        type(data_holder), pointer :: data_holder_ptr
+        type(error) :: err
+        integer(kind=8) :: n_samples, n_columns
+        real(kind=8), allocatable :: x_ini(:), x_min(:)
+        type(steepest_descent) :: steep
+        type(newton_method)    :: newton
+        type(bfgs)    :: bfgs_
+
+        lr_temp2%hparam = this%hparam
+        lr_temp2%data_holder_ptr => data_holder_ptr
+        lr_temp2%n_columns = data_holder_ptr%n_columns
+        lr_temp2%n_samples = data_holder_ptr%n_samples
+        call ifdealloc(lr_temp2%thetas_)
+
+        allocate(lr_temp2%thetas_(lr_temp2%n_columns))
+        allocate(x_ini(lr_temp2%n_columns+1))
+        allocate(x_min(lr_temp2%n_columns+1))
+        call rand_uniform(lr_temp2%thetas_,    -1d0, 1d0, lr_temp2%n_columns)
+        call rand_uniform(lr_temp2%intercept_, -1d0, 1d0)
+        call err%is_binary_labels(data_holder_ptr%y_ptr%y_i8_ptr, lr_temp2%n_samples, lr_temp2%hparam%algo_name)
+
+        lr_temp2%thetas_ = 1d0
+        lr_temp2%intercept_ = 1d0
+
+        allocate(lr_temp2%probas(lr_temp2%n_samples, 1))
+        allocate(lr_temp2%p_psq(lr_temp2%n_samples, 1))
+        ! newton = newton_method(max_iter=100_8, tolerance=lr_temp2%hparam%tolerance) 
+        bfgs_ = bfgs(max_iter=100_8, tolerance=lr_temp2%hparam%tolerance) 
+        x_ini(1:lr_temp2%n_columns) = lr_temp2%thetas_
+        x_ini(lr_temp2%n_columns+1) = lr_temp2%intercept_
+
+        x_min = bfgs_%optimize(x_ini=x_ini, loss=lr_loss_, grad=lr_grad_)
+
+        this%n_columns = lr_temp2%n_columns
+        this%thetas_ = lr_temp2%thetas_
+        this%intercept_ = lr_temp2%intercept_
+    contains
+        function lr_loss_(x)
+            real(kind=8) :: lr_loss_
+            real(kind=8), intent(in) :: x(:)
+            lr_loss_ = lr_temp2%loss(x)
+        end function lr_loss_
+
+        function lr_grad_(x)
+            real(kind=8), allocatable :: lr_grad_(:)
+            real(kind=8), intent(in) :: x(:)
+            lr_grad_ = lr_temp2%grad(x)
+        end function lr_grad_
+
+        function lr_hess_(x)
+            real(kind=8), allocatable :: lr_hess_(:,:)
+            real(kind=8), intent(in) :: x(:)
+            lr_hess_ = lr_temp2%hess(x)
+        end function lr_hess_
+    end subroutine fit_bfgs_logistic_regression
 
 
     subroutine conjugate_gradient(this, theta_update, data_holder_ptr, grad, hess, probas, n_samples, n_columns)
