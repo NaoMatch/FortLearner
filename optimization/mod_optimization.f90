@@ -1,5 +1,6 @@
 module mod_optimization
     use mod_timer
+    use mod_common, only: identity, vv2mat, vmv
     use mod_linalg, only: multi_mat_vec, inner_product, inversion
     implicit none
     
@@ -26,6 +27,10 @@ module mod_optimization
         procedure :: optimize => optimize_newton_method
     end type newton_method
 
+    type, extends(opt_method) :: bfgs
+    contains
+        procedure :: optimize => optimize_bfgs
+    end type bfgs
 
 
     interface steepest_descent
@@ -35,6 +40,10 @@ module mod_optimization
     interface newton_method
         module procedure :: new_newton_method
     end interface newton_method
+
+    interface bfgs
+        module procedure :: new_bfgs
+    end interface bfgs
 
 contains
 
@@ -110,6 +119,18 @@ contains
         if (present(tolerance)) new_newton_method % tolerance = tolerance
         if (present(alpha_ini)) new_newton_method % alpha_ini = alpha_ini
     end function new_newton_method
+
+    function new_bfgs(max_iter, tolerance, alpha_ini)
+        implicit none
+        type(bfgs) :: new_bfgs
+        integer(kind=8), optional   :: max_iter
+        real(kind=8), optional   :: tolerance
+        real(kind=8), optional   :: alpha_ini
+
+        if (present(max_iter)) new_bfgs % max_iter = max_iter
+        if (present(tolerance)) new_bfgs % tolerance = tolerance
+        if (present(alpha_ini)) new_bfgs % alpha_ini = alpha_ini
+    end function new_bfgs
 
 
     function optimize_steepest_descent(this, x_ini, loss, grad)
@@ -226,5 +247,104 @@ contains
         end do
         optimize_newton_method = x0
     end function optimize_newton_method
+
+
+    function optimize_bfgs(this, x_ini, loss, grad)
+        implicit none
+        class(bfgs)        :: this
+        real(kind=8), allocatable   :: optimize_bfgs(:)
+        real(kind=8), intent(in)    :: x_ini(:)
+
+        interface
+            function loss(x)
+                real(kind=8) :: loss
+                real(kind=8), intent(in) :: x(:)
+            end function loss
+        end interface
+        interface
+            function grad(x)
+                real(kind=8), allocatable :: grad(:)
+                real(kind=8), intent(in) :: x(:)
+            end function grad
+        end interface
+
+        type(line_search) :: ls
+        integer(kind=8) :: date_value1(8), date_value2(8), tot_grad, tot_hess, tot_inv, tot_armi
+
+        real(kind=8) :: alpha, loss_ini, norm_grad, denom
+        real(kind=8) :: tmp_ij, tmp_ji, factor
+        real(kind=8), allocatable :: x0(:), x0_update(:)
+        real(kind=8), allocatable :: hess0(:,:), hess0_inv(:,:), grad0(:), y(:)
+        real(kind=8), allocatable :: mat_l(:,:), mat_r(:,:), id(:,:), mat(:,:)
+        integer(kind=8) :: iter, n_variables, i, j
+
+        n_variables = size(x_ini)
+        allocate(x0(n_variables), x0_update(n_variables))
+        allocate(hess0_inv(n_variables,n_variables))
+        allocate(id(n_variables,n_variables))
+        allocate(mat_l(n_variables,n_variables))
+        allocate(mat_r(n_variables,n_variables))
+        allocate(mat(n_variables,n_variables))
+        allocate(y(n_variables))
+        call identity(id, n_variables)
+        x0 = x_ini
+
+        tot_grad = 0
+        tot_hess = 0
+        tot_inv = 0
+        tot_armi = 0
+
+        do iter=1, this%max_iter, 1
+            if ( iter .eq. 1_8 ) then
+                call identity(hess0_inv, n_variables)
+            else
+                denom = 1d0/inner_product(x0_update, y, n_variables)
+                ! call vv2mat(x0_update, y, mat_l, n_variables, n_variables)
+                ! call vv2mat(y, x0_update, mat_r, n_variables, n_variables)
+                ! call vv2mat(x0_update, x0_update, mat, n_variables, n_variables)
+                ! mat_l = id - mat_l * denom
+                ! mat_r = id - mat_r * denom
+                ! mat = mat * denom
+                ! hess0_inv = mat + matmul(mat_l, matmul(hess0_inv, mat_r))
+
+                factor = (1d0/denom + vmv(y, hess0_inv, n_variables)) * denom**2d0
+                call vv2mat(x0_update*factor, x0_update, mat_l, n_variables, n_variables)
+
+                call vv2mat(y, x0_update, mat_r, n_variables, n_variables)
+                mat_r = matmul(hess0_inv, mat_r)
+                do i=1, n_variables, 1
+                    mat_r(i,i) = mat_r(i,i) * 2d0
+                end do
+                do j=1, n_variables, 1
+                    do i=j+1, n_variables
+                        tmp_ij = mat_r(i,j)
+                        tmp_ji = mat_r(j,i)
+                        mat_r(i,j) = tmp_ij + tmp_ji
+                        mat_r(j,i) = tmp_ij + tmp_ji
+                    end do
+                end do
+                mat_r = mat_r * denom
+                hess0_inv = hess0_inv + mat_l - mat_r
+            end if
+
+            loss_ini = loss(x0)
+            grad0 = grad(x0)
+
+            norm_grad = inner_product(grad0, grad0, n_variables)
+            if ( norm_grad .le. this%tolerance ) exit
+
+            call multi_mat_vec(hess0_inv, grad0, x0_update, n_variables, n_variables)
+
+            alpha = 1d0
+            call ls%armijo_condition(alpha, x0, x0_update, loss_ini, loss, grad0, grad)
+            x0_update = - alpha * x0_update
+            x0 = x0 + x0_update
+
+            y = grad(x0) - grad0
+
+            print*, "NEW: Grad, Hess, Inv, Armijo: ", iter, tot_grad, tot_hess, tot_inv, tot_armi, norm_grad
+        end do
+        optimize_bfgs = x0
+    end function optimize_bfgs
 
 end module mod_optimization

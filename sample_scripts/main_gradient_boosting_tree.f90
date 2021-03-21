@@ -31,6 +31,7 @@ program main_gradient_boosting_tree
     real(kind=8), ALLOCATABLE :: y_train_pred_gbet(:,:), y_test_pred_gbet(:,:)
     real(kind=8), ALLOCATABLE :: y_train_pred_gbcl(:,:), y_test_pred_gbcl(:,:)
     real(kind=8), ALLOCATABLE :: y_train_pred_gblw(:,:), y_test_pred_gblw(:,:)
+    real(kind=8), ALLOCATABLE :: y_train_pred_ansemble(:,:), y_test_pred_ansemble(:,:)
     
     type(metrics)                 :: metric
     type(data_holder), target     :: dholder
@@ -172,14 +173,12 @@ program main_gradient_boosting_tree
 
 
     max_iter = 1
-    ! max_leaf_nodes = 
     print*, "    mse train vs test: ",         0, &
         "DecisionTree,                            ", &
         "ExtraTree,                               ", &
         "Clouds,                                  ", &
         "Lawu"
 
-    learning_rate_layer = 0.5d0
     do power=2, 10, 1
         n_leaf_nodes = 2**power
         ! dt_reg = decision_tree_regressor(max_leaf_nodes=n_leaf_nodes, fashion="best")
@@ -258,6 +257,10 @@ program main_gradient_boosting_tree
         y_test_pred_gblw = gblw_reg%predict(x_test)
         time_gblw = time_diff(date_value1, date_value2)
 
+        y_train_pred_ansemble = y_train_pred_gbdt + y_train_pred_gbet + y_train_pred_gbcl + y_train_pred_gblw
+        y_test_pred_ansemble  = y_test_pred_gbdt  + y_test_pred_gbet  + y_test_pred_gbcl  + y_test_pred_gblw
+        y_train_pred_ansemble = y_train_pred_ansemble / 4d0
+        y_test_pred_ansemble  = y_test_pred_ansemble  / 4d0
 
         print*, "    mse train vs test: ", int(n_leaf_nodes), &
             ! print*, '============================================================='
@@ -283,7 +286,10 @@ program main_gradient_boosting_tree
             ! print*, '============================================================='
             ! real(metric%mean_square_error(y_train(:,1), y_train_pred_gblw(:,1))), &
             real(metric%mean_square_error(y_test(:,1), y_test_pred_gblw(:,1))), &
-            real(time_gblw/dble(max_iter)), "[msec]"
+            real(time_gblw/dble(max_iter)), "[msec]", &
+            ! print*, '============================================================='
+            ! real(metric%mean_square_error(y_train(:,1), y_train_pred_gblw(:,1))), &
+            real(metric%mean_square_error(y_test(:,1), y_test_pred_ansemble(:,1)))
     end do
 
 end program main_gradient_boosting_tree
