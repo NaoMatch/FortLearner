@@ -104,6 +104,7 @@ main_decision_tree:
 	../decision_tree/mod_extra_tree.f90 \
 	../decision_tree/mod_clouds.f90 \
 	../decision_tree/mod_lawu.f90 \
+	../decision_tree/mod_weighted_oblique_decision_tree.f90 \
 	\
 	./main_decision_tree.f90 \
 	-o main_decision_tree.out

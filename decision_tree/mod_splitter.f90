@@ -31,7 +31,17 @@ module mod_splitter
         
         ! procedure :: split_oblivious_extra_tree_regressor
         ! procedure :: split_oblivious_extra_tree_regressor_all
+
+        procedure :: split_weighted_oblique_decision_tree_classifier
+        procedure :: split_weighted_oblique_decision_tree_classifier_indivisuals
     end type node_splitter
+
+
+    ! type wodt_objective
+    !     type(data_holder), pointer :: dholder_ptr
+    ! contains
+    !     procedure :: loss => loss_wodt_objective
+    ! end type wodt_objective
 
 
 contains
@@ -640,5 +650,244 @@ contains
         call node_ptr%hparam_check(hparam_ptr)
         ! print*, node_ptr%n_samples, num_l, num_r
     end subroutine split_clouds_regressor_indivisuals
+
+    !> A subroutine to split node by 'clouds'.
+    subroutine split_weighted_oblique_decision_tree_classifier(this, node_ptrs, data_holder_ptr, hparam_ptr, &
+        n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
+        implicit none
+        class(node_splitter)               :: this
+        type(node_axis_ptr), intent(inout) :: node_ptrs(:)
+        type(data_holder), pointer         :: data_holder_ptr
+        type(hparam_decisiontree), pointer :: hparam_ptr
+        integer(kind=8), intent(in)        :: n_columns
+        integer(kind=8), intent(inout)     :: feature_indices(n_columns)
+        integer(kind=8), intent(in)        :: feature_indices_scanning_range(2)
+        logical(kind=4), intent(in)        :: is_permute_per_node
+        integer(kind=8) :: n
+
+        if ( size(node_ptrs) .eq. 1 ) then
+            call this%split_weighted_oblique_decision_tree_classifier_indivisuals(node_ptrs(1)%node_ptr, data_holder_ptr, & 
+                hparam_ptr, n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
+        else
+            do n=1, size(node_ptrs), 1
+                call this%split_weighted_oblique_decision_tree_classifier_indivisuals(node_ptrs(n)%node_ptr, & 
+                data_holder_ptr, hparam_ptr, n_columns, feature_indices, &
+                feature_indices_scanning_range, is_permute_per_node)
+            end do
+        end if
+    end subroutine split_weighted_oblique_decision_tree_classifier
+
+
+    !> A subroutine to split node by 'clouds_regressor'.
+    subroutine split_weighted_oblique_decision_tree_classifier_indivisuals(this, node_ptr, data_holder_ptr, hparam_ptr, &
+        n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
+        implicit none
+        class(node_splitter)               :: this
+        type(node_axis), pointer           :: node_ptr
+        type(data_holder), pointer         :: data_holder_ptr
+        type(hparam_decisiontree), pointer :: hparam_ptr
+        integer(kind=8), intent(in)        :: n_columns
+        integer(kind=8), intent(inout)     :: feature_indices(n_columns)
+        integer(kind=8), intent(in)        :: feature_indices_scanning_range(2)
+        logical(kind=4), intent(in)        :: is_permute_per_node
+
+        integer(kind=8) :: date_value1(8), date_value2(8), time1, time2, time3
+
+        real(kind=8) :: n_rows_inv, n_outs_inv
+        real(kind=8), allocatable :: res_l(:), res_r(:), sum_l(:), sum_r(:), avg_l(:), avg_r(:)
+        real(kind=8), allocatable :: tot_p(:), tot_l(:), tot_r(:)
+        real(kind=8) :: gain, gain_best, best_threshold
+        integer(kind=8) :: i_start, i_stop, fid, f, i, j, k, best_fid, r
+        integer(kind=8) :: count_l, count_r, idx, count_eval
+        integer(kind=8) :: num_l, num_r
+        integer(kind=8) :: ini_f_idx, fin_f_idx
+        real(kind=8), allocatable :: tmp_y(:,:), tmp_y_idx(:), tmp_f_copy(:)
+        integer(kind=8), allocatable :: feature_ids(:), indices(:)
+        integer(kind=8) :: factor, b
+        real(kind=8) :: min_val, max_val, rand_val
+        
+        real(kind=8), allocatable    :: sum_hist_y(:,:), tmp_r(:)
+        integer(kind=8), allocatable :: tmp_f(:), count_hist(:), bin_indices(:)
+
+        integer(kind=8) :: buffer_idx(15), buffer_len=15, n_samples_unroll
+        integer(kind=8) :: row_idx, bin_idx
+        integer(kind=8), save :: tot_time=0, tot_time2=0
+        if (node_ptr%depth .eq. 0_8) tot_time=0
+        if (node_ptr%depth .eq. 0_8) tot_time2=0
+
+        time1 = 0
+        time2 = 0
+        time3 = 0
+        allocate(tot_p(data_holder_ptr%n_outputs))
+        allocate(tot_l(data_holder_ptr%n_outputs))
+        allocate(tot_r(data_holder_ptr%n_outputs))
+        allocate(res_l(data_holder_ptr%n_outputs))
+        allocate(res_r(data_holder_ptr%n_outputs))
+        allocate(sum_l(data_holder_ptr%n_outputs))
+        allocate(sum_r(data_holder_ptr%n_outputs))
+        allocate(avg_l(data_holder_ptr%n_outputs))
+        allocate(avg_r(data_holder_ptr%n_outputs))
+        node_ptr%n_outputs = data_holder_ptr%n_outputs
+
+        gain_best = - huge(0d0)
+        n_rows_inv = 1d0 / dble(node_ptr%n_samples)
+        n_outs_inv = 1d0 / dble(node_ptr%n_outputs)
+        ! tot_p = node_ptr%sum_p
+        ! tot_p = sum(data_holder_ptr%y_ptr%y_r8_ptr(node_ptr%indices,:), dim=1)
+        count_eval = 0_8
+
+        i_start = hparam_ptr%min_samples_leaf
+        i_stop = node_ptr%n_samples-i_start
+
+        allocate(tmp_y(node_ptr%n_samples, node_ptr%n_outputs))
+        allocate(tmp_f(node_ptr%n_samples))
+        allocate(tmp_f_copy(node_ptr%n_samples))
+        allocate(indices(node_ptr%n_samples))
+        allocate(feature_ids(node_ptr%n_columns))
+        allocate(sum_hist_y(hparam_ptr%max_bins, data_holder_ptr%n_outputs))
+        allocate(count_hist(hparam_ptr%max_bins))
+        if (is_permute_per_node) call permutation(feature_indices, n_columns)
+
+        do i=1, node_ptr%n_samples, 1
+            idx = node_ptr%indices(i)
+            tmp_y(i,:) = data_holder_ptr%y_ptr%y_r8_ptr(idx,:)
+        end do
+        tot_p(:) = sum(tmp_y, dim=1)
+
+        if ( .not. allocated(node_ptr%hist_self_sum_y) ) then
+            ! ---------------------------------------------------------------------------------------------
+            ! ---------------------------------------------------------------------------------------------
+            ! Transposed
+            allocate(node_ptr%hist_self_sum_y(node_ptr%n_columns, hparam_ptr%max_bins, node_ptr%n_outputs))
+            allocate(node_ptr%hist_self_count(node_ptr%n_columns, hparam_ptr%max_bins))
+            allocate(tmp_r(node_ptr%n_outputs))
+            allocate(bin_indices(node_ptr%n_columns))
+            node_ptr%hist_self_sum_y(:,:,:) = 0d0
+            node_ptr%hist_self_count(:,:)   = 0_4
+            n_samples_unroll = node_ptr%n_samples - mod(node_ptr%n_samples, 7)
+            call date_and_time(values=date_value1)
+            do i=1, node_ptr%n_samples, 1
+                row_idx = node_ptr%indices(i)
+                tmp_r = data_holder_ptr%y_ptr%y_r8_ptr(row_idx,:)
+                bin_indices = data_holder_ptr % x_hist_row(row_idx) % i_i4
+                do j=1, node_ptr%n_columns, 1
+                    bin_idx = bin_indices(j)
+                    node_ptr%hist_self_sum_y(j,bin_idx,:) = node_ptr%hist_self_sum_y(j,bin_idx,:) + tmp_r
+                    node_ptr%hist_self_count(j,bin_idx)   = node_ptr%hist_self_count(j,bin_idx) + 1_4
+                end do
+            end do
+            call date_and_time(values=date_value2)
+
+            ! ---------------------------------------------------------------------------------------------
+            ! ---------------------------------------------------------------------------------------------
+            ! Normal
+            ! allocate(node_ptr%hist_self_sum_y(hparam_ptr%max_bins, node_ptr%n_columns, node_ptr%n_outputs))
+            ! allocate(node_ptr%hist_self_count(hparam_ptr%max_bins, node_ptr%n_columns))
+            ! allocate(tmp_r(node_ptr%n_outputs))
+            ! allocate(bin_indices(node_ptr%n_columns))
+            ! node_ptr%hist_self_sum_y(:,:,:) = 0d0
+            ! node_ptr%hist_self_count(:,:)   = 0_4
+            ! n_samples_unroll = node_ptr%n_samples - mod(node_ptr%n_samples, 7)
+            ! call date_and_time(values=date_value1)
+            ! do i=1, node_ptr%n_samples, 1
+            !     row_idx = node_ptr%indices(i)
+            !     tmp_r = data_holder_ptr%y_ptr%y_r8_ptr(row_idx,:)
+            !     bin_indices = data_holder_ptr % x_hist_row(row_idx) % i_i4
+            !     do j=1, node_ptr%n_columns, 1
+            !         bin_idx = bin_indices(j)
+            !         node_ptr%hist_self_sum_y(bin_idx,j,:) = node_ptr%hist_self_sum_y(bin_idx,j,:) + tmp_r
+            !         node_ptr%hist_self_count(bin_idx,j)   = node_ptr%hist_self_count(bin_idx,j) + 1_4
+            !     end do
+            ! end do
+            ! call date_and_time(values=date_value2)
+
+
+            ! print*, time_diff(date_value1, date_value2), "[msec]"
+        end if
+
+        ini_f_idx = feature_indices_scanning_range(1)
+        fin_f_idx = feature_indices_scanning_range(2)
+        n_samples_unroll = node_ptr%n_samples - mod(node_ptr%n_samples, buffer_len)
+        do f=ini_f_idx, fin_f_idx, 1
+            fid = feature_indices(f)
+            ! print*, '============================================================='
+            ! print*, "FeatureID: ", fid
+            ! Useless or Used Feature Skip
+            if ( node_ptr%is_useless(fid) ) cycle
+            if ( node_ptr%is_used(fid) .and. hparam_ptr%skip_used_features ) cycle
+
+            tot_l = 0d0
+            count_l = 0
+            do b=1, hparam_ptr%max_bins-1, 1
+                ! Transposed
+                tot_l = tot_l + node_ptr%hist_self_sum_y(fid,b,:)
+                count_l = count_l + node_ptr%hist_self_count(fid,b)
+                if (count_l .eq. 0_8) cycle
+
+                ! Normal
+                ! tot_l = tot_l + node_ptr%hist_self_sum_y(b,fid,:)
+                ! count_l = count_l + node_ptr%hist_self_count(b,fid)
+                if (count_l .ge. node_ptr%n_samples) exit
+
+                tot_r = tot_p - tot_l
+                count_r = node_ptr%n_samples - count_l
+                if (count_r .eq. 0_8) exit
+
+                avg_l = tot_l / dble(count_l)
+                avg_r = tot_r / dble(count_r)
+                gain = dble(count_l*count_r)*n_rows_inv * sum( (avg_l-avg_r)**2d0 ) * n_outs_inv
+                ! print*,    real(tot_p), " : ", &
+                !     real(avg_l), real(count_l), &
+                !     " : ", real(avg_r), real(count_r), &
+                !     " : ", real(gain), real(gain_best), &
+                !     " : ", real(res_l), real(res_r), &
+                !     " : ", tot_l, tot_r
+
+                if (gain_best .lt. gain) then
+                    gain_best = gain
+                    best_fid = fid
+                    best_threshold = b
+                    res_l = avg_l
+                    res_r = avg_r
+                    num_l = count_l
+                    num_r = count_r
+                    sum_l = tot_l
+                    sum_r = tot_r
+                    count_eval = count_eval+1
+                end if
+            end do
+            if ( hparam_ptr%max_features .ne. -1 ) then
+                if ( hparam_ptr%max_features .le. f .and. count_eval .ge. 1 ) then
+                    exit
+                end if
+            end if
+        end do
+
+        node_ptr%is_trained = t_
+        node_ptr%eval_counter = count_eval
+        node_ptr%gain_best = gain_best
+
+        if ( count_eval .eq. 0 ) then
+            node_ptr%is_terminal = t_
+            return
+        end if
+
+        node_ptr%feature_id_ = best_fid
+        node_ptr%threshold_ = best_threshold
+
+        allocate(node_ptr%sum_l(node_ptr%n_outputs))
+        allocate(node_ptr%sum_r(node_ptr%n_outputs))
+        allocate(node_ptr%response_l(node_ptr%n_outputs))
+        allocate(node_ptr%response_r(node_ptr%n_outputs))
+
+        node_ptr%sum_l = sum_l
+        node_ptr%sum_r = sum_r
+        node_ptr%n_samples_l = num_l
+        node_ptr%n_samples_r = num_r
+        node_ptr%response_l = res_l
+        node_ptr%response_r = res_r
+        call node_ptr%hparam_check(hparam_ptr)
+        ! print*, node_ptr%n_samples, num_l, num_r
+    end subroutine split_weighted_oblique_decision_tree_classifier_indivisuals
 
 end module mod_splitter

@@ -204,7 +204,7 @@ program main_decision_tree
 
     max_iter = 1
     max_leaf_nodes = 40
-    do power=2, 12, 1
+    do power=2, 8, 1
         n_leaf_nodes = 2**power
         ! print*, "decision_tree_regressor"
         dt_reg = decision_tree_regressor(max_leaf_nodes=n_leaf_nodes, fashion="best")
