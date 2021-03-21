@@ -34,14 +34,18 @@ graphviz
   * gradient_boosting_lawu_regressor
 * Dimensionality Reduction: see sample_scripts/main_pca.f90
   * pca
-  
+ 
+# WIP
+* weighted oblique decision tree
+* residual likelihood tree
+* slow-growing tree
   
 # ToDo
 * Decision Tree
   * Axis-Parallel
     * sliq
+    * residual likelihood tree
   * Oblique
-    * weighted oblique decision tree
     * simulated annealing decision tree
     * rotation tree
     * random rotation tree
