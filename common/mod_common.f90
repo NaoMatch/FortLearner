@@ -129,6 +129,13 @@ module mod_common
         module procedure read2bin_2d_64bit ! place in "./include/common_read2bin_2d/inc_read2bin_2d.f90"
     end interface read2bin_2d
 
+    interface vv2mat
+        module procedure vv2mat_r8
+    end interface vv2mat
+
+    interface vmv
+        module procedure vmv_r8
+    end interface vmv
 
 contains
 
@@ -452,4 +459,68 @@ contains
         include "./include/common/read2bin_2d/inc_read2bin_2d_detail.f90"
     end subroutine read2bin_2d_32bit
     include "./include/common/read2bin_2d/inc_read2bin_2d.f90"
+
+
+    subroutine vv2mat_r8(vector1, vector2, matrix, n_dim1, n_dim2)
+        implicit none
+        real(kind=8), intent(in)    :: vector1(n_dim1)
+        real(kind=8), intent(in)    :: vector2(n_dim2)
+        real(kind=8), intent(inout) :: matrix(n_dim1, n_dim2)
+        integer(kind=8), intent(in) :: n_dim1, n_dim2
+
+        integer(kind=8) :: i, j
+        real(kind=8) :: tmp
+
+        do j=1, n_dim2, 1
+            tmp = vector2(j)
+            do i=1, n_dim1, 1
+                matrix(i,j) = tmp * vector1(i)
+            end do
+        end do
+    end subroutine vv2mat_r8
+
+
+    function vmv_r8(vector, matrix, n_dim)
+        implicit none
+        real(kind=8)                :: vmv_r8
+        real(kind=8), intent(in)    :: vector(n_dim)
+        real(kind=8), intent(in)    :: matrix(n_dim, n_dim)
+        integer(kind=8), intent(in) :: n_dim
+
+        real(kind=8), ALLOCATABLE :: tmp_vector(:)
+        real(kind=8)              :: tmp_sum
+        integer(kind=8) :: i, j
+
+        allocate(tmp_vector(n_dim))
+
+        tmp_vector = 0d0
+        do j=1, n_dim, 1
+            tmp_sum = 0d0
+            do i=1, n_dim, 1
+                tmp_sum = tmp_sum + matrix(i,j) * vector(i)
+            end do
+            tmp_vector(j) = tmp_sum
+        end do
+
+        vmv_r8 = 0d0
+        do j=1, n_dim, 1
+            vmv_r8 = vmv_r8 + tmp_vector(j) * vector(j)
+        end do
+    end function vmv_r8
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 end module mod_common
