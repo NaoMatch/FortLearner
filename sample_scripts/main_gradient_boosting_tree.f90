@@ -45,6 +45,7 @@ program main_gradient_boosting_tree
 
     integer(kind=8)    :: i, n_leaf_nodes, max_leaf_nodes
     integer(kind=8)    :: iter, max_iter, power
+    real(kind=8)    :: learning_rate_layer
 
     print*, '============================================================='
     print*, "Input Data Shape: "
@@ -172,7 +173,14 @@ program main_gradient_boosting_tree
 
     max_iter = 1
     ! max_leaf_nodes = 
-    do power=2, 3, 1
+    print*, "    mse train vs test: ",         0, &
+        "DecisionTree,                            ", &
+        "ExtraTree,                               ", &
+        "Clouds,                                  ", &
+        "Lawu"
+
+    learning_rate_layer = 0.5d0
+    do power=2, 10, 1
         n_leaf_nodes = 2**power
         ! dt_reg = decision_tree_regressor(max_leaf_nodes=n_leaf_nodes, fashion="best")
         ! call date_and_time(values=date_value1)
@@ -197,7 +205,7 @@ program main_gradient_boosting_tree
 
 
         gbt_reg = gradient_boosting_tree_regressor(&
-            n_estimators=100_8, &
+            n_estimators=500_8, &
             max_leaf_nodes=n_leaf_nodes, fashion="best", min_samples_leaf=10_8, learning_rate=0.1d0)
         call date_and_time(values=date_value1)
         do iter=1, max_iter, 1
@@ -210,7 +218,7 @@ program main_gradient_boosting_tree
 
 
         gbet_reg = gradient_boosting_extra_tree_regressor(&
-            n_estimators=100_8, &
+            n_estimators=500_8, &
             max_leaf_nodes=n_leaf_nodes, fashion="best", min_samples_leaf=10_8, learning_rate=0.1d0)
         call date_and_time(values=date_value1)
         do iter=1, max_iter, 1
@@ -223,7 +231,7 @@ program main_gradient_boosting_tree
 
 
         gbcl_reg = gradient_boosting_clouds_regressor(&
-            n_estimators=100_8, &
+            n_estimators=500_8, &
             max_bins=255_8, strategy="greedy", &
             max_leaf_nodes=n_leaf_nodes, fashion="best", min_samples_leaf=10_8, learning_rate=0.1d0)
         call date_and_time(values=date_value1)
@@ -237,10 +245,10 @@ program main_gradient_boosting_tree
 
 
         gblw_reg = gradient_boosting_lawu_regressor(&
-            n_estimators=100_8, &
+            n_estimators=500_8, &
             max_bins=255_8, strategy="greedy", &
-            max_leaf_nodes=n_leaf_nodes, fashion="best", min_samples_leaf=10_8, learning_rate=0.1d0, &
-            learning_rate_layer=.9d0)
+            max_leaf_nodes=n_leaf_nodes, fashion="best", min_samples_leaf=10_8, learning_rate=0.1d0/learning_rate_layer, &
+            learning_rate_layer=learning_rate_layer)
         call date_and_time(values=date_value1)
         do iter=1, max_iter, 1
             call gblw_reg%fit(dholder_ptr)
