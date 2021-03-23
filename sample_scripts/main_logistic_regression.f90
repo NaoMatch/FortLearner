@@ -29,8 +29,8 @@ program main_logistic_regression
 
     print*, '============================================================='
     print*, "Input Data Shape: "
-    n_samples_train  = 9000000_8
-    n_samples_test   = 1000000_8
+    n_samples_train  = 900000_8
+    n_samples_test   = 100000_8
     n_columns_train  = 28_8
     n_columns_test   = 28_8
     skip_header = f_
@@ -58,20 +58,20 @@ program main_logistic_regression
     print*, "   y_test  csv -> bin: ", trim(file_name_y_test_csv),  " -> ", trim(file_name_y_test_bin)
 
 
-    print*, '============================================================='
-    print*, "CSV to Binary"
-    print*, "    x_train"
-    call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
-        n_samples_train, n_columns_train, skip_header, dtype_in, dtype_out)
-    print*, "    y_train"
-    call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
-        n_samples_train, 1_8, skip_header, dtype_in, "i")
-    print*, "    x_test"
-    call read2bin_2d(file_name_x_test_csv, file_name_x_test_bin, &
-        n_samples_test, n_columns_test, skip_header, dtype_in, dtype_out)
-    print*, "    y_test"
-    call read2bin_2d(file_name_y_test_csv, file_name_y_test_bin, &
-        n_samples_test, 1_8, skip_header, dtype_in, "i")
+    ! print*, '============================================================='
+    ! print*, "CSV to Binary"
+    ! print*, "    x_train"
+    ! call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
+    !     n_samples_train, n_columns_train, skip_header, dtype_in, dtype_out)
+    ! print*, "    y_train"
+    ! call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
+    !     n_samples_train, 1_8, skip_header, dtype_in, "i")
+    ! print*, "    x_test"
+    ! call read2bin_2d(file_name_x_test_csv, file_name_x_test_bin, &
+    !     n_samples_test, n_columns_test, skip_header, dtype_in, dtype_out)
+    ! print*, "    y_test"
+    ! call read2bin_2d(file_name_y_test_csv, file_name_y_test_bin, &
+    !     n_samples_test, 1_8, skip_header, dtype_in, "i")
 
     print*, '============================================================='
     print*, "Read Binary"
@@ -88,21 +88,9 @@ program main_logistic_regression
     dholder = data_holder(x_train, y_train)
     dholder_ptr => dholder
 
-!     lr = logistic_regression(penalty="l2", lambda=1d-10, tolerance=1d-4)
-!     call date_and_time(values=date_value1)  
-!     call lr%fit(dholder_ptr)
-!     call date_and_time(values=date_value2)
-!     y_train_pred = lr%predict(x_train)
-!     y_test_pred = lr%predict(x_test)
-
-!     print*, time_diff(date_value1, date_value2), &
-!             metric%auc_i8(y_train(:,1), y_train_pred(:,1)), &
-!             metric%auc_i8(y_test(:,1), y_test_pred(:,1))
-
-
     lr_new = logistic_regression(penalty="l2", lambda=1d-10, tolerance=1d-4)
     call date_and_time(values=date_value1)  
-    call lr_new%fit_new(dholder_ptr)
+    call lr_new%fit_newton(dholder_ptr)
     call date_and_time(values=date_value2)
     y_train_pred = lr_new%predict(x_train)
     y_test_pred = lr_new%predict(x_test)
@@ -110,7 +98,6 @@ program main_logistic_regression
     print*, time_diff(date_value1, date_value2), &
             metric%auc_i8(y_train(:,1), y_train_pred(:,1)), &
             metric%auc_i8(y_test(:,1), y_test_pred(:,1))
-
 
     lr_bfgs = logistic_regression(penalty="l2", lambda=1d-10, tolerance=1d-4)
     call date_and_time(values=date_value1)  
