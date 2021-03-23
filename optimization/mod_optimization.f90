@@ -1,6 +1,7 @@
 module mod_optimization
     use mod_timer
     use mod_common, only: identity, vv2mat, vmv
+    use mod_random, only: rand_uniform
     use mod_linalg, only: multi_mat_vec, inner_product, inversion
     implicit none
     
@@ -94,6 +95,56 @@ contains
             end if
         end do
     end subroutine armijo_condition
+
+
+    ! subroutine wolfe_condition(this, alpha, theta_update, data_holder_ptr, probas, n_samples, n_columns)
+    !     implicit none
+    !     class(logistic_regression)  :: this
+    !     real(kind=8), intent(inout) :: alpha
+    !     real(kind=8), intent(in)    :: theta_update(n_columns+1)
+    !     type(data_holder), pointer  :: data_holder_ptr
+    !     real(kind=8), intent(inout) :: probas(n_samples,1)
+    !     integer(kind=8), intent(in) :: n_samples, n_columns
+
+    !     real(kind=8), parameter :: xi1=0.001d0
+    !     real(kind=8), parameter :: xi2=0.9d0
+    !     real(kind=8), parameter :: tau=0.6d0
+    !     real(kind=8), ALLOCATABLE :: theta_fix(:)
+    !     real(kind=8) :: intercept_fix
+
+    !     real(kind=8) :: lhs_a, rhs_a
+    !     real(kind=8) :: lhs_w, rhs_w
+    !     real(kind=8) :: tmp_1, tmp_2
+    !     real(kind=8) :: grad(n_columns+1)
+
+    !     theta_fix = this%thetas_
+    !     intercept_fix = this%intercept_
+    !     tmp_1 = this%compute_loss(data_holder_ptr, probas, n_samples)
+
+    !     call this%compute_grad(grad, data_holder_ptr, probas, n_samples, n_columns)
+    !     tmp_2 = inner_product(grad, theta_update, n_columns+1)
+
+    !     do while (t_)
+    !         this%thetas_ = theta_fix - alpha * theta_update(1:n_columns)
+    !         this%intercept_ = intercept_fix - alpha * theta_update(n_columns+1)
+    !         probas = this%predict(data_holder_ptr%x_ptr%x_r8_ptr)
+
+    !         lhs_a = this%compute_loss(data_holder_ptr, probas, n_samples)
+    !         rhs_a = tmp_1 - xi1 * alpha * tmp_2
+
+    !         call this%compute_grad(grad, data_holder_ptr, probas, n_samples, n_columns)
+    !         lhs_w = sum(theta_update * grad)
+    !         rhs_w = xi2 * tmp_2
+
+    !         if ( all((/lhs_a .gt. rhs_a, lhs_w .lt. rhs_w/)) ) then
+    !             alpha = alpha * tau
+    !         else
+    !             exit
+    !         end if
+    !     end do
+    !     this%thetas_ = theta_fix
+    !     this%intercept_ = intercept_fix
+    ! end subroutine wolfe_condition
 
 
     function new_steepest_descent(max_iter, tolerance, alpha_ini)
@@ -233,17 +284,20 @@ contains
             tot_hess = tot_hess + time_diff(date_value1, date_value2)
 
             call date_and_time(values=date_value1)
-            call inversion(hess0_inv, hess0, n_variables)
+            call conjugate_gradient(hess0, x0_update, grad0, n_variables, this%max_iter)
             call date_and_time(values=date_value2)
+            ! call date_and_time(values=date_value1)
+            ! call inversion(hess0_inv, hess0, n_variables)
+            ! call multi_mat_vec(hess0_inv, grad0, x0_update, n_variables, n_variables)
+            ! call date_and_time(values=date_value2)
             tot_inv = tot_inv + time_diff(date_value1, date_value2)
 
-            call multi_mat_vec(hess0_inv, grad0, x0_update, n_variables, n_variables)
             call date_and_time(values=date_value1)
             call ls%armijo_condition(alpha, x0, x0_update, loss_ini, loss, grad0, grad)
             call date_and_time(values=date_value2)
             tot_armi = tot_armi + time_diff(date_value1, date_value2)
             x0 = x0 - alpha * x0_update
-            print*, "NEW: Grad, Hess, Inv, Armijo: ", iter, tot_grad, tot_hess, tot_inv, tot_armi
+            ! print*, "NEW: Grad, Hess, Inv, Armijo: ", iter, tot_grad, tot_hess, tot_inv, tot_armi
         end do
         optimize_newton_method = x0
     end function optimize_newton_method
@@ -271,7 +325,7 @@ contains
         type(line_search) :: ls
         integer(kind=8) :: date_value1(8), date_value2(8), tot_grad, tot_hess, tot_inv, tot_armi
 
-        real(kind=8) :: alpha, loss_ini, norm_grad, denom
+        real(kind=8) :: alpha, loss_ini, norm_grad, denom, denom2
         real(kind=8) :: tmp_ij, tmp_ji, factor
         real(kind=8), allocatable :: x0(:), x0_update(:)
         real(kind=8), allocatable :: hess0(:,:), hess0_inv(:,:), grad0(:), y(:)
@@ -294,6 +348,37 @@ contains
         tot_inv = 0
         tot_armi = 0
 
+        ! do iter=1, this%max_iter, 1
+        !     if ( iter .eq. 1_8 ) then
+        !         call identity(hess0_inv, n_variables)
+        !     else
+        !         denom = inner_product(x0_update, y, n_variables)
+        !         denom2 = vmv(x0_update, hess0_inv, n_variables)
+        !         call vv2mat(y/denom, y, mat_l, n_variables, n_variables)
+
+        !         call vv2mat(x0_update, x0_update, mat_r, n_variables, n_variables)
+        !         mat_r = matmul(hess0_inv, matmul(mat_r, hess0_inv))
+
+        !         hess0_inv = hess0_inv + mat_l - mat_r / denom2
+        !     end if
+
+        !     loss_ini = loss(x0)
+        !     grad0 = grad(x0)
+
+        !     norm_grad = inner_product(grad0, grad0, n_variables)
+        !     if ( norm_grad .le. this%tolerance ) exit
+
+        !     call conjugate_gradient(hess0_inv, x0_update, grad0, n_variables, this%max_iter)
+
+        !     alpha = 2d0
+        !     call ls%armijo_condition(alpha, x0, x0_update, loss_ini, loss, grad0, grad)
+        !     x0_update = - alpha * x0_update
+        !     x0 = x0 + x0_update
+
+        !     y = grad(x0) - grad0
+
+        !     print*, "NEW: Grad, Hess, Inv, Armijo: ", iter, tot_grad, tot_hess, tot_inv, tot_armi, norm_grad, alpha
+        ! end do
         do iter=1, this%max_iter, 1
             if ( iter .eq. 1_8 ) then
                 call identity(hess0_inv, n_variables)
@@ -342,9 +427,61 @@ contains
 
             y = grad(x0) - grad0
 
-            print*, "NEW: Grad, Hess, Inv, Armijo: ", iter, tot_grad, tot_hess, tot_inv, tot_armi, norm_grad
+            ! print*, "NEW: Grad, Hess, Inv, Armijo: ", iter, tot_grad, tot_hess, tot_inv, tot_armi, norm_grad
         end do
         optimize_bfgs = x0
     end function optimize_bfgs
+
+
+    subroutine conjugate_gradient(hess, x0_update, grad, n_variables, max_iteration)
+        implicit none
+        real(kind=8), intent(in)               :: hess(n_variables,n_variables)
+        real(kind=8), intent(inout)            :: x0_update(n_variables)
+        real(kind=8), intent(in)               :: grad(n_variables)
+        integer(kind=8), intent(in)            :: n_variables
+        integer(kind=8), intent(in)            :: max_iteration
+
+        real(kind=8), allocatable :: t(:), r(:), p(:) ! thetas_ and intercept_
+        real(kind=8), allocatable :: h_v(:) ! hessian x arbitrary vector
+        integer(kind=8) :: iter, i, j
+        real(kind=8) :: alpha_i, beta_i, tmp
+        real(kind=8) :: r_sq_old, r_sq_new
+
+        allocate(t(n_variables), r(n_variables), p(n_variables), h_v(n_variables))
+
+        call rand_uniform(t, -1d0, 1d0, n_variables)
+
+        do j=1, n_variables, 1
+            tmp = 0d0
+            do i=1, n_variables, 1
+                tmp = tmp + hess(i,j) * t(i)
+            end do
+            h_v(j) = tmp
+        end do
+
+        r = grad - h_v
+        p = r
+        r_sq_old = inner_product(r, r, n_variables)
+        do iter=1, max_iteration, 1
+            do j=1, n_variables, 1
+                tmp = 0d0
+                do i=1, n_variables, 1
+                    tmp = tmp + hess(i,j) * p(i)
+                end do
+                h_v(j) = tmp
+            end do
+            alpha_i = r_sq_old / inner_product(h_v, p, n_variables)
+            t = t + alpha_i * p
+            r = r - alpha_i * h_v
+
+            r_sq_new = inner_product(r, r, n_variables)
+            beta_i = r_sq_new / r_sq_old
+            if ( r_sq_new .le. 1d-6 ) exit
+            p = r + alpha_i * p
+            r_sq_old = r_sq_new
+        end do
+        x0_update = t
+    end subroutine conjugate_gradient
+
 
 end module mod_optimization
