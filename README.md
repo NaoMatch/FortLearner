@@ -37,7 +37,7 @@ graphviz
  
 # WIP
 * weighted oblique decision tree
-* residual likelihood tree
+* residual likelihood forest
 * slow-growing tree
   
 # ToDo
