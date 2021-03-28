@@ -31,11 +31,10 @@ module mod_discretizer
         procedure :: transform => transform_column_discretizer
         procedure :: fit_uniform_discretizer
         procedure :: fit_quantile_discretizer
-        procedure :: fit_kmeans_discretizer
+        procedure :: fit_kmeans_naive_discretizer
         procedure :: fit_greedy_discretizer
         procedure :: fit_modified_greedy_discretizer
         procedure :: fit_dpoptimal_equal_area_discretizer
-        ! procedure :: fit_kmeans_discretizer_old
     end type column_discretizer
 
 
@@ -97,7 +96,7 @@ contains
         tmp%hparam%algo_name = "dicretizer"
         preset_strategies(1) = "uniform"
         preset_strategies(2) = "quantile"
-        preset_strategies(3) = "kmeans"
+        preset_strategies(3) = "kmeans_naive"
         preset_strategies(4) = "greedy"
         preset_strategies(5) = "modified_greedy"
         ! preset_strategies(6) = "dpoptimal"
@@ -121,7 +120,7 @@ contains
         tmp%hparam%algo_name = "dicretizer"
         preset_strategies(1) = "uniform"
         preset_strategies(2) = "quantile"
-        preset_strategies(3) = "kmeans"
+        preset_strategies(3) = "kmeans_naive"
         preset_strategies(4) = "greedy"
         preset_strategies(5) = "modified_greedy"
         ! preset_strategies(6) = "dpoptimal"
@@ -212,8 +211,8 @@ contains
                 call this%fit_uniform_discretizer(vector, n_samples)
             case (2) ! quantile
                 call this%fit_quantile_discretizer(vector, n_samples)
-            case (3) ! kmeans
-                call this%fit_kmeans_discretizer(vector, n_samples)
+            case (3) ! kmeans_naive
+                call this%fit_kmeans_naive_discretizer(vector, n_samples)
             case (4) ! greedy
                 call this%fit_greedy_discretizer(vector, n_samples)
             case (5) ! modified_greedy
@@ -365,345 +364,250 @@ contains
     end subroutine fit_greedy_discretizer
 
 
-    subroutine fit_kmeans_discretizer(this, vector, n_samples)
+    subroutine fit_kmeans_naive_discretizer(this, vector, n_samples)
         implicit none
         integer(kind=8) :: date_value1(8), date_value2(8)
         class(column_discretizer)          :: this
         real(kind=8), intent(in)    :: vector(n_samples)
         integer(kind=8), intent(in) :: n_samples
 
-        real(kind=8), allocatable    :: unique_v(:), vector_copy(:)
-        integer(kind=8), allocatable :: count_v(:)
-        integer(kind=8) :: n, n_unique_v, idx, m, factor, i, mm, cnt, c
-        integer(kind=8) :: n_unique_v_unroll, n_selected
+        real(kind=8), allocatable    :: unique_values(:), vector_copy(:)
+        integer(kind=8), allocatable :: counts(:)
+        integer(kind=8) :: n, n_unique_values, idx, m, factor, i, mm, cnt, c, selected_idx, min_idx, mid_idx, max_idx
+        integer(kind=8) :: n_selected, n_current_centroids
         real(kind=8) :: rand_val, dc, dn, tmp_dist_nearest(63), tmp_centroid, sum_dist
-        real(kind=8), allocatable :: centroids(:), centroids_new(:), dist_current(:), dist_nearest(:), dist_nearest_norm(:)
-        real(kind=8), allocatable :: cluster_sum(:), centroids_tmp(:)
-        real(kind=8) :: centroid_old, centroid_new, dist_old, dist_new, min_centroid, max_centroid, med_centroid, tmp_point
-        integer(kind=8), allocatable :: cluster_counter(:), cluster_idx(:), centroid_indices(:), uniq_indices(:)
-        integer(kind=8) :: centroid_idx_old, centroid_idx_new, start_idx, end_idx, iter, nearest_idx
+        real(kind=8) :: n_unique_values_inv, centroid
+        real(kind=8), allocatable :: centroid_coordinates(:), centroid_coordinates_new(:), centroid_coordinates_old(:)
+        real(kind=8), allocatable :: dist_current(:), distance_nearest(:), distance_nearest_norm(:), sum_distances(:)
+        real(kind=8), allocatable :: cluster_sum(:), centroid_coordinates_tmp(:)
+        real(kind=8) :: centroid_new, dist_old, dist_new, min_centroid, max_centroid, mid_centroid, tmp_point
+        real(kind=8) :: uniq_val, centroid_left, centroid_right, midpoint, coordinate
+        integer(kind=8), allocatable :: cluster_counter(:), centroid_indices(:), uniq_indices(:), bin_counter(:)
+        integer(kind=8) :: centroid_idx_old, centroid_idx_new, start_idx, end_idx, iter, nearest_idx, centroid_idx, cluster_idx
+        integer(kind=8) :: midpoint_idx, left_idx, right_idx, counter, sum_check
         logical(kind=4) :: is_reverse
-        integer(kind=8) :: min_index, med_index, max_index
+        integer(kind=8) :: min_index, med_index, max_index, n_centroid_coordinates, n_centroid_indices
 
         if (allocated(this%thresholds_)) deallocate(this%thresholds_)
-        if (allocated(centroids)) deallocate(centroids)
-        if (allocated(dist_nearest)) deallocate(dist_nearest)
+        if (allocated(centroid_coordinates)) deallocate(centroid_coordinates)
+        if (allocated(distance_nearest)) deallocate(distance_nearest)
         if (allocated(dist_current)) deallocate(dist_current)
 
-        ! print*, "Copy & Sort" ! -------------------------------------------------------------------------
+! call date_and_time(values=date_value1)
+        ! print*, '============================================================='
+        ! print*, "Copy & Sort"
         allocate(vector_copy(n_samples))
         do n=1, n_samples, 1
             vector_copy(n) = vector(n)
         end do
         call quick_sort(vector_copy, n_samples)
-        
-        ! print*, "GROUPBY" ! -------------------------------------------------------------------------
-        call groupby_count(unique_v, count_v, vector_copy, n_samples)
-        n_unique_v = size(unique_v)
-        if (n_unique_v .le. this%hparam%max_bins) goto 999
+! call date_and_time(values=date_value2)
+! print*, "Copy & Sort", time_diff(date_value1, date_value2)
 
-        ! print*, "Select Centroids" ! -------------------------------------------------------------------------
-        allocate(centroids(0))
+! call date_and_time(values=date_value1)
+        ! print*, '============================================================='
+        ! print*, "Get Unique Values & Counts"
+        call groupby_count(unique_values, counts, vector_copy, n_samples)
+        n_unique_values = size(unique_values)
+        DEALLOCATE(vector_copy)
+        if (n_unique_values .le. this%hparam%max_bins) goto 999
+! call date_and_time(values=date_value2)
+! print*, "Get Unique Values & Counts", time_diff(date_value1, date_value2)
+
+
+        ! print*, '============================================================='
+        ! print*, "Select Initial Centroids"
+        allocate(centroid_coordinates(0))
         allocate(centroid_indices(0))
-        allocate(dist_nearest(n_unique_v))
-        allocate(dist_nearest_norm(n_unique_v))
+        allocate(distance_nearest(n_unique_values))
+        allocate(distance_nearest_norm(n_unique_values))
 
-        dist_nearest = 1d0/dble(n_unique_v)
-        idx = roulette_selection(dist_nearest, n_unique_v, reverse=f_)
-        centroids = [centroids, unique_v(idx)]
-        tmp_centroid = centroids(1)
-        do n=1, n_unique_v, 1
-            dist_nearest(n) = abs(tmp_centroid-unique_v(n))
+! call date_and_time(values=date_value1)
+        is_reverse = f_
+        n_unique_values_inv = 1d0 / dble(n_unique_values)
+        do n=1, n_unique_values, 1
+            distance_nearest(n) = n_unique_values_inv
         end do
-        centroid_old = unique_v(idx)
-        centroid_indices = [centroid_indices, 1_8, idx, n_unique_v]
-        call quick_sort(centroid_indices, size(centroid_indices)+0_8)
+        centroid_indices = [centroid_indices, 1_8, n_unique_values]
 
-        do while (size(centroids) .lt. this%hparam%max_bins)
-            is_reverse = f_
-            if (mod(size(centroids),2) .eq. 0) is_reverse = t_
-
-            do n=1, n_unique_v, 1
-                dist_nearest_norm(n) = dist_nearest(n)
+        do while ( size(centroid_coordinates) .lt. this%hparam%max_bins )
+            ! Select New Centroid
+            is_reverse = .not. is_reverse
+            do n=1, n_unique_values, 1
+                distance_nearest_norm(n) = distance_nearest(n)
             end do
-            call vector2sum1(dist_nearest_norm, n_unique_v)
+            call vector2sum1(distance_nearest_norm, n_unique_values)
+            selected_idx = roulette_selection(distance_nearest_norm, n_unique_values, reverse=is_reverse)
+            centroid_new = unique_values(selected_idx)
+            centroid_coordinates = [centroid_coordinates, centroid_new]
+            centroid_indices = [centroid_indices, selected_idx]
 
-            idx = roulette_selection(dist_nearest_norm, n_unique_v, reverse=is_reverse)
-            centroids = [centroids, unique_v(idx)]
-            centroid_new = unique_v(idx)
-            centroid_idx_new = idx
-            centroid_indices = [centroid_indices, centroid_idx_new]
-            call quick_sort(centroids, size(centroids)+0_8)
-            call quick_sort(centroid_indices, size(centroid_indices)+0_8)
+            ! Update Nearest Centroid Distance
+            n_centroid_coordinates = size(centroid_coordinates)
+            n_centroid_indices     = size(centroid_indices)
+            call quick_sort(centroid_coordinates, n_centroid_coordinates)
+            call quick_sort(centroid_indices,     n_centroid_indices)
+            mid_idx = linear_search(centroid_indices, n_centroid_indices, selected_idx)
+            min_idx = centroid_indices(mid_idx-1)
+            max_idx = centroid_indices(mid_idx+1)
+            mid_centroid = centroid_new
 
-            do i=2, size(centroid_indices)-1, 1
-                if ( centroid_idx_new .eq. centroid_indices(i) ) then
-                    start_idx = centroid_indices(i-1)
-                    end_idx   = centroid_indices(i+1)
-                    exit
-                end if
-            end do
-
-            min_centroid = unique_v(start_idx)
-            med_centroid = centroid_new
-            max_centroid = unique_v(end_idx)
-
-            do n=start_idx, end_idx, 1
-                tmp_point = unique_v(n)
-                dist_nearest(n) = minval((/ & 
-                    abs(tmp_point-min_centroid) ,& 
-                    abs(tmp_point-med_centroid) , & 
-                    abs(tmp_point-max_centroid) /))
-            end do
-        end do
-
-
-        ! print*, "Update Centroids until convergence" ! -------------------------------------------------------------------------
-        allocate(centroids_tmp(0))
-        allocate(cluster_idx(n_unique_v))
-        allocate(cluster_sum(this%hparam%max_bins))
-        allocate(cluster_counter(this%hparam%max_bins))
-        allocate(dist_current(n_unique_v))
-
-        call quick_sort(centroids, size(centroids)+0_8)
-        ! print*, "START: ", centroids
-
-        dist_nearest = abs(unique_v-centroids(1))
-        cluster_idx = 1_8
-        do n=2, size(centroids), 1
-            dist_current = abs(unique_v-centroids(n))
-            do i=1, n_unique_v
-                dn = dist_nearest(i)
-                dc = dist_current(i)
-                factor = dc .lt. dn
-                cluster_idx(i) = cluster_idx(i) + factor
-                dist_nearest(i) = minval((/dn, dc/))
-            end do
-        end do
-
-        do iter=1, 10000, 1
-            centroids_tmp = centroids
-
-            ! Left most Centroid
-            min_centroid = centroids_tmp(1)
-            min_index = binary_search_left(unique_v, n_unique_v, min_centroid)
-            ! print*, 1, min_index
-            do idx=1, min_index
-                cluster_idx(idx) = 1_8
-            end do
-
-            ! Intermediate Centroids
-            do c=2, this%hparam%max_bins
-                max_centroid = centroids_tmp(c)
-                max_index = binary_search_left(unique_v, n_unique_v, max_centroid)
-                ! print*, min_index, max_index 
-
-                do idx=min_index, max_index, 1
-                    tmp_point = unique_v(idx)
-                    factor = abs(tmp_point-min_centroid) .lt. abs(tmp_point-max_centroid)
-                    cluster_idx(idx) = c-factor
+            if     ( min_idx .eq. 1_8 .and. max_idx .eq. n_unique_values ) then
+                ! First
+                do n=1, n_unique_values, 1
+                    distance_nearest(n) = abs(unique_values(n)-mid_centroid)
                 end do
-
-                min_centroid = max_centroid
-                min_index = max_index + 1
-            end do
-
-            ! Right most Centroid
-            max_centroid = centroids_tmp(this%hparam%max_bins)
-            max_index = binary_search_left(unique_v, n_unique_v, max_centroid)
-            ! print*, max_index, n_unique_v
-            do idx=max_index, n_unique_v
-                cluster_idx(idx) = this%hparam%max_bins
-            end do
-
-            ! print*, "Update Centroid Coordinates"
-            cluster_sum = 0d0
-            cluster_counter = 0_8
-            do i=1, n_unique_v, 1
-                idx = cluster_idx(i)
-                cluster_sum(idx) = cluster_sum(idx) + unique_v(i) * count_v(i)
-                cluster_counter(idx) = cluster_counter(idx) + count_v(i)
-            end do
-            centroids_new = cluster_sum / dble(cluster_counter)
-
-            ! print*, iter, sum(abs(centroids-centroids_new))
-            if ( maxval(abs(centroids-centroids_new)) .le. 10d-18 ) exit
-            centroids = centroids_new
-            ! call sleep(1)
-        end do
-
-        if (allocated(this%thresholds_)) deallocate(this%thresholds_)
-        allocate(this%thresholds_(0))
-        do i=1, size(centroids_new)-1, 1
-            this%thresholds_ = [this%thresholds_, (centroids_new(i)+centroids_new(i+1))*.5d0]
-        end do
-        this%thresholds_ = [this%thresholds_, huge(0d0)]
-
-        return
-        999 continue
-        if (n_unique_v .eq. 1) then
-            allocate(this%thresholds_(1))
-            this%thresholds_ = huge(0d0)
-        elseif ( n_unique_v .le. this%hparam%max_bins ) then
-            allocate(this%thresholds_(0))
-            do n=2, n_unique_v, 1
-                this%thresholds_ = [this%thresholds_, (unique_v(n-1)+unique_v(n)) * .5d0]
-            end do
-            this%thresholds_ = [this%thresholds_, huge(0d0)]
-        end if        
-    end subroutine fit_kmeans_discretizer
-
-
-    subroutine fit_kmeans_discretizer_old(this, vector, n_samples)
-        implicit none
-        integer(kind=8) :: date_value1(8), date_value2(8)
-        class(column_discretizer)          :: this
-        real(kind=8), intent(in)    :: vector(n_samples)
-        integer(kind=8), intent(in) :: n_samples
-
-        real(kind=8), allocatable    :: unique_v(:), vector_copy(:)
-        integer(kind=8), allocatable :: count_v(:)
-        integer(kind=8) :: n, n_unique_v, idx, m, factor, i, mm, cnt
-        integer(kind=8) :: n_unique_v_unroll, n_selected
-        real(kind=8) :: rand_val, dc, dn, tmp_dist_nearest(63), tmp_centroid, sum_dist
-        real(kind=8), allocatable :: centroids(:), centroids_new(:), dist_current(:), dist_nearest(:), dist_nearest_norm(:)
-        real(kind=8), allocatable :: cluster_sum(:)
-        real(kind=8) :: centroid_old, centroid_new, dist_old, dist_new, min_centroid, max_centroid, med_centroid, tmp_point
-        integer(kind=8), allocatable :: cluster_counter(:), cluster_idx(:), centroid_indices(:)
-        integer(kind=8) :: centroid_idx_old, centroid_idx_new, start_idx, end_idx
-        logical(kind=4) :: is_reverse
-
-        if (allocated(this%thresholds_)) deallocate(this%thresholds_)
-        if (allocated(centroids)) deallocate(centroids)
-        if (allocated(dist_nearest)) deallocate(dist_nearest)
-        if (allocated(dist_current)) deallocate(dist_current)
-        call date_and_time(values=date_value1)
-        allocate(vector_copy(n_samples))
-        do n=1, n_samples, 1
-            vector_copy(n) = vector(n)
-        end do
-        call quick_sort(vector_copy, n_samples)
-        call date_and_time(values=date_value2)
-        print*, "Copy & Sort Time: ", time_diff(date_value1, date_value2)
-        
-
-        print*, "GROUPBY"
-        call date_and_time(values=date_value1)
-        call groupby_count(unique_v, count_v, vector_copy, n_samples)
-        n_unique_v = size(unique_v)
-        print*, n_unique_v, this%hparam%max_bins
-        if (n_unique_v .le. this%hparam%max_bins) goto 999
-        call date_and_time(values=date_value2)
-        print*, "Groupby Time: ", time_diff(date_value1, date_value2)
-
-
-        print*, "Select Centroids"
-        n_selected = 1
-        call date_and_time(values=date_value1)
-        allocate(centroids(this%hparam%max_bins))
-        centroids = 0d0
-        call random_number(rand_val)
-        idx = n_unique_v * rand_val + 1
-        centroids(1) = unique_v(idx)
-
-        ! select 2th- centroids
-        allocate(dist_nearest(n_unique_v))
-        allocate(dist_current(n_unique_v))
-        n_unique_v_unroll = n_unique_v - mod(n_unique_v, 63)
-        do while (n_selected .lt. this%hparam%max_bins)
-            dist_nearest = abs(unique_v-centroids(1))
-            do n=2, n_selected, 1
-                dist_current = abs(unique_v-centroids(n))
-                do m=1, n_unique_v_unroll, 63
-                    do mm=0, 63-1
-                        tmp_dist_nearest(mm+1) = minval((/dist_nearest(m+mm), dist_current(m+mm)/))
-                    end do
-                    do mm=0, 63-1
-                        dist_nearest(m+mm) = tmp_dist_nearest(mm+1)
-                    end do
+            elseif ( min_idx .eq. 1_8 .and. max_idx .ne. n_unique_values ) then
+                ! New Selected Centroid is most left position.
+                max_centroid = unique_values(max_idx)
+                do n=1, mid_idx, 1
+                    distance_nearest(n) = abs(unique_values(n)-mid_centroid)
                 end do
-                do m=n_unique_v_unroll+1, n_unique_v
-                    dist_nearest(m) = minval((/dist_nearest(m), dist_current(m)/))
+                do n=mid_idx+1, max_idx, 1
+                    distance_nearest(n) = minval((/ & 
+                        abs(unique_values(n)-mid_centroid),  &
+                        abs(unique_values(n)-max_centroid)   &
+                    /))
                 end do
-            end do
-
-            if (sum(dist_nearest) .eq. 0d0) exit
-            dist_nearest = dist_nearest * dist_nearest
-            dist_nearest = dist_nearest / sum(dist_nearest)
-
-            idx = roulette_selection(dist_nearest, n_unique_v, reverse=f_)
-            n_selected = n_selected + 1
-            centroids(n_selected) = unique_v(idx)
-
-            ! print*, "Current Centroids: ", centroids
-            ! print*, "New Centroids:     ", unique_v(idx)
-            ! call sleep(5)
+            elseif ( min_idx .ne. 1_8 .and. max_idx .eq. n_unique_values ) then
+                ! New Selected Centroid is most right position.
+                min_centroid = unique_values(min_idx)
+                do n=min_idx, mid_idx, 1
+                    distance_nearest(n) = minval((/ & 
+                        abs(unique_values(n)-mid_centroid),  &
+                        abs(unique_values(n)-min_centroid)   &
+                    /))
+                end do
+                do n=mid_idx+1, n_unique_values, 1
+                    distance_nearest(n) = abs(unique_values(n)-mid_centroid)
+                end do
+            else
+                ! Others
+                min_centroid = unique_values(min_idx)
+                max_centroid = unique_values(max_idx)
+                do n=min_idx, mid_idx, 1
+                    distance_nearest(n) = minval((/ & 
+                        abs(unique_values(n)-mid_centroid),  &
+                        abs(unique_values(n)-min_centroid)   &
+                    /))
+                end do
+                do n=mid_idx+1, max_idx, 1
+                    distance_nearest(n) = minval((/ & 
+                        abs(unique_values(n)-mid_centroid),  &
+                        abs(unique_values(n)-max_centroid)   &
+                    /))
+                end do
+            end if
         end do
-        call quick_sort(centroids, size(centroids)+0_8)
-        allocate(centroids_new(size(centroids)))
-        call date_and_time(values=date_value2)
-        print*, "Selection Time: ", time_diff(date_value1, date_value2)
+! call date_and_time(values=date_value2)
+! print*, "Select Initial Centroids", time_diff(date_value1, date_value2)
 
-        print*, "Update Centroids until convergence"
-        ! print*, "START: ", centroids
-        cnt = 1
-        call date_and_time(values=date_value1)
-        allocate(cluster_idx(n_unique_v))
-        allocate(cluster_sum(this%hparam%max_bins))
-        allocate(cluster_counter(this%hparam%max_bins))
-        ! print*, "----------------------------------------------------------------------------------"
-        ! print*, centroids
-        do while (t_)
-            dist_nearest = abs(unique_v-centroids(1))
+! call date_and_time(values=date_value1)
+        ! print*, '============================================================='
+        ! print*, "Update Centroids coordinates until convergence"
+        call ifdealloc(centroid_indices)
+        allocate(sum_distances(this%hparam%max_bins))
+        allocate(bin_counter(this%hparam%max_bins))
+
+        allocate(centroid_indices(n_unique_values))
+        allocate(centroid_coordinates_old(this%hparam%max_bins))
+        allocate(centroid_coordinates_new(this%hparam%max_bins))
+        do i=1, size(centroid_coordinates), 1
+            centroid_coordinates_old(i) = centroid_coordinates(i)
+        end do
+        ! print*, "INITIAL: ", centroid_coordinates_old
+
+        do iter=1, this%hparam%max_iteration, 1
+            ! Most Left Centroid 
             cluster_idx = 1_8
-            do n=2, size(centroids), 1
-                dist_current = abs(unique_v-centroids(n))
-                do i=1, n_unique_v
-                    dn = dist_nearest(i)
-                    dc = dist_current(i)
-                    factor = dc .lt. dn
-                    cluster_idx(i) = cluster_idx(i) + factor
-                    dist_nearest(i) = minval((/dn, dc/))
+            centroid = centroid_coordinates_old(cluster_idx)
+            max_idx = find_le(unique_values, n_unique_values, centroid)
+            do i=1, max_idx, 1
+                centroid_indices(i) = cluster_idx
+            end do
+
+            ! Most Right Centroid 
+            cluster_idx = this%hparam%max_bins
+            centroid = centroid_coordinates_old(cluster_idx)
+            min_idx = find_ge(unique_values, n_unique_values, centroid)
+            do i=min_idx, n_unique_values, 1
+                centroid_indices(i) = cluster_idx
+            end do
+
+            ! print*, 1, max_idx
+            ! Intermediate Centroids
+            ! print*, '============================================================='
+            do n=1, this%hparam%max_bins-1, 1
+                centroid_left  = centroid_coordinates_old(n)
+                centroid_right = centroid_coordinates_old(n+1)
+                midpoint = (centroid_left + centroid_right) * .5d0
+
+                left_idx     = find_gt(unique_values, n_unique_values, centroid_left)
+                midpoint_idx = find_le(unique_values, n_unique_values, midpoint)
+                right_idx    = find_le(unique_values, n_unique_values, centroid_right)
+
+                ! print*, "---------------------------------------------------------------"
+                ! print*, "     -> ", left_idx, centroid_left
+                ! print*, "     -> ", midpoint_idx, midpoint
+                ! print*, "     -> ", right_idx, centroid_right
+                do i=left_idx, midpoint_idx, 1
+                    centroid_indices(i) = n
+                end do
+                do i=midpoint_idx+1, right_idx, 1
+                    centroid_indices(i) = n+1
                 end do
             end do
+            ! print*, min_idx, n_unique_values
 
-            cluster_sum = 0d0
-            cluster_counter = 0_8
-            do i=1, n_unique_v, 1
-                idx = cluster_idx(i)
-                cluster_sum(idx) = cluster_sum(idx) + unique_v(i) * count_v(i)
-                cluster_counter(idx) = cluster_counter(idx) + count_v(i)
+            bin_counter   = 0_8
+            sum_distances = 0d0
+            do n=1, n_unique_values, 1
+                idx        = centroid_indices(n)
+                counter    = counts(n)
+                coordinate = unique_values(n)
+                bin_counter(idx)   = bin_counter(idx)   + counter
+                sum_distances(idx) = sum_distances(idx) + counter * coordinate
             end do
-            centroids_new = cluster_sum / dble(cluster_counter)
+            ! print*, '============================================================='
+            ! print*, '============================================================='
+            ! print*, "bin_counter:   ", bin_counter, sum(bin_counter), sum(counts), sum(bin_counter)-sum(counts), sum_check
+            ! print*, "sum_distances: ", sum_distances
 
-            if ( maxval(abs(centroids-centroids_new)) .le. 10d-18 ) exit
-            centroids = centroids_new
+            do i=1, this%hparam%max_bins, 1
+                centroid_coordinates_new(i) = sum_distances(i) / dble(bin_counter(i))
+            end do
+            print*, sum(abs(centroid_coordinates_new-centroid_coordinates_old)), & 
+                maxval(abs(centroid_coordinates_new-centroid_coordinates_old))
+            if (sum(abs(centroid_coordinates_new-centroid_coordinates_old)) .le. this%hparam%tolerance) exit
+            centroid_coordinates_old = centroid_coordinates_new
+            ! print*, centroid_coordinates_new, " : ", sum(abs(centroid_coordinates_new-centroid_coordinates_old))
+            ! stop 
         end do
+            ! print*, max_idx
+            ! print*, centroid, unique_values(max_idx)
+            ! print*, unique_values(max_idx-1:max_idx+1)
 
-        allocate(this%thresholds_(0))
-        do i=1, size(centroids_new)-1, 1
-            this%thresholds_ = [this%thresholds_, (centroids_new(i)+centroids_new(i+1))*.5d0]
-        end do
-        this%thresholds_ = [this%thresholds_, huge(0d0)]
-        call date_and_time(values=date_value2)
-        print*, "----------------------------------------------------------------------------------"
-        print*, "Convergence Time: ", time_diff(date_value1, date_value2)
-        ! print*, "STOP: ", real(centroids_new, kind=4)
-
+            allocate(this%thresholds_(0))
+            do i=1, this%hparam%max_bins-1, 1
+                this%thresholds_ = [this%thresholds_, (centroid_coordinates_old(i)+centroid_coordinates_old(i+1))*.5d0]
+                print*, i, (centroid_coordinates_old(i)+centroid_coordinates_old(i+1))*.5d0
+            end do
+! call date_and_time(values=date_value2)
+! print*, "Update Centroids coordinates until convergence", time_diff(date_value1, date_value2)
 
         return
         999 continue
-        if (n_unique_v .eq. 1) then
+        if (n_unique_values .eq. 1_8) then
             allocate(this%thresholds_(1))
             this%thresholds_ = huge(0d0)
-        elseif ( n_unique_v .le. this%hparam%max_bins ) then
+        elseif ( n_unique_values .le. this%hparam%max_bins ) then
             allocate(this%thresholds_(0))
-            do n=2, n_unique_v, 1
-                this%thresholds_ = [this%thresholds_, (unique_v(n-1)+unique_v(n)) * .5d0]
+            do n=2, n_unique_values, 1
+                this%thresholds_ = [this%thresholds_, (unique_values(n-1)+unique_values(n)) * .5d0]
             end do
             this%thresholds_ = [this%thresholds_, huge(0d0)]
-        end if        
-    end subroutine fit_kmeans_discretizer_old
+        end if                
+    end subroutine fit_kmeans_naive_discretizer
 
 
     subroutine fit_quantile_discretizer(this, vector, n_samples)
