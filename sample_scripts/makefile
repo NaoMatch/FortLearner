@@ -147,7 +147,7 @@ main_deep_forest:
 
 
 main_discretizer:
-	gfortran -w -w \
+	gfortran -w -O3 \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
