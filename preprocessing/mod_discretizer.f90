@@ -376,15 +376,16 @@ contains
         integer(kind=8) :: n, n_unique_values, idx, m, factor, i, mm, cnt, c, selected_idx, min_idx, mid_idx, max_idx
         integer(kind=8) :: n_selected, n_current_centroids
         real(kind=8) :: rand_val, dc, dn, tmp_dist_nearest(63), tmp_centroid, sum_dist
-        real(kind=8) :: n_unique_values_inv, centroid
+        real(kind=8) :: n_unique_values_inv, centroid, selected_centroid
         real(kind=8), allocatable :: centroid_coordinates(:), centroid_coordinates_new(:), centroid_coordinates_old(:)
         real(kind=8), allocatable :: dist_current(:), distance_nearest(:), distance_nearest_norm(:), sum_distances(:)
         real(kind=8), allocatable :: cluster_sum(:), centroid_coordinates_tmp(:)
         real(kind=8) :: centroid_new, dist_old, dist_new, min_centroid, max_centroid, mid_centroid, tmp_point
         real(kind=8) :: uniq_val, centroid_left, centroid_right, midpoint, coordinate
         integer(kind=8), allocatable :: cluster_counter(:), centroid_indices(:), uniq_indices(:), bin_counter(:)
+        integer(kind=8), allocatable :: centroid_indices_old(:)
         integer(kind=8) :: centroid_idx_old, centroid_idx_new, start_idx, end_idx, iter, nearest_idx, centroid_idx, cluster_idx
-        integer(kind=8) :: midpoint_idx, left_idx, right_idx, counter, sum_check
+        integer(kind=8) :: midpoint_idx, left_idx, right_idx, counter, sum_check, count_diff
         logical(kind=4) :: is_reverse
         integer(kind=8) :: min_index, med_index, max_index, n_centroid_coordinates, n_centroid_indices
 
@@ -409,7 +410,6 @@ contains
         ! print*, "Get Unique Values & Counts"
         call groupby_count(unique_values, counts, vector_copy, n_samples)
         n_unique_values = size(unique_values)
-        DEALLOCATE(vector_copy)
         if (n_unique_values .le. this%hparam%max_bins) goto 999
 ! call date_and_time(values=date_value2)
 ! print*, "Get Unique Values & Counts", time_diff(date_value1, date_value2)
@@ -434,7 +434,7 @@ contains
             ! Select New Centroid
             is_reverse = .not. is_reverse
             do n=1, n_unique_values, 1
-                distance_nearest_norm(n) = distance_nearest(n)
+                distance_nearest_norm(n) = distance_nearest(n) * dble(counts(n))
             end do
             call vector2sum1(distance_nearest_norm, n_unique_values)
             selected_idx = roulette_selection(distance_nearest_norm, n_unique_values, reverse=is_reverse)
@@ -510,12 +510,14 @@ contains
         allocate(bin_counter(this%hparam%max_bins))
 
         allocate(centroid_indices(n_unique_values))
+        allocate(centroid_indices_old(n_unique_values))
         allocate(centroid_coordinates_old(this%hparam%max_bins))
         allocate(centroid_coordinates_new(this%hparam%max_bins))
         do i=1, size(centroid_coordinates), 1
             centroid_coordinates_old(i) = centroid_coordinates(i)
         end do
         ! print*, "INITIAL: ", centroid_coordinates_old
+        centroid_indices_old = 0_8
 
         do iter=1, this%hparam%max_iteration, 1
             ! Most Left Centroid 
@@ -559,6 +561,12 @@ contains
             end do
             ! print*, min_idx, n_unique_values
 
+            ! count_diff = 0_8
+            ! do n=1, n_unique_values, 1
+            !     if (centroid_indices(n) .ne. centroid_indices_old(n)) count_diff = count_diff + 1
+            !     centroid_indices_old(n) = centroid_indices(n)
+            ! end do
+
             bin_counter   = 0_8
             sum_distances = 0d0
             do n=1, n_unique_values, 1
@@ -576,8 +584,12 @@ contains
             do i=1, this%hparam%max_bins, 1
                 centroid_coordinates_new(i) = sum_distances(i) / dble(bin_counter(i))
             end do
-            print*, sum(abs(centroid_coordinates_new-centroid_coordinates_old)), & 
-                maxval(abs(centroid_coordinates_new-centroid_coordinates_old))
+            ! max_idx = maxloc(abs(centroid_coordinates_new-centroid_coordinates_old), dim=1)
+            ! print*, iter, sum(abs(centroid_coordinates_new-centroid_coordinates_old)), & 
+            !     maxval(abs(centroid_coordinates_new-centroid_coordinates_old)), &
+            !     centroid_coordinates_old(max_idx), centroid_coordinates_new(max_idx), &
+            !     " : ", count_diff
+
             if (sum(abs(centroid_coordinates_new-centroid_coordinates_old)) .le. this%hparam%tolerance) exit
             centroid_coordinates_old = centroid_coordinates_new
             ! print*, centroid_coordinates_new, " : ", sum(abs(centroid_coordinates_new-centroid_coordinates_old))
@@ -590,7 +602,7 @@ contains
             allocate(this%thresholds_(0))
             do i=1, this%hparam%max_bins-1, 1
                 this%thresholds_ = [this%thresholds_, (centroid_coordinates_old(i)+centroid_coordinates_old(i+1))*.5d0]
-                print*, i, (centroid_coordinates_old(i)+centroid_coordinates_old(i+1))*.5d0
+                ! print*, i, (centroid_coordinates_old(i)+centroid_coordinates_old(i+1))*.5d0
             end do
 ! call date_and_time(values=date_value2)
 ! print*, "Update Centroids coordinates until convergence", time_diff(date_value1, date_value2)
