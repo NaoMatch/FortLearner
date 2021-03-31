@@ -33,6 +33,23 @@ module mod_common
         module procedure count_unique_i8
     end interface count_unique
 
+    ! https://docs.python.org/ja/3/library/bisect.html
+    interface find_lt
+        module procedure find_lt_r8
+    end interface find_lt
+
+    interface find_le
+        module procedure find_le_r8
+    end interface find_le
+
+    interface find_gt
+        module procedure find_gt_r8
+    end interface find_gt
+
+    interface find_ge
+        module procedure find_ge_r8
+    end interface find_ge
+
     !> Interface to call get_abs_maxloc_real32, get_abs_maxloc_real64, get_abs_maxloc_int32, get_abs_maxloc_int64
     interface get_abs_maxloc
         module procedure get_abs_maxloc_symmat_r4
@@ -155,6 +172,7 @@ contains
 
         integer(kind=4) :: lo, hi, mid
         include "./include/common/binary_search/inc_binary_search_left_detail.f90"
+        binary_search_left_r4 = lo
     end function binary_search_left_r4
     include "./include/common/binary_search/inc_binary_search_left.f90"
 
@@ -210,6 +228,47 @@ contains
         count_unique_r4 = tmp_count
     end function count_unique_r4
     include "./include/common/count_unique/inc_count_unique.f90"
+
+
+    function find_lt_r8(vector, n_samples, value)
+        implicit none
+        integer(kind=8) :: find_lt_r8
+        real(kind=8), intent(in)    :: vector(n_samples)
+        integer(kind=8), intent(in) :: n_samples
+        real(kind=8), intent(in)    :: value
+        integer(kind=8)             :: idx
+        find_lt_r8 = binary_search_left(vector, n_samples, value)-1_8
+    end function find_lt_r8
+
+    function find_le_r8(vector, n_samples, value)
+        implicit none
+        integer(kind=8)             :: find_le_r8
+        real(kind=8), intent(in)    :: vector(n_samples)
+        integer(kind=8), intent(in) :: n_samples
+        real(kind=8), intent(in)    :: value
+        integer(kind=8)             :: idx
+        find_le_r8 = binary_search_right(vector, n_samples, value)-1_8
+    end function find_le_r8
+
+    function find_gt_r8(vector, n_samples, value)
+        implicit none
+        integer(kind=8)             :: find_gt_r8
+        real(kind=8), intent(in)    :: vector(n_samples)
+        integer(kind=8), intent(in) :: n_samples
+        real(kind=8), intent(in)    :: value
+        integer(kind=8)             :: idx
+        find_gt_r8 = binary_search_right(vector, n_samples, value)
+    end function find_gt_r8
+
+    function find_ge_r8(vector, n_samples, value)
+        implicit none
+        integer(kind=8)             :: find_ge_r8
+        real(kind=8), intent(in)    :: vector(n_samples)
+        integer(kind=8), intent(in) :: n_samples
+        real(kind=8), intent(in)    :: value
+        integer(kind=8)             :: idx
+        find_ge_r8 = binary_search_left(vector, n_samples, value)
+    end function find_ge_r8
 
 
     !> A subroutine to get the off-diagonal absolute maximum value and its location from a symmetric matrix at the same time. \n

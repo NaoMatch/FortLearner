@@ -37,8 +37,10 @@ module mod_hyperparameter
     ! Tree, Forest, Boosting
     type, extends(hparam_base) :: hparam_discretizer
         integer(kind=8)    :: max_bins = 255_8
+        integer(kind=8)    :: max_iteration = 10000_8
         character(len=256) :: strategy
         integer(kind=8)    :: strategy_int = 2_8
+        real(kind=8)       :: tolerance=1d-8
     end type hparam_discretizer
 
     ! Tree, Forest, Boosting
