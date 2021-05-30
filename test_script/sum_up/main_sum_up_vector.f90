@@ -1,6 +1,7 @@
 program main_sum_up_vector
     use mod_timer
     use Iso_C_Binding
+    use ISO_FORTRAN_ENV    
     implicit none
 
     Interface
@@ -108,8 +109,7 @@ program main_sum_up_vector
     integer(kind=4) :: n_i4
     character(len=30), ALLOCATABLE :: types(:)
 
-
-    n_types = 9
+    n_types = 10
     allocate(times(n_types))
     allocate(types(n_types))
     types(1) = "sum_intrinsic_F      :"
@@ -121,6 +121,7 @@ program main_sum_up_vector
     types(7) = "sum_assembl_r8_08_C  :"
     types(8) = "sum_assembl_r8_16_C  :"
     types(9) = "sum_assembl_r8_32_C  :"
+    types(10) = "sum_hybrid          :"
 
     open(10, file="time_sum_r8.csv")
     open(20, file="time_sum_i8.csv")
@@ -132,7 +133,7 @@ program main_sum_up_vector
         call random_number(x_r8)
         x_r8 = 10 * x_r8
         x_i8 = x_r8
-        n_iter=5000000000_8/n_i8
+        n_iter=500000000_8/n_i8
         ! n_iter=1
 
         print*, '============================================================='
@@ -159,6 +160,8 @@ program main_sum_up_vector
                             res_r8 =  sum_assembl_r8_16_C(x_r8, n_i8)
                     case (9)
                             res_r8 =  sum_assembl_r8_32_C(x_r8, n_i8)
+                    case (10)
+                            res_r8 =  sum_up_hydrid_r8(x_r8, n_i8)
                 end select
             end do
             call date_and_time(values=date_value2)
@@ -191,6 +194,8 @@ program main_sum_up_vector
                             res_i8 =  sum_assembl_i8_16_C(x_i8, n_i8)
                     case (9)
                             res_i8 =  sum_assembl_i8_32_C(x_i8, n_i8)
+                    case (10)
+                            res_i8 =  sum_up_hydrid_i8(x_i8, n_i8)
                 end select
             end do
             call date_and_time(values=date_value2)
@@ -265,5 +270,35 @@ contains
         include "./inc_sum_unroll_f.f90"
         sum_unroll_f_r8 = r15 + r14 + r13 + r12
     end function sum_unroll_f_r8
+
+    function sum_up_hydrid_r8(x,n)
+        implicit none
+        real(kind=8), intent(in)    :: x(n)
+        integer(kind=8), intent(in) :: n
+        real(kind=8)                :: sum_up_hydrid_r8
+
+        if (n .le. 256_8) then
+            sum_up_hydrid_r8 = sum_unroll_f_r8(x,n)
+        elseif(n .le. 1000000) then
+            sum_up_hydrid_r8 = sum_assembl_r8_16_C(x,n)
+        else
+            sum_up_hydrid_r8 = sum_assembl_r8_08_C(x,n)
+        end if
+    end function sum_up_hydrid_r8
+
+    function sum_up_hydrid_i8(x,n)
+        implicit none
+        integer(kind=8), intent(in) :: x(n)
+        integer(kind=8), intent(in) :: n
+        integer(kind=8)             :: sum_up_hydrid_i8
+
+        if (n .le. 256_8) then
+            sum_up_hydrid_i8 = sum_unroll_f_i8(x,n)
+        elseif(n .le. 1000000) then
+            sum_up_hydrid_i8 = sum_assembl_i8_16_C(x,n)
+        else
+            sum_up_hydrid_i8 = sum_assembl_i8_08_C(x,n)
+        end if
+    end function sum_up_hydrid_i8
 
 end program main_sum_up_vector
