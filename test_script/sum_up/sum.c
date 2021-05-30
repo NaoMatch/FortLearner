@@ -5,10 +5,6 @@
 #define ALIGN_SIZE  32
 #define ALIGN_CHECK 0x1f // 00001111
 
-double sum_xy(double x, double y){
-    return(x+y);
-}
-
 int64_t sum_naive_i8_c(int64_t x[], int64_t n){
     int64_t res=0e0;
     int64_t i;
@@ -138,7 +134,7 @@ int64_t sum_assembl_i8_04_C(int64_t x[], int64_t n){
 		__asm__ __volatile__(
 			"\n\t"
 			"vmovupd   0*8(%[x]), %%ymm0 \n\t"
-			"vaddpd      %%ymm0 , %%ymm12, %%ymm12\n\t"
+			"vPADDQ       %%ymm0 , %%ymm12, %%ymm12\n\t"
 			"\n\t"
 			"subq $-4*8, %[x]\n\t"
 			"\n\t"
@@ -150,9 +146,6 @@ int64_t sum_assembl_i8_04_C(int64_t x[], int64_t n){
 	int64_t value=0e0;
 	__asm__ __volatile__(
 		"\n\t"
-		// "vaddpd            %%ymm12, %%ymm13, %%ymm13\n\t"
-		// "vaddpd            %%ymm14, %%ymm15, %%ymm15\n\t"
-		// "vaddpd            %%ymm13, %%ymm15, %%ymm15\n\t"
 		"vperm2f128 $0x01, %%ymm12, %%ymm12, %%ymm14\n\t" // exchange |a|b|c|d| -> |c|d|a|b|
 		"vhaddpd           %%ymm14, %%ymm12, %%ymm12\n\t"
 		"vhaddpd           %%ymm12, %%ymm12, %%ymm12\n\t"
@@ -284,10 +277,10 @@ int64_t sum_assembl_i8_08_C(int64_t x[], int64_t n){
 	while( n_unroll-- ){ 
 		__asm__ __volatile__(
 			"\n\t"
-			"vaddpd      %%ymm0, %%ymm1, %%ymm2 \n\t"
+			"vPADDQ      %%ymm0, %%ymm1, %%ymm2 \n\t"
 			"vmovupd   0*8(%[x]), %%ymm0 \n\t"
 			"vmovupd   4*8(%[x]), %%ymm1 \n\t"
-			"vaddpd      %%ymm2 , %%ymm12, %%ymm12\n\t"
+			"vPADDQ      %%ymm2 , %%ymm12, %%ymm12\n\t"
 			"\n\t"
 			"subq $-8*8, %[x]\n\t"
 			"\n\t"
@@ -297,8 +290,8 @@ int64_t sum_assembl_i8_08_C(int64_t x[], int64_t n){
 	}
 	__asm__ __volatile__(
 		"\n\t"
-		"vaddpd      %%ymm0, %%ymm1, %%ymm2 \n\t"
-		"vaddpd      %%ymm2 , %%ymm12, %%ymm12\n\t"
+		"vPADDQ      %%ymm0, %%ymm1, %%ymm2 \n\t"
+		"vPADDQ      %%ymm2 , %%ymm12, %%ymm12\n\t"
 		"\n\t"
 		:[x]"=r"(x)
 		:"0"(x)
@@ -308,9 +301,6 @@ int64_t sum_assembl_i8_08_C(int64_t x[], int64_t n){
 	int64_t value=0e0;
 	__asm__ __volatile__(
 		"\n\t"
-		// "vaddpd            %%ymm12, %%ymm13, %%ymm13\n\t"
-		// "vaddpd            %%ymm14, %%ymm15, %%ymm15\n\t"
-		// "vaddpd            %%ymm13, %%ymm15, %%ymm15\n\t"
 		"vperm2f128 $0x01, %%ymm12, %%ymm12, %%ymm14\n\t" // exchange |a|b|c|d| -> |c|d|a|b|
 		"vhaddpd           %%ymm14, %%ymm12, %%ymm12\n\t"
 		"vhaddpd           %%ymm12, %%ymm12, %%ymm12\n\t"
@@ -329,7 +319,7 @@ int64_t sum_assembl_i8_08_C(int64_t x[], int64_t n){
 			"\n\t"
 			"remsum_i8_08:"
 			"movsd 0*8(%[x]), %%xmm0   \n\t"
-			"addsd %%xmm0, %%xmm1      \n\t"
+			"PADDQ  %%xmm0, %%xmm1      \n\t"
 			"subq $-1*8, %[x]          \n\t"
 			"sub $1, %[n]              \n\t"
 			"loop remsum_i8_08 \n\t"
@@ -469,16 +459,16 @@ int64_t sum_assembl_i8_16_C(int64_t x[], int64_t n){
 	while( n_unroll-- ){ 
 		__asm__ __volatile__(
 			"\n\t"
-			"vaddpd      %%ymm0, %%ymm1, %%ymm4 \n\t"
+			"vPADDQ      %%ymm0, %%ymm1, %%ymm4 \n\t"
 			"vmovupd   0*8(%[x]), %%ymm0 \n\t"
 			"vmovupd   4*8(%[x]), %%ymm1 \n\t"
-			"vaddpd      %%ymm4 , %%ymm12, %%ymm12\n\t"
+			"vPADDQ      %%ymm4 , %%ymm12, %%ymm12\n\t"
 			"\n\t"
 			"\n\t"
-			"vaddpd      %%ymm2, %%ymm3, %%ymm5 \n\t"
+			"vPADDQ      %%ymm2, %%ymm3, %%ymm5 \n\t"
 			"vmovupd   8*8(%[x]), %%ymm2 \n\t"
 			"vmovupd  12*8(%[x]), %%ymm3 \n\t"
-			"vaddpd      %%ymm5 , %%ymm13, %%ymm13\n\t"
+			"vPADDQ      %%ymm5 , %%ymm13, %%ymm13\n\t"
 			"\n\t"
 			"subq $-16*8, %[x]\n\t"
 			"\n\t"
@@ -488,10 +478,10 @@ int64_t sum_assembl_i8_16_C(int64_t x[], int64_t n){
 	}
 	__asm__ __volatile__(
 		"\n\t"
-		"vaddpd      %%ymm0, %%ymm1, %%ymm4 \n\t"
-		"vaddpd      %%ymm4 , %%ymm12, %%ymm12\n\t"
-		"vaddpd      %%ymm2, %%ymm3, %%ymm5 \n\t"
-		"vaddpd      %%ymm5 , %%ymm13, %%ymm13\n\t"
+		"vPADDQ      %%ymm0, %%ymm1, %%ymm4 \n\t"
+		"vPADDQ      %%ymm4 , %%ymm12, %%ymm12\n\t"
+		"vPADDQ      %%ymm2, %%ymm3, %%ymm5 \n\t"
+		"vPADDQ      %%ymm5 , %%ymm13, %%ymm13\n\t"
 		"\n\t"
 		:[x]"=r"(x)
 		:"0"(x)
@@ -501,9 +491,7 @@ int64_t sum_assembl_i8_16_C(int64_t x[], int64_t n){
 	int64_t value=0e0;
 	__asm__ __volatile__(
 		"\n\t"
-		"vaddpd            %%ymm12, %%ymm13, %%ymm13\n\t"
-		// "vaddpd            %%ymm14, %%ymm15, %%ymm15\n\t"
-		// "vaddpd            %%ymm13, %%ymm15, %%ymm15\n\t"
+		"vPADDQ            %%ymm12, %%ymm13, %%ymm13\n\t"
 		"vperm2f128 $0x01, %%ymm13, %%ymm13, %%ymm14\n\t" // exchange |a|b|c|d| -> |c|d|a|b|
 		"vhaddpd           %%ymm14, %%ymm13, %%ymm13\n\t"
 		"vhaddpd           %%ymm13, %%ymm13, %%ymm13\n\t"
@@ -522,7 +510,7 @@ int64_t sum_assembl_i8_16_C(int64_t x[], int64_t n){
 			"\n\t"
 			"remsum_i8_16:"
 			"movsd 0*8(%[x]), %%xmm0   \n\t"
-			"addsd %%xmm0, %%xmm1      \n\t"
+			"PADDQ %%xmm0, %%xmm1      \n\t"
 			"subq $-1*8, %[x]          \n\t"
 			"sub $1, %[n]              \n\t"
 			"loop remsum_i8_16 \n\t"
@@ -681,25 +669,25 @@ int64_t sum_assembl_i8_32_C(int64_t x[], int64_t n){
 	while( n_unroll-- ){ 
 		__asm__ __volatile__(
 			"\n\t"
-			"vaddpd      %%ymm0, %%ymm1, %%ymm8 \n\t"
+			"vPADDQ      %%ymm0, %%ymm1, %%ymm8 \n\t"
 			"vmovupd   0*8(%[x]), %%ymm0 \n\t"
 			"vmovupd   4*8(%[x]), %%ymm1 \n\t"
-			"vaddpd      %%ymm8 , %%ymm12, %%ymm12\n\t"
+			"vPADDQ      %%ymm8 , %%ymm12, %%ymm12\n\t"
 			"\n\t"
-			"vaddpd      %%ymm2, %%ymm3, %%ymm9 \n\t"
+			"vPADDQ      %%ymm2, %%ymm3, %%ymm9 \n\t"
 			"vmovupd   8*8(%[x]), %%ymm2 \n\t"
 			"vmovupd  12*8(%[x]), %%ymm3 \n\t"
-			"vaddpd      %%ymm9 , %%ymm13, %%ymm13\n\t"
+			"vPADDQ      %%ymm9 , %%ymm13, %%ymm13\n\t"
 			"\n\t"
-			"vaddpd      %%ymm4, %%ymm5, %%ymm10 \n\t"
+			"vPADDQ      %%ymm4, %%ymm5, %%ymm10 \n\t"
 			"vmovupd  16*8(%[x]), %%ymm4 \n\t"
 			"vmovupd  20*8(%[x]), %%ymm5 \n\t"
-			"vaddpd      %%ymm10 , %%ymm14, %%ymm14\n\t"
+			"vPADDQ      %%ymm10 , %%ymm14, %%ymm14\n\t"
 			"\n\t"
-			"vaddpd      %%ymm6, %%ymm7, %%ymm11 \n\t"
+			"vPADDQ      %%ymm6, %%ymm7, %%ymm11 \n\t"
 			"vmovupd  24*8(%[x]), %%ymm6 \n\t"
 			"vmovupd  28*8(%[x]), %%ymm7 \n\t"
-			"vaddpd      %%ymm11 , %%ymm15, %%ymm15\n\t"
+			"vPADDQ      %%ymm11 , %%ymm15, %%ymm15\n\t"
 			"\n\t"
 			"subq $-32*8, %[x]\n\t"
 			"\n\t"
@@ -709,17 +697,17 @@ int64_t sum_assembl_i8_32_C(int64_t x[], int64_t n){
 	}
 	__asm__ __volatile__(
 		"\n\t"
-		"vaddpd      %%ymm0, %%ymm1, %%ymm8 \n\t"
-		"vaddpd      %%ymm8 , %%ymm12, %%ymm12\n\t"
+		"vPADDQ      %%ymm0, %%ymm1, %%ymm8 \n\t"
+		"vPADDQ      %%ymm8 , %%ymm12, %%ymm12\n\t"
 		"\n\t"
-		"vaddpd      %%ymm2, %%ymm3, %%ymm9 \n\t"
-		"vaddpd      %%ymm9 , %%ymm13, %%ymm13\n\t"
+		"vPADDQ      %%ymm2, %%ymm3, %%ymm9 \n\t"
+		"vPADDQ      %%ymm9 , %%ymm13, %%ymm13\n\t"
 		"\n\t"
-		"vaddpd      %%ymm4, %%ymm5, %%ymm10 \n\t"
-		"vaddpd      %%ymm10 , %%ymm14, %%ymm14\n\t"
+		"vPADDQ      %%ymm4, %%ymm5, %%ymm10 \n\t"
+		"vPADDQ      %%ymm10 , %%ymm14, %%ymm14\n\t"
 		"\n\t"
-		"vaddpd      %%ymm6, %%ymm7, %%ymm11 \n\t"
-		"vaddpd      %%ymm11 , %%ymm15, %%ymm15\n\t"
+		"vPADDQ      %%ymm6, %%ymm7, %%ymm11 \n\t"
+		"vPADDQ      %%ymm11 , %%ymm15, %%ymm15\n\t"
 		"\n\t"
 		:[x]"=r"(x)
 		:"0"(x)
@@ -729,9 +717,9 @@ int64_t sum_assembl_i8_32_C(int64_t x[], int64_t n){
 	int64_t value=0e0;
 	__asm__ __volatile__(
 		"\n\t"
-		"vaddpd            %%ymm12, %%ymm13, %%ymm13\n\t"
-		"vaddpd            %%ymm14, %%ymm15, %%ymm15\n\t"
-		"vaddpd            %%ymm13, %%ymm15, %%ymm15\n\t"
+		"vPADDQ            %%ymm12, %%ymm13, %%ymm13\n\t"
+		"vPADDQ            %%ymm14, %%ymm15, %%ymm15\n\t"
+		"vPADDQ            %%ymm13, %%ymm15, %%ymm15\n\t"
 		"vperm2f128 $0x01, %%ymm15, %%ymm15, %%ymm14\n\t" // exchange |a|b|c|d| -> |c|d|a|b|
 		"vhaddpd           %%ymm14, %%ymm15, %%ymm15\n\t"
 		"vhaddpd           %%ymm15, %%ymm15, %%ymm15\n\t"
@@ -750,7 +738,7 @@ int64_t sum_assembl_i8_32_C(int64_t x[], int64_t n){
 			"\n\t"
 			"remsum_i8_32:"
 			"movsd 0*8(%[x]), %%xmm0   \n\t"
-			"addsd %%xmm0, %%xmm1      \n\t"
+			"PADDQ %%xmm0, %%xmm1      \n\t"
 			"subq $-1*8, %[x]          \n\t"
 			"loop remsum_i8_32 \n\t"
 			"\n\t"
