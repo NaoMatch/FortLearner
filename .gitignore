@@ -1,5 +1,6 @@
 html/
 latex/
 *.out
+*.o
 *.mod
 *.bin

@@ -30,6 +30,7 @@ run_utils:
 	make main_scaler
 	make main_search
 	make main_sort
+	make sum_up
 	make main_sum_of_matrix
 	make main_sum_up_left
 	make main_vector2sum1
@@ -466,6 +467,16 @@ main_sgd_regressor:
 main_sort:
 	gfortran -w -O3 -unroll ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../math/mod_math.f90 ../common/mod_sort.f90 main_sort.f90 -o main_sort.out
 	./main_sort.out
+
+main_sum_up:
+	gcc -c ../math/include/stats/sum_up/inc_sum_up.c -O3 -o inc_sum_up_c.out
+	gfortran -w -unroll -O3 \
+	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
+	../common/mod_random.f90 ../common/mod_sort.f90 \
+	../math/mod_stats.f90 \
+	./inc_sum_up_c.out \
+	main_sum_up.f90 -o main_sum_up.out
+	./main_sum_up.out
 
 main_sum_of_matrix:
 	gfortran -w -unroll -O3 \
