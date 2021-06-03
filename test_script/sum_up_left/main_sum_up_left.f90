@@ -21,6 +21,14 @@ program main_sum_up_left
             Integer(c_int64_t),Value      :: v
         end function    
 
+        function sum_up_left_unroll_c_i8_i8(x,y,n,v) Bind(C,Name='sum_up_left_unroll_c_i8_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_unroll_c_i8_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
         function sum_up_left_naive_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_naive_c_r8_r8')
             Import
             Real(c_double)            :: sum_up_left_naive_c_r8_r8
@@ -32,6 +40,14 @@ program main_sum_up_left
         function sum_up_left_naive_branchless_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_naive_branchless_c_r8_r8')
             Import
             Real(c_double)            :: sum_up_left_naive_branchless_c_r8_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function
+
+        function sum_up_left_unroll_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_unroll_c_r8_r8')
+            Import
+            Real(c_double)            :: sum_up_left_unroll_c_r8_r8
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n), y(n)
             Real(c_double),Value  :: v
@@ -69,6 +85,22 @@ program main_sum_up_left
             Real(c_double),Value  :: v
         end function    
 
+        function sum_up_left_assembler_16_c_i8_i8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_16_c_i8_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_assembler_16_c_i8_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_assembler_16_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_16_c_r8_r8')
+            Import
+            Real(c_double)            :: sum_up_left_assembler_16_c_r8_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
     end interface
 
     integer(kind=8) :: date_value1(8), date_value2(8)
@@ -84,13 +116,13 @@ program main_sum_up_left
     real(kind=8) :: time1, time2, time3, time4, time5, time6, time7, time8, NFLOP
     real(kind=8), ALLOCATABLE :: times(:)
     integer(kind=8) :: iter, n_iter, n_i8, k, n_x, n_i, idx, i, n_types, iter_types, res_i8
-    integer(kind=4) :: n_i4, ini_04, ini_08, fin
+    integer(kind=4) :: n_i4, ini_04, ini_08, ini_16, fin
     character(len=30), ALLOCATABLE :: types(:)
 
     real(kind=8)    :: thre_r8
     integer(kind=8) :: thre_i8
 
-    n_types = 8
+    n_types = 10
     allocate(times(n_types))
     allocate(types(n_types))
     types(1) = "naive_F                     :"
@@ -99,8 +131,10 @@ program main_sum_up_left
     types(4) = "sum_naive_unroll_F          :"
     types(5) = "sum_naive_loop_C            :"
     types(6) = "sum_naive_loop_branchkess_C :"
-    types(7) = "sum_naive_assember_04_C     :"
-    types(8) = "sum_naive_assember_08_C     :"
+    types(7) = "sum_up_left_unroll_C        :"
+    types(8) = "sum_naive_assember_04_C     :"
+    types(9) = "sum_naive_assember_08_C     :"
+    types(10) = "sum_naive_assember_16_C    :"
     ! types(5) = "sum_unroll_r8_C      :"
     ! types(6) = "sum_assembl_r8_04_C  :"
     ! types(7) = "sum_assembl_r8_08_C  :"
@@ -110,8 +144,8 @@ program main_sum_up_left
 
     open(10, file="time_sum_up_left_r8.csv")
     open(20, file="time_sum_up_left_i8.csv")
-    do k=101, 200, 1
-        n_i8 = maxval((/2**(k/dble(8)), 4d0/)) + 1
+    do k=50, 200, 1
+        n_i8 = maxval((/2**(k/dble(8)), 4d0/))
         n_i4 = n_i8
         allocate(x_r8(n_i8), y_r8(n_i8))
         allocate(x_i8(n_i8), y_i8(n_i8))
@@ -125,10 +159,11 @@ program main_sum_up_left
         thre_r8 = 5d0
         thre_i8 = thre_r8
 
-        n_iter=500000000_8/n_i8
-        n_iter=1
+        n_iter=50000000_8/n_i8
+        ! n_iter=1
         ini_04 = n_i8 - mod(n_i8, 4)+1
         ini_08 = n_i8 - mod(n_i8, 8)+1
+        ini_16 = n_i8 - mod(n_i8, 16)+1
         fin = n_i8
 
         print*, '============================================================='
@@ -150,9 +185,13 @@ program main_sum_up_left
                     case (6)
                             res_r8 = sum_up_left_naive_branchless_c_r8_r8(x_r8, y_r8, n_i8, thre_r8)
                     case (7)
-                            res_r8 = sum_up_left_assembler_04_c_r8_r8(x_r8, y_r8, n_i8, thre_r8)
+                            res_r8 = sum_up_left_unroll_c_r8_r8(x_r8, y_r8, n_i8, thre_r8)
                     case (8)
+                            res_r8 = sum_up_left_assembler_04_c_r8_r8(x_r8, y_r8, n_i8, thre_r8)
+                    case (9)
                             res_r8 = sum_up_left_assembler_08_c_r8_r8(x_r8, y_r8, n_i8, thre_r8)
+                    case (10)
+                            res_r8 = sum_up_left_assembler_16_c_r8_r8(x_r8, y_r8, n_i8, thre_r8)
                 end select
             end do
             call date_and_time(values=date_value2)
@@ -160,8 +199,10 @@ program main_sum_up_left
             print *, types(iter_types), int(n_i8), real(times(iter_types)), res_r8, &
                        sum(pack(y_r8(ini_04:), mask=x_r8(ini_04:)<=thre_r8)),       & 
                        sum(pack(y_r8(ini_08:), mask=x_r8(ini_08:)<=thre_r8)),       &
+                       sum(pack(y_r8(ini_16:), mask=x_r8(ini_16:)<=thre_r8)),       &
                 res_r8+sum(pack(y_r8(ini_04:), mask=x_r8(ini_04:)<=thre_r8)),       & 
-                res_r8+sum(pack(y_r8(ini_08:), mask=x_r8(ini_08:)<=thre_r8))
+                res_r8+sum(pack(y_r8(ini_08:), mask=x_r8(ini_08:)<=thre_r8)),       &
+                res_r8+sum(pack(y_r8(ini_16:), mask=x_r8(ini_16:)<=thre_r8))
         end do
         write(10,*) k, n_i8, times
 
@@ -172,28 +213,36 @@ program main_sum_up_left
             do iter=1, n_iter, 1
                 select case(iter_types)
                     case (1)
-                            res_i8 =  sum(pack(y_i8, mask=x_i8<=thre_i8))
+                            res_i8 = sum(pack(y_i8, mask=x_i8<=thre_i8))
                     case (2)
-                            res_i8 =  sum_up_left_naive_f_i8_i8(x_i8, y_i8, n_i8, thre_i8)
+                            res_i8 = sum_up_left_naive_f_i8_i8(x_i8, y_i8, n_i8, thre_i8)
                     case (3)
-                            res_i8 =  sum_up_left_naive_branchless_f_i8_i8(x_i8, y_i8, n_i8, thre_i8)
+                            res_i8 = sum_up_left_naive_branchless_f_i8_i8(x_i8, y_i8, n_i8, thre_i8)
                     case (4)
-                            res_i8 =  sum_up_left_unroll_f_i8_i8(x_i8, y_i8, n_i8, thre_i8)
+                            res_i8 = sum_up_left_unroll_f_i8_i8(x_i8, y_i8, n_i8, thre_i8)
                     case (5)
-                            res_i8 =  sum_up_left_naive_c_i8_i8(x_i8, y_i8, n_i8, thre_i8)
+                            res_i8 = sum_up_left_naive_c_i8_i8(x_i8, y_i8, n_i8, thre_i8)
                     case (6)
-                            res_i8 =  sum_up_left_naive_branchless_c_i8_i8(x_i8, y_i8, n_i8, thre_i8)
+                            res_i8 = sum_up_left_naive_branchless_c_i8_i8(x_i8, y_i8, n_i8, thre_i8)
                     case (7)
-                            res_i8 =  sum_up_left_assembler_04_c_i8_i8(x_i8, y_i8, n_i8, thre_i8)
+                            res_i8 = sum_up_left_unroll_c_i8_i8(x_i8, y_i8, n_i8, thre_i8)
                     case (8)
-                            res_i8 =  sum_up_left_assembler_08_c_i8_i8(x_i8, y_i8, n_i8, thre_i8)
+                            res_i8 = sum_up_left_assembler_04_c_i8_i8(x_i8, y_i8, n_i8, thre_i8)
+                    case (9)
+                            res_i8 = sum_up_left_assembler_08_c_i8_i8(x_i8, y_i8, n_i8, thre_i8)
+                    case (10)
+                            res_i8 = sum_up_left_assembler_16_c_i8_i8(x_i8, y_i8, n_i8, thre_i8)
                 end select
             end do
             call date_and_time(values=date_value2)
             times(iter_types) = time_diff(date_value1, date_value2)/dble(n_iter)
             print *, types(iter_types), int(n_i8), real(times(iter_types)), res_i8, &
-                sum(pack(y_i8(ini_04:), mask=x_i8(ini_04:)<=thre_i8)), & 
-                sum(pack(y_i8(ini_08:), mask=x_i8(ini_08)<=thre_i8))
+                       sum(pack(y_i8(ini_04:), mask=x_i8(ini_04:)<=thre_i8)),       & 
+                       sum(pack(y_i8(ini_08:), mask=x_i8(ini_08:)<=thre_i8)),       &
+                       sum(pack(y_i8(ini_16:), mask=x_i8(ini_16:)<=thre_i8)),       &
+                res_i8+sum(pack(y_i8(ini_04:), mask=x_i8(ini_04:)<=thre_i8)),       & 
+                res_i8+sum(pack(y_i8(ini_08:), mask=x_i8(ini_08:)<=thre_i8)),       &
+                res_i8+sum(pack(y_i8(ini_16:), mask=x_i8(ini_16:)<=thre_i8))
         end do
         write(20,*) k, n_i8, times
 
@@ -201,6 +250,7 @@ program main_sum_up_left
         deallocate(x_r8, x_i8)
         deallocate(y_r8, y_i8)
         ! stop
+        ! call sleep(5)
     end do
 
 
