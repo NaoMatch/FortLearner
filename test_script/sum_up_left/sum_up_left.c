@@ -26,6 +26,55 @@ int64_t sum_up_left_naive_branchless_c_i8_i8(int64_t x[], int64_t y[], int64_t n
     return(res);
 }
 
+int64_t sum_up_left_unroll_c_i8_i8(int64_t x[], int64_t y[], int64_t n, int64_t v){
+    int64_t res=0;
+    int64_t i, n_unroll, n_rem, factor;
+    int64_t r00, r01, r02, r03;
+    int64_t r04, r05, r06, r07;
+    int64_t r08, r09, r10, r11;
+    int64_t r12, r13, r14, r15;
+
+    n_unroll = (n>>2);
+    r12=0;
+    r13=0;
+    r14=0;
+    r15=0;
+
+    i=0;
+    while(n_unroll--){
+        r00 = x[i];
+        r01 = x[i+1];
+        r02 = x[i+2];
+        r03 = x[i+3];
+
+        r04 = y[i];
+        r05 = y[i+1];
+        r06 = y[i+2];
+        r07 = y[i+3];
+
+        r08 = (r00 <= v);
+        r09 = (r01 <= v);
+        r10 = (r02 <= v);
+        r11 = (r03 <= v);
+
+        r12 += r04 * r08;
+        r13 += r05 * r09;
+        r14 += r06 * r10;
+        r15 += r07 * r11;
+
+        i+=4;
+    }
+
+    n_rem=(n%4);
+    while(n_rem--){
+        factor = ( x[i]<= v );
+        r15 += y[i] * factor;
+        i+=1;
+    }
+
+    return(r12+r13+r14+r15);
+}
+
 int64_t sum_up_left_assembler_04_c_i8_i8(int64_t x[], int64_t y[], int64_t n, int64_t v){
     int64_t res=0, res_rem=0;
     int64_t i, factor;
@@ -186,6 +235,119 @@ int64_t sum_up_left_assembler_08_c_i8_i8(int64_t x[], int64_t y[], int64_t n, in
     return(res);
 }
 
+int64_t sum_up_left_assembler_16_c_i8_i8(int64_t x[], int64_t y[], int64_t n, int64_t v){
+    int64_t res=0, res_rem=0;
+    int64_t i, factor;
+    int64_t n_unroll, n_pow, pow2;
+    n_pow = 4;
+    pow2=pow(2,n_pow);
+    n_unroll = (n>>n_pow);
+
+    __asm__ __volatile__ (
+        "vpxor %%ymm13, %%ymm13, %%ymm13    \n\t" // zero clear
+        "vpxor %%ymm14, %%ymm14, %%ymm14    \n\t" // zero clear
+        "\n\t"
+        "vmovupd  0*8(%[x]), %%ymm0       \n\t" // load x
+        "vmovupd  0*8(%[y]), %%ymm1       \n\t" // load y
+        "vmovupd  4*8(%[x]), %%ymm2       \n\t" // load x
+        "vmovupd  4*8(%[y]), %%ymm3       \n\t" // load y
+        "vmovupd  8*8(%[x]), %%ymm4       \n\t" // load x
+        "vmovupd  8*8(%[y]), %%ymm5       \n\t" // load y
+        "vmovupd 12*8(%[x]), %%ymm6       \n\t" // load x
+        "vmovupd 12*8(%[y]), %%ymm7       \n\t" // load y
+        "\n\t"
+        "VPBROADCASTQ %[v], %%ymm8        \n\t" // broadcast
+        "VCMPLEPD %%ymm8, %%ymm0, %%ymm9  \n\t" // x <= v
+        "VCMPLEPD %%ymm8, %%ymm2, %%ymm10 \n\t" // x <= v
+        "VCMPLEPD %%ymm8, %%ymm4, %%ymm11 \n\t" // x <= v
+        "VCMPLEPD %%ymm8, %%ymm6, %%ymm12 \n\t" // x <= v
+        "subq $-16*8, %[x]                \n\t"
+        "subq $-16*8, %[y]                \n\t"
+        :[x]"=r"(x), [y]"=r"(y), [v]"=r"(v)
+        :"0"(x), "1"(y), "2"(v)
+    );
+
+    n_unroll--;
+    while(n_unroll--){
+        __asm__ __volatile__(
+            "vANDPD %%ymm1, %%ymm9, %%ymm15   \n\t"
+            "vmovupd  0*8(%[x]), %%ymm0        \n\t"
+            "vmovupd  0*8(%[y]), %%ymm1        \n\t"
+            "vaddpd %%ymm15, %%ymm13, %%ymm13 \n\t"
+            "\n\t"
+            "vANDPD %%ymm3, %%ymm10, %%ymm15   \n\t"
+            "vmovupd  4*8(%[x]), %%ymm2        \n\t"
+            "vmovupd  4*8(%[y]), %%ymm3        \n\t"
+            "vaddpd %%ymm15, %%ymm14, %%ymm14 \n\t"
+            "\n\t"
+            "vANDPD %%ymm5, %%ymm11, %%ymm15   \n\t"
+            "vmovupd  8*8(%[x]), %%ymm4        \n\t"
+            "vmovupd  8*8(%[y]), %%ymm5        \n\t"
+            "vaddpd %%ymm15, %%ymm13, %%ymm13 \n\t"
+            "\n\t"
+            "vANDPD %%ymm7, %%ymm12, %%ymm15   \n\t"
+            "vmovupd 12*8(%[x]), %%ymm6        \n\t"
+            "vmovupd 12*8(%[y]), %%ymm7        \n\t"
+            "vaddpd %%ymm15, %%ymm14, %%ymm14 \n\t"
+            "\n\t"
+            "VCMPLEPD %%ymm8, %%ymm0, %%ymm9  \n\t" 
+            "VCMPLEPD %%ymm8, %%ymm2, %%ymm10 \n\t" 
+            "VCMPLEPD %%ymm8, %%ymm4, %%ymm11 \n\t" 
+            "VCMPLEPD %%ymm8, %%ymm6, %%ymm12 \n\t" 
+            "subq $-16*8, %[x]                \n\t"
+            "subq $-16*8, %[y]                \n\t"
+            :[x]"=r"(x), [y]"=r"(y)
+            :"0"(x), "1"(y)
+        );
+    }
+
+    __asm__ __volatile__(
+        "vANDPD %%ymm1,  %%ymm9,  %%ymm15    \n\t"
+        "vaddpd %%ymm15, %%ymm13, %%ymm13    \n\t"
+        "\n\t"
+        "vANDPD %%ymm3,  %%ymm10, %%ymm15    \n\t"
+        "vaddpd %%ymm15, %%ymm14, %%ymm14    \n\t"
+        "\n\t"
+        "vANDPD %%ymm5,  %%ymm11, %%ymm15    \n\t"
+        "vaddpd %%ymm15, %%ymm13, %%ymm13    \n\t"
+        "\n\t"
+        "vANDPD %%ymm7,  %%ymm12, %%ymm15    \n\t"
+        "vaddpd %%ymm15, %%ymm14, %%ymm14    \n\t"
+        "\n\t"
+        "vaddpd %%ymm13, %%ymm14, %%ymm15   \n\t"
+		"vperm2f128 $0x01, %%ymm15, %%ymm15, %%ymm12\n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"vhaddpd           %%ymm12, %%ymm15, %%ymm15\n\t"
+		"vhaddpd           %%ymm15, %%ymm15, %%ymm15\n\t"
+		"movsd             %%xmm15, %[v] \n\t"
+		:[v]"=m"(res)
+        :
+    );
+
+    int64_t n_rem;
+    n_rem=(n%pow2);
+    if (n_rem>0){
+        __asm__ __volatile__ (
+            "pxor %%xmm3, %%xmm3        \n\t"
+            "VPBROADCASTQ %[v], %%ymm2  \n\t"
+            "mov %[n], %%rcx            \n\t"
+            "loop_rem_sum_16_i8:        \n\t"
+            "   movq 0*8(%[x]), %%xmm0 \n\t"
+            "   movq 0*8(%[y]), %%xmm1 \n\t"
+            "   CMPLEPD  %%xmm2, %%xmm0 \n\t"
+            "   pand %%xmm0, %%xmm1     \n\t"
+            "   PADDQ %%xmm1, %%xmm3    \n\t"
+            "   subq $-1*8, %[x]        \n\t"
+            "   subq $-1*8, %[y]        \n\t"
+            "loop loop_rem_sum_16_i8    \n\t"
+            "   movq %%xmm3, %[r]      \n\t"
+            :[x]"=r"(x), [y]"=r"(y), [v]"=r"(v), [n]"=r"(n_rem), [r]"=m"(res_rem)
+            :"0"(x), "1"(y), "2"(v), "3"(n_rem)
+        );
+        res+=res_rem;
+    }
+    return(res);
+}
+
 double sum_up_left_naive_c_r8_r8(double x[], double y[], int64_t n, double v){
     double res=0e0;
     int64_t i;
@@ -205,6 +367,55 @@ double sum_up_left_naive_branchless_c_r8_r8(double x[], double y[], int64_t n, d
         res += y[i] * factor;
     }
     return(res);
+}
+
+double sum_up_left_unroll_c_r8_r8(double x[], double y[], int64_t n, double v){
+    double res=0;
+    int64_t i, n_unroll, n_rem, factor;
+    double r00, r01, r02, r03;
+    double r04, r05, r06, r07;
+    int64_t r08, r09, r10, r11;
+    double r12, r13, r14, r15;
+
+    n_unroll = (n>>2);
+    r12=0;
+    r13=0;
+    r14=0;
+    r15=0;
+    
+    i=0;
+    while(n_unroll--){
+        r00 = x[i];
+        r01 = x[i+1];
+        r02 = x[i+2];
+        r03 = x[i+3];
+
+        r04 = y[i];
+        r05 = y[i+1];
+        r06 = y[i+2];
+        r07 = y[i+3];
+
+        r08 = (r00 <= v);
+        r09 = (r01 <= v);
+        r10 = (r02 <= v);
+        r11 = (r03 <= v);
+        
+        r12 += r04 * r08;
+        r13 += r05 * r09;
+        r14 += r06 * r10;
+        r15 += r07 * r11;
+
+        i+=4;
+    }
+
+    n_rem=(n%4);
+    while(n_rem--){
+        factor = ( x[i]<= v );
+        r15 += y[i] * factor;
+        i+=1;
+    }
+    
+    return(r12+r13+r14+r15);
 }
 
 double sum_up_left_assembler_04_c_r8_r8(double x[], double y[], int64_t n, double v){
@@ -359,6 +570,121 @@ double sum_up_left_assembler_08_c_r8_r8(double x[], double y[], int64_t n, doubl
             "   subq $-1*8, %[x]        \n\t"
             "   subq $-1*8, %[y]        \n\t"
             "loop loop_rem_sum_08_r8    \n\t"
+            "   movsd %%xmm3, %[r]      \n\t"
+            :[x]"=r"(x), [y]"=r"(y), [v]"=r"(v), [n]"=r"(n_rem), [r]"=m"(res_rem)
+            :"0"(x), "1"(y), "2"(v), "3"(n_rem)
+        );
+        res+=res_rem;
+    }
+    return(res);
+}
+
+double sum_up_left_assembler_16_c_r8_r8(double x[], double y[], int64_t n, double v){
+    double res=0e0, res_rem=0e0;
+    int64_t i, factor;
+    int64_t n_unroll, n_pow, pow2;
+    n_pow = 4;
+    pow2=pow(2,n_pow);
+    n_unroll = (n>>n_pow);
+
+    __asm__ __volatile__ (
+        "vpxor %%ymm13, %%ymm13, %%ymm13  \n\t" // zero clear
+        "vpxor %%ymm14, %%ymm14, %%ymm14  \n\t" // zero clear
+        "vpxor %%ymm15, %%ymm15, %%ymm15  \n\t" // zero clear
+        "\n\t"
+        "vmovupd  0*8(%[x]), %%ymm0       \n\t" // load x
+        "vmovupd  0*8(%[y]), %%ymm1       \n\t" // load y
+        "vmovupd  4*8(%[x]), %%ymm2       \n\t" // load x
+        "vmovupd  4*8(%[y]), %%ymm3       \n\t" // load y
+        "vmovupd  8*8(%[x]), %%ymm4       \n\t" // load x
+        "vmovupd  8*8(%[y]), %%ymm5       \n\t" // load y
+        "vmovupd 12*8(%[x]), %%ymm6       \n\t" // load x
+        "vmovupd 12*8(%[y]), %%ymm7       \n\t" // load y
+        "\n\t"
+        "VPBROADCASTQ %[v], %%ymm8        \n\t" // broadcast
+        "VCMPLEPD %%ymm8, %%ymm0, %%ymm0  \n\t" // x <= v
+        "VCMPLEPD %%ymm8, %%ymm2, %%ymm2  \n\t" // x <= v
+        "VCMPLEPD %%ymm8, %%ymm4, %%ymm4  \n\t" // x <= v
+        "VCMPLEPD %%ymm8, %%ymm6, %%ymm6  \n\t" // x <= v
+        "subq $-16*8, %[x]                \n\t"
+        "subq $-16*8, %[y]                \n\t"
+        :[x]"=r"(x), [y]"=r"(y), [v]"=r"(v)
+        :"0"(x), "1"(y), "2"(v)
+    );
+
+    n_unroll--;
+    while(n_unroll--){
+        __asm__ __volatile__(
+            "vANDPD %%ymm0, %%ymm1, %%ymm9   \n\t"
+            "vmovupd  0*8(%[x]), %%ymm0        \n\t"
+            "vmovupd  0*8(%[y]), %%ymm1        \n\t"
+            "vaddpd %%ymm9, %%ymm13, %%ymm13 \n\t"
+            "\n\t"
+            "vANDPD %%ymm2, %%ymm3, %%ymm10   \n\t"
+            "vmovupd  4*8(%[x]), %%ymm2        \n\t"
+            "vmovupd  4*8(%[y]), %%ymm3        \n\t"
+            "vaddpd %%ymm10, %%ymm14, %%ymm14 \n\t"
+            "\n\t"
+            "vANDPD %%ymm4, %%ymm5, %%ymm11   \n\t"
+            "vmovupd  8*8(%[x]), %%ymm4        \n\t"
+            "vmovupd  8*8(%[y]), %%ymm5        \n\t"
+            "vaddpd %%ymm11, %%ymm15, %%ymm15 \n\t"
+            "\n\t"
+            "vANDPD %%ymm6, %%ymm7, %%ymm12   \n\t"
+            "vmovupd 12*8(%[x]), %%ymm6        \n\t"
+            "vmovupd 12*8(%[y]), %%ymm7        \n\t"
+            "vaddpd %%ymm12, %%ymm13, %%ymm13 \n\t"
+            "\n\t"
+            "VCMPLEPD %%ymm8, %%ymm0, %%ymm0  \n\t" 
+            "VCMPLEPD %%ymm8, %%ymm2, %%ymm2  \n\t" 
+            "VCMPLEPD %%ymm8, %%ymm4, %%ymm4  \n\t" 
+            "VCMPLEPD %%ymm8, %%ymm6, %%ymm6  \n\t" 
+            "subq $-16*8, %[x]                \n\t"
+            "subq $-16*8, %[y]                \n\t"
+            :[x]"=r"(x), [y]"=r"(y)
+            :"0"(x), "1"(y)
+        );
+    }
+
+    __asm__ __volatile__(
+        "vANDPD %%ymm0, %%ymm1, %%ymm9   \n\t"
+        "vaddpd %%ymm9, %%ymm13, %%ymm13 \n\t"
+        "\n\t"
+        "vANDPD %%ymm2, %%ymm3, %%ymm10   \n\t"
+        "vaddpd %%ymm10, %%ymm14, %%ymm14 \n\t"
+        "\n\t"
+        "vANDPD %%ymm4, %%ymm5, %%ymm11   \n\t"
+        "vaddpd %%ymm11, %%ymm15, %%ymm15 \n\t"
+        "\n\t"
+        "vANDPD %%ymm6, %%ymm7, %%ymm12   \n\t"
+        "vaddpd %%ymm12, %%ymm13, %%ymm13 \n\t"
+        "\n\t"
+        "vaddpd %%ymm13, %%ymm14, %%ymm14   \n\t"
+        "vaddpd %%ymm14, %%ymm15, %%ymm15   \n\t"
+		"vperm2f128 $0x01, %%ymm15, %%ymm15, %%ymm12\n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"vhaddpd           %%ymm12, %%ymm15, %%ymm15\n\t"
+		"vhaddpd           %%ymm15, %%ymm15, %%ymm15\n\t"
+		"movsd             %%xmm15, %[v] \n\t"
+		:[v]"=m"(res)
+        :
+    );
+
+    int64_t n_rem;
+    n_rem=(n%pow2);
+    if (n_rem>0){
+        __asm__ __volatile__ (
+            "pxor %%xmm3, %%xmm3        \n\t"
+            "VPBROADCASTQ %[v], %%ymm2  \n\t"
+            "mov %[n], %%rcx            \n\t"
+            "loop_rem_sum_16_r8:        \n\t"
+            "   movsd 0*8(%[x]), %%xmm0 \n\t"
+            "   movsd 0*8(%[y]), %%xmm1 \n\t"
+            "   CMPLEPD  %%xmm2, %%xmm0 \n\t"
+            "   andpd %%xmm0, %%xmm1    \n\t"
+            "   addpd %%xmm1, %%xmm3    \n\t"
+            "   subq $-1*8, %[x]        \n\t"
+            "   subq $-1*8, %[y]        \n\t"
+            "loop loop_rem_sum_16_r8    \n\t"
             "   movsd %%xmm3, %[r]      \n\t"
             :[x]"=r"(x), [y]"=r"(y), [v]"=r"(v), [n]"=r"(n_rem), [r]"=m"(res_rem)
             :"0"(x), "1"(y), "2"(v), "3"(n_rem)
