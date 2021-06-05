@@ -133,7 +133,7 @@ program main_sum_up_vector
         call random_number(x_r8)
         x_r8 = 10 * x_r8
         x_i8 = x_r8
-        n_iter=500000000_8/n_i8
+        n_iter=5000000000_8/n_i8
         ! n_iter=1
 
         print*, '============================================================='

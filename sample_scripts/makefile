@@ -487,10 +487,14 @@ main_sum_of_matrix:
 	./main_sum_of_matrix.out
 
 main_sum_up_left:
+	gcc -c ../math/include/stats/sum_up/inc_sum_up.c           -O3 -o inc_sum_up_c.out
+	gcc -c ../math/include/stats/sum_up_left/inc_sum_up_left.c -O3 -o inc_sum_up_left_c.out
 	gfortran -w -unroll -O3 -ftree-vectorize \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
+	./inc_sum_up_c.out \
+	./inc_sum_up_left_c.out \
 	main_sum_up_left.f90 -o main_sum_up_left.out
 	./main_sum_up_left.out
 
