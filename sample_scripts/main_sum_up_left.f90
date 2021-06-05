@@ -8,7 +8,7 @@ program main_sum_up_left
     integer(kind=8) :: iter, max_iter
     integer(kind=8) :: date_value1(8), date_value2(8)
     integer(kind=8) :: n_samples, n_columns
-    real(kind=8), allocatable :: matrix(:,:), vector_r8(:)
+    real(kind=8), allocatable :: matrix(:,:), x(:), y(:)
     integer(kind=8), allocatable :: vector_i8(:)
     real(kind=8) :: sumval_naive, sumval_branch
     real(kind=8) :: threshold_r8
@@ -18,17 +18,19 @@ program main_sum_up_left
     n_samples = 10000000
     threshold_r8 = 5d0
     threshold_i8 = 5_8
-    allocate(vector_r8(n_samples))
+    allocate(x(n_samples))
+    allocate(y(n_samples))
     allocate(vector_i8(n_samples))
-    call RANDOM_NUMBER(vector_r8)
-    vector_r8 = int(vector_r8 * 10d0, kind=8)
-    vector_i8 = int(vector_r8, kind=8)
+    call RANDOM_NUMBER(x)
+    call RANDOM_NUMBER(y)
+    x = int(x * 10d0, kind=8)
+    vector_i8 = int(x, kind=8)
 
     print*, '============================================================='
     print*, "NAIVE"
     call date_and_time(values=date_value1)
     do iter=1, max_iter, 1
-        sumval_naive = sum_up_left_naive(vector_r8, threshold_r8, n_samples)
+        sumval_naive = sum_up_left_naive(x, threshold_r8, n_samples)
     end do
     call date_and_time(values=date_value2)
     print*, time_diff(date_value1, date_value2), sumval_naive
@@ -38,7 +40,7 @@ program main_sum_up_left
     print*, "BRANCH"
     call date_and_time(values=date_value1)
     do iter=1, max_iter, 1
-        sumval_branch = sum_up_left(vector_r8, threshold_r8, n_samples)
+        sumval_branch = sum_up_left(x, threshold_r8, n_samples)
     end do
     call date_and_time(values=date_value2)
     print*, time_diff(date_value1, date_value2), sumval_branch
@@ -61,6 +63,28 @@ program main_sum_up_left
     end do
     call date_and_time(values=date_value2)
     print*, time_diff(date_value1, date_value2), sumval_branch
+
+
+
+    print*, '============================================================='
+    print*, "NAIVE"
+    call date_and_time(values=date_value1)
+    do iter=1, max_iter, 1
+        sumval_naive = sum_up_left_naive2(x, y, n_samples, threshold_r8)
+    end do
+    call date_and_time(values=date_value2)
+    print*, time_diff(date_value1, date_value2), sumval_naive
+
+
+    print*, '============================================================='
+    print*, "BRANCH"
+    call date_and_time(values=date_value1)
+    do iter=1, max_iter, 1
+        sumval_branch = sum_up_left(x, y, n_samples, threshold_r8)
+    end do
+    call date_and_time(values=date_value2)
+    print*, time_diff(date_value1, date_value2), sumval_branch
+
 
 
 
@@ -89,6 +113,25 @@ contains
             end if
         end do
     end function sum_up_left_naive
+
+    function sum_up_left_naive2(x, y, n_samples, threshold)
+        implicit none
+        real(kind=8)                :: sum_up_left_naive2
+        real(kind=8), intent(in)    :: x(n_samples), y(n_samples)
+        real(kind=8), intent(in)    :: threshold
+        integer(kind=8), intent(in) :: n_samples
+
+        integer(kind=8) :: n
+        real(kind=8) :: val
+
+        sum_up_left_naive2 = 0d0
+        do n=1, n_samples, 1
+            val = x(n)
+            if ( val .le. threshold ) then
+                sum_up_left_naive2 = sum_up_left_naive2 + y(n)
+            end if
+        end do
+    end function sum_up_left_naive2
 
     ! function sum_up_left_branch(vector, threshold, n_samples)
     !     implicit none

@@ -77,14 +77,6 @@ program main_sum_up_left
             Integer(c_int64_t),Value      :: v
         end function    
 
-        function sum_up_left_assembler_08_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_08_c_r8_r8')
-            Import
-            Real(c_double)            :: sum_up_left_assembler_08_c_r8_r8
-            Integer(c_int64_t),Value  :: n
-            Real(c_double),Intent(In) :: x(n), y(n)
-            Real(c_double),Value  :: v
-        end function    
-
         function sum_up_left_assembler_16_c_i8_i8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_16_c_i8_i8')
             Import
             Integer(c_int64_t)            :: sum_up_left_assembler_16_c_i8_i8
@@ -120,6 +112,14 @@ program main_sum_up_left
         function sum_up_left_assembler_04_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_04_c_r8_r8')
             Import
             Real(c_double)            :: sum_up_left_assembler_04_c_r8_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_assembler_08_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_08_c_r8_r8')
+            Import
+            Real(c_double)            :: sum_up_left_assembler_08_c_r8_r8
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n), y(n)
             Real(c_double),Value  :: v
