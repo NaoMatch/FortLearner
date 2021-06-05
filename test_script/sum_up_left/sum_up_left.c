@@ -75,6 +75,82 @@ int64_t sum_up_left_unroll_c_i8_i8(int64_t x[], int64_t y[], int64_t n, int64_t 
     return(r12+r13+r14+r15);
 }
 
+int64_t sum_up_left_assembler_02_c_i8_i8(int64_t x[], int64_t y[], int64_t n, int64_t v){
+    int64_t res=0, res_rem=0;
+    if (n<2){
+        return(sum_up_left_naive_c_i8_i8(x,y,n,v));
+    }
+    int64_t i, factor;
+    int64_t n_unroll, n_pow, pow2;
+    n_pow = 1;
+    pow2=pow(2,n_pow);
+    n_unroll = (n>>n_pow);
+
+    __asm__ __volatile__ (
+        "vpxor %%ymm6, %%ymm6, %%ymm6    \n\t" // zero clear
+        "\n\t"
+        "vPBROADCASTQ %[v], %%ymm3       \n\t" // broadcast
+        "movupd 0*8(%[x]), %%xmm0        \n\t" // load x
+        "movupd 0*8(%[y]), %%xmm1        \n\t" // load y
+        "CMPLEPD %%xmm3, %%xmm0          \n\t" // x <= v
+        "subq $-2*8, %[x]                \n\t"
+        "subq $-2*8, %[y]                \n\t"
+        :[x]"=r"(x), [y]"=r"(y), [v]"=r"(v)
+        :"0"(x), "1"(y), "2"(v)
+    );
+
+    n_unroll--;
+    while(n_unroll--){
+        __asm__ __volatile__(
+            "PAND  %%xmm0, %%xmm1   \n\t"
+            "PADDQ %%xmm1, %%xmm6   \n\t"
+            "movupd 0*8(%[x]), %%xmm0       \n\t"
+            "movupd 0*8(%[y]), %%xmm1       \n\t"
+            "\n\t"
+            "CMPLEPD %%xmm3, %%xmm0 \n\t"
+            "subq $-2*8, %[x]                \n\t"
+            "subq $-2*8, %[y]                \n\t"
+            :[x]"=r"(x), [y]"=r"(y)
+            :"0"(x), "1"(y)
+        );
+    }
+
+    __asm__ __volatile__(
+        "PAND  %%xmm0, %%xmm1    \n\t"
+        "PADDQ %%xmm1, %%xmm6   \n\t"
+		"vperm2f128 $0x01, %%ymm6, %%ymm6, %%ymm7\n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"vhaddpd           %%ymm7, %%ymm6, %%ymm6\n\t"
+		"vhaddpd           %%ymm6, %%ymm6, %%ymm6\n\t"
+		"movsd             %%xmm6, %[v] \n\t"
+		:[v]"=m"(res)
+        :
+    );
+
+    int64_t n_rem;
+    n_rem=(n%pow2);
+    if (n_rem>0){
+        __asm__ __volatile__ (
+            "pxor %%xmm3, %%xmm3        \n\t"
+            "VPBROADCASTQ %[v], %%ymm2  \n\t"
+            "mov %[n], %%rcx            \n\t"
+            "loop_rem_sum_02_i8:        \n\t"
+            "   movq 0*8(%[x]), %%xmm0 \n\t"
+            "   movq 0*8(%[y]), %%xmm1 \n\t"
+            "   CMPLEPD  %%xmm2, %%xmm0 \n\t"
+            "   pand %%xmm0, %%xmm1     \n\t"
+            "   PADDQ %%xmm1, %%xmm3    \n\t"
+            "   subq $-1*8, %[x]        \n\t"
+            "   subq $-1*8, %[y]        \n\t"
+            "loop loop_rem_sum_02_i8    \n\t"
+            "   movq %%xmm3, %[r]      \n\t"
+            :[x]"=r"(x), [y]"=r"(y), [v]"=r"(v), [n]"=r"(n_rem), [r]"=m"(res_rem)
+            :"0"(x), "1"(y), "2"(v), "3"(n_rem)
+        );
+        res+=res_rem;
+    }
+    return(res);
+}
+
 int64_t sum_up_left_assembler_04_c_i8_i8(int64_t x[], int64_t y[], int64_t n, int64_t v){
     int64_t res=0, res_rem=0;
     if (n<4){
@@ -699,6 +775,83 @@ double sum_up_left_unroll_c_r8_r8(double x[], double y[], int64_t n, double v){
     }
     
     return(r12+r13+r14+r15);
+}
+
+double sum_up_left_assembler_02_c_r8_r8(double x[], double y[], int64_t n, double v){
+    double res=0e0, res_rem=0e0;
+    if (n<2){
+        return(sum_up_left_naive_c_r8_r8(x,y,n,v));
+    }
+
+    int64_t i, factor;
+    int64_t n_unroll, n_pow, pow2;
+    n_pow = 1;
+    pow2=pow(2,n_pow);
+    n_unroll = (n>>n_pow);
+
+    __asm__ __volatile__ (
+        "vpxor %%ymm6, %%ymm6, %%ymm6    \n\t" // zero clear
+        "\n\t"
+        "VPBROADCASTQ  %[v], %%ymm3       \n\t" // broadcast
+        "movupd 0*8(%[x]), %%xmm0         \n\t" // load x
+        "movupd 0*8(%[y]), %%xmm1         \n\t" // load y
+        "CMPLEPD %%xmm3, %%xmm0 \n\t" // x <= v
+        "subq $-2*8, %[x]                \n\t"
+        "subq $-2*8, %[y]                \n\t"
+        :[x]"=r"(x), [y]"=r"(y), [v]"=r"(v)
+        :"0"(x), "1"(y), "2"(v)
+    );
+
+    n_unroll--;
+    while(n_unroll--){
+        __asm__ __volatile__(
+            "ANDPD %%xmm1, %%xmm0   \n\t"
+            "addpd %%xmm0, %%xmm6   \n\t"
+            "movupd 0*8(%[x]), %%xmm0       \n\t"
+            "movupd 0*8(%[y]), %%xmm1       \n\t"
+            "\n\t"
+            "CMPLEPD %%xmm3, %%xmm0 \n\t"
+            "subq $-2*8, %[x]                \n\t"
+            "subq $-2*8, %[y]                \n\t"
+            :[x]"=r"(x), [y]"=r"(y)
+            :"0"(x), "1"(y)
+        );
+    }
+
+    __asm__ __volatile__(
+        "ANDPD %%xmm1, %%xmm0   \n\t"
+        "addpd %%xmm0, %%xmm6   \n\t"
+		"vperm2f128 $0x01, %%ymm6, %%ymm6, %%ymm7\n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"vhaddpd           %%ymm7, %%ymm6, %%ymm6\n\t"
+		"vhaddpd           %%ymm6, %%ymm6, %%ymm6\n\t"
+		"movsd             %%xmm6, %[v] \n\t"
+		:[v]"=m"(res)
+        :
+    );
+
+    int64_t n_rem;
+    n_rem=(n%pow2);
+    if (n_rem>0){
+        __asm__ __volatile__ (
+            "pxor %%xmm3, %%xmm3        \n\t"
+            "VPBROADCASTQ %[v], %%ymm2  \n\t"
+            "mov %[n], %%rcx            \n\t"
+            "loop_rem_sum_02_r8:        \n\t"
+            "   movsd 0*8(%[x]), %%xmm0 \n\t"
+            "   movsd 0*8(%[y]), %%xmm1 \n\t"
+            "   CMPLEPD  %%xmm2, %%xmm0 \n\t"
+            "   andpd %%xmm0, %%xmm1    \n\t"
+            "   addpd %%xmm1, %%xmm3    \n\t"
+            "   subq $-1*8, %[x]        \n\t"
+            "   subq $-1*8, %[y]        \n\t"
+            "loop loop_rem_sum_02_r8    \n\t"
+            "   movsd %%xmm3, %[r]      \n\t"
+            :[x]"=r"(x), [y]"=r"(y), [v]"=r"(v), [n]"=r"(n_rem), [r]"=m"(res_rem)
+            :"0"(x), "1"(y), "2"(v), "3"(n_rem)
+        );
+        res+=res_rem;
+    }
+    return(res);
 }
 
 double sum_up_left_assembler_04_c_r8_r8(double x[], double y[], int64_t n, double v){
