@@ -2,6 +2,10 @@ run:
 	make run_utils
 	make run_ml
 
+build:
+	gcc -c ../math/include/stats/sum_up/inc_sum_up.c           -O3 -o inc_sum_up_c.out
+	gcc -c ../math/include/stats/sum_up_left/inc_sum_up_left.c -O3 -o inc_sum_up_left_c.out
+
 run_utils:
 	make main_cholesky_decomposition
 	make main_collect_unique_values
@@ -30,7 +34,7 @@ run_utils:
 	make main_scaler
 	make main_search
 	make main_sort
-	make sum_up
+	make main_sum_up
 	make main_sum_of_matrix
 	make main_sum_up_left
 	make main_vector2sum1
@@ -52,6 +56,7 @@ main_cholesky_decomposition:
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 ../linalg/mod_linalg.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	main_cholesky_decomposition.f90 -o main_cholesky_decomposition.out
 	./main_cholesky_decomposition.out
 
@@ -75,6 +80,7 @@ main_data_holder:
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
 	../data_holder/mod_data_holder.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	main_data_holder.f90 \
 	-o main_data_holder.out
 	./main_data_holder.out
@@ -92,6 +98,7 @@ main_decision_tree:
 	../math/mod_stats.f90 \
 	../metric/mod_metric.f90 \
 	../linalg/mod_linalg.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	\
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
@@ -123,6 +130,7 @@ main_deep_forest:
 	../math/mod_stats.f90 \
 	../metric/mod_metric.f90 \
 	../linalg/mod_linalg.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	\
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
@@ -159,6 +167,7 @@ main_discretizer:
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
 	main_discretizer.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	-o main_discretizer.out
 	./main_discretizer.out
 
@@ -174,6 +183,7 @@ main_forest:
 	../math/mod_stats.f90 \
 	../metric/mod_metric.f90 \
 	../linalg/mod_linalg.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	\
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
@@ -197,7 +207,8 @@ main_get_abs_maxloc:
 	./main_get_abs_maxloc.out
 	
 main_get_minmax:
-	gfortran -w -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_get_minmax.f90 -o main_get_minmax.out
+	gfortran -w -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_get_minmax.f90 -o main_get_minmax.out \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out 
 	./main_get_minmax.out
 
 main_gradient_boosting_tree:
@@ -212,6 +223,7 @@ main_gradient_boosting_tree:
 	../math/mod_stats.f90 \
 	../metric/mod_metric.f90 \
 	../linalg/mod_linalg.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	\
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
@@ -234,7 +246,8 @@ main_gradient_boosting_tree:
 	./main_gradient_boosting_tree.out
 
 main_groupby:
-	gfortran -w -fbounds-check -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_groupby.f90 -o main_groupby.out
+	gfortran -w -fbounds-check -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_groupby.f90 -o main_groupby.out \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out 
 	./main_groupby.out
 
 main_hyperparameter:
@@ -250,6 +263,7 @@ main_inner_product:
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 ../linalg/mod_linalg.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	main_inner_product.f90 -o main_inner_product.out
 	./main_inner_product.out
 
@@ -258,6 +272,7 @@ main_inv_unit_lower_matrix:
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 ../linalg/mod_linalg.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	main_inv_unit_lower_matrix.f90 -o main_inv_unit_lower_matrix.out
 	./main_inv_unit_lower_matrix.out
 
@@ -276,6 +291,7 @@ main_linear_regression:
 	../math/mod_stats.f90 \
 	../linalg/mod_linalg.f90 \
 	../metric/mod_metric.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	\
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
@@ -298,6 +314,7 @@ main_logistic_regression:
 	../math/mod_stats.f90 \
 	../linalg/mod_linalg.f90 \
 	../metric/mod_metric.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	\
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
@@ -323,12 +340,14 @@ main_mattxmat:
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	../linalg/mod_linalg.f90 main_mattxmat.f90 -o main_mattxmat.out
 	./main_mattxmat.out
 
 main_mean_variance_covariance:
 	gfortran -w -unroll -O3 -ftree-vectorize -fbounds-check \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	../math/mod_stats.f90 main_mean_variance_covariance.f90 -o main_mean_variance_covariance.out
 	./main_mean_variance_covariance.out
 
@@ -342,6 +361,7 @@ main_metric:
 	../math/mod_stats.f90 \
 	../metric/mod_metric.f90 \
 	main_metric.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	-o main_metric.out
 	./main_metric.out
 
@@ -353,6 +373,7 @@ main_multi_mat_vec:
 	gfortran -w -unroll -O3 -ftree-vectorize \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	../math/mod_stats.f90 ../linalg/mod_linalg.f90 main_multi_mat_vec.f90 -o main_multi_mat_vec.out
 	./main_multi_mat_vec.out
 
@@ -368,6 +389,7 @@ main_optimize:
 	../math/mod_stats.f90 \
 	../linalg/mod_linalg.f90 \
 	../metric/mod_metric.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	\
 	../optimization/mod_optimization.f90 \
 	\
@@ -390,6 +412,7 @@ main_pca:
 	../math/mod_stats.f90 \
 	../linalg/mod_linalg.f90 ../linalg/mod_eig.f90 \
 	../decomposition/mod_pca.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	main_pca.f90 -o main_pca.out
 	./main_pca.out
 
@@ -407,6 +430,7 @@ main_random_rotation:
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	../linalg/mod_linalg.f90 main_random_rotation.f90 -o main_random_rotation.out
 	./main_random_rotation.out
 
@@ -429,6 +453,7 @@ main_scaler:
 	\
 	../linalg/mod_linalg.f90 \
 	../math/mod_stats.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
 	../preprocessing/mod_scaler.f90 \
@@ -461,6 +486,7 @@ main_sgd_regressor:
 	\
 	../linear_regression/mod_linear_regression.f90 \
 	../sgd_estimator/mod_sgd_estimator.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	main_sgd_regressor.f90 -o main_sgd_regressor.out
 	./main_sgd_regressor.out
 
@@ -469,12 +495,11 @@ main_sort:
 	./main_sort.out
 
 main_sum_up:
-	gcc -c ../math/include/stats/sum_up/inc_sum_up.c -O3 -o inc_sum_up_c.out
 	gfortran -w -unroll -O3 \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
-	./inc_sum_up_c.out \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	main_sum_up.f90 -o main_sum_up.out
 	./main_sum_up.out
 
@@ -483,6 +508,7 @@ main_sum_of_matrix:
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	main_sum_of_matrix.f90 -o main_sum_of_matrix.out
 	./main_sum_of_matrix.out
 
@@ -504,6 +530,7 @@ main_vector2sum1:
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
 	../linalg/mod_linalg.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	main_vector2sum1.f90 -o main_vector2sum1.out
 	./main_vector2sum1.out
 
