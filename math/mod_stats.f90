@@ -42,6 +42,73 @@ module mod_stats
         end function        
     end interface
 
+    !> An interface to call extern c functions with inline assembler
+    Interface
+        function sum_up_left_assembler_04_c_i8_i8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_04_c_i8_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_assembler_04_c_i8_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_assembler_04_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_04_c_r8_r8')
+            Import
+            Real(c_double)            :: sum_up_left_assembler_04_c_r8_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_assembler_08_c_i8_i8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_08_c_i8_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_assembler_08_c_i8_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_assembler_08_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_08_c_r8_r8')
+            Import
+            Real(c_double)            :: sum_up_left_assembler_08_c_r8_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_assembler_20_c_i8_i8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_20_c_i8_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_assembler_20_c_i8_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_assembler_20_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_20_c_r8_r8')
+            Import
+            Real(c_double)            :: sum_up_left_assembler_20_c_r8_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_assembler_24_c_i8_i8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_24_c_i8_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_assembler_24_c_i8_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_assembler_24_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_24_c_r8_r8')
+            Import
+            Real(c_double)            :: sum_up_left_assembler_24_c_r8_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function
+    end interface
+
     !> An interface to call sum_up function in Fortran only
     interface sum_up_f
         module procedure sum_up_f_r8
@@ -56,6 +123,8 @@ module mod_stats
         module procedure sum_up_left_i4_r4_threshold
         module procedure sum_up_left_i8
         module procedure sum_up_left_i8_r8_threshold
+        module procedure sum_up_left_hybrid_r8
+        module procedure sum_up_left_hybrid_i8
     end interface sum_up_left
 
     interface sum_of_matrix
@@ -170,6 +239,44 @@ module mod_stats
     end interface groupby_count
 
 contains
+
+    !> A function to sum up vector, real 64bit.
+    !! Change the function to be executed depending on the size of the vector.
+    !! \param sum_up_hybrid_r8 Sum of vector elements
+    !! \param x vector
+    !! \param n size of vector
+    function sum_up_left_hybrid_i8(x, y, n, v)
+        implicit none
+        integer(kind=8), intent(in) :: x(n), y(n), v
+        integer(kind=8), intent(in) :: n
+        integer(kind=8)             :: sum_up_left_hybrid_i8
+        if (n .le. 256_8) then
+            sum_up_left_hybrid_i8 = sum_up_left_assembler_08_c_i8_i8(x, y, n, v)
+        elseif ( n .le. 10000000_8 ) then
+            sum_up_left_hybrid_i8 = sum_up_left_assembler_24_c_i8_i8(x, y, n, v)
+        else
+            sum_up_left_hybrid_i8 = sum_up_left_assembler_08_c_i8_i8(x, y, n, v)
+        end if
+    end function sum_up_left_hybrid_i8
+
+    !> A function to sum up vector, integer 64bit.
+    !! Change the function to be executed depending on the size of the vector.
+    !! \param sum_up_hybrid_i8 Sum of vector elements
+    !! \param x vector
+    !! \param n size of vector
+    function sum_up_left_hybrid_r8(x, y, n, v)
+        implicit none
+        real(kind=8), intent(in)    :: x(n), y(n), v
+        integer(kind=8), intent(in) :: n
+        real(kind=8)                :: sum_up_left_hybrid_r8
+        if (n .le. 3000_8) then
+            sum_up_left_hybrid_r8 = sum_up_left_assembler_08_c_r8_r8(x, y, n, v)
+        elseif ( n .le. 10000000_8 ) then
+            sum_up_left_hybrid_r8 = sum_up_left_assembler_20_c_r8_r8(x, y, n, v)
+        else
+            sum_up_left_hybrid_r8 = sum_up_left_assembler_04_c_r8_r8(x, y, n, v)
+        end if
+    end function sum_up_left_hybrid_r8
 
     !> A function to sum up vector, real 64bit.
     !! Change the function to be executed depending on the size of the vector.
