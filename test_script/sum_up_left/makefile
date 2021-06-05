@@ -12,9 +12,9 @@ rm:
 	rm *.out
 
 run:
-	gcc -c ../../math/include/stats/sum_up/inc_sum_up.c -O2 -o inc_sum_up_c.out
-	gcc -c sum_up_left.c -O2
-	gfortran -w -c main_sum_up_left.f90 -O2
+	gcc -c ../../math/include/stats/sum_up/inc_sum_up.c -O3 -o inc_sum_up_c.out
+	gcc -c sum_up_left.c -O3
+	gfortran -w -c main_sum_up_left.f90 -O3
 	gfortran \
 	mod_const.o \
 	mod_common.o \
