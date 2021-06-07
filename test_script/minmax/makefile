@@ -13,8 +13,8 @@ rm:
 	rm *.out
 
 run:
-	gcc -c minmax.c -O2 -o minmax.out
-	gfortran -w -c main_minmax.f90 -O2
+	gcc -c minmax.c -O3 -o minmax.out
+	gfortran -w -c main_minmax.f90 -O3
 	gfortran \
 	mod_const.o \
 	mod_common.o \
