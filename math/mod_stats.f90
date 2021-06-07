@@ -109,6 +109,134 @@ module mod_stats
         end function
     end interface
 
+    Interface
+        subroutine minmax_loop_c_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_c_r8')
+            Import
+            Real(c_double)            :: x_min, x_max
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_c_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_c_i8')
+            Import
+            Integer(c_int64_t)            :: x_min, x_max
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_04_c_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_04_c_r8')
+            Import
+            Real(c_double)            :: x_min, x_max
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_04_c_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_04_c_i8')
+            Import
+            Integer(c_int64_t)            :: x_min, x_max
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_08_c_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08_c_r8')
+            Import
+            Real(c_double)            :: x_min, x_max
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_08_c_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08_c_i8')
+            Import
+            Integer(c_int64_t)            :: x_min, x_max
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_14_c_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_14_c_r8')
+            Import
+            Real(c_double)            :: x_min, x_max
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_14_c_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_14_c_i8')
+            Import
+            Integer(c_int64_t)            :: x_min, x_max
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_02_ams_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_02_ams_r8')
+            Import
+            Real(c_double)            :: x_min, x_max
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_02_ams_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_02_ams_i8')
+            Import
+            Integer(c_int64_t)            :: x_min, x_max
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_04_ams_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_04_ams_r8')
+            Import
+            Real(c_double)            :: x_min, x_max
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_04_ams_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_04_ams_i8')
+            Import
+            Integer(c_int64_t)            :: x_min, x_max
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_08_ams_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08_ams_r8')
+            Import
+            Real(c_double)            :: x_min, x_max
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_08_ams_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08_ams_i8')
+            Import
+            Integer(c_int64_t)            :: x_min, x_max
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_16_ams_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16_ams_r8')
+            Import
+            Real(c_double)            :: x_min, x_max
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_16_ams_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16_ams_i8')
+            Import
+            Integer(c_int64_t)            :: x_min, x_max
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_32_ams_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_32_ams_r8')
+            Import
+            Real(c_double)            :: x_min, x_max
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_32_ams_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_32_ams_i8')
+            Import
+            Integer(c_int64_t)            :: x_min, x_max
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end subroutine    
+    end interface
+
     !> An interface to call sum_up function in Fortran only
     interface sum_up_f
         module procedure sum_up_f_r8
@@ -141,6 +269,11 @@ module mod_stats
         module procedure get_minmax_i4
         module procedure get_minmax_i8
     end interface get_minmax
+
+    interface minmax
+        module procedure minmax_hybrid_r8
+        module procedure minmax_hybrid_i8
+    end interface minmax
 
     !> Interface to call mean_value_of_vector_r4, mean_value_of_vector_r8, mean_value_of_vector_i4, mean_value_of_vector_i8
     interface mean  
@@ -239,6 +372,30 @@ module mod_stats
     end interface groupby_count
 
 contains
+
+    subroutine minmax_hybrid_r8(min, max, x, n)
+        implicit none
+        real(kind=8), intent(inout) :: min, max
+        real(kind=8), intent(in)    :: x(n)
+        integer(kind=8), intent(in) :: n
+        if (n .le. 256_8) then
+            call minmax_loop_unroll_08_ams_r8(min, max, x, n)
+        else
+            call minmax_loop_unroll_16_ams_r8(min, max, x, n)
+        end if
+    end subroutine minmax_hybrid_r8
+
+    subroutine minmax_hybrid_i8(min, max, x, n)
+        implicit none
+        integer(kind=8), intent(inout) :: min, max
+        integer(kind=8), intent(in)    :: x(n)
+        integer(kind=8), intent(in)    :: n
+        if (n .le. 256_8) then
+            call minmax_loop_unroll_04_ams_i8(min, max, x, n)
+        else
+            call minmax_loop_unroll_16_ams_i8(min, max, x, n)
+        end if
+    end subroutine minmax_hybrid_i8
 
     !> A function to sum up vector, real 64bit.
     !! Change the function to be executed depending on the size of the vector.
