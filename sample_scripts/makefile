@@ -1,11 +1,20 @@
+
+asm := ./inc_sum_up_c.out ./inc_sum_up_left_c.out  ./inc_get_minmax.out
+
+compiler_fortran := gfortran
+
+compiler_clang := gcc
+
+option := -cpp -D_default
+
 run:
 	make run_utils
 	make run_ml
 
 build:
-	gcc -c ../math/include/stats/sum_up/inc_sum_up.c           -O3 -o inc_sum_up_c.out
-	gcc -c ../math/include/stats/sum_up_left/inc_sum_up_left.c -O3 -o inc_sum_up_left_c.out
-	gcc -c ../math/include/stats/get_minmax/inc_get_minmax.c   -O3 -o inc_get_minmax.out
+	$(compiler_clang) $(option) -c ../math/include/stats/sum_up/inc_sum_up.c           -O3 -o inc_sum_up_c.out
+	$(compiler_clang) $(option) -c ../math/include/stats/sum_up_left/inc_sum_up_left.c -O3 -o inc_sum_up_left_c.out
+	$(compiler_clang) $(option) -c ../math/include/stats/get_minmax/inc_get_minmax.c   -O3 -o inc_get_minmax.out
 
 run_utils:
 	make main_cholesky_decomposition
@@ -54,24 +63,24 @@ run_ml:
 
 
 main_cholesky_decomposition:
-	gfortran -w -unroll -O3 -ftree-vectorize \
+	$(compiler_fortran) $(option) -w -unroll -O3 -ftree-vectorize \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 ../linalg/mod_linalg.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	main_cholesky_decomposition.f90 -o main_cholesky_decomposition.out
 	./main_cholesky_decomposition.out
 
 main_collect_unique_values:
-	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 main_collect_unique_values.f90 -o main_collect_unique_values.out
+	$(compiler_fortran) -w ../common/mod_const.f90 ../common/mod_common.f90 main_collect_unique_values.f90 -o main_collect_unique_values.out
 	./main_collect_unique_values.out
 
 main_count_unique:
-	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 main_count_unique.f90 -o main_count_unique.out
+	$(compiler_fortran) -w ../common/mod_const.f90 ../common/mod_common.f90 main_count_unique.f90 -o main_count_unique.out
 	./main_count_unique.out
 
 main_data_holder:
-	gfortran -w -fbounds-check \
+	$(compiler_fortran) -w -fbounds-check \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
@@ -82,14 +91,14 @@ main_data_holder:
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
 	../data_holder/mod_data_holder.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	main_data_holder.f90 \
 	-o main_data_holder.out
 	./main_data_holder.out
 
 
 main_decision_tree:
-	gfortran \
+	$(compiler_fortran) \
 	-w -O3 -unroll \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
@@ -100,7 +109,7 @@ main_decision_tree:
 	../math/mod_stats.f90 \
 	../metric/mod_metric.f90 \
 	../linalg/mod_linalg.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	\
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
@@ -121,7 +130,7 @@ main_decision_tree:
 	./main_decision_tree.out
 
 main_deep_forest:
-	gfortran \
+	$(compiler_fortran) \
 	-w -O3 -unroll \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
@@ -132,7 +141,7 @@ main_deep_forest:
 	../math/mod_stats.f90 \
 	../metric/mod_metric.f90 \
 	../linalg/mod_linalg.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	\
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
@@ -158,7 +167,7 @@ main_deep_forest:
 
 
 main_discretizer:
-	gfortran -w -O3 \
+	$(compiler_fortran) -w -O3 \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
@@ -169,12 +178,12 @@ main_discretizer:
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
 	main_discretizer.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	-o main_discretizer.out
 	./main_discretizer.out
 
 main_forest:
-	gfortran \
+	$(compiler_fortran) \
 	-w -O3 -unroll \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
@@ -185,7 +194,7 @@ main_forest:
 	../math/mod_stats.f90 \
 	../metric/mod_metric.f90 \
 	../linalg/mod_linalg.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	\
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
@@ -205,16 +214,16 @@ main_forest:
 	./main_forest.out
 
 main_get_abs_maxloc:
-	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 main_get_abs_maxloc.f90 -o main_get_abs_maxloc.out
+	$(compiler_fortran) -w ../common/mod_const.f90 ../common/mod_common.f90 main_get_abs_maxloc.f90 -o main_get_abs_maxloc.out
 	./main_get_abs_maxloc.out
 	
 main_get_minmax:
-	gfortran -w -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_get_minmax.f90 -o main_get_minmax.out \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out 
+	$(compiler_fortran) -w -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_get_minmax.f90 -o main_get_minmax.out \
+	$(asm)
 	./main_get_minmax.out
 
 main_gradient_boosting_tree:
-	gfortran \
+	$(compiler_fortran) \
 	-w -O3 -unroll \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
@@ -225,7 +234,7 @@ main_gradient_boosting_tree:
 	../math/mod_stats.f90 \
 	../metric/mod_metric.f90 \
 	../linalg/mod_linalg.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	\
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
@@ -248,42 +257,42 @@ main_gradient_boosting_tree:
 	./main_gradient_boosting_tree.out
 
 main_groupby:
-	gfortran -w -fbounds-check -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_groupby.f90 -o main_groupby.out \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out 
+	$(compiler_fortran) -w -fbounds-check -unroll -O3 -ftree-vectorize ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90  ../math/mod_stats.f90 main_groupby.f90 -o main_groupby.out \
+	$(asm) 
 	./main_groupby.out
 
 main_hyperparameter:
-	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 ../hyperparameter/mod_hyperparameter.f90 main_hyperparameter.f90 -o main_hyperparameter.out
+	$(compiler_fortran) -w ../common/mod_const.f90 ../common/mod_common.f90 ../hyperparameter/mod_hyperparameter.f90 main_hyperparameter.f90 -o main_hyperparameter.out
 	./main_hyperparameter.out
 
 main_identity:
-	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 main_identity.f90 -o main_identity.out
+	$(compiler_fortran) -w ../common/mod_const.f90 ../common/mod_common.f90 main_identity.f90 -o main_identity.out
 	./main_identity.out
 
 main_inner_product:
-	gfortran -w -unroll -O2 \
+	$(compiler_fortran) -w -unroll -O2 \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 ../linalg/mod_linalg.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	main_inner_product.f90 -o main_inner_product.out
 	./main_inner_product.out
 
 main_inv_unit_lower_matrix:
-	gfortran -w -unroll -O3 -ftree-vectorize \
+	$(compiler_fortran) -w -unroll -O3 -ftree-vectorize \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 ../linalg/mod_linalg.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	main_inv_unit_lower_matrix.f90 -o main_inv_unit_lower_matrix.out
 	./main_inv_unit_lower_matrix.out
 
 main_is_sorted:
-	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 main_is_sorted.f90 -o main_is_sorted.out
+	$(compiler_fortran) -w ../common/mod_const.f90 ../common/mod_common.f90 main_is_sorted.f90 -o main_is_sorted.out
 	./main_is_sorted.out
 
 main_linear_regression:
-	gfortran -w -fbounds-check \
+	$(compiler_fortran) -w -fbounds-check \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
@@ -293,7 +302,7 @@ main_linear_regression:
 	../math/mod_stats.f90 \
 	../linalg/mod_linalg.f90 \
 	../metric/mod_metric.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	\
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
@@ -305,7 +314,7 @@ main_linear_regression:
 	./main_linear_regression.out
 
 main_logistic_regression:
-	gfortran -w -O3 -ftree-vectorize \
+	$(compiler_fortran) -w -O3 -ftree-vectorize \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
@@ -316,7 +325,7 @@ main_logistic_regression:
 	../math/mod_stats.f90 \
 	../linalg/mod_linalg.f90 \
 	../metric/mod_metric.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	\
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
@@ -330,7 +339,7 @@ main_logistic_regression:
 	./main_logistic_regression.out
 
 main_math:
-	gfortran -w \
+	$(compiler_fortran) -w \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
@@ -338,23 +347,23 @@ main_math:
 	./main_math.out
 
 main_mattxmat:
-	gfortran -w -unroll -O3 \
+	$(compiler_fortran) -w -unroll -O3 \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	../linalg/mod_linalg.f90 main_mattxmat.f90 -o main_mattxmat.out
 	./main_mattxmat.out
 
 main_mean_variance_covariance:
-	gfortran -w -unroll -O3 -ftree-vectorize -fbounds-check \
+	$(compiler_fortran) -w -unroll -O3 -ftree-vectorize -fbounds-check \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../common/mod_sort.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	../math/mod_stats.f90 main_mean_variance_covariance.f90 -o main_mean_variance_covariance.out
 	./main_mean_variance_covariance.out
 
 main_metric:
-	gfortran -w -w \
+	$(compiler_fortran) -w -w \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
@@ -363,33 +372,33 @@ main_metric:
 	../math/mod_stats.f90 \
 	../metric/mod_metric.f90 \
 	main_metric.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	-o main_metric.out
 	./main_metric.out
 
 main_minmax:
-	gfortran -w -unroll -O3 \
+	$(compiler_fortran) -w -unroll -O3 \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out ./inc_get_minmax.out \
+	$(asm) \
 	main_minmax.f90 -o main_minmax.out
 	./main_minmax.out
 
 main_most_left_bit_position:
-	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 main_most_left_bit_position.f90 -o main_most_left_bit_position.out
+	$(compiler_fortran) -w ../common/mod_const.f90 ../common/mod_common.f90 main_most_left_bit_position.f90 -o main_most_left_bit_position.out
 	./main_most_left_bit_position.out
 
 main_multi_mat_vec:
-	gfortran -w -unroll -O3 -ftree-vectorize \
+	$(compiler_fortran) -w -unroll -O3 -ftree-vectorize \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	../math/mod_stats.f90 ../linalg/mod_linalg.f90 main_multi_mat_vec.f90 -o main_multi_mat_vec.out
 	./main_multi_mat_vec.out
 
 main_optimize:
-	gfortran -O2 -fbounds-check -w \
+	$(compiler_fortran) -O2 -fbounds-check -w \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
@@ -400,7 +409,7 @@ main_optimize:
 	../math/mod_stats.f90 \
 	../linalg/mod_linalg.f90 \
 	../metric/mod_metric.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	\
 	../optimization/mod_optimization.f90 \
 	\
@@ -413,48 +422,48 @@ main_optimize:
 	./main_optimize.out
 
 main_progress_bar:
-	gfortran -w -fbounds-check ../common/mod_const.f90 ../common/mod_common.f90 main_progress_bar.f90 -o main_progress_bar.out
+	$(compiler_fortran) -w -fbounds-check ../common/mod_const.f90 ../common/mod_common.f90 main_progress_bar.f90 -o main_progress_bar.out
 	./main_progress_bar.out
 
 main_pca:
-	gfortran -w -unroll -O3 -ftree-vectorize -fbounds-check \
+	$(compiler_fortran) -w -unroll -O3 -ftree-vectorize -fbounds-check \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../error/mod_error.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
 	../linalg/mod_linalg.f90 ../linalg/mod_eig.f90 \
 	../decomposition/mod_pca.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	main_pca.f90 -o main_pca.out
 	./main_pca.out
 
 	
 main_rand_integer:
-	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_random.f90 main_rand_integer.f90 -o main_rand_integer.out
+	$(compiler_fortran) -w ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_random.f90 main_rand_integer.f90 -o main_rand_integer.out
 	./main_rand_integer.out
 
 main_rand_normal:
-	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_random.f90 main_rand_normal.f90 -o main_rand_normal.out
+	$(compiler_fortran) -w ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_random.f90 main_rand_normal.f90 -o main_rand_normal.out
 	./main_rand_normal.out
 
 main_random_rotation:
-	gfortran -w -unroll -O3 \
+	$(compiler_fortran) -w -unroll -O3 \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	../linalg/mod_linalg.f90 main_random_rotation.f90 -o main_random_rotation.out
 	./main_random_rotation.out
 
 main_read2bin:
-	gfortran -w -fbounds-check ../common/mod_const.f90 ../common/mod_common.f90 main_read2bin.f90 -o main_read2bin.out
+	$(compiler_fortran) -w -fbounds-check ../common/mod_const.f90 ../common/mod_common.f90 main_read2bin.f90 -o main_read2bin.out
 	./main_read2bin.out
 
 main_roulette_selection:
-	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_random.f90 main_roulette_selection.f90 -o main_roulette_selection.out
+	$(compiler_fortran) -w ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_random.f90 main_roulette_selection.f90 -o main_roulette_selection.out
 	./main_roulette_selection.out
 
 main_scaler:
-	gfortran -w -w -fbounds-check \
+	$(compiler_fortran) -w -w -fbounds-check \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
 	../common/mod_timer.f90 \
@@ -464,7 +473,7 @@ main_scaler:
 	\
 	../linalg/mod_linalg.f90 \
 	../math/mod_stats.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	../hyperparameter/mod_hyperparameter.f90 \
 	../preprocessing/mod_discretizer.f90 \
 	../preprocessing/mod_scaler.f90 \
@@ -474,11 +483,11 @@ main_scaler:
 
 
 main_search:
-	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 main_search.f90 -o main_search.out
+	$(compiler_fortran) -w ../common/mod_const.f90 ../common/mod_common.f90 main_search.f90 -o main_search.out
 	./main_search.out
 
 main_sgd_regressor:
-	gfortran \
+	$(compiler_fortran) \
 	-w -unroll -O3 \
 	../common/mod_const.f90 \
 	../common/mod_common.f90 \
@@ -497,51 +506,48 @@ main_sgd_regressor:
 	\
 	../linear_regression/mod_linear_regression.f90 \
 	../sgd_estimator/mod_sgd_estimator.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	main_sgd_regressor.f90 -o main_sgd_regressor.out
 	./main_sgd_regressor.out
 
 main_sort:
-	gfortran -w -O3 -unroll ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../math/mod_math.f90 ../common/mod_sort.f90 main_sort.f90 -o main_sort.out
+	$(compiler_fortran) -w -O3 -unroll ../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 ../common/mod_random.f90 ../math/mod_math.f90 ../common/mod_sort.f90 main_sort.f90 -o main_sort.out
 	./main_sort.out
 
 main_sum_up:
-	gfortran -w -unroll -O3 \
+	$(compiler_fortran) -w -unroll -O3 \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	main_sum_up.f90 -o main_sum_up.out
 	./main_sum_up.out
 
 main_sum_of_matrix:
-	gfortran -w -unroll -O3 \
+	$(compiler_fortran) -w -unroll -O3 \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	main_sum_of_matrix.f90 -o main_sum_of_matrix.out
 	./main_sum_of_matrix.out
 
 main_sum_up_left:
-	gcc -c ../math/include/stats/sum_up/inc_sum_up.c           -O3 -o inc_sum_up_c.out
-	gcc -c ../math/include/stats/sum_up_left/inc_sum_up_left.c -O3 -o inc_sum_up_left_c.out
-	gfortran -w -unroll -O3 -ftree-vectorize \
+	$(compiler_fortran) -w -unroll -O3 -ftree-vectorize \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
-	./inc_sum_up_c.out \
-	./inc_sum_up_left_c.out \
+	$(asm) \
 	main_sum_up_left.f90 -o main_sum_up_left.out
 	./main_sum_up_left.out
 
 main_vector2sum1:
-	gfortran -w -unroll -O3 -ftree-vectorize \
+	$(compiler_fortran) -w -unroll -O3 -ftree-vectorize \
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
 	../linalg/mod_linalg.f90 \
-	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
+	$(asm)  \
 	main_vector2sum1.f90 -o main_vector2sum1.out
 	./main_vector2sum1.out
 
