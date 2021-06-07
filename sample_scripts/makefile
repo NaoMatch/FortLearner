@@ -5,6 +5,7 @@ run:
 build:
 	gcc -c ../math/include/stats/sum_up/inc_sum_up.c           -O3 -o inc_sum_up_c.out
 	gcc -c ../math/include/stats/sum_up_left/inc_sum_up_left.c -O3 -o inc_sum_up_left_c.out
+	gcc -c ../math/include/stats/get_minmax/inc_get_minmax.c   -O3 -o inc_get_minmax.out
 
 run_utils:
 	make main_cholesky_decomposition
@@ -22,6 +23,7 @@ run_utils:
 	make main_mattxmat
 	make main_mean_variance_covariance
 	make main_metric
+	make main_minmax
 	make main_most_left_bit_position
 	make main_multi_mat_vec
 	make main_optimize
@@ -364,6 +366,15 @@ main_metric:
 	./inc_sum_up_c.out ./inc_sum_up_left_c.out \
 	-o main_metric.out
 	./main_metric.out
+
+main_minmax:
+	gfortran -w -unroll -O3 \
+	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
+	../common/mod_random.f90 ../common/mod_sort.f90 \
+	../math/mod_stats.f90 \
+	./inc_sum_up_c.out ./inc_sum_up_left_c.out ./inc_get_minmax.out \
+	main_minmax.f90 -o main_minmax.out
+	./main_minmax.out
 
 main_most_left_bit_position:
 	gfortran -w ../common/mod_const.f90 ../common/mod_common.f90 main_most_left_bit_position.f90 -o main_most_left_bit_position.out
