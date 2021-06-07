@@ -5,8 +5,7 @@
 #include <stdint.h>
 #define ALIGN_SIZE  32
 #define ALIGN_CHECK 0x1f // 00001111
-#define __STDC_FORMAT_MACROS
-#include <inttypes.h>
+
 double maxval_r8(double x, double y){
 	if (x > y){
 		return x;
@@ -39,6 +38,9 @@ int64_t minval_i8(int64_t x, int64_t y){
 	}
 }
 
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 void minmax_loop_c_r8(double *min, double *max, double x[], int64_t n){
     *min =   HUGE_VAL;
     *max = - HUGE_VAL;
@@ -65,6 +67,9 @@ void minmax_loop_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
 	}
 }
 
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 void minmax_loop_unroll_04_c_r8(double *min, double *max, double x[], int64_t n){
     if(n<4){
         minmax_loop_c_r8(min, max, x, n);
@@ -159,6 +164,9 @@ void minmax_loop_unroll_04_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t
     *max = r05;
 }
 
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 void minmax_loop_unroll_08_c_r8(double *min, double *max, double x[], int64_t n){
     if(n<8){
         minmax_loop_c_r8(min, max, x, n);
@@ -281,6 +289,9 @@ void minmax_loop_unroll_08_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t
     *max = r15;
 }
 
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 void minmax_loop_unroll_14_c_r8(double *min, double *max, double x[], int64_t n){
     if(n<14){
         minmax_loop_c_r8(min, max, x, n);
@@ -439,6 +450,9 @@ void minmax_loop_unroll_14_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t
     *max = r15;
 }
 
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 void minmax_loop_unroll_02_ams_r8(double *min, double *max, double x[], int64_t n){
 	if (n<2){
 		*min=x[0];
@@ -563,6 +577,9 @@ void minmax_loop_unroll_02_ams_i8(int64_t *min, int64_t *max, int64_t x[], int64
 	*max = maxval_i8(value_max, tmp);
 }
 
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 void minmax_loop_unroll_04_ams_r8(double *min, double *max, double x[], int64_t n){
     *min =   HUGE_VAL;
     *max = - HUGE_VAL;
@@ -687,8 +704,16 @@ void minmax_loop_unroll_04_ams_i8(int64_t *min, int64_t *max, int64_t x[], int64
 		"VPMAXSQ           %%ymm0, %%ymm1, %%ymm1 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
 		"shufpd $0x01,     %%xmm1, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
 		"VPMAXSQ           %%xmm0, %%xmm1, %%xmm1 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
+		"vperm2f128 $0x01, %%ymm1, %%ymm1, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"VPMAXSQ           %%ymm0, %%ymm1, %%ymm1 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
+		"shufpd $0x01,     %%xmm1, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
+		"VPMAXSQ           %%xmm0, %%xmm1, %%xmm1 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
 		"movq              %%xmm1, %[v_max]   \n\t"         // return   max(a,b,c,d)
 		"\n\t"
+		"vperm2f128 $0x01, %%ymm2, %%ymm2, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"VPMINSQ           %%ymm0, %%ymm2, %%ymm2 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
+		"shufpd $0x01,     %%xmm2, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
+		"VPMINSQ           %%xmm0, %%xmm2, %%xmm2 \n\t"         // return   |min(a,b,c,d)|min(a,b,c,d)|
 		"vperm2f128 $0x01, %%ymm2, %%ymm2, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
 		"VPMINSQ           %%ymm0, %%ymm2, %%ymm2 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
 		"shufpd $0x01,     %%xmm2, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
@@ -701,6 +726,9 @@ void minmax_loop_unroll_04_ams_i8(int64_t *min, int64_t *max, int64_t x[], int64
 	*max = maxval_i8(value_max, *max);
 }
 
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 void minmax_loop_unroll_08_ams_r8(double *min, double *max, double x[], int64_t n){
     *min =   HUGE_VAL;
     *max = - HUGE_VAL;
@@ -760,8 +788,16 @@ void minmax_loop_unroll_08_ams_r8(double *min, double *max, double x[], int64_t 
 		"vmaxpd            %%ymm0, %%ymm2, %%ymm2 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
 		"shufpd $0x01,     %%xmm2, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
 		"maxpd             %%xmm0, %%xmm2 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
+		"vperm2f128 $0x01, %%ymm2, %%ymm2, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"vmaxpd            %%ymm0, %%ymm2, %%ymm2 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
+		"shufpd $0x01,     %%xmm2, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
+		"maxpd             %%xmm0, %%xmm2 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
 		"movsd             %%xmm2, %[v_max]   \n\t"         // return   max(a,b,c,d)
 		"\n\t"
+		"vperm2f128 $0x01, %%ymm3, %%ymm3, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"vminpd            %%ymm0, %%ymm3, %%ymm3 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
+		"shufpd $0x01,     %%xmm3, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
+		"minpd             %%xmm0, %%xmm3 \n\t"         // return   |min(a,b,c,d)|min(a,b,c,d)|
 		"vperm2f128 $0x01, %%ymm3, %%ymm3, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
 		"vminpd            %%ymm0, %%ymm3, %%ymm3 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
 		"shufpd $0x01,     %%xmm3, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
@@ -847,6 +883,9 @@ void minmax_loop_unroll_08_ams_i8(int64_t *min, int64_t *max, int64_t x[], int64
 	*max = maxval_i8(value_max, *max);
 }
 
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 void minmax_loop_unroll_16_ams_r8(double *min, double *max, double x[], int64_t n){
     *min =   HUGE_VAL;
     *max = - HUGE_VAL;
@@ -922,8 +961,16 @@ void minmax_loop_unroll_16_ams_r8(double *min, double *max, double x[], int64_t 
 		"vmaxpd            %%ymm0, %%ymm4, %%ymm4 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
 		"shufpd $0x01,     %%xmm4, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
 		"maxpd             %%xmm0, %%xmm4 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
+		"vperm2f128 $0x01, %%ymm4, %%ymm4, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"vmaxpd            %%ymm0, %%ymm4, %%ymm4 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
+		"shufpd $0x01,     %%xmm4, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
+		"maxpd             %%xmm0, %%xmm4 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
 		"movsd             %%xmm4, %[v_max]   \n\t"         // return   max(a,b,c,d)
 		"\n\t"
+		"vperm2f128 $0x01, %%ymm5, %%ymm5, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"vminpd            %%ymm0, %%ymm5, %%ymm5 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
+		"shufpd $0x01,     %%xmm5, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
+		"minpd             %%xmm0, %%xmm5 \n\t"         // return   |min(a,b,c,d)|min(a,b,c,d)|
 		"vperm2f128 $0x01, %%ymm5, %%ymm5, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
 		"vminpd            %%ymm0, %%ymm5, %%ymm5 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
 		"shufpd $0x01,     %%xmm5, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
@@ -1011,8 +1058,16 @@ void minmax_loop_unroll_16_ams_i8(int64_t *min, int64_t *max, int64_t x[], int64
 		"VPMAXSQ           %%ymm0, %%ymm4, %%ymm4 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
 		"shufpd $0x01,     %%xmm4, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
 		"VPMAXSQ           %%xmm0, %%xmm4, %%xmm4 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
+		"vperm2f128 $0x01, %%ymm4, %%ymm4, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"VPMAXSQ           %%ymm0, %%ymm4, %%ymm4 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
+		"shufpd $0x01,     %%xmm4, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
+		"VPMAXSQ           %%xmm0, %%xmm4, %%xmm4 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
 		"movq              %%xmm4, %[v_max]   \n\t"         // return   max(a,b,c,d)
 		"\n\t"
+		"vperm2f128 $0x01, %%ymm5, %%ymm5, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"VPMINSQ           %%ymm0, %%ymm5, %%ymm5 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
+		"shufpd $0x01,     %%xmm5, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
+		"VPMINSQ           %%xmm0, %%xmm5, %%xmm5 \n\t"         // return   |min(a,b,c,d)|min(a,b,c,d)|
 		"vperm2f128 $0x01, %%ymm5, %%ymm5, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
 		"VPMINSQ           %%ymm0, %%ymm5, %%ymm5 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
 		"shufpd $0x01,     %%xmm5, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
@@ -1025,6 +1080,9 @@ void minmax_loop_unroll_16_ams_i8(int64_t *min, int64_t *max, int64_t x[], int64
 	*max = maxval_i8(value_max, *max);
 }
 
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 void minmax_loop_unroll_32_ams_r8(double *min, double *max, double x[], int64_t n){
     *min =   HUGE_VAL;
     *max = - HUGE_VAL;
@@ -1132,8 +1190,16 @@ void minmax_loop_unroll_32_ams_r8(double *min, double *max, double x[], int64_t 
 		"vmaxpd            %%ymm0, %%ymm8, %%ymm8 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
 		"shufpd $0x01,     %%xmm8, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
 		"maxpd             %%xmm0, %%xmm8 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
+		"vperm2f128 $0x01, %%ymm8, %%ymm8, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"vmaxpd            %%ymm0, %%ymm8, %%ymm8 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
+		"shufpd $0x01,     %%xmm8, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
+		"maxpd             %%xmm0, %%xmm8 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
 		"movsd             %%xmm8, %[v_max]   \n\t"         // return   max(a,b,c,d)
 		"\n\t"
+		"vperm2f128 $0x01, %%ymm9, %%ymm9, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"vminpd            %%ymm0, %%ymm9, %%ymm9 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
+		"shufpd $0x01,     %%xmm9, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
+		"minpd             %%xmm0, %%xmm9 \n\t"         // return   |min(a,b,c,d)|min(a,b,c,d)|
 		"vperm2f128 $0x01, %%ymm9, %%ymm9, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
 		"vminpd            %%ymm0, %%ymm9, %%ymm9 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
 		"shufpd $0x01,     %%xmm9, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
@@ -1253,8 +1319,16 @@ void minmax_loop_unroll_32_ams_i8(int64_t *min, int64_t *max, int64_t x[], int64
 		"VPMAXSQ           %%ymm0, %%ymm8, %%ymm8 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
 		"shufpd $0x01,     %%xmm8, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
 		"VPMAXSQ           %%xmm0, %%xmm8, %%xmm8 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
+		"vperm2f128 $0x01, %%ymm8, %%ymm8, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"VPMAXSQ           %%ymm0, %%ymm8, %%ymm8 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
+		"shufpd $0x01,     %%xmm8, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
+		"VPMAXSQ           %%xmm0, %%xmm8, %%xmm8 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
 		"movq              %%xmm8, %[v_max]   \n\t"         // return   max(a,b,c,d)
 		"\n\t"
+		"vperm2f128 $0x01, %%ymm9, %%ymm9, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"VPMINSQ           %%ymm0, %%ymm9, %%ymm9 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
+		"shufpd $0x01,     %%xmm9, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
+		"VPMINSQ           %%xmm0, %%xmm9, %%xmm9 \n\t"         // return   |min(a,b,c,d)|min(a,b,c,d)|
 		"vperm2f128 $0x01, %%ymm9, %%ymm9, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
 		"VPMINSQ           %%ymm0, %%ymm9, %%ymm9 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
 		"shufpd $0x01,     %%xmm9, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
@@ -1267,6 +1341,9 @@ void minmax_loop_unroll_32_ams_i8(int64_t *min, int64_t *max, int64_t x[], int64
 	*max = maxval_i8(value_max, *max);
 }
 
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 void minmax_loop_unroll_64_ams_r8(double *min, double *max, double x[], int64_t n){
     *min =   HUGE_VAL;
     *max = - HUGE_VAL;
@@ -1439,8 +1516,16 @@ void minmax_loop_unroll_64_ams_r8(double *min, double *max, double x[], int64_t 
 		"vmaxpd            %%ymm0, %%ymm1, %%ymm1 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
 		"shufpd $0x01,     %%xmm1, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
 		"maxpd             %%xmm0, %%xmm1 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
+		"vperm2f128 $0x01, %%ymm1, %%ymm1, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"vmaxpd            %%ymm0, %%ymm1, %%ymm1 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
+		"shufpd $0x01,     %%xmm1, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
+		"maxpd             %%xmm0, %%xmm1 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
 		"movsd             %%xmm1, %[v_max]   \n\t"         // return   max(a,b,c,d)
 		"\n\t"
+		"vperm2f128 $0x01, %%ymm2, %%ymm2, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"vminpd            %%ymm0, %%ymm2, %%ymm2 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
+		"shufpd $0x01,     %%xmm2, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
+		"minpd             %%xmm0, %%xmm2 \n\t"         // return   |min(a,b,c,d)|min(a,b,c,d)|
 		"vperm2f128 $0x01, %%ymm2, %%ymm2, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
 		"vminpd            %%ymm0, %%ymm2, %%ymm2 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
 		"shufpd $0x01,     %%xmm2, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
@@ -1609,8 +1694,16 @@ void minmax_loop_unroll_64_ams_i8(int64_t *min, int64_t *max, int64_t x[], int64
 		"VPMAXSQ           %%ymm0, %%ymm1, %%ymm1 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
 		"shufpd $0x01,     %%xmm1, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
 		"VPMAXSQ           %%xmm0, %%xmm1, %%xmm1 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
+		"vperm2f128 $0x01, %%ymm1, %%ymm1, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"VPMAXSQ           %%ymm0, %%ymm1, %%ymm1 \n\t" // return   |max(a,c)|max(b,d)|max(a,c)|max(b,d)| 
+		"shufpd $0x01,     %%xmm1, %%xmm0 \n\t"         // exchange |max(a,c)|max(b,d)| -> |max(b,d)|max(a,c)|
+		"VPMAXSQ           %%xmm0, %%xmm1, %%xmm1 \n\t"         // return   |max(a,b,c,d)|max(a,b,c,d)|
 		"movq              %%xmm1, %[v_max]   \n\t"         // return   max(a,b,c,d)
 		"\n\t"
+		"vperm2f128 $0x01, %%ymm2, %%ymm2, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
+		"VPMINSQ           %%ymm0, %%ymm2, %%ymm2 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
+		"shufpd $0x01,     %%xmm2, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
+		"VPMINSQ           %%xmm0, %%xmm2, %%xmm2 \n\t"         // return   |min(a,b,c,d)|min(a,b,c,d)|
 		"vperm2f128 $0x01, %%ymm2, %%ymm2, %%ymm0 \n\t" // exchange |a|b|c|d| -> |c|d|a|b|
 		"VPMINSQ           %%ymm0, %%ymm2, %%ymm2 \n\t" // return   |min(a,c)|min(b,d)|min(a,c)|min(b,d)| 
 		"shufpd $0x01,     %%xmm2, %%xmm0 \n\t"         // exchange |min(a,c)|min(b,d)| -> |min(b,d)|min(a,c)|
@@ -1623,3 +1716,25 @@ void minmax_loop_unroll_64_ams_i8(int64_t *min, int64_t *max, int64_t x[], int64
 	*max = maxval_i8(value_max, *max);
 }
 
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+void minmax_loop_with_index_c_r8(){
+
+}
+
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+void minmax_matrix_loop_r8(double *min, double *max, double *x, int64_t n, int64_t c){
+    int64_t ii, jj;
+    double *x_ptr;
+    int64_t tmp;
+    x_ptr = x;
+    for(jj=0; jj<c; jj++){
+        for(ii=0; ii<n; ii++){
+            tmp = x_ptr[ii+jj*n];
+            printf("%d, %d, %d, %d \n", ii, jj, ii+jj*n, tmp);
+        }
+    }
+}
