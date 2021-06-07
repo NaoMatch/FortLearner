@@ -144,7 +144,14 @@ program main_minmax
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
-        end subroutine    
+        end subroutine
+
+        subroutine minmax_matrix_loop_r8(x_min, x_max, x, n, c) bind(c, name='minmax_matrix_loop_r8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_min, x_max, x
+            integer(c_int64_t), value :: n, c
+        end subroutine minmax_matrix_loop_r8
+
     end interface
 
     integer(kind=8) :: date_value1(8), date_value2(8)
@@ -165,6 +172,56 @@ program main_minmax
     integer(kind=4) :: n_i4
     character(len=30), ALLOCATABLE :: types(:)
 
+    integer(c_int64_t) :: n, c, ii, jj, shape_c(2)
+    real(c_double), allocatable, target :: arr(:,:), arr_c(:,:), mins(:), maxs(:)
+    type(c_ptr) :: arr_ptr, arr_c_ptr, mins_ptr, maxs_ptr
+
+    ! Allocate memory
+    n = 2000000
+    c = 15
+    allocate(arr(n,c))
+    allocate(arr_c(c,n))
+    allocate(mins(c))
+    allocate(maxs(c))
+    print*, '============================================================='
+    call date_and_time(values=date_value1)
+    print*, "insert"
+    do jj=1, c, 1
+        do ii=1, n, 1
+            arr(ii,jj) = ii + (jj-1)*n
+        end do
+    end do
+    call date_and_time(values=date_value2)
+    print*, time_diff(date_value1, date_value2)
+
+    print*, '============================================================='
+    print*, "reshape"
+    call date_and_time(values=date_value1)
+    arr_c = reshape(arr, shape=(/c,n/), order=(/2,1/))
+    call date_and_time(values=date_value2)
+    print*, time_diff(date_value1, date_value2)
+
+    print*, '============================================================='
+    print*, shape(arr)
+    do ii=1, n, 1
+        ! print*, int(arr(ii,:))
+    end do
+
+    print*, '============================================================='
+    print*, shape(arr_c)
+    shape_c = shape(arr_c)
+    do ii=1, shape_c(1), 1
+        ! print*, int(arr_c(ii,:))
+    end do
+
+    ! Get C-language address
+    arr_ptr = c_loc(arr)
+    maxs_ptr = c_loc(maxs)
+    mins_ptr = c_loc(mins)
+    ! call minmax_matrix_loop_r8(mins_ptr, maxs_ptr, arr_ptr, n, c)
+
+
+    stop
     n_types = 15
     allocate(times(n_types))
     allocate(types(n_types))
@@ -194,7 +251,7 @@ program main_minmax
         call random_number(x_r8)
         x_r8 = 10d0 * x_r8-5d0
         x_i8 = x_r8
-        n_iter=5000000_8/n_i8
+        n_iter=maxval((/2000000000_8/n_i8, 5_8/))
         ! n_iter=1
         x_r8(n_i8) = -1000000
         x_i8(n_i8) = -1000000
@@ -424,8 +481,4 @@ contains
         r15 = - huge(0_8)        
         include "./inc_minmax_loop_unroll_14_f.f90"
     end subroutine minmax_loop_unroll_14_f_i8
-
-
-
-
 end program main_minmax
