@@ -5,86 +5,141 @@ program main_sum_up_vector
     implicit none
 
     Interface
-        function sum_naive_r8_c(x,n) Bind(C,Name='sum_naive_r8_c')
+
+        ! -------------------------------------------------------------------
+        ! -------------------------------------------------------------------
+        function sum_naive_i8_c_(x,n) Bind(C,Name='sum_naive_i8_c_')
             Import
-            Real(c_double) :: sum_naive_r8_c
+            Integer(c_int64_t)            :: sum_naive_i8_c_
+            Integer(c_int64_t),Value   :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end function        
+
+        function sum_naive_r8_c_(x,n) Bind(C,Name='sum_naive_r8_c_')
+            Import
+            Real(c_double) :: sum_naive_r8_c_
             Integer(c_int64_t),Value :: n
             Real(c_double),Intent(In) :: x(n)
         end function    
 
-        function sum_unroll_r8_c(x,n) Bind(C,Name='sum_unroll_r8_c')
+        ! -------------------------------------------------------------------
+        ! -------------------------------------------------------------------
+        function sum_unroll_02_r8_c_(x,n) Bind(C,Name='sum_unroll_02_r8_c_')
             Import
-            Real(c_double) :: sum_unroll_r8_c
-            Integer(c_int64_t),Value :: n
+            Real(c_double)            :: sum_unroll_02_r8_c_
+            Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end function
 
-        function sum_assembl_r8_04_C(x,n) Bind(C,Name='sum_assembl_r8_04_C')
+        function sum_unroll_02_i8_c_(x,n) Bind(C,Name='sum_unroll_02_i8_c_')
             Import
-            Real(c_double) :: sum_assembl_r8_04_C
+            Integer(c_int64_t)            :: sum_unroll_02_i8_c_
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end function
+
+        function sum_unroll_04_r8_c_(x,n) Bind(C,Name='sum_unroll_04_r8_c_')
+            Import
+            Real(c_double)            :: sum_unroll_04_r8_c_
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end function
+
+        function sum_unroll_04_i8_c_(x,n) Bind(C,Name='sum_unroll_04_i8_c_')
+            Import
+            Integer(c_int64_t)            :: sum_unroll_04_i8_c_
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end function
+
+        function sum_unroll_08_r8_c_(x,n) Bind(C,Name='sum_unroll_08_r8_c_')
+            Import
+            Real(c_double)            :: sum_unroll_08_r8_c_
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end function
+
+        function sum_unroll_08_i8_c_(x,n) Bind(C,Name='sum_unroll_08_i8_c_')
+            Import
+            Integer(c_int64_t)            :: sum_unroll_08_i8_c_
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end function
+
+        function sum_unroll_15_r8_c_(x,n) Bind(C,Name='sum_unroll_15_r8_c_')
+            Import
+            Real(c_double)            :: sum_unroll_15_r8_c_
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end function
+
+        function sum_unroll_15_i8_c_(x,n) Bind(C,Name='sum_unroll_15_i8_c_')
+            Import
+            Integer(c_int64_t)            :: sum_unroll_15_i8_c_
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end function
+
+        ! -------------------------------------------------------------------
+        ! -------------------------------------------------------------------
+        function sum_assembl_r8_04_C_(x,n) Bind(C,Name='sum_assembl_r8_04_C_')
+            Import
+            Real(c_double) :: sum_assembl_r8_04_C_
             Integer(c_int64_t),Value :: n
             Real(c_double),Intent(In) :: x(n)
         end function    
 
-        function sum_assembl_r8_08_C(x,n) Bind(C,Name='sum_assembl_r8_08_C')
+        function sum_assembl_i8_04_C_(x,n) Bind(C,Name='sum_assembl_i8_04_C_')
             Import
-            Real(c_double) :: sum_assembl_r8_08_C
+            Integer(c_int64_t)            :: sum_assembl_i8_04_C_
+            Integer(c_int64_t),Value   :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end function        
+
+        ! -------------------------------------------------------------------
+        ! -------------------------------------------------------------------
+        function sum_assembl_r8_08_C_(x,n) Bind(C,Name='sum_assembl_r8_08_C_')
+            Import
+            Real(c_double) :: sum_assembl_r8_08_C_
             Integer(c_int64_t),Value :: n
             Real(c_double),Intent(In) :: x(n)
         end function    
 
-        function sum_assembl_r8_16_C(x,n) Bind(C,Name='sum_assembl_r8_16_C')
+        function sum_assembl_i8_08_C_(x,n) Bind(C,Name='sum_assembl_i8_08_C_')
             Import
-            Real(c_double) :: sum_assembl_r8_16_C
+            Integer(c_int64_t)            :: sum_assembl_i8_08_C_
+            Integer(c_int64_t),Value   :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end function        
+
+        ! -------------------------------------------------------------------
+        ! -------------------------------------------------------------------
+        function sum_assembl_r8_16_C_(x,n) Bind(C,Name='sum_assembl_r8_16_C_')
+            Import
+            Real(c_double) :: sum_assembl_r8_16_C_
             Integer(c_int64_t),Value :: n
             Real(c_double),Intent(In) :: x(n)
         end function    
 
-        function sum_assembl_r8_32_C(x,n) Bind(C,Name='sum_assembl_r8_32_C')
+        function sum_assembl_i8_16_C_(x,n) Bind(C,Name='sum_assembl_i8_16_C_')
             Import
-            Real(c_double) :: sum_assembl_r8_32_C
+            Integer(c_int64_t)            :: sum_assembl_i8_16_C_
+            Integer(c_int64_t),Value   :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end function        
+
+        ! -------------------------------------------------------------------
+        ! -------------------------------------------------------------------
+        function sum_assembl_r8_32_C_(x,n) Bind(C,Name='sum_assembl_r8_32_C_')
+            Import
+            Real(c_double) :: sum_assembl_r8_32_C_
             Integer(c_int64_t),Value :: n
             Real(c_double),Intent(In) :: x(n)
         end function    
 
-        function sum_naive_i8_c(x,n) Bind(C,Name='sum_naive_i8_c')
+        function sum_assembl_i8_32_C_(x,n) Bind(C,Name='sum_assembl_i8_32_C_')
             Import
-            Integer(c_int64_t)            :: sum_naive_i8_c
-            Integer(c_int64_t),Value   :: n
-            Integer(c_int64_t),Intent(In) :: x(n)
-        end function        
-
-        function sum_unroll_i8_c(x,n) Bind(C,Name='sum_unroll_i8_c')
-            Import
-            Integer(c_int64_t)            :: sum_unroll_i8_c
-            Integer(c_int64_t),Value   :: n
-            Integer(c_int64_t),Intent(In) :: x(n)
-        end function        
-
-        function sum_assembl_i8_04_C(x,n) Bind(C,Name='sum_assembl_i8_04_C')
-            Import
-            Integer(c_int64_t)            :: sum_assembl_i8_04_C
-            Integer(c_int64_t),Value   :: n
-            Integer(c_int64_t),Intent(In) :: x(n)
-        end function        
-
-        function sum_assembl_i8_08_C(x,n) Bind(C,Name='sum_assembl_i8_08_C')
-            Import
-            Integer(c_int64_t)            :: sum_assembl_i8_08_C
-            Integer(c_int64_t),Value   :: n
-            Integer(c_int64_t),Intent(In) :: x(n)
-        end function        
-
-        function sum_assembl_i8_16_C(x,n) Bind(C,Name='sum_assembl_i8_16_C')
-            Import
-            Integer(c_int64_t)            :: sum_assembl_i8_16_C
-            Integer(c_int64_t),Value   :: n
-            Integer(c_int64_t),Intent(In) :: x(n)
-        end function        
-
-        function sum_assembl_i8_32_C(x,n) Bind(C,Name='sum_assembl_i8_32_C')
-            Import
-            Integer(c_int64_t)            :: sum_assembl_i8_32_C
+            Integer(c_int64_t)            :: sum_assembl_i8_32_C_
             Integer(c_int64_t),Value   :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end function        
@@ -109,19 +164,24 @@ program main_sum_up_vector
     integer(kind=4) :: n_i4
     character(len=30), ALLOCATABLE :: types(:)
 
-    n_types = 10
+    n_types = 15
     allocate(times(n_types))
     allocate(types(n_types))
-    types(1) = "sum_intrinsic_F      :"
-    types(2) = "sum_naive_loop_F     :"
-    types(3) = "sum_unroll_loop_F    :"
-    types(4) = "sum_naive_loop_C     :"
-    types(5) = "sum_unroll_r8_C      :"
-    types(6) = "sum_assembl_r8_04_C  :"
-    types(7) = "sum_assembl_r8_08_C  :"
-    types(8) = "sum_assembl_r8_16_C  :"
-    types(9) = "sum_assembl_r8_32_C  :"
-    types(10) = "sum_hybrid          :"
+    types(1)  = "sum_intrinsic_F      :"
+    types(2)  = "sum_naive_loop_F     :"
+    types(3)  = "sum_unroll_02_F      :"
+    types(4)  = "sum_unroll_04_F      :"
+    types(5)  = "sum_unroll_08_F      :"
+    types(6)  = "sum_unroll_15_F      :"
+    types(7)  = "sum_naive_loop_C     :"
+    types(8)  = "sum_unroll_02_C      :"
+    types(9)  = "sum_unroll_04_C      :"
+    types(10) = "sum_unroll_08_C      :"
+    types(11) = "sum_unroll_15_C      :"
+    types(12) = "sum_assembl_r8_04_C_  :"
+    types(13) = "sum_assembl_r8_08_C_  :"
+    types(14) = "sum_assembl_r8_16_C_  :"
+    types(15) = "sum_assembl_r8_32_C_  :"
 
     open(10, file="time_sum_r8.csv")
     open(20, file="time_sum_i8.csv")
@@ -134,6 +194,7 @@ program main_sum_up_vector
         x_r8 = 10 * x_r8
         x_i8 = x_r8
         n_iter=5000000000_8/n_i8
+        ! n_iter=100000000_8/n_i8
         ! n_iter=1
 
         print*, '============================================================='
@@ -145,23 +206,33 @@ program main_sum_up_vector
                     case (1)
                             res_r8 =  sum(x_r8)
                     case (2)
-                            res_r8 =  sum_naive_f_r8(x_r8, n_i8)
+                            res_r8 =  sum_naive_f_r8_(x_r8, n_i8)
                     case (3)
-                            res_r8 =  sum_unroll_f_r8(x_r8, n_i8)
+                            res_r8 =  sum_unroll_02_f_r8_(x_r8, n_i8)
                     case (4)
-                            res_r8 =  sum_naive_r8_c(x_r8, n_i8)
+                            res_r8 =  sum_unroll_04_f_r8_(x_r8, n_i8)
                     case (5)
-                            res_r8 =  sum_unroll_r8_c(x_r8, n_i8)
+                            res_r8 =  sum_unroll_08_f_r8_(x_r8, n_i8)
                     case (6)
-                            res_r8 =  sum_assembl_r8_04_C(x_r8, n_i8)
+                            res_r8 =  sum_unroll_15_f_r8_(x_r8, n_i8)
                     case (7)
-                            res_r8 =  sum_assembl_r8_08_C(x_r8, n_i8)
+                            res_r8 =  sum_naive_r8_c_(x_r8, n_i8)
                     case (8)
-                            res_r8 =  sum_assembl_r8_16_C(x_r8, n_i8)
+                            res_r8 =  sum_unroll_02_r8_c_(x_r8, n_i8)
                     case (9)
-                            res_r8 =  sum_assembl_r8_32_C(x_r8, n_i8)
+                            res_r8 =  sum_unroll_04_r8_c_(x_r8, n_i8)
                     case (10)
-                            res_r8 =  sum_up_hydrid_r8(x_r8, n_i8)
+                            res_r8 =  sum_unroll_08_r8_c_(x_r8, n_i8)
+                    case (11)
+                            res_r8 =  sum_unroll_15_r8_c_(x_r8, n_i8)
+                    case (12)
+                            res_r8 =  sum_assembl_r8_04_C_(x_r8, n_i8)
+                    case (13)
+                            res_r8 =  sum_assembl_r8_08_C_(x_r8, n_i8)
+                    case (14)
+                            res_r8 =  sum_assembl_r8_16_C_(x_r8, n_i8)
+                    case (15)
+                            res_r8 =  sum_assembl_r8_32_C_(x_r8, n_i8)
                 end select
             end do
             call date_and_time(values=date_value2)
@@ -179,23 +250,33 @@ program main_sum_up_vector
                     case (1)
                             res_i8 =  sum(x_i8)
                     case (2)
-                            res_i8 =  sum_naive_f_i8(x_i8, n_i8)
+                            res_i8 =  sum_naive_f_i8_(x_i8, n_i8)
                     case (3)
-                            res_i8 =  sum_unroll_f_i8(x_i8, n_i8)
+                            res_i8 =  sum_unroll_02_f_i8_(x_i8, n_i8)
                     case (4)
-                            res_i8 =  sum_naive_i8_c(x_i8, n_i8)
+                            res_i8 =  sum_unroll_04_f_i8_(x_i8, n_i8)
                     case (5)
-                            res_i8 =  sum_unroll_i8_c(x_i8, n_i8)
+                            res_i8 =  sum_unroll_08_f_i8_(x_i8, n_i8)
                     case (6)
-                            res_i8 =  sum_assembl_i8_04_C(x_i8, n_i8)
+                            res_i8 =  sum_unroll_15_f_i8_(x_i8, n_i8)
                     case (7)
-                            res_i8 =  sum_assembl_i8_08_C(x_i8, n_i8)
+                            res_i8 =  sum_naive_i8_c_(x_i8, n_i8)
                     case (8)
-                            res_i8 =  sum_assembl_i8_16_C(x_i8, n_i8)
+                            res_i8 =  sum_unroll_02_i8_c_(x_i8, n_i8)
                     case (9)
-                            res_i8 =  sum_assembl_i8_32_C(x_i8, n_i8)
+                            res_i8 =  sum_unroll_04_i8_c_(x_i8, n_i8)
                     case (10)
-                            res_i8 =  sum_up_hydrid_i8(x_i8, n_i8)
+                            res_i8 =  sum_unroll_08_i8_c_(x_i8, n_i8)
+                    case (11)
+                            res_i8 =  sum_unroll_15_i8_c_(x_i8, n_i8)
+                    case (12)
+                            res_i8 =  sum_assembl_i8_04_C_(x_i8, n_i8)
+                    case (13)
+                            res_i8 =  sum_assembl_i8_08_C_(x_i8, n_i8)
+                    case (14)
+                            res_i8 =  sum_assembl_i8_16_C_(x_i8, n_i8)
+                    case (15)
+                            res_i8 =  sum_assembl_i8_32_C_(x_i8, n_i8)
                 end select
             end do
             call date_and_time(values=date_value2)
@@ -206,40 +287,41 @@ program main_sum_up_vector
 
 
         deallocate(x_r8, x_i8)
+        call sleep(3)
     end do
 
 
 contains
 
-    function sum_naive_f_i8(x,n)
+    function sum_naive_f_i8_(x,n)
         implicit none
         integer(kind=8), intent(in)    :: x(n)
         integer(kind=8), intent(in) :: n
-        integer(kind=8)                :: sum_naive_f_i8
+        integer(kind=8)                :: sum_naive_f_i8_
 
         integer(kind=8) :: i
         integer(kind=8)    :: r00
         include "./inc_sum_naive_f.f90"
-        sum_naive_f_i8 = r00
-    end function sum_naive_f_i8
+        sum_naive_f_i8_ = r00
+    end function sum_naive_f_i8_
 
-    function sum_naive_f_r8(x,n)
+    function sum_naive_f_r8_(x,n)
         implicit none
         real(kind=8), intent(in)    :: x(n)
         integer(kind=8), intent(in) :: n
-        real(kind=8)                :: sum_naive_f_r8
+        real(kind=8)                :: sum_naive_f_r8_
 
         integer(kind=8) :: i
         real(kind=8)    :: r00
         include "./inc_sum_naive_f.f90"
-        sum_naive_f_r8 = r00
-    end function sum_naive_f_r8
+        sum_naive_f_r8_ = r00
+    end function sum_naive_f_r8_
 
-    function sum_unroll_f_i8(x,n)
+    function sum_unroll_02_f_i8_(x,n)
         implicit none
         integer(kind=8), intent(in) :: x(n)
         integer(kind=8), intent(in) :: n
-        integer(kind=8)             :: sum_unroll_f_i8
+        integer(kind=8)             :: sum_unroll_02_f_i8_
 
         integer(kind=8) :: num_unroll, i
         integer(kind=8) :: r00, r01, r02, r03
@@ -247,17 +329,17 @@ contains
         integer(kind=8) :: r08, r09, r10, r11
         integer(kind=8) :: r12, r13, r14, r15
 
-        sum_unroll_f_i8=0d0
-        num_unroll = n - mod(n, 8)
-        include "./inc_sum_unroll_f.f90"
-        sum_unroll_f_i8 = r15 + r14 + r13 + r12
-    end function sum_unroll_f_i8
+        sum_unroll_02_f_i8_=0d0
+        num_unroll = n - mod(n, 2)
+        include "./inc_sum_unroll_02_f.f90"
+        sum_unroll_02_f_i8_ = r15 + r14 + r13 + r12
+    end function sum_unroll_02_f_i8_
 
-    function sum_unroll_f_r8(x,n)
+    function sum_unroll_02_f_r8_(x,n)
         implicit none
         real(kind=8), intent(in)    :: x(n)
         integer(kind=8), intent(in) :: n
-        real(kind=8)                :: sum_unroll_f_r8
+        real(kind=8)                :: sum_unroll_02_f_r8_
 
         integer(kind=8) :: num_unroll, i
         real(kind=8) :: r00, r01, r02, r03
@@ -265,11 +347,119 @@ contains
         real(kind=8) :: r08, r09, r10, r11
         real(kind=8) :: r12, r13, r14, r15
 
-        sum_unroll_f_r8=0d0
+        sum_unroll_02_f_r8_=0d0
+        num_unroll = n - mod(n, 2)
+        include "./inc_sum_unroll_02_f.f90"
+        sum_unroll_02_f_r8_ = r15 + r14 + r13 + r12
+    end function sum_unroll_02_f_r8_
+
+    function sum_unroll_04_f_i8_(x,n)
+        implicit none
+        integer(kind=8), intent(in) :: x(n)
+        integer(kind=8), intent(in) :: n
+        integer(kind=8)             :: sum_unroll_04_f_i8_
+
+        integer(kind=8) :: num_unroll, i
+        integer(kind=8) :: r00, r01, r02, r03
+        integer(kind=8) :: r04, r05, r06, r07
+        integer(kind=8) :: r08, r09, r10, r11
+        integer(kind=8) :: r12, r13, r14, r15
+
+        sum_unroll_04_f_i8_=0d0
+        num_unroll = n - mod(n, 4)
+        include "./inc_sum_unroll_04_f.f90"
+        sum_unroll_04_f_i8_ = r15 + r14 + r13 + r12
+    end function sum_unroll_04_f_i8_
+
+    function sum_unroll_04_f_r8_(x,n)
+        implicit none
+        real(kind=8), intent(in)    :: x(n)
+        integer(kind=8), intent(in) :: n
+        real(kind=8)                :: sum_unroll_04_f_r8_
+
+        integer(kind=8) :: num_unroll, i
+        real(kind=8) :: r00, r01, r02, r03
+        real(kind=8) :: r04, r05, r06, r07
+        real(kind=8) :: r08, r09, r10, r11
+        real(kind=8) :: r12, r13, r14, r15
+
+        sum_unroll_04_f_r8_=0d0
+        num_unroll = n - mod(n, 4)
+        include "./inc_sum_unroll_04_f.f90"
+        sum_unroll_04_f_r8_ = r15 + r14 + r13 + r12
+    end function sum_unroll_04_f_r8_
+
+    function sum_unroll_08_f_i8_(x,n)
+        implicit none
+        integer(kind=8), intent(in) :: x(n)
+        integer(kind=8), intent(in) :: n
+        integer(kind=8)             :: sum_unroll_08_f_i8_
+
+        integer(kind=8) :: num_unroll, i
+        integer(kind=8) :: r00, r01, r02, r03
+        integer(kind=8) :: r04, r05, r06, r07
+        integer(kind=8) :: r08, r09, r10, r11
+        integer(kind=8) :: r12, r13, r14, r15
+
+        sum_unroll_08_f_i8_=0d0
         num_unroll = n - mod(n, 8)
-        include "./inc_sum_unroll_f.f90"
-        sum_unroll_f_r8 = r15 + r14 + r13 + r12
-    end function sum_unroll_f_r8
+        include "./inc_sum_unroll_08_f.f90"
+        sum_unroll_08_f_i8_ = r15 + r14 + r13 + r12
+    end function sum_unroll_08_f_i8_
+
+    function sum_unroll_08_f_r8_(x,n)
+        implicit none
+        real(kind=8), intent(in)    :: x(n)
+        integer(kind=8), intent(in) :: n
+        real(kind=8)                :: sum_unroll_08_f_r8_
+
+        integer(kind=8) :: num_unroll, i
+        real(kind=8) :: r00, r01, r02, r03
+        real(kind=8) :: r04, r05, r06, r07
+        real(kind=8) :: r08, r09, r10, r11
+        real(kind=8) :: r12, r13, r14, r15
+
+        sum_unroll_08_f_r8_=0d0
+        num_unroll = n - mod(n, 8)
+        include "./inc_sum_unroll_08_f.f90"
+        sum_unroll_08_f_r8_ = r15 + r14 + r13 + r12
+    end function sum_unroll_08_f_r8_
+
+    function sum_unroll_15_f_i8_(x,n)
+        implicit none
+        integer(kind=8), intent(in) :: x(n)
+        integer(kind=8), intent(in) :: n
+        integer(kind=8)             :: sum_unroll_15_f_i8_
+
+        integer(kind=8) :: num_unroll, i
+        integer(kind=8) :: r00, r01, r02, r03
+        integer(kind=8) :: r04, r05, r06, r07
+        integer(kind=8) :: r08, r09, r10, r11
+        integer(kind=8) :: r12, r13, r14, r15
+
+        sum_unroll_15_f_i8_=0d0
+        num_unroll = n - mod(n, 15)
+        include "./inc_sum_unroll_15_f.f90"
+        sum_unroll_15_f_i8_ = r15
+    end function sum_unroll_15_f_i8_
+
+    function sum_unroll_15_f_r8_(x,n)
+        implicit none
+        real(kind=8), intent(in)    :: x(n)
+        integer(kind=8), intent(in) :: n
+        real(kind=8)                :: sum_unroll_15_f_r8_
+
+        integer(kind=8) :: num_unroll, i
+        real(kind=8) :: r00, r01, r02, r03
+        real(kind=8) :: r04, r05, r06, r07
+        real(kind=8) :: r08, r09, r10, r11
+        real(kind=8) :: r12, r13, r14, r15
+
+        sum_unroll_15_f_r8_=0d0
+        num_unroll = n - mod(n, 15)
+        include "./inc_sum_unroll_15_f.f90"
+        sum_unroll_15_f_r8_ = r15
+    end function sum_unroll_15_f_r8_
 
     function sum_up_hydrid_r8(x,n)
         implicit none
@@ -278,11 +468,11 @@ contains
         real(kind=8)                :: sum_up_hydrid_r8
 
         if (n .le. 256_8) then
-            sum_up_hydrid_r8 = sum_unroll_f_r8(x,n)
+            sum_up_hydrid_r8 = sum_unroll_08_f_r8_(x,n)
         elseif(n .le. 1000000) then
-            sum_up_hydrid_r8 = sum_assembl_r8_16_C(x,n)
+            sum_up_hydrid_r8 = sum_assembl_r8_16_C_(x,n)
         else
-            sum_up_hydrid_r8 = sum_assembl_r8_08_C(x,n)
+            sum_up_hydrid_r8 = sum_assembl_r8_08_C_(x,n)
         end if
     end function sum_up_hydrid_r8
 
@@ -293,11 +483,11 @@ contains
         integer(kind=8)             :: sum_up_hydrid_i8
 
         if (n .le. 256_8) then
-            sum_up_hydrid_i8 = sum_unroll_f_i8(x,n)
+            sum_up_hydrid_i8 = sum_unroll_08_f_i8_(x,n)
         elseif(n .le. 1000000) then
-            sum_up_hydrid_i8 = sum_assembl_i8_16_C(x,n)
+            sum_up_hydrid_i8 = sum_assembl_i8_16_C_(x,n)
         else
-            sum_up_hydrid_i8 = sum_assembl_i8_08_C(x,n)
+            sum_up_hydrid_i8 = sum_assembl_i8_08_C_(x,n)
         end if
     end function sum_up_hydrid_i8
 
