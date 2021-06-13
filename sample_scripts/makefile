@@ -1,11 +1,16 @@
 
-asm := ./inc_sum_up_c.out ./inc_sum_up_left_c.out  ./inc_get_minmax.out
+asm              := ./inc_sum_up_c.out \
+                    ./inc_sum_up_left_c.out  \
+					./inc_get_minmax.out
 
 compiler_fortran := gfortran
 
-compiler_clang := gcc
+compiler_clang   := gcc
 
-option := -cpp -D_default
+# Preprocessor
+# -D_default: use Fortran only
+# -D_x86_64:  use Fortran & inline assembler with x86_64
+option := -cpp -D_x86_64
 
 run:
 	make run_utils
@@ -519,7 +524,7 @@ main_sum_up:
 	../common/mod_const.f90 ../common/mod_common.f90 ../common/mod_timer.f90 \
 	../common/mod_random.f90 ../common/mod_sort.f90 \
 	../math/mod_stats.f90 \
-	$(asm)  \
+	$(asm)  $(option) \
 	main_sum_up.f90 -o main_sum_up.out
 	./main_sum_up.out
 
