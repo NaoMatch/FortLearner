@@ -7,36 +7,36 @@ module mod_stats
 
     !> An interface to call sum_up function with inline assembler and Fortran
     interface sum_up
-        module procedure sum_up_hybrid_r8
-        module procedure sum_up_hybrid_i8
+        module procedure sum_up_r8
+        module procedure sum_up_i8
     end interface ! sum_up
 
     !> An interface to call extern c functions with inline assembler
     Interface
-        function sum_assembl_r8_08_C(x,n) Bind(C,Name='sum_assembl_r8_08_C')
+        function sum_up_08_C_r8(x,n) Bind(C,Name='sum_up_08_C_r8')
             Import
-            Real(c_double) :: sum_assembl_r8_08_C
+            Real(c_double) :: sum_up_08_C_r8
             Integer(c_int64_t),Value :: n
             Real(c_double),Intent(In) :: x(n)
         end function    
 
-        function sum_assembl_r8_16_C(x,n) Bind(C,Name='sum_assembl_r8_16_C')
+        function sum_up_16_C_r8(x,n) Bind(C,Name='sum_up_16_C_r8')
             Import
-            Real(c_double) :: sum_assembl_r8_16_C
+            Real(c_double) :: sum_up_16_C_r8
             Integer(c_int64_t),Value :: n
             Real(c_double),Intent(In) :: x(n)
         end function    
 
-        function sum_assembl_i8_08_C(x,n) Bind(C,Name='sum_assembl_i8_08_C')
+        function sum_up_08_C_i8(x,n) Bind(C,Name='sum_up_08_C_i8')
             Import
-            Integer(c_int64_t)            :: sum_assembl_i8_08_C
+            Integer(c_int64_t)            :: sum_up_08_C_i8
             Integer(c_int64_t),Value   :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end function        
 
-        function sum_assembl_i8_16_C(x,n) Bind(C,Name='sum_assembl_i8_16_C')
+        function sum_up_16_C_i8(x,n) Bind(C,Name='sum_up_16_C_i8')
             Import
-            Integer(c_int64_t)            :: sum_assembl_i8_16_C
+            Integer(c_int64_t)            :: sum_up_16_C_i8
             Integer(c_int64_t),Value   :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end function        
@@ -237,12 +237,6 @@ module mod_stats
         end subroutine    
     end interface
 
-    !> An interface to call sum_up function in Fortran only
-    interface sum_up_f
-        module procedure sum_up_f_r8
-        module procedure sum_up_f_i8
-    end interface sum_up_f
-
     !> Interface to call sum_up_left_r4, sum_up_left_with_indices_real32
     interface sum_up_left
         module procedure sum_up_left_r4
@@ -373,6 +367,69 @@ module mod_stats
 
 contains
 
+    ! -----------------------------------------------------------------------------
+    ! -----------------------------------------------------------------------------
+    ! -----------------------------------------------------------------------------
+    ! sum_up functions
+
+    !> A function to sum up vector, integer 64bit.
+    !! Change the function to be executed depending on the size of the vector.
+    !! \param sum_up_r8 Sum of vector elements
+    !! \param x vector
+    !! \param n size of vector
+    function sum_up_r8(x,n)
+        implicit none
+        real(kind=8), intent(in)    :: x(n)
+        integer(kind=8), intent(in) :: n
+        real(kind=8)                :: sum_up_r8
+#if _default
+        sum_up_r8 = sum_up_15_f_r8(x,n)
+#elif _x86_64
+        if (n .le. 256_8) then
+            sum_up_r8 = sum_up_15_f_r8(x,n)
+        elseif(n .le. 10000000) then
+            sum_up_r8 = sum_up_16_C_r8(x,n)
+        else
+            sum_up_r8 = sum_up_08_C_r8(x,n)
+        end if
+#else 
+#error "CPU Architecture is not supported. Use '-D_default'."
+#endif
+    end function sum_up_r8
+
+    !> A function to sum up vector, integer 64bit.
+    !! Change the function to be executed depending on the size of the vector.
+    !! \param sum_up_i8 Sum of vector elements
+    !! \param x vector
+    !! \param n size of vector
+    function sum_up_i8(x,n)
+        implicit none
+        integer(kind=8), intent(in) :: x(n)
+        integer(kind=8), intent(in) :: n
+        integer(kind=8)             :: sum_up_i8
+#if _default
+        sum_up_i8 = sum_up_15_f_i8(x,n)
+#elif _x86_64
+        if (n .le. 256_8) then
+            sum_up_i8 = sum_up_15_f_i8(x,n)
+        elseif(n .le. 10000000) then
+            sum_up_i8 = sum_up_16_C_i8(x,n)
+        else
+            sum_up_i8 = sum_up_08_C_i8(x,n)
+        end if
+#else 
+#error "CPU Architecture is not supported. Use '-D_default'."
+#endif
+    end function sum_up_i8
+    include "./include/stats/sum_up/inc_sum_up_f_variants.f90"
+
+
+
+
+    ! -----------------------------------------------------------------------------
+    ! -----------------------------------------------------------------------------
+    ! -----------------------------------------------------------------------------
+    ! minmax functions
     subroutine minmax_hybrid_r8(min, max, x, n)
         implicit none
         real(kind=8), intent(inout) :: min, max
@@ -397,6 +454,10 @@ contains
         end if
     end subroutine minmax_hybrid_i8
 
+    ! -----------------------------------------------------------------------------
+    ! -----------------------------------------------------------------------------
+    ! -----------------------------------------------------------------------------
+    ! sum_up_left functions
     !> A function to sum up vector, real 64bit.
     !! Change the function to be executed depending on the size of the vector.
     !! \param sum_up_hybrid_r8 Sum of vector elements
@@ -434,92 +495,6 @@ contains
             sum_up_left_hybrid_r8 = sum_up_left_assembler_04_c_r8_r8(x, y, n, v)
         end if
     end function sum_up_left_hybrid_r8
-
-    !> A function to sum up vector, real 64bit.
-    !! Change the function to be executed depending on the size of the vector.
-    !! \param sum_up_hybrid_r8 Sum of vector elements
-    !! \param x vector
-    !! \param n size of vector
-    function sum_up_hybrid_r8(x,n)
-        implicit none
-        real(kind=8), intent(in)    :: x(n)
-        integer(kind=8), intent(in) :: n
-        real(kind=8)                :: sum_up_hybrid_r8
-
-        if (n .le. 256_8) then
-            sum_up_hybrid_r8 = sum_up_f_r8(x,n)
-        elseif(n .le. 10000000) then
-            sum_up_hybrid_r8 = sum_assembl_r8_16_C(x,n)
-        else
-            sum_up_hybrid_r8 = sum_assembl_r8_08_C(x,n)
-        end if
-    end function sum_up_hybrid_r8
-
-    !> A function to sum up vector, integer 64bit.
-    !! Change the function to be executed depending on the size of the vector.
-    !! \param sum_up_hybrid_i8 Sum of vector elements
-    !! \param x vector
-    !! \param n size of vector
-    function sum_up_hybrid_i8(x,n)
-        implicit none
-        integer(kind=8), intent(in) :: x(n)
-        integer(kind=8), intent(in) :: n
-        integer(kind=8)             :: sum_up_hybrid_i8
-
-        if (n .le. 256_8) then
-            sum_up_hybrid_i8 = sum_up_f_i8(x,n)
-        elseif(n .le. 10000000) then
-            sum_up_hybrid_i8 = sum_assembl_i8_16_C(x,n)
-        else
-            sum_up_hybrid_i8 = sum_assembl_i8_08_C(x,n)
-        end if
-    end function sum_up_hybrid_i8
-
-    !> A function to sum up vector, integer 64bit.
-    !! Optimization was performed using only Fortran.
-    !! \param sum_up_f_r8 Sum of vector elements
-    !! \param x vector
-    !! \param n size of vector
-    function sum_up_f_r8(x,n)
-        implicit none
-        real(kind=8), intent(in)    :: x(n)
-        integer(kind=8), intent(in) :: n
-        real(kind=8)                :: sum_up_f_r8
-
-        integer(kind=8) :: num_unroll, i
-        real(kind=8) :: r00, r01, r02, r03
-        real(kind=8) :: r04, r05, r06, r07
-        real(kind=8) :: r08, r09, r10, r11
-        real(kind=8) :: r12, r13, r14, r15
-
-        sum_up_f_r8=0d0
-        num_unroll = n - mod(n, 8)
-        include "./include/stats/sum_up/inc_sum_up.f90"
-        sum_up_f_r8 = r15 + r14 + r13 + r12
-    end function sum_up_f_r8
-
-    !> A function to sum up vector, integer 64bit.
-    !! Optimization was performed using only Fortran.
-    !! \param sum_up_f_i8 Sum of vector elements
-    !! \param x vector
-    !! \param n size of vector
-    function sum_up_f_i8(x,n)
-        implicit none
-        integer(kind=8), intent(in) :: x(n)
-        integer(kind=8), intent(in) :: n
-        integer(kind=8)             :: sum_up_f_i8
-
-        integer(kind=8) :: num_unroll, i
-        integer(kind=8) :: r00, r01, r02, r03
-        integer(kind=8) :: r04, r05, r06, r07
-        integer(kind=8) :: r08, r09, r10, r11
-        integer(kind=8) :: r12, r13, r14, r15
-
-        sum_up_f_i8=0d0
-        num_unroll = n - mod(n, 8)
-        include "./include/stats/sum_up/inc_sum_up.f90"
-        sum_up_f_i8 = r15 + r14 + r13 + r12
-    end function sum_up_f_i8
 
     !> A subroutine to the sum of values less than or equal the threshold from a 1-dim array. \n
     !! \return returns the sum of values less than or equal the threshold.
