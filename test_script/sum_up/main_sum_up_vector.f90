@@ -142,6 +142,13 @@ program main_sum_up_vector
             Real(c_double),Intent(In) :: x(n)
         end function    
 
+        function sum_assembl_r8_16_C_ver02_(x,n) Bind(C,Name='sum_assembl_r8_16_C_ver02_')
+            Import
+            Real(c_double) :: sum_assembl_r8_16_C_ver02_
+            Integer(c_int64_t),Value :: n
+            Real(c_double),Intent(In) :: x(n)
+        end function    
+
         function sum_assembl_i8_16_C_(x,n) Bind(C,Name='sum_assembl_i8_16_C_')
             Import
             Integer(c_int64_t)            :: sum_assembl_i8_16_C_
@@ -184,7 +191,7 @@ program main_sum_up_vector
     integer(kind=8) :: iter, n_iter, n_i8, k, n_x, n_i, idx, i, n_types, iter_types, res_i8
     integer(kind=4) :: n_i4
     character(len=30), ALLOCATABLE :: types(:)
-
+    
     n_types = 17
     allocate(times(n_types))
     allocate(types(n_types))
@@ -208,7 +215,7 @@ program main_sum_up_vector
 
     open(10, file="time_sum_r8.csv")
     open(20, file="time_sum_i8.csv")
-    do k=120, 200, 1
+    do k=20, 200, 1
         n_i8 = maxval((/2**(k/dble(8)), 4d0/))
         n_i4 = n_i8
         allocate(x_r8(n_i8))
@@ -318,7 +325,6 @@ program main_sum_up_vector
 
 
         deallocate(x_r8, x_i8)
-        call sleep(3)
     end do
 
 
@@ -557,5 +563,19 @@ contains
             sum_up_hydrid_i8 = sum_assembl_i8_08_C_(x,n)
         end if
     end function sum_up_hydrid_i8
+
+    function sum_up_hybrid2_r8(x,n)
+        implicit none
+        real(kind=8)    :: x(n)
+        integer(kind=8) :: n
+        real(kind=8)    :: sum_up_hybrid2_r8
+#if _default
+        sum_up_hybrid2_r8 = sum_unroll_15_f_r8_(x,n)
+#elif _x86_64
+        
+#endif
+    end function sum_up_hybrid2_r8
+
+
 
 end program main_sum_up_vector
