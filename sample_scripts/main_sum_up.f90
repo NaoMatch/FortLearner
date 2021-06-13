@@ -1,4 +1,4 @@
-program main_sum_up_left
+program main_sum_up
     use mod_const
     use mod_common
     use mod_timer
@@ -35,7 +35,7 @@ program main_sum_up_left
     print*, "Optimized Fortran"
     call date_and_time(values=date_value1)
     do iter=1, max_iter, 1
-        sumval_branch = sum_up_f(vector_r8, n_samples)
+        sumval_branch = sum_up_15_f_r8(vector_r8, n_samples)
     end do
     call date_and_time(values=date_value2)
     print*, time_diff(date_value1, date_value2), sumval_branch
@@ -63,7 +63,7 @@ program main_sum_up_left
     print*, "Optimized Fortran"
     call date_and_time(values=date_value1)
     do iter=1, max_iter, 1
-        sumval_branch = sum_up_f(vector_i8, n_samples)
+        sumval_branch = sum_up_15_f_i8(vector_i8, n_samples)
     end do
     call date_and_time(values=date_value2)
     print*, time_diff(date_value1, date_value2), sumval_branch
@@ -77,4 +77,4 @@ program main_sum_up_left
     call date_and_time(values=date_value2)
     print*, time_diff(date_value1, date_value2), sumval_branch
 
-end program main_sum_up_left
+end program main_sum_up
