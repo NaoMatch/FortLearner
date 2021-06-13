@@ -2160,4 +2160,473 @@ int64_t sum_up_32_i8(int64_t x[], int64_t n){
 }
 
 
+// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
+void sum_up_matrix_naive_r8_C(double *x_sum, double *x, int64_t n, int64_t c){
+	int64_t ii, jj,j0;
+	double tmp;
+	for(jj=0; jj<c; jj++){
+		j0 = jj*n;
+		tmp=0e0;
+		for(ii=0; ii<n; ii++){
+			tmp += x[ii+j0];
+		}
+		x_sum[jj]=tmp;
+	}
+}
+
+void sum_up_matrix_naive_i8_C(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
+	int64_t ii, jj,j0;
+	int64_t tmp;
+	for(jj=0; jj<c; jj++){
+		j0 = jj*n;
+		tmp=0e0;
+		for(ii=0; ii<n; ii++){
+			tmp += x[ii+j0];
+		}
+		x_sum[jj]=tmp;
+	}
+}
+
+void sum_up_matrix_unroll_02_r8_C(double *x_sum, double *x, int64_t n, int64_t c){
+	int64_t ii, jj,j0;
+    double ymm0,ymm1,ymm14,ymm15;
+
+	for(jj=0; jj<c; jj++){
+		j0 = jj*n;
+		ymm14=0e0;
+		ymm15=0e0;
+		int64_t n_unroll=(n>>1);
+		while( n_unroll-- ){ 
+			ymm0  = *(x  );
+			ymm1  = *(x+1);
+			ymm14 = ymm14 + ymm0;
+			ymm15 = ymm15 + ymm1;
+			x+=2;
+		}
+		ymm15 += ymm14;
+
+		int64_t n_remain=n%2;
+		if(n_remain & 1){
+			ymm15 += *(x);
+			x+=1;
+		}
+
+		x_sum[jj]=ymm15;
+	}
+}
+
+void sum_up_matrix_unroll_02_i8_C(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
+	int64_t ii, jj,j0;
+    int64_t ymm0,ymm1,ymm14,ymm15;
+
+	for(jj=0; jj<c; jj++){
+		j0 = jj*n;
+		ymm14=0e0;
+		ymm15=0e0;
+		int64_t n_unroll=(n>>1);
+		while( n_unroll-- ){ 
+			ymm0  = *(x  );
+			ymm1  = *(x+1);
+			ymm14 = ymm14 + ymm0;
+			ymm15 = ymm15 + ymm1;
+			x+=2;
+		}
+		ymm15 += ymm14;
+
+		int64_t n_remain=n%2;
+		if(n_remain & 1){
+			ymm15 += *(x);
+			x+=1;
+		}
+
+		x_sum[jj]=ymm15;
+	}
+}
+
+void sum_up_matrix_unroll_04_r8_C(double *x_sum, double *x, int64_t n, int64_t c){
+	int64_t ii, jj,j0;
+    double ymm0,ymm1,ymm2,ymm3;
+    double ymm12,ymm13,ymm14,ymm15;
+
+	for(jj=0; jj<c; jj++){
+		j0 = jj*n;
+		ymm12=0e0;
+		ymm13=0e0;
+		ymm14=0e0;
+		ymm15=0e0;
+		int64_t n_unroll=(n>>2);
+		while( n_unroll-- ){ 
+			ymm0  = *(x  );
+			ymm1  = *(x+1);
+			ymm2  = *(x+2);
+			ymm3  = *(x+3);
+			ymm12 = ymm12 + ymm0;
+			ymm13 = ymm13 + ymm1;
+			ymm14 = ymm14 + ymm2;
+			ymm15 = ymm15 + ymm3;
+			x+=4;
+		}
+		ymm15 += ymm14;
+		ymm15 += ymm13;
+		ymm15 += ymm12;
+
+		int64_t n_remain=n%4;
+		if(n_remain & 2){
+			ymm15 += *(x);
+			ymm15 += *(x+1);
+			x+=2;
+		}
+
+		if(n_remain & 1){
+			ymm15 += *(x);
+			x+=1;
+		}
+
+		x_sum[jj]=ymm15;
+	}
+}
+
+void sum_up_matrix_unroll_04_i8_C(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
+	int64_t ii, jj,j0;
+    int64_t ymm0,ymm1,ymm2,ymm3;
+    int64_t ymm12,ymm13,ymm14,ymm15;
+
+	for(jj=0; jj<c; jj++){
+		j0 = jj*n;
+		ymm12=0e0;
+		ymm13=0e0;
+		ymm14=0e0;
+		ymm15=0e0;
+		int64_t n_unroll=(n>>2);
+		while( n_unroll-- ){ 
+			ymm0  = *(x  );
+			ymm1  = *(x+1);
+			ymm2  = *(x+2);
+			ymm3  = *(x+3);
+			ymm12 = ymm12 + ymm0;
+			ymm13 = ymm13 + ymm1;
+			ymm14 = ymm14 + ymm2;
+			ymm15 = ymm15 + ymm3;
+			x+=4;
+		}
+		ymm15 += ymm14;
+		ymm15 += ymm13;
+		ymm15 += ymm12;
+
+		int64_t n_remain=n%4;
+		if(n_remain & 2){
+			ymm15 += *(x);
+			ymm15 += *(x+1);
+			x+=2;
+		}
+
+		if(n_remain & 1){
+			ymm15 += *(x);
+			x+=1;
+		}
+
+		x_sum[jj]=ymm15;
+	}
+}
+
+void sum_up_matrix_unroll_08_r8_C(double *x_sum, double *x, int64_t n, int64_t c){
+	int64_t ii, jj,j0;
+    double ymm0,ymm1,ymm2,ymm3;
+    double ymm4,ymm5,ymm6,ymm7;
+    double ymm8,ymm9,ymm10,ymm11;
+    double ymm12,ymm13,ymm14,ymm15;
+
+	for(jj=0; jj<c; jj++){
+		j0 = jj*n;
+		ymm8=0e0;
+		ymm9=0e0;
+		ymm10=0e0;
+		ymm11=0e0;
+		ymm12=0e0;
+		ymm13=0e0;
+		ymm14=0e0;
+		ymm15=0e0;
+		int64_t n_unroll=(n>>3);
+		while( n_unroll-- ){ 
+			ymm0  = *(x  );
+			ymm1  = *(x+1);
+			ymm2  = *(x+2);
+			ymm3  = *(x+3);
+			ymm4  = *(x+4);
+			ymm5  = *(x+5);
+			ymm6  = *(x+6);
+			ymm7  = *(x+7);
+			ymm8  = ymm8  + ymm0;
+			ymm9  = ymm9  + ymm1;
+			ymm10 = ymm10 + ymm2;
+			ymm11 = ymm11 + ymm3;
+			ymm12 = ymm12 + ymm4;
+			ymm13 = ymm13 + ymm5;
+			ymm14 = ymm14 + ymm6;
+			ymm15 = ymm15 + ymm7;
+			x+=8;
+		}
+		ymm15 += ymm14;
+		ymm15 += ymm13;
+		ymm15 += ymm12;
+		ymm15 += ymm11;
+		ymm15 += ymm10;
+		ymm15 += ymm9;
+		ymm15 += ymm8;
+
+		int64_t n_remain=n%8;
+		if(n_remain & 4){
+			ymm15 += *(x);
+			ymm15 += *(x+1);
+			ymm15 += *(x+2);
+			ymm15 += *(x+3);
+			x+=4;
+		}
+
+		if(n_remain & 2){
+			ymm15 += *(x);
+			ymm15 += *(x+1);
+			x+=2;
+		}
+
+		if(n_remain & 1){
+			ymm15 += *(x);
+			x+=1;
+		}
+
+		x_sum[jj]=ymm15;
+	}
+}
+
+void sum_up_matrix_unroll_08_i8_C(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
+	int64_t ii, jj,j0;
+    int64_t ymm0,ymm1,ymm2,ymm3;
+    int64_t ymm4,ymm5,ymm6,ymm7;
+    int64_t ymm8,ymm9,ymm10,ymm11;
+    int64_t ymm12,ymm13,ymm14,ymm15;
+
+	for(jj=0; jj<c; jj++){
+		j0 = jj*n;
+		ymm8=0e0;
+		ymm9=0e0;
+		ymm10=0e0;
+		ymm11=0e0;
+		ymm12=0e0;
+		ymm13=0e0;
+		ymm14=0e0;
+		ymm15=0e0;
+		int64_t n_unroll=(n>>3);
+		while( n_unroll-- ){ 
+			ymm0  = *(x  );
+			ymm1  = *(x+1);
+			ymm2  = *(x+2);
+			ymm3  = *(x+3);
+			ymm4  = *(x+4);
+			ymm5  = *(x+5);
+			ymm6  = *(x+6);
+			ymm7  = *(x+7);
+			ymm8  = ymm8  + ymm0;
+			ymm9  = ymm9  + ymm1;
+			ymm10 = ymm10 + ymm2;
+			ymm11 = ymm11 + ymm3;
+			ymm12 = ymm12 + ymm4;
+			ymm13 = ymm13 + ymm5;
+			ymm14 = ymm14 + ymm6;
+			ymm15 = ymm15 + ymm7;
+			x+=8;
+		}
+		ymm15 += ymm14;
+		ymm15 += ymm13;
+		ymm15 += ymm12;
+		ymm15 += ymm11;
+		ymm15 += ymm10;
+		ymm15 += ymm9;
+		ymm15 += ymm8;
+
+		int64_t n_remain=n%8;
+		if(n_remain & 4){
+			ymm15 += *(x);
+			ymm15 += *(x+1);
+			ymm15 += *(x+2);
+			ymm15 += *(x+3);
+			x+=4;
+		}
+
+		if(n_remain & 2){
+			ymm15 += *(x);
+			ymm15 += *(x+1);
+			x+=2;
+		}
+
+		if(n_remain & 1){
+			ymm15 += *(x);
+			x+=1;
+		}
+
+		x_sum[jj]=ymm15;
+	}
+}
+
+void sum_up_matrix_unroll_15_r8_C(double *x_sum, double *x, int64_t n, int64_t c){
+	int64_t ii, jj,j0;
+    double ymm0,ymm1,ymm2,ymm3;
+    double ymm4,ymm5,ymm6,ymm7;
+    double ymm8,ymm9,ymm10,ymm11;
+    double ymm12,ymm13,ymm14,ymm15;
+
+	for(jj=0; jj<c; jj++){
+		j0 = jj*n;
+		ymm15=0e0;
+		int64_t n_unroll=(n/15);
+		while( n_unroll-- ){ 
+			ymm0  = *(x  );
+			ymm1  = *(x+1);
+			ymm2  = *(x+2);
+			ymm3  = *(x+3);
+			ymm4  = *(x+4);
+			ymm5  = *(x+5);
+			ymm6  = *(x+6);
+			ymm7  = *(x+7);
+			ymm8  = *(x+8);
+			ymm9  = *(x+9);
+			ymm10 = *(x+10);
+			ymm11 = *(x+11);
+			ymm12 = *(x+12);
+			ymm13 = *(x+13);
+			ymm14 = *(x+14);
+			ymm15 = ymm15 + ymm0;
+			ymm15 = ymm15 + ymm1;
+			ymm15 = ymm15 + ymm2;
+			ymm15 = ymm15 + ymm3;
+			ymm15 = ymm15 + ymm4;
+			ymm15 = ymm15 + ymm5;
+			ymm15 = ymm15 + ymm6;
+			ymm15 = ymm15 + ymm7;
+			ymm15 = ymm15 + ymm8;
+			ymm15 = ymm15 + ymm9;
+			ymm15 = ymm15 + ymm10;
+			ymm15 = ymm15 + ymm11;
+			ymm15 = ymm15 + ymm12;
+			ymm15 = ymm15 + ymm13;
+			ymm15 = ymm15 + ymm14;
+			x+=15;
+		}
+
+		int64_t n_remain=n%15;
+		if(n_remain & 8){
+			ymm15 += *(x);
+			ymm15 += *(x+1);
+			ymm15 += *(x+2);
+			ymm15 += *(x+3);
+			ymm15 += *(x+4);
+			ymm15 += *(x+5);
+			ymm15 += *(x+6);
+			ymm15 += *(x+7);
+			x+=8;
+		}
+
+		if(n_remain & 4){
+			ymm15 += *(x);
+			ymm15 += *(x+1);
+			ymm15 += *(x+2);
+			ymm15 += *(x+3);
+			x+=4;
+		}
+
+		if(n_remain & 2){
+			ymm15 += *(x);
+			ymm15 += *(x+1);
+			x+=2;
+		}
+
+		if(n_remain & 1){
+			ymm15 += *(x);
+			x+=1;
+		}
+
+		x_sum[jj]=ymm15;
+	}
+}
+
+void sum_up_matrix_unroll_15_i8_C(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
+	int64_t ii, jj,j0;
+    int64_t ymm0,ymm1,ymm2,ymm3;
+    int64_t ymm4,ymm5,ymm6,ymm7;
+    int64_t ymm8,ymm9,ymm10,ymm11;
+    int64_t ymm12,ymm13,ymm14,ymm15;
+
+	for(jj=0; jj<c; jj++){
+		j0 = jj*n;
+		ymm15=0e0;
+		int64_t n_unroll=(n/15);
+		while( n_unroll-- ){ 
+			ymm0  = *(x  );
+			ymm1  = *(x+1);
+			ymm2  = *(x+2);
+			ymm3  = *(x+3);
+			ymm4  = *(x+4);
+			ymm5  = *(x+5);
+			ymm6  = *(x+6);
+			ymm7  = *(x+7);
+			ymm8  = *(x+8);
+			ymm9  = *(x+9);
+			ymm10 = *(x+10);
+			ymm11 = *(x+11);
+			ymm12 = *(x+12);
+			ymm13 = *(x+13);
+			ymm14 = *(x+14);
+			ymm15 = ymm15 + ymm0;
+			ymm15 = ymm15 + ymm1;
+			ymm15 = ymm15 + ymm2;
+			ymm15 = ymm15 + ymm3;
+			ymm15 = ymm15 + ymm4;
+			ymm15 = ymm15 + ymm5;
+			ymm15 = ymm15 + ymm6;
+			ymm15 = ymm15 + ymm7;
+			ymm15 = ymm15 + ymm8;
+			ymm15 = ymm15 + ymm9;
+			ymm15 = ymm15 + ymm10;
+			ymm15 = ymm15 + ymm11;
+			ymm15 = ymm15 + ymm12;
+			ymm15 = ymm15 + ymm13;
+			ymm15 = ymm15 + ymm14;
+			x+=15;
+		}
+
+		int64_t n_remain=n%15;
+		if(n_remain & 8){
+			ymm15 += *(x);
+			ymm15 += *(x+1);
+			ymm15 += *(x+2);
+			ymm15 += *(x+3);
+			ymm15 += *(x+4);
+			ymm15 += *(x+5);
+			ymm15 += *(x+6);
+			ymm15 += *(x+7);
+			x+=8;
+		}
+
+		if(n_remain & 4){
+			ymm15 += *(x);
+			ymm15 += *(x+1);
+			ymm15 += *(x+2);
+			ymm15 += *(x+3);
+			x+=4;
+		}
+
+		if(n_remain & 2){
+			ymm15 += *(x);
+			ymm15 += *(x+1);
+			x+=2;
+		}
+
+		if(n_remain & 1){
+			ymm15 += *(x);
+			x+=1;
+		}
+
+		x_sum[jj]=ymm15;
+	}
+}
 
