@@ -280,17 +280,149 @@ program main_sum_up_vector
             integer(c_int64_t), value :: n, c
         end subroutine sum_up_matrix_unroll_32_i8_ASM
 
-        subroutine sum_up_matrix_unroll_04_02_r8_ASM(x_sum, x, n, c) bind(c, name='sum_up_matrix_unroll_04_02_r8_ASM')
+        subroutine sum_up_matrix_unroll_04_02_r8_C(x_sum, x, n, c) bind(c, name='sum_up_matrix_unroll_04_02_r8_C')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_04_02_r8_C
+
+        subroutine sum_up_matrix_unroll_04_02_i8_C(x_sum, x, n, c) bind(c, name='sum_up_matrix_unroll_04_02_i8_C')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_04_02_i8_C
+
+        subroutine sum_up_matrix_unroll_08_02_r8_C(x_sum, x, n, c) bind(c, name='sum_up_matrix_unroll_08_02_r8_C')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_08_02_r8_C
+
+        subroutine sum_up_matrix_unroll_08_02_i8_C(x_sum, x, n, c) bind(c, name='sum_up_matrix_unroll_08_02_i8_C')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_08_02_i8_C
+
+        subroutine sum_up_matrix_unroll_02_08_r8_C(x_sum, x, n, c) bind(c, name='sum_up_matrix_unroll_02_08_r8_C')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_02_08_r8_C
+
+        subroutine sum_up_matrix_unroll_02_08_i8_C(x_sum, x, n, c) bind(c, name='sum_up_matrix_unroll_02_08_i8_C')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_02_08_i8_C
+
+        subroutine sum_up_matrix_unroll_04_04_r8_C(x_sum, x, n, c) bind(c, name='sum_up_matrix_unroll_04_04_r8_C')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_04_04_r8_C
+
+        subroutine sum_up_matrix_unroll_04_04_i8_C(x_sum, x, n, c) bind(c, name='sum_up_matrix_unroll_04_04_i8_C')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_04_04_i8_C
+
+        subroutine sum_up_matrix_unroll_02_04_r8_C(x_sum, x, n, c) bind(c, name='sum_up_matrix_unroll_02_04_r8_C')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_02_04_r8_C
+
+        subroutine sum_up_matrix_unroll_02_04_i8_C(x_sum, x, n, c) bind(c, name='sum_up_matrix_unroll_02_04_i8_C')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_02_04_i8_C
+
+        subroutine sum_up_matrix_unroll_04_04_r8_ASM(x_sum, x, n, c) &
+            bind(c, name='sum_up_matrix_unroll_04_04_r8_ASM')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_04_04_r8_ASM
+
+        subroutine sum_up_matrix_unroll_04_04_i8_ASM(x_sum, x, n, c) &
+            bind(c, name='sum_up_matrix_unroll_04_04_i8_ASM')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_04_04_i8_ASM
+
+        subroutine sum_up_matrix_unroll_08_04_r8_ASM(x_sum, x, n, c) &
+            bind(c, name='sum_up_matrix_unroll_08_04_r8_ASM')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_08_04_r8_ASM
+
+        subroutine sum_up_matrix_unroll_08_04_i8_ASM(x_sum, x, n, c) &
+            bind(c, name='sum_up_matrix_unroll_08_04_i8_ASM')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_08_04_i8_ASM
+
+        subroutine sum_up_matrix_unroll_08_04_r8_ASM_Parallel(x_sum, x, n, c) & 
+            bind(c, name='sum_up_matrix_unroll_08_04_r8_ASM_Parallel')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_08_04_r8_ASM_Parallel
+
+        subroutine sum_up_matrix_unroll_08_04_i8_ASM_Parallel(x_sum, x, n, c) & 
+            bind(c, name='sum_up_matrix_unroll_08_04_i8_ASM_Parallel')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_08_04_i8_ASM_Parallel
+
+        subroutine sum_up_matrix_unroll_04_02_r8_ASM(x_sum, x, n, c) & 
+            bind(c, name='sum_up_matrix_unroll_04_02_r8_ASM')
             import :: c_ptr, c_int64_t
             type(c_ptr), value    :: x_sum, x
             integer(c_int64_t), value :: n, c
         end subroutine sum_up_matrix_unroll_04_02_r8_ASM
 
-        subroutine sum_up_matrix_unroll_04_02_i8_ASM(x_sum, x, n, c) bind(c, name='sum_up_matrix_unroll_04_02_i8_ASM')
+        subroutine sum_up_matrix_unroll_04_02_i8_ASM(x_sum, x, n, c) & 
+            bind(c, name='sum_up_matrix_unroll_04_02_i8_ASM')
             import :: c_ptr, c_int64_t
             type(c_ptr), value    :: x_sum, x
             integer(c_int64_t), value :: n, c
         end subroutine sum_up_matrix_unroll_04_02_i8_ASM
+
+        subroutine sum_up_matrix_unroll_04_08_r8_ASM(x_sum, x, n, c) & 
+            bind(c, name='sum_up_matrix_unroll_04_08_r8_ASM')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_04_08_r8_ASM
+
+        subroutine sum_up_matrix_unroll_04_08_i8_ASM(x_sum, x, n, c) & 
+            bind(c, name='sum_up_matrix_unroll_04_08_i8_ASM')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_04_08_i8_ASM
+
+        subroutine sum_up_matrix_unroll_08_02_r8_ASM(x_sum, x, n, c) & 
+            bind(c, name='sum_up_matrix_unroll_08_02_r8_ASM')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_08_02_r8_ASM
+
+        subroutine sum_up_matrix_unroll_08_02_i8_ASM(x_sum, x, n, c) & 
+            bind(c, name='sum_up_matrix_unroll_08_02_i8_ASM')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_unroll_08_02_i8_ASM
 
     end interface
 
@@ -314,8 +446,8 @@ program main_sum_up_vector
 
     type(c_ptr) :: res_r8_ptr, res_i8_ptr, x_r8_ptr, x_i8_ptr
 
-    
-    n_types = 22
+
+    n_types = 34
     allocate(times(n_types))
     allocate(types(n_types))
     types(1)  = "sum_intrinsic_F      :"
@@ -325,11 +457,11 @@ program main_sum_up_vector
     types(5)  = "sum_unroll_08_F      :"
     types(6)  = "sum_unroll_15_F      :"
     types(7)  = "sum_unroll_30_F      :"
-    types(8)  = "sum_unroll_04_04_F   :"
-    types(9)  = "sum_unroll_08_02_F   :"
-    types(10) = "sum_unroll_02_08_F   :"
-    types(11) = "sum_unroll_04_02_F   :"
-    types(12) = "sum_unroll_02_04_F   :"
+    types(8)  = "sum_unroll_04_04_F   :" !
+    types(9)  = "sum_unroll_08_02_F   :" !
+    types(10) = "sum_unroll_02_08_F   :" !x
+    types(11) = "sum_unroll_04_02_F   :" !
+    types(12) = "sum_unroll_02_04_F   :" !x
     types(13) = "sum_naive_C          :"
     types(14) = "sum_unroll_02_C      :"
     types(15) = "sum_unroll_04_C      :"
@@ -339,15 +471,27 @@ program main_sum_up_vector
     types(19) = "sum_unroll_08_ASM    :"
     types(20) = "sum_unroll_16_ASM    :"
     types(21) = "sum_unroll_32_ASM    :"
-    types(22) = "sum_unroll_04_02_ASM :"
+    types(22) = "sum_unroll_04_04_C   :"
+    types(23) = "sum_unroll_08_02_C   :"
+    types(24) = "sum_unroll_02_08_C   :"
+    types(25) = "sum_unroll_04_02_C   :"
+    types(26) = "sum_unroll_02_04_C   :"
+    types(27) = "sum_unroll_04_04_ASM :" !
+    types(28) = "sum_unroll_08_02_ASM :" !
+    types(29) = "sum_unroll_04_08_ASM :"
+    types(30) = "sum_unroll_04_02_ASM :" !
+    types(31) = "sum_vector_loop      :" !
+    types(32) = "sum_vector_loop_para2:" !
+    types(33) = "sum_vector_loop_para4:" !
+    types(34) = "sum_vector_loop_para8:" !
 
-    c_i8 = 25
+    c_i8 = 8
     allocate(res_r8(c_i8))
     allocate(res_i8(c_i8))
 
-    open(10, file="time_sum_10_r8.csv")
-    open(20, file="time_sum_10_i8.csv")
-    do k=100, 200, 1
+    open(10, file="time_sum_Xx64_r8.csv")
+    open(20, file="time_sum_Xx64_i8.csv")
+    do k=120, 200, 1
         n_i8 = maxval((/2**(k/dble(8)), 4d0/))
         n_i4 = n_i8
         allocate(x_r8(n_i8,c_i8))
@@ -355,8 +499,9 @@ program main_sum_up_vector
         call random_number(x_r8)
         x_r8 = 10 * x_r8
         x_i8 = x_r8
-        n_iter=maxval((/5000000000_8/n_i8/c_i8, 1_8/))
-        n_iter=maxval((/500000000_8/n_i8/c_i8, 1_8/))
+        n_iter=maxval((/10000000000_8/n_i8/c_i8, 1_8/))
+        ! n_iter=maxval((/500000000_8/n_i8/c_i8, 1_8/))
+        ! n_iter=maxval((/50000000_8/n_i8/c_i8, 1_8/))
         ! n_iter=1
 
         res_r8_ptr = c_loc(res_r8)
@@ -413,12 +558,38 @@ program main_sum_up_vector
                     case (21)
                             call sum_up_matrix_unroll_32_r8_ASM(res_r8_ptr, x_r8_ptr, n_i8, c_i8)
                     case (22)
+                            call sum_up_matrix_unroll_04_04_r8_C(res_r8_ptr, x_r8_ptr, n_i8, c_i8)
+                    case (23)
+                            call sum_up_matrix_unroll_08_02_r8_C(res_r8_ptr, x_r8_ptr, n_i8, c_i8)
+                    case (24)
+                            call sum_up_matrix_unroll_02_08_r8_C(res_r8_ptr, x_r8_ptr, n_i8, c_i8)
+                    case (25)
+                            call sum_up_matrix_unroll_04_02_r8_C(res_r8_ptr, x_r8_ptr, n_i8, c_i8)
+                    case (26)
+                            call sum_up_matrix_unroll_02_04_r8_C(res_r8_ptr, x_r8_ptr, n_i8, c_i8)
+                    case (27)
+                            call sum_up_matrix_unroll_04_04_r8_ASM(res_r8_ptr, x_r8_ptr, n_i8, c_i8)
+                    case (28)
+                            call sum_up_matrix_unroll_08_02_r8_ASM(res_r8_ptr, x_r8_ptr, n_i8, c_i8)
+                    case (29)
+                            call sum_up_matrix_unroll_04_08_r8_ASM(res_r8_ptr, x_r8_ptr, n_i8, c_i8)
+                    case (30)
                             call sum_up_matrix_unroll_04_02_r8_ASM(res_r8_ptr, x_r8_ptr, n_i8, c_i8)
+                    case (31)
+                            call sum_up_matrix_r8(res_r8, x_r8, n_i8, c_i8)
+                    case (32)
+                            call sum_up_matrix_parallel_02_r8(res_r8, x_r8, n_i8, c_i8)
+                    case (33)
+                            call sum_up_matrix_parallel_04_r8(res_r8, x_r8, n_i8, c_i8)
+                    case (34)
+                            call sum_up_matrix_parallel_08_r8(res_r8, x_r8, n_i8, c_i8)
                 end select
             end do
             call date_and_time(values=date_value2)
             times(iter_types) = time_diff(date_value1, date_value2)/dble(n_iter)
-            print *, "R: ", types(iter_types), n_i8, real(times(iter_types)), sum(res_r8)
+            ! print *, "R: ", types(iter_types), n_i8, real(times(iter_types)), sum(res_r8)
+            ! print "(A, i15, f30.15, f30.15)", types(iter_types), n_i8, real(times(iter_types)), sum(res_r8)
+            print "(A, i15, f30.15, f30.15)", types(iter_types), n_i8, real(times(iter_types)), sum(res_r8)
         end do
         write(10,*) k, n_i8, times
 
@@ -471,12 +642,36 @@ program main_sum_up_vector
                     case (21)
                             call sum_up_matrix_unroll_32_i8_ASM(res_i8_ptr, x_i8_ptr, n_i8, c_i8)
                     case (22)
+                            call sum_up_matrix_unroll_04_04_i8_C(res_i8_ptr, x_i8_ptr, n_i8, c_i8)
+                    case (23)
+                            call sum_up_matrix_unroll_08_02_i8_C(res_i8_ptr, x_i8_ptr, n_i8, c_i8)
+                    case (24)
+                            call sum_up_matrix_unroll_02_08_i8_C(res_i8_ptr, x_i8_ptr, n_i8, c_i8)
+                    case (25)
+                            call sum_up_matrix_unroll_04_02_i8_C(res_i8_ptr, x_i8_ptr, n_i8, c_i8)
+                    case (26)
+                            call sum_up_matrix_unroll_02_04_i8_C(res_i8_ptr, x_i8_ptr, n_i8, c_i8)
+                    case (27)
+                            call sum_up_matrix_unroll_04_04_i8_ASM(res_i8_ptr, x_i8_ptr, n_i8, c_i8)
+                    case (28)
+                            call sum_up_matrix_unroll_08_02_i8_ASM(res_i8_ptr, x_i8_ptr, n_i8, c_i8)
+                    case (29)
+                            call sum_up_matrix_unroll_04_08_i8_ASM(res_i8_ptr, x_i8_ptr, n_i8, c_i8)
+                    case (30)
                             call sum_up_matrix_unroll_04_02_i8_ASM(res_i8_ptr, x_i8_ptr, n_i8, c_i8)
+                    case (31)
+                            call sum_up_matrix_i8(res_i8, x_i8, n_i8, c_i8)
+                    case (32)
+                            call sum_up_matrix_parallel_02_i8(res_i8, x_i8, n_i8, c_i8)
+                    case (33)
+                            call sum_up_matrix_parallel_04_i8(res_i8, x_i8, n_i8, c_i8)
+                    case (34)
+                            call sum_up_matrix_parallel_08_i8(res_i8, x_i8, n_i8, c_i8)
                 end select
             end do
             call date_and_time(values=date_value2)
             times(iter_types) = time_diff(date_value1, date_value2)/dble(n_iter)
-            print *, "I: ", types(iter_types), n_i8, real(times(iter_types)), sum(res_i8)
+            print "(A, i15, f30.15, i15)", types(iter_types), n_i8, real(times(iter_types)), sum(res_i8)
         end do
         write(20,*) k, n_i8, times
 
@@ -487,6 +682,151 @@ program main_sum_up_vector
 
 
 contains
+
+    subroutine sum_up_matrix_r8(r, x, n, c)
+        implicit none
+        real(kind=8), intent(inout) :: r(c)
+        real(kind=8), intent(in)    :: x(n,c)
+        integer(kind=8), intent(in) :: n,c
+
+        integer(kind=8) :: i
+        real(kind=8) :: tmp_sum
+
+        do i=1, c, 1
+            tmp_sum = sum_up(x(:,i),n)
+            r(i) = tmp_sum
+        end do
+    end subroutine sum_up_matrix_r8
+
+    subroutine sum_up_matrix_i8(r, x, n, c)
+        implicit none
+        integer(kind=8), intent(inout) :: r(c)
+        integer(kind=8), intent(in)    :: x(n,c)
+        integer(kind=8), intent(in) :: n,c
+
+        integer(kind=8) :: i
+        integer(kind=8) :: tmp_sum
+
+        do i=1, c, 1
+            tmp_sum = sum_up(x(:,i),n)
+            r(i) = tmp_sum
+        end do
+    end subroutine sum_up_matrix_i8
+
+    subroutine sum_up_matrix_parallel_02_r8(r, x, n, c)
+        implicit none
+        real(kind=8), intent(inout) :: r(c)
+        real(kind=8), intent(in)    :: x(n,c)
+        integer(kind=8), intent(in) :: n,c
+
+        integer(kind=8) :: i
+        real(kind=8) :: tmp_sum
+
+        !$omp parallel num_threads(2)
+        !$omp do
+        do i=1, c, 1
+            tmp_sum = sum_up(x(:,i),n)
+            r(i) = tmp_sum
+        end do
+        !$omp end do
+        !$omp end parallel
+    end subroutine sum_up_matrix_parallel_02_r8
+
+    subroutine sum_up_matrix_parallel_02_i8(r, x, n, c)
+        implicit none
+        integer(kind=8), intent(inout) :: r(c)
+        integer(kind=8), intent(in)    :: x(n,c)
+        integer(kind=8), intent(in) :: n,c
+
+        integer(kind=8) :: i
+        integer(kind=8) :: tmp_sum
+
+        !$omp parallel num_threads(2)
+        !$omp do
+        do i=1, c, 1
+            tmp_sum = sum_up(x(:,i),n)
+            r(i) = tmp_sum
+        end do
+        !$omp end do
+        !$omp end parallel
+    end subroutine sum_up_matrix_parallel_02_i8
+
+    subroutine sum_up_matrix_parallel_04_r8(r, x, n, c)
+        implicit none
+        real(kind=8), intent(inout) :: r(c)
+        real(kind=8), intent(in)    :: x(n,c)
+        integer(kind=8), intent(in) :: n,c
+
+        integer(kind=8) :: i
+        real(kind=8) :: tmp_sum
+
+        !$omp parallel num_threads(4)
+        !$omp do
+        do i=1, c, 1
+            tmp_sum = sum_up(x(:,i),n)
+            r(i) = tmp_sum
+        end do
+        !$omp end do
+        !$omp end parallel
+    end subroutine sum_up_matrix_parallel_04_r8
+
+    subroutine sum_up_matrix_parallel_04_i8(r, x, n, c)
+        implicit none
+        integer(kind=8), intent(inout) :: r(c)
+        integer(kind=8), intent(in)    :: x(n,c)
+        integer(kind=8), intent(in) :: n,c
+
+        integer(kind=8) :: i
+        integer(kind=8) :: tmp_sum
+
+        !$omp parallel num_threads(4)
+        !$omp do
+        do i=1, c, 1
+            tmp_sum = sum_up(x(:,i),n)
+            r(i) = tmp_sum
+        end do
+        !$omp end do
+        !$omp end parallel
+    end subroutine sum_up_matrix_parallel_04_i8
+
+    subroutine sum_up_matrix_parallel_08_r8(r, x, n, c)
+        implicit none
+        real(kind=8), intent(inout) :: r(c)
+        real(kind=8), intent(in)    :: x(n,c)
+        integer(kind=8), intent(in) :: n,c
+
+        integer(kind=8) :: i
+        real(kind=8) :: tmp_sum
+
+        !$omp parallel num_threads(8)
+        !$omp do
+        do i=1, c, 1
+            tmp_sum = sum_up(x(:,i),n)
+            r(i) = tmp_sum
+        end do
+        !$omp end do
+        !$omp end parallel
+    end subroutine sum_up_matrix_parallel_08_r8
+
+    subroutine sum_up_matrix_parallel_08_i8(r, x, n, c)
+        implicit none
+        integer(kind=8), intent(inout) :: r(c)
+        integer(kind=8), intent(in)    :: x(n,c)
+        integer(kind=8), intent(in) :: n,c
+
+        integer(kind=8) :: i
+        integer(kind=8) :: tmp_sum
+
+        !$omp parallel num_threads(8)
+        !$omp do
+        do i=1, c, 1
+            tmp_sum = sum_up(x(:,i),n)
+            r(i) = tmp_sum
+        end do
+        !$omp end do
+        !$omp end parallel
+    end subroutine sum_up_matrix_parallel_08_i8
+
 
     subroutine sum_up_matrix_naive_r8(r,x,n,c)
         implicit none
