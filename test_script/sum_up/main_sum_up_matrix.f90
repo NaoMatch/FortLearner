@@ -461,7 +461,7 @@ program main_sum_up_vector
     type(c_ptr) :: res_r8_ptr, res_i8_ptr, x_r8_ptr, x_i8_ptr
 
 
-    n_types = 36
+    n_types = 37
     allocate(times(n_types))
     allocate(types(n_types))
     types(1)  = "sum_intrinsic_F      :"
@@ -500,6 +500,7 @@ program main_sum_up_vector
     types(34) = "sum_vector_loop_para8:" !
     types(35) = "sum_of_matrix        :" !
     types(36) = "sum_unroll_02_08_C_P :"
+    types(37) = "sum_unroll_04_04_F_P :"
 
     c_i8 = 64
     allocate(res_r8(c_i8))
@@ -516,8 +517,8 @@ program main_sum_up_vector
         x_r8 = 10 * x_r8
         x_i8 = x_r8
         n_iter=maxval((/10000000000_8/n_i8/c_i8, 1_8/))
-        ! n_iter=maxval((/500000000_8/n_i8/c_i8, 1_8/))
-        n_iter=maxval((/50000000_8/n_i8/c_i8, 1_8/))
+        n_iter=maxval((/500000000_8/n_i8/c_i8, 1_8/))
+        ! n_iter=maxval((/50000000_8/n_i8/c_i8, 1_8/))
         ! n_iter=1
 
         res_r8_ptr = c_loc(res_r8)
@@ -603,6 +604,8 @@ program main_sum_up_vector
                             call sum_of_matrix(res_r8, x_r8, n_i8, c_i8, 1_8)
                     case (36)
                             call sum_up_matrix_unroll_02_08_r8_C_P(res_r8_ptr, x_r8_ptr, n_i8, c_i8)
+                    case (37)
+                            call sum_up_matrix_unroll_04_04_P_r8(res_r8, x_r8, n_i8, c_i8)
                 end select
             end do
             call date_and_time(values=date_value2)
@@ -691,6 +694,8 @@ program main_sum_up_vector
                             call sum_of_matrix(res_i8, x_i8, n_i8, c_i8, 1_8)
                     case (36)
                             call sum_up_matrix_unroll_02_08_i8_C_P(res_i8_ptr, x_i8_ptr, n_i8, c_i8)
+                    case (37)
+                            call sum_up_matrix_unroll_04_04_P_i8(res_i8, x_i8, n_i8, c_i8)
                 end select
             end do
             call date_and_time(values=date_value2)
@@ -1195,5 +1200,35 @@ contains
         include "./inc_sum_matrix_unroll_02_04_f.f90"
     end subroutine sum_up_matrix_unroll_02_04_i8
 
+
+    subroutine sum_up_matrix_unroll_04_04_P_r8(r,x,n,c)
+        implicit none
+        real(kind=8), intent(inout) :: r(c)
+        real(kind=8), intent(in)    :: x(n,c)
+        integer(kind=8), intent(in) :: n,c
+
+        integer(kind=8) :: i_unroll, j_unroll, i, j
+
+        real(kind=8) :: r00, r01, r02, r03
+        real(kind=8) :: r04, r05, r06, r07
+        real(kind=8) :: r08, r09, r10, r11
+        real(kind=8) :: r12, r13, r14, r15
+        include "./inc_sum_matrix_unroll_04_04_f_P.f90"
+    end subroutine sum_up_matrix_unroll_04_04_P_r8
+
+    subroutine sum_up_matrix_unroll_04_04_P_i8(r,x,n,c)
+        implicit none
+        integer(kind=8), intent(inout) :: r(c)
+        integer(kind=8), intent(in)    :: x(n,c)
+        integer(kind=8), intent(in)    :: n,c
+
+        integer(kind=8) :: i_unroll, j_unroll, i, j
+
+        integer(kind=8) :: r00, r01, r02, r03
+        integer(kind=8) :: r04, r05, r06, r07
+        integer(kind=8) :: r08, r09, r10, r11
+        integer(kind=8) :: r12, r13, r14, r15
+        include "./inc_sum_matrix_unroll_04_04_f_P.f90"
+    end subroutine sum_up_matrix_unroll_04_04_P_i8
 
 end program main_sum_up_vector
