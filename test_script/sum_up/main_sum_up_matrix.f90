@@ -502,7 +502,7 @@ program main_sum_up_vector
     types(36) = "sum_unroll_02_08_C_P :"
     types(37) = "sum_unroll_04_04_F_P :"
 
-    c_i8 = 64
+    c_i8 = 8
     allocate(res_r8(c_i8))
     allocate(res_i8(c_i8))
 
