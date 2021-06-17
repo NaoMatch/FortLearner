@@ -6286,3 +6286,333 @@ void sum_up_matrix_unroll_04_08_i8_ASM(int64_t *x_sum, int64_t *x0, int64_t n, i
 		j7+=1;
 	}
 }
+
+void sum_up_matrix_unroll_02_08_r8_C_P(double *x_sum, double *x0, int64_t n, int64_t c){
+	if (n<2 || c<8){
+		sum_up_matrix_naive_r8_C(x_sum, x0, n, c);
+		return;
+	}
+	double *x1, *x2, *x3, *x4, *x5, *x6, *x7;
+	x1 = x0;
+	x2 = x0;
+	x3 = x0;
+	x4 = x0;
+	x5 = x0;
+	x6 = x0;
+	x7 = x0;
+
+    double ymm0,ymm1,ymm2,ymm3;
+    double ymm4,ymm5,ymm6,ymm7;
+    double ymm8,ymm9,ymm10,ymm11;
+    double ymm12,ymm13,ymm14,ymm15;
+
+	int64_t skip=c/8, c_unroll=(c/8);
+	x1+=skip*n;
+	x2+=skip*n*2;
+	x3+=skip*n*3;
+	x4+=skip*n*4;
+	x5+=skip*n*5;
+	x6+=skip*n*6;
+	x7+=skip*n*7;
+	int64_t j0=0, j1=skip, j2=skip*2, j3=skip*3, j4=skip*4, j5=skip*5, j6=skip*6, j7=skip*7;
+	while(c_unroll--){
+		int64_t n_unroll=(n>>1);
+		ymm8=0e0;
+		ymm9=0e0;
+		ymm10=0e0;
+		ymm11=0e0;
+		ymm12=0e0;
+		ymm13=0e0;
+		ymm14=0e0;
+		ymm15=0e0;
+		int64_t iii=0;
+		#pragma omp reduction(+:ymm8, ymm9, ymm10, ymm11, ymm12, ymm13, ymm14, ymm15) num_threads(4)
+		for(iii=0; iii<n_unroll; iii++){
+			ymm0  = *(x0);
+			ymm1  = *(x0+1);
+			ymm8  = ymm8 + ymm0;
+			ymm8  = ymm8 + ymm1;
+
+			ymm2 = *(x1);
+			ymm3 = *(x1+1);
+			ymm9  = ymm9 + ymm2;
+			ymm9  = ymm9 + ymm3;
+
+			ymm4  = *(x2);
+			ymm5  = *(x2+1);
+			ymm10 = ymm10 + ymm4;
+			ymm10 = ymm10 + ymm5;
+
+			ymm6 = *(x3);
+			ymm7 = *(x3+1);
+			ymm11 = ymm11 + ymm6;
+			ymm11 = ymm11 + ymm7;
+
+			ymm0  = *(x4);
+			ymm1  = *(x4+1);
+			ymm12 = ymm12+ ymm0;
+			ymm12 = ymm12+ ymm1;
+
+			ymm2 = *(x5);
+			ymm3 = *(x5+1);
+			ymm13  = ymm13 + ymm2;
+			ymm13  = ymm13 + ymm3;
+
+			ymm4  = *(x6);
+			ymm5  = *(x6+1);
+			ymm14 = ymm14 + ymm4;
+			ymm14 = ymm14 + ymm5;
+
+			ymm6 = *(x7);
+			ymm7 = *(x7+1);
+			ymm15 = ymm15 + ymm6;
+			ymm15 = ymm15 + ymm7;
+
+
+			x0+=2;
+			x1+=2;
+			x2+=2;
+			x3+=2;
+			x4+=2;
+			x5+=2;
+			x6+=2;
+			x7+=2;
+		}
+
+		int64_t n_rem=n%2;
+		while(n_rem--){
+			ymm0  = *(x0);
+			ymm8  = ymm8 + ymm0;
+
+			ymm2 = *(x1);
+			ymm9  = ymm9 + ymm2;
+
+			ymm4  = *(x2);
+			ymm10 = ymm10 + ymm4;
+
+			ymm6 = *(x3);
+			ymm11 = ymm11 + ymm6;
+
+			ymm0  = *(x4);
+			ymm12 = ymm12+ ymm0;
+
+			ymm2 = *(x5);
+			ymm13  = ymm13 + ymm2;
+
+			ymm4  = *(x6);
+			ymm14 = ymm14 + ymm4;
+
+			ymm6 = *(x7);
+			ymm15 = ymm15 + ymm6;
+
+			x0+=1;
+			x1+=1;
+			x2+=1;
+			x3+=1;
+			x4+=1;
+			x5+=1;
+			x6+=1;
+			x7+=1;
+		}
+
+		x_sum[j0] = ymm8;
+		x_sum[j1] = ymm9;
+		x_sum[j2] = ymm10;
+		x_sum[j3] = ymm11;
+		x_sum[j4] = ymm12;
+		x_sum[j5] = ymm13;
+		x_sum[j6] = ymm14;
+		x_sum[j7] = ymm15;
+
+		j0+=1;
+		j1+=1;
+		j2+=1;
+		j3+=1;
+		j4+=1;
+		j5+=1;
+		j6+=1;
+		j7+=1;
+	}
+
+	int64_t c_rem=c%8;
+	while(c_rem--){
+		ymm15=0e0;
+		int64_t n_unroll=(n>>1);
+		while(n_unroll--){
+			ymm4 = *(x7);
+			ymm5 = *(x7+1);
+			ymm15 = ymm15 + ymm4;
+			ymm15 = ymm15 + ymm5;
+
+			x7+=2;
+		}
+		x_sum[j7] = ymm15;
+		j7+=1;
+	}
+}
+
+void sum_up_matrix_unroll_02_08_i8_C_P(int64_t *x_sum, int64_t *x0, int64_t n, int64_t c){
+	if (n<2 || c<8){
+		sum_up_matrix_naive_i8_C(x_sum, x0, n, c);
+		return;
+	}
+	int64_t *x1, *x2, *x3, *x4, *x5, *x6, *x7;
+	x1 = x0;
+	x2 = x0;
+	x3 = x0;
+	x4 = x0;
+	x5 = x0;
+	x6 = x0;
+	x7 = x0;
+
+    int64_t ymm0,ymm1,ymm2,ymm3;
+    int64_t ymm4,ymm5,ymm6,ymm7;
+    int64_t ymm8,ymm9,ymm10,ymm11;
+    int64_t ymm12,ymm13,ymm14,ymm15;
+
+	int64_t skip=c/8, c_unroll=(c/8);
+	x1+=skip*n;
+	x2+=skip*n*2;
+	x3+=skip*n*3;
+	x4+=skip*n*4;
+	x5+=skip*n*5;
+	x6+=skip*n*6;
+	x7+=skip*n*7;
+	int64_t j0=0, j1=skip, j2=skip*2, j3=skip*3, j4=skip*4, j5=skip*5, j6=skip*6, j7=skip*7;
+
+	while(c_unroll--){
+		int64_t n_unroll=(n>>1);
+		ymm8=0e0;
+		ymm9=0e0;
+		ymm10=0e0;
+		ymm11=0e0;
+		ymm12=0e0;
+		ymm13=0e0;
+		ymm14=0e0;
+		ymm15=0e0;
+		int64_t iii=0;
+		#pragma omp reduction(+:ymm8, ymm9, ymm10, ymm11, ymm12, ymm13, ymm14, ymm15) num_threads(4)
+		for(iii=0; iii<n_unroll; iii++){
+			ymm0  = *(x0);
+			ymm1  = *(x0+1);
+			ymm8  = ymm8 + ymm0;
+			ymm8  = ymm8 + ymm1;
+
+			ymm2 = *(x1);
+			ymm3 = *(x1+1);
+			ymm9  = ymm9 + ymm2;
+			ymm9  = ymm9 + ymm3;
+
+			ymm4  = *(x2);
+			ymm5  = *(x2+1);
+			ymm10 = ymm10 + ymm4;
+			ymm10 = ymm10 + ymm5;
+
+			ymm6 = *(x3);
+			ymm7 = *(x3+1);
+			ymm11 = ymm11 + ymm6;
+			ymm11 = ymm11 + ymm7;
+
+			ymm0  = *(x4);
+			ymm1  = *(x4+1);
+			ymm12 = ymm12+ ymm0;
+			ymm12 = ymm12+ ymm1;
+
+			ymm2 = *(x5);
+			ymm3 = *(x5+1);
+			ymm13  = ymm13 + ymm2;
+			ymm13  = ymm13 + ymm3;
+
+			ymm4  = *(x6);
+			ymm5  = *(x6+1);
+			ymm14 = ymm14 + ymm4;
+			ymm14 = ymm14 + ymm5;
+
+			ymm6 = *(x7);
+			ymm7 = *(x7+1);
+			ymm15 = ymm15 + ymm6;
+			ymm15 = ymm15 + ymm7;
+
+
+			x0+=2;
+			x1+=2;
+			x2+=2;
+			x3+=2;
+			x4+=2;
+			x5+=2;
+			x6+=2;
+			x7+=2;
+		}
+
+		int64_t n_rem=n%2;
+		while(n_rem--){
+			ymm0  = *(x0);
+			ymm8  = ymm8 + ymm0;
+
+			ymm2 = *(x1);
+			ymm9  = ymm9 + ymm2;
+
+			ymm4  = *(x2);
+			ymm10 = ymm10 + ymm4;
+
+			ymm6 = *(x3);
+			ymm11 = ymm11 + ymm6;
+
+			ymm0  = *(x4);
+			ymm12 = ymm12+ ymm0;
+
+			ymm2 = *(x5);
+			ymm13  = ymm13 + ymm2;
+
+			ymm4  = *(x6);
+			ymm14 = ymm14 + ymm4;
+
+			ymm6 = *(x7);
+			ymm15 = ymm15 + ymm6;
+
+			x0+=1;
+			x1+=1;
+			x2+=1;
+			x3+=1;
+			x4+=1;
+			x5+=1;
+			x6+=1;
+			x7+=1;
+		}
+
+		x_sum[j0] = ymm8;
+		x_sum[j1] = ymm9;
+		x_sum[j2] = ymm10;
+		x_sum[j3] = ymm11;
+		x_sum[j4] = ymm12;
+		x_sum[j5] = ymm13;
+		x_sum[j6] = ymm14;
+		x_sum[j7] = ymm15;
+
+		j0+=1;
+		j1+=1;
+		j2+=1;
+		j3+=1;
+		j4+=1;
+		j5+=1;
+		j6+=1;
+		j7+=1;
+	}
+
+	int64_t c_rem=c%8;
+	while(c_rem--){
+		ymm15=0e0;
+		int64_t n_unroll=(n>>1);
+		while(n_unroll--){
+			ymm4 = *(x7);
+			ymm5 = *(x7+1);
+			ymm15 = ymm15 + ymm4;
+			ymm15 = ymm15 + ymm5;
+
+			x7+=2;
+		}
+		x_sum[j7] = ymm15;
+		j7+=1;
+	}
+}
+
