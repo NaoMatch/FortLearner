@@ -23,9 +23,9 @@ rm:
 	rm *.out
 
 run_m:
-	gcc $(option) -c sum.c -O3
-	gfortran -w -c main_sum_up_matrix.f90 -O3
-	gfortran \
+	gcc $(option) -fopenmp -c sum.c -O3
+	gfortran -w -c main_sum_up_matrix.f90 -O3 -fopenmp
+	gfortran -fopenmp \
 	mod_const.o \
 	mod_common.o \
 	mod_timer.o \
