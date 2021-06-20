@@ -1,6 +1,3 @@
-r12 = 0d0
-r13 = 0d0
-r14 = 0d0
 r15 = 0d0
 
 do i=1, num_unroll, 8
@@ -13,15 +10,17 @@ do i=1, num_unroll, 8
     r06 = x(i+6)
     r07 = x(i+7)
 
-    r08 = r04 + r00
-    r09 = r05 + r01
-    r10 = r06 + r02
-    r11 = r07 + r03
+    r00 = r00 + r01
+    r02 = r02 + r03
+    r04 = r04 + r05
+    r06 = r06 + r07
 
-    r12 = r12 + r08
-    r13 = r13 + r09
-    r14 = r14 + r10
-    r15 = r15 + r11
+    r00 = r00 + r02
+    r04 = r04 + r06
+    
+    r00 = r00 + r04
+    
+    r15 = r15 + r00
 end do
 
 do i=num_unroll+1, n, 1
