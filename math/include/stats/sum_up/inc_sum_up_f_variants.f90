@@ -138,92 +138,96 @@ end function sum_up_08_f_r8
 
 !> A function to sum up vector, integer 64bit.
 !! Optimization was performed using only Fortran.
-!! \param sum_up_15_f_i8 Sum of vector elements
+!! \param sum_up_16_f_i8 Sum of vector elements
 !! \param x vector
 !! \param n size of vector
-function sum_up_15_f_i8(x,n)
+function sum_up_16_f_i8(x,n)
     implicit none
     integer(kind=8), intent(in) :: x(n)
     integer(kind=8), intent(in) :: n
-    integer(kind=8)             :: sum_up_15_f_i8
+    integer(kind=8)             :: sum_up_16_f_i8
 
     integer(kind=8) :: num_unroll, i
     integer(kind=8) :: r00, r01, r02, r03
     integer(kind=8) :: r04, r05, r06, r07
     integer(kind=8) :: r08, r09, r10, r11
     integer(kind=8) :: r12, r13, r14, r15
+    integer(kind=8) :: tmp
 
-    sum_up_15_f_i8=0d0
-    num_unroll = n - mod(n, 15)
-    include "./include/stats/sum_up/inc_sum_up_15_f.f90"
-    sum_up_15_f_i8 = r15
-end function sum_up_15_f_i8
+    sum_up_16_f_i8=0d0
+    num_unroll = n - mod(n, 16)
+    include "./include/stats/sum_up/inc_sum_up_16_f.f90"
+    sum_up_16_f_i8 = r15
+end function sum_up_16_f_i8
 
 !> A function to sum up vector, integer 64bit.
 !! Optimization was performed using only Fortran.
-!! \param sum_up_15_f_r8 Sum of vector elements
+!! \param sum_up_16_f_r8 Sum of vector elements
 !! \param x vector
 !! \param n size of vector
-function sum_up_15_f_r8(x,n)
+function sum_up_16_f_r8(x,n)
     implicit none
     real(kind=8), intent(in)    :: x(n)
     integer(kind=8), intent(in) :: n
-    real(kind=8)                :: sum_up_15_f_r8
+    real(kind=8)                :: sum_up_16_f_r8
 
     integer(kind=8) :: num_unroll, i
     real(kind=8) :: r00, r01, r02, r03
     real(kind=8) :: r04, r05, r06, r07
     real(kind=8) :: r08, r09, r10, r11
     real(kind=8) :: r12, r13, r14, r15
+    real(kind=8) :: tmp
 
-    sum_up_15_f_r8=0d0
-    num_unroll = n - mod(n, 15)
-    include "./include/stats/sum_up/inc_sum_up_15_f.f90"
-    sum_up_15_f_r8 = r15
-end function sum_up_15_f_r8
+    sum_up_16_f_r8=0d0
+    num_unroll = n - mod(n, 16)
+    include "./include/stats/sum_up/inc_sum_up_16_f.f90"
+    sum_up_16_f_r8 = r15
+end function sum_up_16_f_r8
 
 !> A function to sum up vector, integer 64bit.
 !! Optimization was performed using only Fortran.
-!! \param sum_up_30_f_i8 Sum of vector elements
+!! \param sum_up_32_f_i8 Sum of vector elements
 !! \param x vector
 !! \param n size of vector
-function sum_up_30_f_i8(x,n)
+function sum_up_32_f_i8(x,n)
     implicit none
     integer(kind=8), intent(in) :: x(n)
     integer(kind=8), intent(in) :: n
-    integer(kind=8)             :: sum_up_30_f_i8
+    integer(kind=8)             :: sum_up_32_f_i8
 
     integer(kind=8) :: num_unroll, i
     integer(kind=8) :: r00, r01, r02, r03
     integer(kind=8) :: r04, r05, r06, r07
     integer(kind=8) :: r08, r09, r10, r11
     integer(kind=8) :: r12, r13, r14, r15
+    integer(kind=8) :: tmp
 
-    sum_up_30_f_i8=0d0
-    num_unroll = n - mod(n, 30)
-    include "./include/stats/sum_up/inc_sum_up_30_f.f90"
-    sum_up_30_f_i8 = r15
-end function sum_up_30_f_i8
+    sum_up_32_f_i8=0d0
+    num_unroll = n - mod(n, 32)
+    include "./include/stats/sum_up/inc_sum_up_32_f.f90"
+    sum_up_32_f_i8 = r15
+end function sum_up_32_f_i8
 
 !> A function to sum up vector, integer 64bit.
 !! Optimization was performed using only Fortran.
-!! \param sum_up_30_f_r8 Sum of vector elements
+!! \param sum_up_32_f_r8 Sum of vector elements
 !! \param x vector
 !! \param n size of vector
-function sum_up_30_f_r8(x,n)
+function sum_up_32_f_r8(x,n)
     implicit none
     real(kind=8), intent(in)    :: x(n)
     integer(kind=8), intent(in) :: n
-    real(kind=8)                :: sum_up_30_f_r8
+    real(kind=8)                :: sum_up_32_f_r8
 
     integer(kind=8) :: num_unroll, i
     real(kind=8) :: r00, r01, r02, r03
     real(kind=8) :: r04, r05, r06, r07
     real(kind=8) :: r08, r09, r10, r11
     real(kind=8) :: r12, r13, r14, r15
+    real(kind=8) :: tmp
 
-    sum_up_30_f_r8=0d0
-    num_unroll = n - mod(n, 30)
-    include "./include/stats/sum_up/inc_sum_up_30_f.f90"
-    sum_up_30_f_r8 = r15
-end function sum_up_30_f_r8
+    sum_up_32_f_r8=0d0
+    num_unroll = n - mod(n, 32)
+    include "./include/stats/sum_up/inc_sum_up_32_f.f90"
+    sum_up_32_f_r8 = r15
+end function sum_up_32_f_r8
