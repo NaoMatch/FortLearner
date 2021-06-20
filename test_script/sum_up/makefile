@@ -4,7 +4,7 @@ compiler_fortran := gfortran -fbounds-check
 
 compiler_clang := gcc
 
-option := -cpp -D_x86_64 
+option := -cpp -D_x86_64 -fopenmp
 # option := -cpp -D_default 
 
 build:
@@ -49,4 +49,18 @@ run_v:
 	main_sum_up_vector.o  $(asm) sum.o \
 	-o main_sum_up_vector.out
 	./main_sum_up_vector.out
+
+run_vi:
+	gcc $(option) -c sum.c -O3
+	gfortran -w -c main_sum_up_vector_with_index.f90 -O3  -fopenmp
+	gfortran  -fopenmp \
+	mod_const.o \
+	mod_common.o \
+	mod_timer.o \
+	mod_random.o \
+	mod_sort.o \
+	mod_stats.o \
+	main_sum_up_vector_with_index.o  $(asm) sum.o \
+	-o main_sum_up_vector_with_index.out
+	./main_sum_up_vector_with_index.out
 
