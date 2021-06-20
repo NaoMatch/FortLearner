@@ -5,7 +5,7 @@
 #define ALIGN_SIZE  32
 #define ALIGN_CHECK 0x1f // 00001111
 
-int64_t sum_naive_i8_c(int64_t x[], int64_t n){
+int64_t sum_up_C_i8(int64_t x[], int64_t n){
     int64_t res=0e0;
     int64_t i;
     for (i=0; i<n; i++){
@@ -14,7 +14,7 @@ int64_t sum_naive_i8_c(int64_t x[], int64_t n){
     return(res);
 }
 
-double sum_naive_r8_c(double x[], int64_t n){
+double sum_up_C_r8(double x[], int64_t n){
     double res=0e0;
     int64_t i;
     for (i=0; i<n; i++){
@@ -23,10 +23,500 @@ double sum_naive_r8_c(double x[], int64_t n){
     return(res);
 }
 
+int64_t sum_up_02_C_i8(int64_t x[], int64_t n){
+    int64_t r0,r1;
+    int64_t tmp=0;
+
+	int64_t n_unroll=(n>>1), n_remain=n%2;
+	while( n_unroll-- ){ 
+		r0  = *(x  );
+		r1  = *(x+1);
+		r0  = r0  + r1;
+		tmp += r0;
+		x+=2;
+	}
+
+	if (n_remain%2){
+		r0  = *(x  );
+		tmp += r0;
+	}
+	return(tmp);
+}
+
+double sum_up_02_C_r8(double x[], int64_t n){
+    double r0,r1;
+    double tmp=0;
+
+	int64_t n_unroll=(n>>1), n_remain=n%2;
+	while( n_unroll-- ){ 
+		r0  = *(x  );
+		r1  = *(x+1);
+		r0  = r0  + r1;
+		tmp += r0;
+		x+=2;
+	}
+
+	if (n_remain%2){
+		r0  = *(x  );
+		tmp += r0;
+	}
+	return(tmp);
+}
+
 int64_t sum_up_04_C_i8(int64_t x[], int64_t n){
+    int64_t r0,r1,r2,r3;
+    int64_t r12,r13,r14,r15;
+    int64_t tmp=0;
+
+	int64_t n_unroll=(n>>2);
+	while( n_unroll-- ){ 
+		r0  = *(x  );
+		r1  = *(x+1);
+		r2  = *(x+2);
+		r3  = *(x+3);
+		r0  = r0 + r1;
+		r2  = r2 + r3;
+		r0  = r0 + r2;
+		tmp += r0;
+		x+=4;
+	}
+
+	int64_t n_unroll_remain=(n%4);
+	while( n_unroll_remain-- ){ 
+		r0  = *(x  );
+		tmp += r0;
+		x+=1;
+	}
+	return(tmp);
+}
+
+double sum_up_04_C_r8(double x[], int64_t n){
+    double r0,r1,r2,r3;
+    double r12,r13,r14,r15;
+    double tmp=0;
+
+	int64_t n_unroll=(n>>2);
+	while( n_unroll-- ){ 
+		r0  = *(x  );
+		r1  = *(x+1);
+		r2  = *(x+2);
+		r3  = *(x+3);
+		r0  = r0 + r1;
+		r2  = r2 + r3;
+		r0  = r0 + r2;
+		tmp += r0;
+		x+=4;
+	}
+
+	int64_t n_unroll_remain=(n%4);
+	while( n_unroll_remain-- ){ 
+		r0  = *(x  );
+		tmp += r0;
+		x+=1;
+	}
+	return(tmp);
+}
+
+int64_t sum_up_08_C_i8(int64_t x[], int64_t n){
+    int64_t r0,r1,r2,r3;
+    int64_t r4,r5,r6,r7;
+    int64_t r8,r9,r10,r11;
+    int64_t r12,r13,r14,r15;
+
+	int64_t res=0e0;
+	r12 = 0e0;
+	r13 = 0e0;
+	r14 = 0e0;
+	r15 = 0e0;
+	int64_t n_unroll=(n>>3);
+	while( n_unroll-- ){ 
+		r0  = *(x  );
+		r1  = *(x+1);
+		r2  = *(x+2);
+		r3  = *(x+3);
+		r4  = *(x+4);
+		r5  = *(x+5);
+		r6  = *(x+6);
+		r7  = *(x+7);
+		r8  = r0  + r4;
+		r9  = r1  + r5;
+		r10 = r2  + r6;
+		r11 = r3  + r7;
+		r12 = r12 + r8;
+		r13 = r13 + r9;
+		r14 = r14 + r10;
+		r15 = r15 + r11;
+		x+=8;
+	}
+
+	int64_t n_unroll_remain=(n%8);
+	while( n_unroll_remain-- ){ 
+		r0  = *(x  );
+		r12 = r12 + r0;
+		x+=1;
+	}
+	return(r12 + r13 + r14 + r15);
+}
+
+double sum_up_08_C_r8(double x[], int64_t n){
+    double r0,r1,r2,r3;
+    double r4,r5,r6,r7;
+    double r8,r9,r10,r11;
+    double r12,r13,r14,r15;
+
+	double res=0e0;
+	r12 = 0e0;
+	r13 = 0e0;
+	r14 = 0e0;
+	r15 = 0e0;
+	int64_t n_unroll=(n>>3);
+	while( n_unroll-- ){ 
+		r0  = *(x  );
+		r1  = *(x+1);
+		r2  = *(x+2);
+		r3  = *(x+3);
+		r4  = *(x+4);
+		r5  = *(x+5);
+		r6  = *(x+6);
+		r7  = *(x+7);
+		r8  = r0  + r4;
+		r9  = r1  + r5;
+		r10 = r2  + r6;
+		r11 = r3  + r7;
+		r12 = r12 + r8;
+		r13 = r13 + r9;
+		r14 = r14 + r10;
+		r15 = r15 + r11;
+		x+=8;
+	}
+
+	int64_t n_unroll_remain=(n%8);
+	while( n_unroll_remain-- ){ 
+		r0  = *(x  );
+		r12 = r12 + r0;
+		x+=1;
+	}
+	return(r12 + r13 + r14 + r15);
+}
+
+int64_t sum_up_16_C_i8(int64_t x[], int64_t n){
+    int64_t r0,r1,r2,r3;
+    int64_t r4,r5,r6,r7;
+    int64_t r8,r9,r10,r11;
+    int64_t r12,r13,r14,r15;
+    int64_t tmp=0;
+
+	int64_t n_unroll=(n/16);
+	while( n_unroll-- ){ 
+		r0   = *(x  );
+		r1   = *(x+1);
+		r2   = *(x+2);
+		r3   = *(x+3);
+		r4   = *(x+4);
+		r5   = *(x+5);
+		r6   = *(x+6);
+		r7   = *(x+7);
+		r8   = *(x+8);
+		r9   = *(x+9);
+		r10  = *(x+10);
+		r11  = *(x+11);
+		r12  = *(x+12);
+		r13  = *(x+13);
+		r14  = *(x+14);
+		r15  = *(x+15);
+
+		r0  = r0 + r1;
+		r2  = r2 + r3;
+		r4  = r4 + r5;
+		r6  = r6 + r7;
+		r8  = r8 + r9;
+		r10 = r10 + r11;
+		r12 = r12 + r13;
+		r14 = r14 + r15;
+
+		r0  = r0 + r2;
+		r4  = r4 + r6;
+		r8  = r8 + r10;
+		r12 = r12 + r14;
+
+		r0 = r0 + r4;
+		r8 = r8 + r12;
+
+		r0 = r0 + r8;
+
+		tmp += r0;
+		x+=16;
+	}
+
+	int64_t n_unroll_remain=(n%16);
+	while( n_unroll_remain-- ){ 
+		r0  = *(x  );
+		tmp += r0;
+		x+=1;
+	}
+	return(tmp);
+}
+
+double sum_up_16_C_r8(double x[], int64_t n){
+    double r0,r1,r2,r3;
+    double r4,r5,r6,r7;
+    double r8,r9,r10,r11;
+    double r12,r13,r14,r15;
+    double tmp=0;
+
+	double res=0e0;
+	r15 = 0e0;
+	int64_t n_unroll=(n/16);
+	while( n_unroll-- ){ 
+		r0   = *(x  );
+		r1   = *(x+1);
+		r2   = *(x+2);
+		r3   = *(x+3);
+		r4   = *(x+4);
+		r5   = *(x+5);
+		r6   = *(x+6);
+		r7   = *(x+7);
+		r8   = *(x+8);
+		r9   = *(x+9);
+		r10  = *(x+10);
+		r11  = *(x+11);
+		r12  = *(x+12);
+		r13  = *(x+13);
+		r14  = *(x+14);
+		r15  = *(x+15);
+
+		r0  += r1;
+		r2  += r3;
+		r4  += r5;
+		r6  += r7;
+		r8  += r9;
+		r10 += r11;
+		r12 += r13;
+		r14 += r15;
+
+		r0  += r2;
+		r4  += r6;
+		r8  += r10;
+		r12 += r14;
+
+		r0 += r4;
+		r8 += r12;
+
+		r0 += r8;
+
+		tmp += r0;
+		x+=16;
+	}
+
+	int64_t n_unroll_remain=(n%16);
+	while( n_unroll_remain-- ){ 
+		r0  = *(x  );
+		tmp += r0;
+		x+=1;
+	}
+	return(tmp);
+}
+
+int64_t sum_up_32_C_i8(int64_t x[], int64_t n){
+    int64_t r0,r1,r2,r3;
+    int64_t r4,r5,r6,r7;
+    int64_t r8,r9,r10,r11;
+    int64_t r12,r13,r14,r15;
+    int64_t tmp=0;
+
+	int64_t n_unroll=(n/32);
+	while( n_unroll-- ){ 
+		r0   = *(x  );
+		r1   = *(x+1);
+		r2   = *(x+2);
+		r3   = *(x+3);
+		r4   = *(x+4);
+		r5   = *(x+5);
+		r6   = *(x+6);
+		r7   = *(x+7);
+		r8   = *(x+8);
+		r9   = *(x+9);
+		r10  = *(x+10);
+		r11  = *(x+11);
+		r12  = *(x+12);
+		r13  = *(x+13);
+		r14  = *(x+14);
+		r15  = *(x+15);
+
+		r0  += r1;
+		r2  += r3;
+		r4  += r5;
+		r6  += r7;
+		r8  += r9;
+		r10 += r11;
+		r12 += r13;
+		r14 += r15;
+
+		r0  += r2;
+		r4  += r6;
+		r8  += r10;
+		r12 += r14;
+
+		r0 += r4;
+		r8 += r12;
+
+		r0 += r8;
+
+		tmp += r0;
+		x+=16;
+
+		r0   = *(x  );
+		r1   = *(x+1);
+		r2   = *(x+2);
+		r3   = *(x+3);
+		r4   = *(x+4);
+		r5   = *(x+5);
+		r6   = *(x+6);
+		r7   = *(x+7);
+		r8   = *(x+8);
+		r9   = *(x+9);
+		r10  = *(x+10);
+		r11  = *(x+11);
+		r12  = *(x+12);
+		r13  = *(x+13);
+		r14  = *(x+14);
+		r15  = *(x+15);
+
+		r0  += r1;
+		r2  += r3;
+		r4  += r5;
+		r6  += r7;
+		r8  += r9;
+		r10 += r11;
+		r12 += r13;
+		r14 += r15;
+
+		r0  += r2;
+		r4  += r6;
+		r8  += r10;
+		r12 += r14;
+
+		r0 += r4;
+		r8 += r12;
+
+		r0 += r8;
+
+		tmp += r0;
+		x+=16;
+	}
+
+	int64_t n_unroll_remain=(n%32);
+	while( n_unroll_remain-- ){ 
+		r0  = *(x  );
+		tmp += r0;
+		x+=1;
+	}
+	return(tmp);
+
+}
+
+double sum_up_32_C_r8(double x[], int64_t n){
+    double r0,r1,r2,r3;
+    double r4,r5,r6,r7;
+    double r8,r9,r10,r11;
+    double r12,r13,r14,r15;
+    double tmp=0;
+
+	int64_t n_unroll=(n/32);
+	while( n_unroll-- ){ 
+		r0   = *(x  );
+		r1   = *(x+1);
+		r2   = *(x+2);
+		r3   = *(x+3);
+		r4   = *(x+4);
+		r5   = *(x+5);
+		r6   = *(x+6);
+		r7   = *(x+7);
+		r8   = *(x+8);
+		r9   = *(x+9);
+		r10  = *(x+10);
+		r11  = *(x+11);
+		r12  = *(x+12);
+		r13  = *(x+13);
+		r14  = *(x+14);
+		r15  = *(x+15);
+
+		r0  += r1;
+		r2  += r3;
+		r4  += r5;
+		r6  += r7;
+		r8  += r9;
+		r10 += r11;
+		r12 += r13;
+		r14 += r15;
+
+		r0  += r2;
+		r4  += r6;
+		r8  += r10;
+		r12 += r14;
+
+		r0 += r4;
+		r8 += r12;
+
+		r0 += r8;
+
+		tmp += r0;
+		x+=16;
+
+		r0   = *(x  );
+		r1   = *(x+1);
+		r2   = *(x+2);
+		r3   = *(x+3);
+		r4   = *(x+4);
+		r5   = *(x+5);
+		r6   = *(x+6);
+		r7   = *(x+7);
+		r8   = *(x+8);
+		r9   = *(x+9);
+		r10  = *(x+10);
+		r11  = *(x+11);
+		r12  = *(x+12);
+		r13  = *(x+13);
+		r14  = *(x+14);
+		r15  = *(x+15);
+
+		r0  += r1;
+		r2  += r3;
+		r4  += r5;
+		r6  += r7;
+		r8  += r9;
+		r10 += r11;
+		r12 += r13;
+		r14 += r15;
+
+		r0  += r2;
+		r4  += r6;
+		r8  += r10;
+		r12 += r14;
+
+		r0 += r4;
+		r8 += r12;
+
+		r0 += r8;
+
+		tmp += r0;
+		x+=16;
+	}
+
+	int64_t n_unroll_remain=(n%32);
+	while( n_unroll_remain-- ){ 
+		r0  = *(x  );
+		tmp += r0;
+		x+=1;
+	}
+	return(tmp);
+
+}
+
+int64_t sum_up_04_ASM_i8(int64_t x[], int64_t n){
 	#if _x86_64
 		if (n<4){
-			return(sum_naive_i8_c(x,n));
+			return(sum_up_C_i8(x,n));
 		}
 
 		// Zero Clear
@@ -102,10 +592,10 @@ int64_t sum_up_04_C_i8(int64_t x[], int64_t n){
 	#endif
 }
 
-double sum_up_04_C_r8(double x[], int64_t n){
+double sum_up_04_ASM_r8(double x[], int64_t n){
 	#if _x86_64
 		if (n<4){
-			return(sum_naive_r8_c(x,n));
+			return(sum_up_C_r8(x,n));
 		}
 
 		// Zero Clear
@@ -183,10 +673,10 @@ double sum_up_04_C_r8(double x[], int64_t n){
 	#endif
 }
 
-int64_t sum_up_08_C_i8(int64_t x[], int64_t n){
+int64_t sum_up_08_ASM_i8(int64_t x[], int64_t n){
 	#if _x86_64
 		if (n<8){
-			return(sum_naive_i8_c(x,n));
+			return(sum_up_C_i8(x,n));
 		}
 
 		// Zero Clear
@@ -289,10 +779,10 @@ int64_t sum_up_08_C_i8(int64_t x[], int64_t n){
 	#endif
 }
 
-double sum_up_08_C_r8(double x[], int64_t n){
+double sum_up_08_ASM_r8(double x[], int64_t n){
 	#if _x86_64
 		if (n<8){
-			return(sum_naive_r8_c(x,n));
+			return(sum_up_C_r8(x,n));
 		}
 
 		// Zero Clear
@@ -397,10 +887,10 @@ double sum_up_08_C_r8(double x[], int64_t n){
 	#endif
 }
 
-int64_t sum_up_16_C_i8(int64_t x[], int64_t n){
+int64_t sum_up_16_ASM_i8(int64_t x[], int64_t n){
 	#if _x86_64
 		if (n<16){
-			return(sum_naive_i8_c(x,n));
+			return(sum_up_C_i8(x,n));
 		}
 
 		// Zero Clear
@@ -529,10 +1019,10 @@ int64_t sum_up_16_C_i8(int64_t x[], int64_t n){
 	#endif
 }
 
-double sum_up_16_C_r8(double x[], int64_t n){
+double sum_up_16_ASM_r8(double x[], int64_t n){
 	#if _x86_64
 		if (n<16){
-			return(sum_naive_r8_c(x,n));
+			return(sum_up_C_r8(x,n));
 		}
 
 		// Zero Clear
@@ -660,10 +1150,10 @@ double sum_up_16_C_r8(double x[], int64_t n){
 	#endif
 }
 
-int64_t sum_up_32_C_i8(int64_t x[], int64_t n){
+int64_t sum_up_32_ASM_i8(int64_t x[], int64_t n){
 	#if _x86_64
 		if (n<32){
-			return(sum_naive_i8_c(x,n));
+			return(sum_up_C_i8(x,n));
 		}
 
 		// Zero Clear
@@ -835,10 +1325,10 @@ int64_t sum_up_32_C_i8(int64_t x[], int64_t n){
 	#endif
 }
 
-double sum_up_32_C_r8(double x[], int64_t n){
+double sum_up_32_ASM_r8(double x[], int64_t n){
 	#if _x86_64
 		if (n<32){
-			return(sum_naive_r8_c(x,n));
+			return(sum_up_C_r8(x,n));
 		}
 
 		// Zero Clear
