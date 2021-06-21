@@ -1,6 +1,5 @@
 do j=1, c, 1
-    r14 = 0d0
-    r15 = 0d0
+    tmp = 0d0
     do i=1, num_unroll, 2
         r00 = x(i  ,j)
         r01 = x(i+1,j)
