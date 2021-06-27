@@ -5,6 +5,7 @@
 #define ALIGN_SIZE  32
 #define ALIGN_CHECK 0x1f // 00001111
 
+
 // --------------------------------------------------------------------------------
 int64_t sum_up_C_i8(int64_t x[], int64_t n){
     int64_t res=0e0;
@@ -1512,3 +1513,29 @@ double sum_up_32_ASM_r8(double x[], int64_t n){
 		return result;
 	#endif
 }
+
+// --------------------------------------------------------------------------------
+int64_t sum_up_C_hybrid_i8(int64_t x[], int64_t n){
+	int64_t res;
+    if (n < 32){
+		res = sum_up_16_C_i8(x,n);
+	} else if (n < 10000000){
+		res = sum_up_32_ASM_i8(x,n);
+	} else {
+		res = sum_up_04_ASM_i8(x,n);
+	}
+    return(res);
+}
+
+double sum_up_C_hybrid_r8(double x[], int64_t n){
+	double res;
+    if (n < 32){
+		res = sum_up_16_C_r8(x,n);
+	} else if (n < 10000000){
+		res = sum_up_32_ASM_r8(x,n);
+	} else {
+		res = sum_up_04_ASM_r8(x,n);
+	}
+    return(res);
+}
+
