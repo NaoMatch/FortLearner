@@ -19,7 +19,7 @@ run:
 
 build:
 	$(compiler_clang) $(mod) $(option) -c ../math/include/stats/sum_up/inc_sum_up_vector.c    -O3 -o ./mod/inc_sum_up_vector_c.out
-	$(compiler_clang) $(mod) $(option) -c ../math/include/stats/sum_up/inc_sum_up_matrix.c    -O3 -o ./mod/inc_sum_up_matrix_c.out
+	$(compiler_clang) $(mod) $(option) -c ../math/include/stats/sum_up/inc_sum_up_matrix.c    -O3 -o ./mod/inc_sum_up_matrix_c.out ./mod/inc_sum_up_vector_c.out
 	$(compiler_clang) $(mod) $(option) -c ../math/include/stats/sum_up_left/inc_sum_up_left.c -O3 -o ./mod/inc_sum_up_left_c.out
 	$(compiler_clang) $(mod) $(option) -c ../math/include/stats/get_minmax/inc_get_minmax.c   -O3 -o ./mod/inc_get_minmax.out
 
