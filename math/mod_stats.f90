@@ -381,6 +381,174 @@ module mod_stats
             integer(c_int64_t), value :: n, c
         end subroutine sum_up_matrix_32_02_C_i8
 
+        subroutine sum_up_matrix_04_ASM_r8(x_sum, x, n, c) bind(c, name='sum_up_matrix_04_ASM_r8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_04_ASM_r8
+
+        subroutine sum_up_matrix_04_ASM_i8(x_sum, x, n, c) bind(c, name='sum_up_matrix_04_ASM_i8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_04_ASM_i8
+
+        subroutine sum_up_matrix_08_ASM_r8(x_sum, x, n, c) bind(c, name='sum_up_matrix_08_ASM_r8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_08_ASM_r8
+
+        subroutine sum_up_matrix_08_ASM_i8(x_sum, x, n, c) bind(c, name='sum_up_matrix_08_ASM_i8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_08_ASM_i8
+
+        subroutine sum_up_matrix_16_ASM_r8(x_sum, x, n, c) bind(c, name='sum_up_matrix_16_ASM_r8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_16_ASM_r8
+
+        subroutine sum_up_matrix_16_ASM_i8(x_sum, x, n, c) bind(c, name='sum_up_matrix_16_ASM_i8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_16_ASM_i8
+
+        subroutine sum_up_matrix_32_ASM_r8(x_sum, x, n, c) bind(c, name='sum_up_matrix_32_ASM_r8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_32_ASM_r8
+
+        subroutine sum_up_matrix_32_ASM_i8(x_sum, x, n, c) bind(c, name='sum_up_matrix_32_ASM_i8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_32_ASM_i8
+
+        subroutine sum_up_matrix_64_ASM_r8(x_sum, x, n, c) bind(c, name='sum_up_matrix_64_ASM_r8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_64_ASM_r8
+
+        subroutine sum_up_matrix_64_ASM_i8(x_sum, x, n, c) bind(c, name='sum_up_matrix_64_ASM_i8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_64_ASM_i8
+
+        subroutine sum_up_matrix_04_02_ASM_r8(x_sum, x, n, c) bind(c, name='sum_up_matrix_04_02_ASM_r8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_04_02_ASM_r8
+
+        subroutine sum_up_matrix_04_02_ASM_i8(x_sum, x, n, c) bind(c, name='sum_up_matrix_04_02_ASM_i8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_04_02_ASM_i8
+
+        subroutine sum_up_matrix_04_04_ASM_r8(x_sum, x, n, c) bind(c, name='sum_up_matrix_04_04_ASM_r8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_04_04_ASM_r8
+
+        subroutine sum_up_matrix_04_04_ASM_i8(x_sum, x, n, c) bind(c, name='sum_up_matrix_04_04_ASM_i8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_04_04_ASM_i8
+
+        subroutine sum_up_matrix_04_04_ASM_Pre_r8(x_sum, x, n, c) bind(c, name='sum_up_matrix_04_04_ASM_Pre_r8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_04_04_ASM_Pre_r8
+
+        subroutine sum_up_matrix_04_04_ASM_Pre_i8(x_sum, x, n, c) bind(c, name='sum_up_matrix_04_04_ASM_Pre_i8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_04_04_ASM_Pre_i8
+
+        subroutine sum_up_matrix_08_02_ASM_r8(x_sum, x, n, c) bind(c, name='sum_up_matrix_08_02_ASM_r8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_08_02_ASM_r8
+
+        subroutine sum_up_matrix_08_02_ASM_i8(x_sum, x, n, c) bind(c, name='sum_up_matrix_08_02_ASM_i8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_08_02_ASM_i8
+
+        subroutine sum_up_matrix_08_04_ASM_r8(x_sum, x, n, c) bind(c, name='sum_up_matrix_08_04_ASM_r8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_08_04_ASM_r8
+
+        subroutine sum_up_matrix_08_04_ASM_i8(x_sum, x, n, c) bind(c, name='sum_up_matrix_08_04_ASM_i8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_08_04_ASM_i8
+
+        subroutine sum_up_matrix_16_02_ASM_r8(x_sum, x, n, c) bind(c, name='sum_up_matrix_16_02_ASM_r8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_16_02_ASM_r8
+
+        subroutine sum_up_matrix_16_02_ASM_i8(x_sum, x, n, c) bind(c, name='sum_up_matrix_16_02_ASM_i8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_16_02_ASM_i8
+
+        subroutine sum_up_matrix_16_04_ASM_r8(x_sum, x, n, c) bind(c, name='sum_up_matrix_16_04_ASM_r8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_16_04_ASM_r8
+
+        subroutine sum_up_matrix_16_04_ASM_i8(x_sum, x, n, c) bind(c, name='sum_up_matrix_16_04_ASM_i8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_16_04_ASM_i8
+
+        subroutine sum_up_matrix_32_02_ASM_r8(x_sum, x, n, c) bind(c, name='sum_up_matrix_32_02_ASM_r8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_32_02_ASM_r8
+
+        subroutine sum_up_matrix_32_02_ASM_i8(x_sum, x, n, c) bind(c, name='sum_up_matrix_32_02_ASM_i8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_32_02_ASM_i8
+
+        subroutine sum_up_matrix_C_hybrid_r8(x_sum, x, n, c) bind(c, name='sum_up_matrix_C_hybrid_r8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_C_hybrid_r8
+
+        subroutine sum_up_matrix_C_hybrid_i8(x_sum, x, n, c) bind(c, name='sum_up_matrix_C_hybrid_i8')
+            import :: c_ptr, c_int64_t
+            type(c_ptr), value    :: x_sum, x
+            integer(c_int64_t), value :: n, c
+        end subroutine sum_up_matrix_C_hybrid_i8
+
     end interface
 
     !> An interface to call extern c functions with inline assembler
@@ -812,7 +980,7 @@ contains
         integer(kind=8) :: i
         real(kind=8) :: tmp_sum
 
-        !$omp parallel num_threads(4)
+        !$omp parallel num_threads(8)
         !$omp do
         do i=1, c, 1
             tmp_sum = sum_up(x(:,i),n)
@@ -831,7 +999,7 @@ contains
         integer(kind=8) :: i
         integer(kind=8) :: tmp_sum
 
-        !$omp parallel num_threads(4)
+        !$omp parallel num_threads(8)
         !$omp do
         do i=1, c, 1
             tmp_sum = sum_up(x(:,i),n)
