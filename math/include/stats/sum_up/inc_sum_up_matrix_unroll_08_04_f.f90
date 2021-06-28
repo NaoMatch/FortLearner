@@ -88,8 +88,8 @@ do j=1, j_unroll, 4
     do i=i_unroll+1, n, 1
         r28 = r28 + x(i,j)
         r29 = r29 + x(i,j+1)
-        r30 = r30 + x(i,j+1)
-        r31 = r31 + x(i,j+1)
+        r30 = r30 + x(i,j+2)
+        r31 = r31 + x(i,j+3)
     end do
 
     r(j)   = r28
