@@ -1925,26 +1925,26 @@ void sum_up_matrix_02_04_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
 
     int64_t c_remain=(c%4);
     if (c_remain>0){
-        jj=jj+step;
+        jj=jj+step*3;
         while(c_remain--){
             tmp0=0e0;
 
             int64_t n_unroll=(n>>1);
             while( n_unroll-- ){ 
-                r00 = *(x1  );
-                r01 = *(x1+1);
+                r00 = *(x3  );
+                r01 = *(x3+1);
 
                 r00 = r00 + r01;
 
                 tmp0 = tmp0 + r00;
 
-                x1+=2;
+                x3+=2;
             }
 
             int64_t n_remain=n%2;
             if(n_remain & 1){
-                tmp0 += *(x1);
-                x1+=1;
+                tmp0 += *(x3);
+                x3+=1;
             }
             x_sum[jj]=tmp0;
             jj++;
@@ -2037,26 +2037,26 @@ void sum_up_matrix_02_04_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 
     int64_t c_remain=(c%4);
     if (c_remain>0){
-        jj=jj+step;
+        jj=jj+step*3;
         while(c_remain--){
             tmp0=0e0;
 
             int64_t n_unroll=(n>>1);
             while( n_unroll-- ){ 
-                r00 = *(x1  );
-                r01 = *(x1+1);
+                r00 = *(x3  );
+                r01 = *(x3+1);
 
                 r00 = r00 + r01;
 
                 tmp0 = tmp0 + r00;
 
-                x1+=2;
+                x3+=2;
             }
 
             int64_t n_remain=n%2;
             if(n_remain & 1){
-                tmp0 += *(x1);
-                x1+=1;
+                tmp0 += *(x3);
+                x3+=1;
             }
             x_sum[jj]=tmp0;
             jj++;
@@ -2214,26 +2214,26 @@ void sum_up_matrix_02_08_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
 
     int64_t c_remain=(c%8);
     if (c_remain>0){
-        jj=jj+step;
+        jj=jj+step*7;
         while(c_remain--){
             tmp0=0e0;
 
             int64_t n_unroll=(n>>1);
             while( n_unroll-- ){ 
-                r00 = *(x1  );
-                r01 = *(x1+1);
+                r00 = *(x7  );
+                r01 = *(x7+1);
 
                 r00 = r00 + r01;
 
                 tmp0 = tmp0 + r00;
 
-                x1+=2;
+                x7+=2;
             }
 
             int64_t n_remain=n%2;
             if(n_remain & 1){
-                tmp0 += *(x1);
-                x1+=1;
+                tmp0 += *(x7);
+                x7+=1;
             }
             x_sum[jj]=tmp0;
             jj++;
@@ -2390,26 +2390,26 @@ void sum_up_matrix_02_08_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 
     int64_t c_remain=(c%8);
     if (c_remain>0){
-        jj=jj+step;
+        jj=jj+step*7;
         while(c_remain--){
             tmp0=0e0;
 
             int64_t n_unroll=(n>>1);
             while( n_unroll-- ){ 
-                r00 = *(x1  );
-                r01 = *(x1+1);
+                r00 = *(x7  );
+                r01 = *(x7+1);
 
                 r00 = r00 + r01;
 
                 tmp0 = tmp0 + r00;
 
-                x1+=2;
+                x7+=2;
             }
 
             int64_t n_remain=n%2;
             if(n_remain & 1){
-                tmp0 += *(x1);
-                x1+=1;
+                tmp0 += *(x7);
+                x7+=1;
             }
             x_sum[jj]=tmp0;
             jj++;
@@ -2418,9 +2418,9 @@ void sum_up_matrix_02_08_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 }
 
 // --------------------------------------------------------------------------------
-void sum_up_matrix_04_02_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
+void sum_up_matrix_04_02_C_r8(double *x_sum, double *x0, int64_t n, int64_t c){
 	if (n<4 || c<2){
-		sum_up_matrix_C_r8(x_sum, x, n, c);
+		sum_up_matrix_C_r8(x_sum, x0, n, c);
 		return;
 	}
 
@@ -2430,7 +2430,7 @@ void sum_up_matrix_04_02_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
     double r04,r05,r06,r07;
     double tmp0, tmp1;
 
-    x1 = x;
+    x1 = x0;
     x1+=step*n;
 
     int64_t c_unroll=(c>>1);
@@ -2440,10 +2440,10 @@ void sum_up_matrix_04_02_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
 
 		int64_t n_unroll=(n>>2);
 		while( n_unroll-- ){ 
-			r00 = *(x  );
-			r01 = *(x+1);
-			r02 = *(x+2);
-			r03 = *(x+3);
+			r00 = *(x0  );
+			r01 = *(x0+1);
+			r02 = *(x0+2);
+			r03 = *(x0+3);
 
 			r00 = r00 + r01;
             r02 = r02 + r03;
@@ -2464,24 +2464,24 @@ void sum_up_matrix_04_02_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
 
 			tmp1 = tmp1 + r04;
 
-			x+=4;
+			x0+=4;
             x1+=4;
 		}
 
 		int64_t n_remain=n%4;
 		if(n_remain & 2){
-			tmp0 += *(x);
+			tmp0 += *(x0);
 			tmp1 += *(x1);
-			tmp0 += *(x+1);
+			tmp0 += *(x0+1);
 			tmp1 += *(x1+1);
-			x+=2;
+			x0+=2;
 			x1+=2;
 		}
 
 		if(n_remain & 1){
-			tmp0 += *(x);
+			tmp0 += *(x0);
 			tmp1 += *(x1);
-			x+=1;
+			x0+=1;
 			x1+=1;
 		}
 
@@ -2493,7 +2493,7 @@ void sum_up_matrix_04_02_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
     int64_t c_remain=(c%2);
     if (c_remain&1){
 		tmp0=0e0;
-
+		jj=jj+step;
 		int64_t n_unroll=(n>>1);
 		while( n_unroll-- ){ 
 			r00 = *(x1  );
@@ -2508,7 +2508,7 @@ void sum_up_matrix_04_02_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
 
 			tmp0 = tmp0 + r00;
 
-            x1+=2;
+            x1+=4;
 		}
 
 		int64_t n_remain=n%2;
@@ -2521,13 +2521,13 @@ void sum_up_matrix_04_02_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
 			tmp0 += *(x1);
 			x1+=1;
 		}
-        x_sum[jj+step]=tmp0;
+        x_sum[jj]=tmp0;
     }
 }
 
-void sum_up_matrix_04_02_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
-	if (n<2 || c<2){
-		sum_up_matrix_C_i8(x_sum, x, n, c);
+void sum_up_matrix_04_02_C_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t c){
+	if (n<4 || c<2){
+		sum_up_matrix_C_i8(x_sum, x0, n, c);
 		return;
 	}
 
@@ -2537,20 +2537,20 @@ void sum_up_matrix_04_02_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
     int64_t r04,r05,r06,r07;
     int64_t tmp0, tmp1;
 
-    x1 = x;
+    x1 = x0;
     x1+=step*n;
 
     int64_t c_unroll=(c>>1);
 	while(c_unroll--){
-		tmp0=0e0;
-		tmp1=0e0;
+		tmp0=0;
+		tmp1=0;
 
 		int64_t n_unroll=(n>>2);
 		while( n_unroll-- ){ 
-			r00 = *(x  );
-			r01 = *(x+1);
-			r02 = *(x+2);
-			r03 = *(x+3);
+			r00 = *(x0  );
+			r01 = *(x0+1);
+			r02 = *(x0+2);
+			r03 = *(x0+3);
 
 			r00 = r00 + r01;
             r02 = r02 + r03;
@@ -2571,24 +2571,24 @@ void sum_up_matrix_04_02_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 
 			tmp1 = tmp1 + r04;
 
-			x+=4;
+			x0+=4;
             x1+=4;
 		}
 
 		int64_t n_remain=n%4;
 		if(n_remain & 2){
-			tmp0 += *(x);
+			tmp0 += *(x0);
 			tmp1 += *(x1);
-			tmp0 += *(x+1);
+			tmp0 += *(x0+1);
 			tmp1 += *(x1+1);
-			x+=2;
+			x0+=2;
 			x1+=2;
 		}
 
 		if(n_remain & 1){
-			tmp0 += *(x);
+			tmp0 += *(x0);
 			tmp1 += *(x1);
-			x+=1;
+			x0+=1;
 			x1+=1;
 		}
 
@@ -2599,9 +2599,9 @@ void sum_up_matrix_04_02_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 
     int64_t c_remain=(c%2);
     if (c_remain&1){
-		tmp0=0e0;
-
-		int64_t n_unroll=(n>>1);
+		tmp0=0;
+		jj=jj+step;
+		int64_t n_unroll=(n>>2);
 		while( n_unroll-- ){ 
 			r00 = *(x1  );
 			r01 = *(x1+1);
@@ -2615,10 +2615,10 @@ void sum_up_matrix_04_02_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 
 			tmp0 = tmp0 + r00;
 
-            x1+=2;
+            x1+=4;
 		}
 
-		int64_t n_remain=n%2;
+		int64_t n_remain=n%4;
 		if(n_remain & 2){
 			tmp0 += *(x1);
 			tmp0 += *(x1+1);
@@ -2628,7 +2628,7 @@ void sum_up_matrix_04_02_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 			tmp0 += *(x1);
 			x1+=1;
 		}
-        x_sum[jj+step]=tmp0;
+        x_sum[jj]=tmp0;
     }
 }
 
@@ -2725,12 +2725,12 @@ void sum_up_matrix_04_04_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
 		if(n_remain & 2){
 			tmp0 += *(x);
 			tmp1 += *(x1);
+			tmp2 += *(x2);
+			tmp3 += *(x3);
 			tmp0 += *(x+1);
 			tmp1 += *(x1+1);
-			tmp0 += *(x+2);
-			tmp1 += *(x1+2);
-			tmp0 += *(x+3);
-			tmp1 += *(x1+3);
+			tmp2 += *(x2+1);
+			tmp3 += *(x3+1);
 			x+=2;
 			x1+=2;
 			x2+=2;
@@ -2756,42 +2756,45 @@ void sum_up_matrix_04_04_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
 	}
 
     int64_t c_remain=(c%4);
-    if (c_remain&1){
-		tmp0=0e0;
+    if (c_remain>0){
+		jj=jj+step*3;
+		while (c_remain--){
+			tmp0=0e0;
+			int64_t n_unroll=(n>>2);
+			while( n_unroll-- ){ 
+				r00 = *(x3  );
+				r01 = *(x3+1);
+				r02 = *(x3+2);
+				r03 = *(x3+3);
 
-		int64_t n_unroll=(n>>1);
-		while( n_unroll-- ){ 
-			r00 = *(x1  );
-			r01 = *(x1+1);
-			r02 = *(x1+2);
-			r03 = *(x1+3);
+				r00 = r00 + r01;
+				r02 = r02 + r03;
 
-			r00 = r00 + r01;
-            r02 = r02 + r03;
+				r00 = r00 + r02;
 
-            r00 = r00 + r02;
+				tmp0 = tmp0 + r00;
 
-			tmp0 = tmp0 + r00;
+				x3+=4;
+			}
 
-            x1+=2;
+			int64_t n_remain=n%4;
+			if(n_remain & 2){
+				tmp0 += *(x3);
+				tmp0 += *(x3+1);
+				x3+=2;
+			}
+			if(n_remain & 1){
+				tmp0 += *(x3);
+				x3+=1;
+			}
+			x_sum[jj]=tmp0;
+			jj++;
 		}
-
-		int64_t n_remain=n%2;
-		if(n_remain & 2){
-			tmp0 += *(x1);
-			tmp0 += *(x1+1);
-			x1+=2;
-		}
-		if(n_remain & 1){
-			tmp0 += *(x1);
-			x1+=1;
-		}
-        x_sum[jj+step]=tmp0;
     }
 }
 
 void sum_up_matrix_04_04_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
-	if (n<2 || c<2){
+	if (n<4 || c<2){
 		sum_up_matrix_C_i8(x_sum, x, n, c);
 		return;
 	}
@@ -2913,37 +2916,40 @@ void sum_up_matrix_04_04_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 	}
 
     int64_t c_remain=(c%4);
-    if (c_remain&1){
-		tmp0=0e0;
+    if (c_remain>0){
+		jj=jj+step*3;
+		while (c_remain--){
+			tmp0=0e0;
+			int64_t n_unroll=(n>>2);
+			while( n_unroll-- ){ 
+				r00 = *(x3  );
+				r01 = *(x3+1);
+				r02 = *(x3+2);
+				r03 = *(x3+3);
 
-		int64_t n_unroll=(n>>1);
-		while( n_unroll-- ){ 
-			r00 = *(x1  );
-			r01 = *(x1+1);
-			r02 = *(x1+2);
-			r03 = *(x1+3);
+				r00 = r00 + r01;
+				r02 = r02 + r03;
 
-			r00 = r00 + r01;
-            r02 = r02 + r03;
+				r00 = r00 + r02;
 
-            r00 = r00 + r02;
+				tmp0 = tmp0 + r00;
 
-			tmp0 = tmp0 + r00;
+				x3+=4;
+			}
 
-            x1+=2;
+			int64_t n_remain=n%4;
+			if(n_remain & 2){
+				tmp0 += *(x3);
+				tmp0 += *(x3+1);
+				x3+=2;
+			}
+			if(n_remain & 1){
+				tmp0 += *(x3);
+				x3+=1;
+			}
+			x_sum[jj]=tmp0;
+			jj++;
 		}
-
-		int64_t n_remain=n%2;
-		if(n_remain & 2){
-			tmp0 += *(x1);
-			tmp0 += *(x1+1);
-			x1+=2;
-		}
-		if(n_remain & 1){
-			tmp0 += *(x1);
-			x1+=1;
-		}
-        x_sum[jj+step]=tmp0;
     }
 }
 
@@ -3173,42 +3179,45 @@ void sum_up_matrix_04_08_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
 	}
 
     int64_t c_remain=(c%8);
-    if (c_remain&1){
-		tmp0=0e0;
+    if (c_remain>0){
+		jj=jj+step*7;
+		while(c_remain--){
+			tmp0=0e0;
+			int64_t n_unroll=(n>>1);
+			while( n_unroll-- ){ 
+				r00 = *(x7  );
+				r01 = *(x7+1);
+				r02 = *(x7+2);
+				r03 = *(x7+3);
 
-		int64_t n_unroll=(n>>1);
-		while( n_unroll-- ){ 
-			r00 = *(x7  );
-			r01 = *(x7+1);
-			r02 = *(x7+2);
-			r03 = *(x7+3);
+				r00 = r00 + r01;
+				r02 = r02 + r03;
 
-			r00 = r00 + r01;
-            r02 = r02 + r03;
+				r00 = r00 + r02;
 
-            r00 = r00 + r02;
+				tmp0 = tmp0 + r00;
 
-			tmp0 = tmp0 + r00;
+				x7+=4;
+			}
 
-            x7+=4;
+			int64_t n_remain=n%2;
+			if(n_remain & 2){
+				tmp0 += *(x7);
+				tmp0 += *(x7+1);
+				x7+=2;
+			}
+			if(n_remain & 1){
+				tmp0 += *(x7);
+				x7+=1;
+			}
+			x_sum[jj]=tmp0;
+			jj++;
 		}
-
-		int64_t n_remain=n%2;
-		if(n_remain & 2){
-			tmp0 += *(x7);
-			tmp0 += *(x7+1);
-			x7+=2;
-		}
-		if(n_remain & 1){
-			tmp0 += *(x7);
-			x7+=1;
-		}
-        x_sum[jj+step]=tmp0;
     }
 }
 
 void sum_up_matrix_04_08_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
-	if (n<2 || c<2){
+	if (n<4 || c<8){
 		sum_up_matrix_C_i8(x_sum, x, n, c);
 		return;
 	}
@@ -3432,38 +3441,41 @@ void sum_up_matrix_04_08_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 	}
 
     int64_t c_remain=(c%8);
-    if (c_remain&1){
-		tmp0=0e0;
+    if (c_remain>0){
+		jj=jj+step*7;
+		while(c_remain--){
+			tmp0=0e0;
+			int64_t n_unroll=(n>>2);
+			while( n_unroll-- ){ 
+				r00 = *(x7  );
+				r01 = *(x7+1);
+				r02 = *(x7+2);
+				r03 = *(x7+3);
 
-		int64_t n_unroll=(n>>1);
-		while( n_unroll-- ){ 
-			r00 = *(x7  );
-			r01 = *(x7+1);
-			r02 = *(x7+2);
-			r03 = *(x7+3);
+				r00 = r00 + r01;
+				r02 = r02 + r03;
 
-			r00 = r00 + r01;
-            r02 = r02 + r03;
+				r00 = r00 + r02;
 
-            r00 = r00 + r02;
+				tmp0 = tmp0 + r00;
 
-			tmp0 = tmp0 + r00;
+				x7+=4;
+			}
 
-            x7+=4;
+			int64_t n_remain=n%4;
+			if(n_remain & 2){
+				tmp0 += *(x7);
+				tmp0 += *(x7+1);
+				x7+=2;
+			}
+			if(n_remain & 1){
+				tmp0 += *(x7);
+				x7+=1;
+			}
+			x_sum[jj]=tmp0;
+			jj++;
 		}
-
-		int64_t n_remain=n%2;
-		if(n_remain & 2){
-			tmp0 += *(x7);
-			tmp0 += *(x7+1);
-			x7+=2;
-		}
-		if(n_remain & 1){
-			tmp0 += *(x7);
-			x7+=1;
-		}
-        x_sum[jj+step]=tmp0;
-    }
+	}
 }
 
 // --------------------------------------------------------------------------------
@@ -3879,7 +3891,7 @@ void sum_up_matrix_08_04_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
 
     int64_t c_remain=(c%4);
     if (c_remain>0){
-        jj=jj+step;
+        jj=jj+step*3;
         while(c_remain--){
             tmp0=0e0;
             int64_t n_unroll=(n>>3);
@@ -4069,7 +4081,7 @@ void sum_up_matrix_08_04_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 
     int64_t c_remain=(c%4);
     if (c_remain>0){
-        jj=jj+step;
+        jj=jj+step*3;
         while(c_remain--){
             tmp0=0e0;
             int64_t n_unroll=(n>>3);
@@ -4705,64 +4717,66 @@ void sum_up_matrix_16_04_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
 	}
 
     int64_t c_remain=(c%4);
-    if (c_remain&1){
-		tmp0=0e0;
-        jj=jj+step;
-		int64_t n_unroll=(n>>4);
-		while( n_unroll-- ){ 
-            // --------------------------------------
-			r00 = *(x3  );
-			r01 = *(x3+1);
-			r02 = *(x3+2);
-			r03 = *(x3+3);
-			r04 = *(x3+4);
-			r05 = *(x3+5);
-			r06 = *(x3+6);
-			r07 = *(x3+7);
-			r08 = *(x3+8);
-			r09 = *(x3+9);
-			r10 = *(x3+10);
-			r11 = *(x3+11);
-			r12 = *(x3+12);
-			r13 = *(x3+13);
-			r14 = *(x3+14);
-			r15 = *(x3+15);
+    if (c_remain>0){
+        jj=jj+step*3;
+		while(c_remain--){
+			tmp0=0e0;
+			int64_t n_unroll=(n>>4);
+			while( n_unroll-- ){ 
+				// --------------------------------------
+				r00 = *(x3  );
+				r01 = *(x3+1);
+				r02 = *(x3+2);
+				r03 = *(x3+3);
+				r04 = *(x3+4);
+				r05 = *(x3+5);
+				r06 = *(x3+6);
+				r07 = *(x3+7);
+				r08 = *(x3+8);
+				r09 = *(x3+9);
+				r10 = *(x3+10);
+				r11 = *(x3+11);
+				r12 = *(x3+12);
+				r13 = *(x3+13);
+				r14 = *(x3+14);
+				r15 = *(x3+15);
 
-			r00 = r00 + r01;
-            r02 = r02 + r03;
-            r04 = r04 + r05;
-            r06 = r06 + r07;
-            r08 = r08 + r09;
-            r10 = r10 + r11;
-            r12 = r12 + r13;
-            r14 = r14 + r15;
+				r00 = r00 + r01;
+				r02 = r02 + r03;
+				r04 = r04 + r05;
+				r06 = r06 + r07;
+				r08 = r08 + r09;
+				r10 = r10 + r11;
+				r12 = r12 + r13;
+				r14 = r14 + r15;
 
-            r00 = r00 + r02;
-            r04 = r04 + r06;
-            r08 = r08 + r10;
-            r12 = r12 + r14;
+				r00 = r00 + r02;
+				r04 = r04 + r06;
+				r08 = r08 + r10;
+				r12 = r12 + r14;
 
-            r00 = r00 + r04;
-            r08 = r08 + r12;
-            
-            r00 = r00 + r08;
+				r00 = r00 + r04;
+				r08 = r08 + r12;
+				
+				r00 = r00 + r08;
 
-			tmp0 = tmp0 + r00;
+				tmp0 = tmp0 + r00;
 
-            x3+=16;
+				x3+=16;
+			}
+
+			int64_t n_remain=n%16;
+			if(n_remain > 0){
+				while(n_remain--){
+					tmp0 += *(x3);
+					x+=1;
+					x3+=1;
+				}
+			}
+
+			x_sum[jj]=tmp0;
+			jj++;
 		}
-
-		int64_t n_remain=n%16;
-		if(n_remain > 0){
-            while(n_remain--){
-                tmp0 += *(x3);
-                x+=1;
-                x3+=1;
-            }
-		}
-
-        x_sum[jj]=tmp0;
-        jj++;
     }
 }
 
@@ -4983,64 +4997,66 @@ void sum_up_matrix_16_04_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 	}
 
     int64_t c_remain=(c%4);
-    if (c_remain&1){
-		tmp0=0e0;
-        jj=jj+step;
-		int64_t n_unroll=(n>>4);
-		while( n_unroll-- ){ 
-            // --------------------------------------
-			r00 = *(x3  );
-			r01 = *(x3+1);
-			r02 = *(x3+2);
-			r03 = *(x3+3);
-			r04 = *(x3+4);
-			r05 = *(x3+5);
-			r06 = *(x3+6);
-			r07 = *(x3+7);
-			r08 = *(x3+8);
-			r09 = *(x3+9);
-			r10 = *(x3+10);
-			r11 = *(x3+11);
-			r12 = *(x3+12);
-			r13 = *(x3+13);
-			r14 = *(x3+14);
-			r15 = *(x3+15);
+    if (c_remain>0){
+        jj=jj+step*3;
+		while(c_remain--){
+			tmp0=0e0;
+			int64_t n_unroll=(n>>4);
+			while( n_unroll-- ){ 
+				// --------------------------------------
+				r00 = *(x3  );
+				r01 = *(x3+1);
+				r02 = *(x3+2);
+				r03 = *(x3+3);
+				r04 = *(x3+4);
+				r05 = *(x3+5);
+				r06 = *(x3+6);
+				r07 = *(x3+7);
+				r08 = *(x3+8);
+				r09 = *(x3+9);
+				r10 = *(x3+10);
+				r11 = *(x3+11);
+				r12 = *(x3+12);
+				r13 = *(x3+13);
+				r14 = *(x3+14);
+				r15 = *(x3+15);
 
-			r00 = r00 + r01;
-            r02 = r02 + r03;
-            r04 = r04 + r05;
-            r06 = r06 + r07;
-            r08 = r08 + r09;
-            r10 = r10 + r11;
-            r12 = r12 + r13;
-            r14 = r14 + r15;
+				r00 = r00 + r01;
+				r02 = r02 + r03;
+				r04 = r04 + r05;
+				r06 = r06 + r07;
+				r08 = r08 + r09;
+				r10 = r10 + r11;
+				r12 = r12 + r13;
+				r14 = r14 + r15;
 
-            r00 = r00 + r02;
-            r04 = r04 + r06;
-            r08 = r08 + r10;
-            r12 = r12 + r14;
+				r00 = r00 + r02;
+				r04 = r04 + r06;
+				r08 = r08 + r10;
+				r12 = r12 + r14;
 
-            r00 = r00 + r04;
-            r08 = r08 + r12;
-            
-            r00 = r00 + r08;
+				r00 = r00 + r04;
+				r08 = r08 + r12;
+				
+				r00 = r00 + r08;
 
-			tmp0 = tmp0 + r00;
+				tmp0 = tmp0 + r00;
 
-            x3+=16;
+				x3+=16;
+			}
+
+			int64_t n_remain=n%16;
+			if(n_remain > 0){
+				while(n_remain--){
+					tmp0 += *(x3);
+					x+=1;
+					x3+=1;
+				}
+			}
+
+			x_sum[jj]=tmp0;
+			jj++;
 		}
-
-		int64_t n_remain=n%16;
-		if(n_remain > 0){
-            while(n_remain--){
-                tmp0 += *(x3);
-                x+=1;
-                x3+=1;
-            }
-		}
-
-        x_sum[jj]=tmp0;
-        jj++;
     }
 }
 
@@ -6860,6 +6876,73 @@ void sum_up_matrix_04_02_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c)
 		x_sum[jj+c_step]=tmp1;
 		jj++;
 	}
+
+	if (c_remain>0){
+		jj=jj+c_step;
+		__asm__ __volatile__ (
+			"vpxor  %%ymm15, %%ymm15, %%ymm15 \n\t"
+			"vmovupd 0*8(%[x1]), %%ymm1       \n\t"
+			"subq $-4*8, %[x1]                \n\t"
+			:[x1]"=r"(x1)
+			:"0"(x1)
+		);
+
+		int64_t n_unroll=(n>>2), n_remain=n%4;
+		n_unroll--;
+		while( n_unroll-- ){ 
+			__asm__ __volatile__ (
+				"vaddpd  %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"vmovupd 0*8(%[x1]), %%ymm1        \n\t"
+				"subq $-4*8, %[x1]                 \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		__asm__ __volatile__ (
+			"vaddpd  %%ymm1, %%ymm15, %%ymm15 \n\t"
+			::
+		);
+
+		if(n_remain & 2){
+			__asm__ __volatile__ (
+				"movupd 0*8(%[x1]), %%xmm1 \n\t"
+				"addpd %%xmm1, %%xmm15     \n\t"
+				"subq $-2*8, %[x1]         \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 1){
+			__asm__ __volatile__ (
+				"pxor      %%xmm1, %%xmm1  \n\t"
+				"movsd  0*8(%[x1]), %%xmm1 \n\t"
+				"addpd %%xmm1, %%xmm15     \n\t"
+				"subq $-1*8, %[x1]         \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		// Extract Result
+		double tmp1;
+		__asm__ __volatile__ (
+			"VEXTRACTF64X2  $0,  %%ymm15, %%xmm0  \n\t"
+			"VEXTRACTF64X2  $1,  %%ymm15, %%xmm1  \n\t"
+			"addpd               %%xmm1,  %%xmm0  \n\t"
+			"movupd              %%xmm0,  %%xmm1  \n\t"
+			"PSRLDQ         $8,  %%xmm1           \n\t"
+			"addpd               %%xmm1,  %%xmm0  \n\t"
+			"movsd               %%xmm0, %[t1]     \n\t"
+			:[t1]"=m"(tmp1)
+			:
+		);
+
+		x_sum[jj]=tmp1;
+		jj++;
+
+	}
 }
 
 void sum_up_matrix_04_02_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t c){
@@ -6960,6 +7043,76 @@ void sum_up_matrix_04_02_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t 
 		x_sum[jj]=tmp0;
 		x_sum[jj+c_step]=tmp1;
 		jj++;
+	}
+
+	if (c_remain>0){
+		jj=jj+c_step;
+		while(c_remain--){
+			__asm__ __volatile__ (
+				"vpxor  %%ymm15, %%ymm15, %%ymm15 \n\t"
+				"vMOVDQU 0*8(%[x1]), %%ymm1       \n\t"
+				"subq $-4*8, %[x1]                \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+
+			int64_t n_unroll=(n>>2), n_remain=n%4;
+			n_unroll--;
+			while( n_unroll-- ){ 
+				__asm__ __volatile__ (
+					"vPADDQ  %%ymm1, %%ymm15, %%ymm15  \n\t"
+					"vMOVDQU 0*8(%[x1]), %%ymm1        \n\t"
+					"\n\t"
+					"subq $-4*8, %[x1]                 \n\t"
+					:[x1]"=r"(x1)
+					:"0"(x1)
+				);
+			}
+
+			__asm__ __volatile__ (
+				"vPADDQ  %%ymm1, %%ymm15, %%ymm15 \n\t"
+				::
+			);
+
+			if(n_remain & 2){
+				__asm__ __volatile__ (
+					"MOVDQU 0*8(%[x1]), %%xmm1 \n\t"
+					"PADDQ %%xmm1, %%xmm15     \n\t"
+					"subq $-2*8, %[x1]         \n\t"
+					:[x1]"=r"(x1)
+					:"0"(x1)
+				);
+			}
+
+			if(n_remain & 1){
+				__asm__ __volatile__ (
+					"pxor      %%xmm1, %%xmm1  \n\t"
+					"MOVQ   0*8(%[x1]), %%xmm1 \n\t"
+					"PADDQ %%xmm1, %%xmm15     \n\t"
+					"subq $-1*8, %[x1]         \n\t"
+					:[x1]"=r"(x1)
+					:"0"(x1)
+				);
+			}
+
+			// Extract Result
+			int64_t tmp1;
+			__asm__ __volatile__ (
+				"VEXTRACTI128   $0,  %%ymm15, %%xmm0  \n\t"
+				"VEXTRACTI128   $1,  %%ymm15, %%xmm1  \n\t"
+				"PADDQ               %%xmm1,  %%xmm0  \n\t"
+				"MOVDQU              %%xmm0,  %%xmm1  \n\t"
+				"PSRLDQ         $8,  %%xmm1           \n\t"
+				"PADDQ               %%xmm1,  %%xmm0  \n\t"
+				"MOVQ                %%xmm0, %[t1]     \n\t"
+				:[t1]"=m"(tmp1)
+				:
+			);
+
+			x_sum[jj]=tmp1;
+			jj++;
+
+		}
 	}
 }
 
@@ -7133,6 +7286,77 @@ void sum_up_matrix_04_04_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c)
 		x_sum[jj+c_step*3]=tmp3;
 		jj++;
 	}
+
+	if (c_remain>0){
+		jj=jj+c_step*3;
+		while(c_remain--){
+			__asm__ __volatile__ (
+				"vpxor  %%ymm15, %%ymm15, %%ymm15 \n\t"
+				"vmovupd 0*8(%[x3]), %%ymm3       \n\t"
+				"subq $-4*8, %[x3]                \n\t"
+				:[x3]"=r"(x3)
+				:"0"(x3)
+			);
+
+			int64_t n_unroll=(n>>2), n_remain=n%4;
+			n_unroll--;
+			while( n_unroll-- ){ 
+				__asm__ __volatile__ (
+					"vaddpd  %%ymm3, %%ymm15, %%ymm15  \n\t"
+					"vmovupd 0*8(%[x3]), %%ymm3        \n\t"
+					"\n\t"
+					"subq $-4*8, %[x3]                 \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			__asm__ __volatile__ (
+				"vaddpd  %%ymm3, %%ymm15, %%ymm15 \n\t"
+				::
+			);
+
+			if(n_remain & 2){
+				__asm__ __volatile__ (
+					"movupd 0*8(%[x3]), %%xmm3 \n\t"
+					"addpd %%xmm3, %%xmm15     \n\t"
+					"\n\t"
+					"subq $-2*8, %[x3]         \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			if(n_remain & 1){
+				__asm__ __volatile__ (
+					"pxor      %%xmm3, %%xmm3  \n\t"
+					"movsd  0*8(%[x3]), %%xmm3 \n\t"
+					"addpd %%xmm3, %%xmm15     \n\t"
+					"\n\t"
+					"subq $-1*8, %[x3]         \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			// Extract Result
+			double tmp3;
+			__asm__ __volatile__ (
+				"VEXTRACTF64X2  $0,  %%ymm15, %%xmm0  \n\t"
+				"VEXTRACTF64X2  $1,  %%ymm15, %%xmm1  \n\t"
+				"addpd               %%xmm1,  %%xmm0  \n\t"
+				"movupd              %%xmm0,  %%xmm1  \n\t"
+				"PSRLDQ         $8,  %%xmm1           \n\t"
+				"addpd               %%xmm1,  %%xmm0  \n\t"
+				"movsd               %%xmm0, %[t3]     \n\t"
+				:[t3]"=m"(tmp3)
+				:
+			);
+
+			x_sum[jj]=tmp3;
+			jj++;
+		}
+	}
 }
 
 void sum_up_matrix_04_04_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t c){
@@ -7303,6 +7527,78 @@ void sum_up_matrix_04_04_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t 
 		x_sum[jj+c_step*2]=tmp2;
 		x_sum[jj+c_step*3]=tmp3;
 		jj++;
+	}
+
+	if (c_remain>0){
+		jj=jj+c_step*3;
+		while(c_remain--){
+			__asm__ __volatile__ (
+				"vpxor  %%ymm15, %%ymm15, %%ymm15 \n\t"
+				"vMOVDQU 0*8(%[x3]), %%ymm3       \n\t"
+				"subq $-4*8, %[x3]                \n\t"
+				:[x3]"=r"(x3)
+				:"0"(x3)
+			);
+
+			int64_t n_unroll=(n>>2), n_remain=n%4;
+			n_unroll--;
+			while( n_unroll-- ){ 
+				__asm__ __volatile__ (
+					"vPADDQ  %%ymm3, %%ymm15, %%ymm15  \n\t"
+					"vMOVDQU 0*8(%[x3]), %%ymm3        \n\t"
+					"\n\t"
+					"subq $-4*8, %[x3]                 \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			__asm__ __volatile__ (
+				"vPADDQ  %%ymm3, %%ymm15, %%ymm15 \n\t"
+				::
+			);
+
+			if(n_remain & 2){
+				__asm__ __volatile__ (
+					"MOVDQU 0*8(%[x3]), %%xmm3 \n\t"
+					"PADDQ %%xmm3, %%xmm15     \n\t"
+					"\n\t"
+					"subq $-2*8, %[x3]         \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			if(n_remain & 1){
+				__asm__ __volatile__ (
+					"pxor      %%xmm3, %%xmm3  \n\t"
+					"MOVQ   0*8(%[x3]), %%xmm3 \n\t"
+					"PADDQ %%xmm3, %%xmm15     \n\t"
+					"\n\t"
+					"subq $-1*8, %[x3]         \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			// Extract Result
+			int64_t tmp3;
+			__asm__ __volatile__ (
+				"VEXTRACTI128   $0,  %%ymm15, %%xmm0  \n\t"
+				"VEXTRACTI128   $1,  %%ymm15, %%xmm1  \n\t"
+				"PADDQ               %%xmm1,  %%xmm0  \n\t"
+				"MOVDQU              %%xmm0,  %%xmm1  \n\t"
+				"PSRLDQ         $8,  %%xmm1           \n\t"
+				"PADDQ               %%xmm1,  %%xmm0  \n\t"
+				"MOVQ                %%xmm0, %[t3]     \n\t"
+				:[t3]"=m"(tmp3)
+				:
+			);
+
+			x_sum[jj]=tmp3;
+			jj++;
+		}
+
 	}
 }
 
@@ -7479,6 +7775,77 @@ void sum_up_matrix_04_04_ASM_Pre_r8(double *x_sum, double *x0, int64_t n, int64_
 		x_sum[jj+c_step*2]=tmp2;
 		x_sum[jj+c_step*3]=tmp3;
 		jj++;
+	}
+
+	if (c_remain>0){
+		jj=jj+c_step*3;
+		while(c_remain--){
+			__asm__ __volatile__ (
+				"vpxor  %%ymm15, %%ymm15, %%ymm15 \n\t"
+				"vmovupd 0*8(%[x3]), %%ymm3       \n\t"
+				"subq $-4*8, %[x3]                \n\t"
+				:[x3]"=r"(x3)
+				:"0"(x3)
+			);
+
+			int64_t n_unroll=(n>>2), n_remain=n%4;
+			n_unroll--;
+			while( n_unroll-- ){ 
+				__asm__ __volatile__ (
+					"vaddpd  %%ymm3, %%ymm15, %%ymm15  \n\t"
+					"vmovupd 0*8(%[x3]), %%ymm3        \n\t"
+					"\n\t"
+					"subq $-4*8, %[x3]                 \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			__asm__ __volatile__ (
+				"vaddpd  %%ymm3, %%ymm15, %%ymm15 \n\t"
+				::
+			);
+
+			if(n_remain & 2){
+				__asm__ __volatile__ (
+					"movupd 0*8(%[x3]), %%xmm3 \n\t"
+					"addpd %%xmm3, %%xmm15     \n\t"
+					"\n\t"
+					"subq $-2*8, %[x3]         \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			if(n_remain & 1){
+				__asm__ __volatile__ (
+					"pxor      %%xmm3, %%xmm3  \n\t"
+					"movsd  0*8(%[x3]), %%xmm3 \n\t"
+					"addpd %%xmm3, %%xmm15     \n\t"
+					"\n\t"
+					"subq $-1*8, %[x3]         \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			// Extract Result
+			double tmp3;
+			__asm__ __volatile__ (
+				"VEXTRACTF64X2  $0,  %%ymm15, %%xmm0  \n\t"
+				"VEXTRACTF64X2  $1,  %%ymm15, %%xmm1  \n\t"
+				"addpd               %%xmm1,  %%xmm0  \n\t"
+				"movupd              %%xmm0,  %%xmm1  \n\t"
+				"PSRLDQ         $8,  %%xmm1           \n\t"
+				"addpd               %%xmm1,  %%xmm0  \n\t"
+				"movsd               %%xmm0, %[t3]     \n\t"
+				:[t3]"=m"(tmp3)
+				:
+			);
+
+			x_sum[jj]=tmp3;
+			jj++;
+		}
 	}
 }
 
@@ -7779,6 +8146,86 @@ void sum_up_matrix_08_02_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c)
 		x_sum[jj+c_step]=tmp1;
 		jj++;
 	}
+
+	if (c_remain>0){
+		jj=jj+c_step;
+		__asm__ __volatile__ (
+			"vpxor  %%ymm15, %%ymm15, %%ymm15 \n\t"
+			"vmovupd 0*8(%[x1]), %%ymm2       \n\t"
+			"vmovupd 4*8(%[x1]), %%ymm3       \n\t"
+			"subq $-8*8, %[x1]                \n\t"
+			:[x1]"=r"(x1)
+			:"0"(x1)
+		);
+
+		int64_t n_unroll=(n>>3), n_remain=n%8;
+		n_unroll--;
+		while( n_unroll-- ){ 
+			__asm__ __volatile__ (
+				"vaddpd  %%ymm2, %%ymm3, %%ymm9    \n\t"
+				"vmovupd 0*8(%[x1]), %%ymm2        \n\t"
+				"vmovupd 4*8(%[x1]), %%ymm3        \n\t"
+				"vaddpd  %%ymm9, %%ymm15, %%ymm15  \n\t"
+				"\n\t"
+				"subq $-8*8, %[x1]                 \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		__asm__ __volatile__ (
+			"vaddpd  %%ymm2, %%ymm3, %%ymm9    \n\t"
+			"vaddpd  %%ymm9, %%ymm15, %%ymm15  \n\t"
+			::
+		);
+
+		if(n_remain & 4){
+			__asm__ __volatile__ (
+				"vmovupd 0*8(%[x1]), %%ymm1       \n\t"
+				"vaddpd %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"subq $-4*8, %[x1]                \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 2){
+			__asm__ __volatile__ (
+				"movupd 0*8(%[x1]), %%xmm1 \n\t"
+				"addpd %%xmm1, %%xmm15     \n\t"
+				"subq $-2*8, %[x1]         \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 1){
+			__asm__ __volatile__ (
+				"pxor      %%xmm1, %%xmm1  \n\t"
+				"movsd  0*8(%[x1]), %%xmm1 \n\t"
+				"addpd %%xmm1, %%xmm15     \n\t"
+				"subq $-1*8, %[x1]         \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		// Extract Result
+		double tmp1;
+		__asm__ __volatile__ (
+			"VEXTRACTF64X2  $0,  %%ymm15, %%xmm0  \n\t"
+			"VEXTRACTF64X2  $1,  %%ymm15, %%xmm1  \n\t"
+			"addpd               %%xmm1,  %%xmm0  \n\t"
+			"movupd              %%xmm0,  %%xmm1  \n\t"
+			"PSRLDQ         $8,  %%xmm1           \n\t"
+			"addpd               %%xmm1,  %%xmm0  \n\t"
+			"movsd               %%xmm0, %[t1]     \n\t"
+			:[t1]"=m"(tmp1)
+			:
+		);
+
+		x_sum[jj]=tmp1;
+	}
 }
 
 void sum_up_matrix_08_02_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t c){
@@ -7901,6 +8348,86 @@ void sum_up_matrix_08_02_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t 
 		x_sum[jj]=tmp0;
 		x_sum[jj+c_step]=tmp1;
 		jj++;
+	}
+
+	if (c_remain>0){
+		jj=jj+c_step;
+		__asm__ __volatile__ (
+			"vpxor  %%ymm15, %%ymm15, %%ymm15 \n\t"
+			"vMOVDQU 0*8(%[x1]), %%ymm2       \n\t"
+			"vMOVDQU 4*8(%[x1]), %%ymm3       \n\t"
+			"subq $-8*8, %[x1]                \n\t"
+			:[x1]"=r"(x1)
+			:"0"(x1)
+		);
+
+		int64_t n_unroll=(n>>3), n_remain=n%8;
+		n_unroll--;
+		while( n_unroll-- ){ 
+			__asm__ __volatile__ (
+				"vPADDQ  %%ymm2, %%ymm3, %%ymm9    \n\t"
+				"vMOVDQU 0*8(%[x1]), %%ymm2        \n\t"
+				"vMOVDQU 4*8(%[x1]), %%ymm3        \n\t"
+				"vPADDQ  %%ymm9, %%ymm15, %%ymm15  \n\t"
+				"\n\t"
+				"subq $-8*8, %[x1]                 \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		__asm__ __volatile__ (
+			"vPADDQ  %%ymm2, %%ymm3, %%ymm9    \n\t"
+			"vPADDQ  %%ymm9, %%ymm15, %%ymm15  \n\t"
+			::
+		);
+
+		if(n_remain & 4){
+			__asm__ __volatile__ (
+				"vMOVDQU 0*8(%[x1]), %%ymm1       \n\t"
+				"vPADDQ %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"subq $-4*8, %[x1]                \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 2){
+			__asm__ __volatile__ (
+				"MOVDQU 0*8(%[x1]), %%xmm1 \n\t"
+				"PADDQ %%xmm1, %%xmm15     \n\t"
+				"subq $-2*8, %[x1]         \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 1){
+			__asm__ __volatile__ (
+				"pxor      %%xmm1, %%xmm1  \n\t"
+				"MOVQ   0*8(%[x1]), %%xmm1 \n\t"
+				"PADDQ %%xmm1, %%xmm15     \n\t"
+				"subq $-1*8, %[x1]         \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		// Extract Result
+		int64_t tmp1;
+		__asm__ __volatile__ (
+			"VEXTRACTI128   $0,  %%ymm15, %%xmm0  \n\t"
+			"VEXTRACTI128   $1,  %%ymm15, %%xmm1  \n\t"
+			"PADDQ               %%xmm1,  %%xmm0  \n\t"
+			"MOVDQU              %%xmm0,  %%xmm1  \n\t"
+			"PSRLDQ         $8,  %%xmm1           \n\t"
+			"PADDQ               %%xmm1,  %%xmm0  \n\t"
+			"MOVQ                %%xmm0, %[t1]     \n\t"
+			:[t1]"=m"(tmp1)
+			:
+		);
+
+		x_sum[jj]=tmp1;
 	}
 }
 
@@ -8113,6 +8640,93 @@ void sum_up_matrix_08_04_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c)
 		x_sum[jj+c_step*3]=tmp3;
 		jj++;
 	}
+
+	if (c_remain>0){
+		jj=jj+c_step*3;
+		while(c_remain--){
+			__asm__ __volatile__ (
+				"vpxor  %%ymm15, %%ymm15, %%ymm15 \n\t"
+				"\n\t"
+				"vmovupd 0*8(%[x3]), %%ymm6       \n\t"
+				"vmovupd 4*8(%[x3]), %%ymm7       \n\t"
+				"\n\t"
+				"subq $-8*8, %[x3]                \n\t"
+				:[x3]"=r"(x3)
+				:"0"(x3)
+			);
+
+			int64_t n_unroll=(n>>3), n_remain=n%8;
+			n_unroll--;
+			while( n_unroll-- ){ 
+				__asm__ __volatile__ (
+					"vaddpd  %%ymm6, %%ymm7, %%ymm11    \n\t"
+					"vmovupd 0*8(%[x3]), %%ymm6        \n\t"
+					"vmovupd 4*8(%[x3]), %%ymm7        \n\t"
+					"vaddpd  %%ymm11, %%ymm15, %%ymm15  \n\t"
+					"\n\t"
+					"subq $-8*8, %[x3]                 \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			__asm__ __volatile__ (
+				"vaddpd  %%ymm6, %%ymm7, %%ymm11    \n\t"
+				"vaddpd  %%ymm11, %%ymm15, %%ymm15  \n\t"
+				::
+			);
+
+			if(n_remain & 4){
+				__asm__ __volatile__ (
+					"vmovupd 0*8(%[x3]), %%ymm3       \n\t"
+					"vaddpd %%ymm3, %%ymm15, %%ymm15  \n\t"
+					"\n\t"
+					"subq $-4*8, %[x3]                \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			if(n_remain & 2){
+				__asm__ __volatile__ (
+					"movupd 0*8(%[x3]), %%xmm4 \n\t"
+					"addpd %%xmm4, %%xmm15     \n\t"
+					"subq $-2*8, %[x3]         \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			if(n_remain & 1){
+				__asm__ __volatile__ (
+					"pxor      %%xmm3, %%xmm3  \n\t"
+					"movsd  0*8(%[x3]), %%xmm3 \n\t"
+					"addpd %%xmm3, %%xmm15     \n\t"
+					"\n\t"
+					"subq $-1*8, %[x3]         \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			// Extract Result
+			double tmp3;
+			__asm__ __volatile__ (
+				"VEXTRACTF64X2  $0,  %%ymm15, %%xmm0  \n\t"
+				"VEXTRACTF64X2  $1,  %%ymm15, %%xmm1  \n\t"
+				"addpd               %%xmm1,  %%xmm0  \n\t"
+				"movupd              %%xmm0,  %%xmm1  \n\t"
+				"PSRLDQ         $8,  %%xmm1           \n\t"
+				"addpd               %%xmm1,  %%xmm0  \n\t"
+				"movsd               %%xmm0, %[t3]     \n\t"
+				:[t3]"=m"(tmp3)
+				:
+			);
+
+			x_sum[jj]=tmp3;
+			jj++;
+		}
+	}
 }
 
 void sum_up_matrix_08_04_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t c){
@@ -8323,6 +8937,94 @@ void sum_up_matrix_08_04_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t 
 		x_sum[jj+c_step*3]=tmp3;
 		jj++;
 	}
+
+	if (c_remain>0){
+		jj=jj+c_step*3;
+		while(c_remain--){
+			__asm__ __volatile__ (
+				"vpxor  %%ymm15, %%ymm15, %%ymm15 \n\t"
+				"\n\t"
+				"vMOVDQU 0*8(%[x3]), %%ymm6       \n\t"
+				"vMOVDQU 4*8(%[x3]), %%ymm7       \n\t"
+				"\n\t"
+				"subq $-8*8, %[x3]                \n\t"
+				:[x3]"=r"(x3)
+				:"0"(x3)
+			);
+
+			int64_t n_unroll=(n>>3), n_remain=n%8;
+			n_unroll--;
+			while( n_unroll-- ){ 
+				__asm__ __volatile__ (
+					"vPADDQ  %%ymm6, %%ymm7, %%ymm11    \n\t"
+					"vMOVDQU 0*8(%[x3]), %%ymm6        \n\t"
+					"vMOVDQU 4*8(%[x3]), %%ymm7        \n\t"
+					"vPADDQ  %%ymm11, %%ymm15, %%ymm15  \n\t"
+					"\n\t"
+					"subq $-8*8, %[x3]                 \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			__asm__ __volatile__ (
+				"vPADDQ  %%ymm6, %%ymm7, %%ymm11    \n\t"
+				"vPADDQ  %%ymm11, %%ymm15, %%ymm15  \n\t"
+				::
+			);
+
+			if(n_remain & 4){
+				__asm__ __volatile__ (
+					"vMOVDQU 0*8(%[x3]), %%ymm3       \n\t"
+					"vPADDQ %%ymm3, %%ymm15, %%ymm15  \n\t"
+					"\n\t"
+					"subq $-4*8, %[x3]                \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			if(n_remain & 2){
+				__asm__ __volatile__ (
+					"MOVDQU 0*8(%[x3]), %%xmm4 \n\t"
+					"PADDQ %%xmm4, %%xmm15     \n\t"
+					"subq $-2*8, %[x3]         \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			if(n_remain & 1){
+				__asm__ __volatile__ (
+					"pxor      %%xmm3, %%xmm3  \n\t"
+					"\n\t"
+					"MOVQ   0*8(%[x3]), %%xmm3 \n\t"
+					"PADDQ %%xmm3, %%xmm15     \n\t"
+					"\n\t"
+					"subq $-1*8, %[x3]         \n\t"
+					:[x3]"=r"(x3)
+					:"0"(x3)
+				);
+			}
+
+			// Extract Result
+			int64_t tmp3;
+			__asm__ __volatile__ (
+				"VEXTRACTI128   $0,  %%ymm15, %%xmm0  \n\t"
+				"VEXTRACTI128   $1,  %%ymm15, %%xmm1  \n\t"
+				"PADDQ               %%xmm1,  %%xmm0  \n\t"
+				"MOVDQU              %%xmm0,  %%xmm1  \n\t"
+				"PSRLDQ         $8,  %%xmm1           \n\t"
+				"PADDQ               %%xmm1,  %%xmm0  \n\t"
+				"MOVQ                %%xmm0, %[t3]     \n\t"
+				:[t3]"=m"(tmp3)
+				:
+			);
+
+			x_sum[jj]=tmp3;
+			jj++;
+		}
+	}
 }
 
 // --------------------------------------------------------------------------------
@@ -8492,6 +9194,116 @@ void sum_up_matrix_16_02_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c)
 		x_sum[jj+c_step]=tmp1;
 		jj++;
 	}
+
+	if (c_remain>0){
+		jj=jj+c_step;
+		__asm__ __volatile__ (
+			"vpxor  %%ymm14, %%ymm14, %%ymm14 \n\t"
+			"vpxor  %%ymm15, %%ymm15, %%ymm15 \n\t"
+			"vmovupd  0*8(%[x1]), %%ymm4      \n\t"
+			"vmovupd  4*8(%[x1]), %%ymm5      \n\t"
+			"vmovupd  8*8(%[x1]), %%ymm6      \n\t"
+			"vmovupd 12*8(%[x1]), %%ymm7      \n\t"
+			"subq $-16*8, %[x1]               \n\t"
+			:[x1]"=r"(x1)
+			:"0"(x1)
+		);
+
+		int64_t n_unroll=(n>>4), n_remain=n%16;
+		n_unroll--;
+		while( n_unroll-- ){ 
+			__asm__ __volatile__ (
+				"vaddpd  %%ymm4, %%ymm5, %%ymm10    \n\t"
+				"vmovupd  0*8(%[x1]), %%ymm4        \n\t"
+				"vmovupd  4*8(%[x1]), %%ymm5        \n\t"
+				"vaddpd  %%ymm10, %%ymm14, %%ymm14  \n\t"
+				"\n\t"
+				"vaddpd  %%ymm6, %%ymm7, %%ymm11    \n\t"
+				"vmovupd  8*8(%[x1]), %%ymm6        \n\t"
+				"vmovupd 12*8(%[x1]), %%ymm7        \n\t"
+				"vaddpd  %%ymm11, %%ymm15, %%ymm15  \n\t"
+				"\n\t"
+				"subq $-16*8, %[x1]                 \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		__asm__ __volatile__ (
+			"vaddpd  %%ymm4, %%ymm5, %%ymm10    \n\t"
+			"vaddpd  %%ymm10, %%ymm14, %%ymm14  \n\t"
+			"\n\t"
+			"vaddpd  %%ymm6, %%ymm7, %%ymm11    \n\t"
+			"vaddpd  %%ymm11, %%ymm15, %%ymm15  \n\t"
+			"\n\t"
+			"vaddpd  %%ymm14, %%ymm15, %%ymm15  \n\t"
+			::
+		);
+
+		if(n_remain & 8){
+			__asm__ __volatile__ (
+				"vmovupd 0*8(%[x1]), %%ymm1       \n\t"
+				"vaddpd %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"vmovupd 4*8(%[x1]), %%ymm1       \n\t"
+				"vaddpd %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"subq $-8*8, %[x1]                \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 4){
+			__asm__ __volatile__ (
+				"vmovupd 0*8(%[x1]), %%ymm1       \n\t"
+				"vaddpd %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"subq $-4*8, %[x1]                \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 2){
+			__asm__ __volatile__ (
+				"movupd 0*8(%[x1]), %%xmm1 \n\t"
+				"addpd %%xmm1, %%xmm15     \n\t"
+				"subq $-2*8, %[x1]         \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 1){
+			__asm__ __volatile__ (
+				"pxor      %%xmm0, %%xmm0  \n\t"
+				"pxor      %%xmm1, %%xmm1  \n\t"
+				"movsd  0*8(%[x0]), %%xmm0 \n\t"
+				"addpd %%xmm0, %%xmm14     \n\t"
+				"movsd  0*8(%[x1]), %%xmm1 \n\t"
+				"addpd %%xmm1, %%xmm15     \n\t"
+				"subq $-1*8, %[x0]         \n\t"
+				"subq $-1*8, %[x1]         \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		// Extract Result
+		double tmp1;
+		__asm__ __volatile__ (
+			"VEXTRACTF64X2  $0,  %%ymm15, %%xmm0  \n\t"
+			"VEXTRACTF64X2  $1,  %%ymm15, %%xmm1  \n\t"
+			"addpd               %%xmm1,  %%xmm0  \n\t"
+			"movupd              %%xmm0,  %%xmm1  \n\t"
+			"PSRLDQ         $8,  %%xmm1           \n\t"
+			"addpd               %%xmm1,  %%xmm0  \n\t"
+			"movsd               %%xmm0, %[t1]     \n\t"
+			:[t1]"=m"(tmp1)
+			:
+		);
+
+		x_sum[jj]=tmp1;
+		jj++;
+	}
 }
 
 void sum_up_matrix_16_02_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t c){
@@ -8659,6 +9471,112 @@ void sum_up_matrix_16_02_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t 
 		x_sum[jj]=tmp0;
 		x_sum[jj+c_step]=tmp1;
 		jj++;
+	}
+
+	if (c_remain>0){
+		jj=jj+c_step;
+		__asm__ __volatile__ (
+			"vpxor  %%ymm14, %%ymm14, %%ymm14 \n\t"
+			"vpxor  %%ymm15, %%ymm15, %%ymm15 \n\t"
+			"vMOVDQU  0*8(%[x1]), %%ymm4      \n\t"
+			"vMOVDQU  4*8(%[x1]), %%ymm5      \n\t"
+			"vMOVDQU  8*8(%[x1]), %%ymm6      \n\t"
+			"vMOVDQU 12*8(%[x1]), %%ymm7      \n\t"
+			"subq $-16*8, %[x1]               \n\t"
+			:[x1]"=r"(x1)
+			:"0"(x1)
+		);
+
+		int64_t n_unroll=(n>>4), n_remain=n%16;
+		n_unroll--;
+		while( n_unroll-- ){ 
+			__asm__ __volatile__ (
+				"vPADDQ  %%ymm4, %%ymm5, %%ymm10    \n\t"
+				"vMOVDQU  0*8(%[x1]), %%ymm4        \n\t"
+				"vMOVDQU  4*8(%[x1]), %%ymm5        \n\t"
+				"vPADDQ  %%ymm10, %%ymm14, %%ymm14  \n\t"
+				"\n\t"
+				"vPADDQ  %%ymm6, %%ymm7, %%ymm11    \n\t"
+				"vMOVDQU  8*8(%[x1]), %%ymm6        \n\t"
+				"vMOVDQU 12*8(%[x1]), %%ymm7        \n\t"
+				"vPADDQ  %%ymm11, %%ymm15, %%ymm15  \n\t"
+				"\n\t"
+				"subq $-16*8, %[x1]                 \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		__asm__ __volatile__ (
+			"vPADDQ  %%ymm4, %%ymm5, %%ymm10    \n\t"
+			"vPADDQ  %%ymm10, %%ymm14, %%ymm14  \n\t"
+			"\n\t"
+			"vPADDQ  %%ymm6, %%ymm7, %%ymm11    \n\t"
+			"vPADDQ  %%ymm11, %%ymm15, %%ymm15  \n\t"
+			"\n\t"
+			"vPADDQ  %%ymm14, %%ymm15, %%ymm15  \n\t"
+			::
+		);
+
+		if(n_remain & 8){
+			__asm__ __volatile__ (
+				"vMOVDQU 0*8(%[x1]), %%ymm1       \n\t"
+				"vPADDQ %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"\n\t"
+				"vMOVDQU 4*8(%[x1]), %%ymm1       \n\t"
+				"vPADDQ %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"subq $-8*8, %[x1]                \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 4){
+			__asm__ __volatile__ (
+				"vMOVDQU 0*8(%[x1]), %%ymm1       \n\t"
+				"vPADDQ %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"subq $-4*8, %[x1]                \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 2){
+			__asm__ __volatile__ (
+				"MOVDQU 0*8(%[x1]), %%xmm1 \n\t"
+				"PADDQ %%xmm1, %%xmm15     \n\t"
+				"subq $-2*8, %[x1]         \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 1){
+			__asm__ __volatile__ (
+				"pxor      %%xmm1, %%xmm1  \n\t"
+				"MOVQ   0*8(%[x1]), %%xmm1 \n\t"
+				"PADDQ %%xmm1, %%xmm15     \n\t"
+				"subq $-1*8, %[x1]         \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		// Extract Result
+		int64_t tmp1;
+		__asm__ __volatile__ (
+			"VEXTRACTI128   $0,  %%ymm15, %%xmm0  \n\t"
+			"VEXTRACTI128   $1,  %%ymm15, %%xmm1  \n\t"
+			"PADDQ               %%xmm1,  %%xmm0  \n\t"
+			"MOVDQU              %%xmm0,  %%xmm1  \n\t"
+			"PSRLDQ         $8,  %%xmm1           \n\t"
+			"PADDQ               %%xmm1,  %%xmm0  \n\t"
+			"MOVQ                %%xmm0, %[t1]     \n\t"
+			:[t1]"=m"(tmp1)
+			:
+		);
+
+		x_sum[jj]=tmp1;
 	}
 }
 
@@ -8848,10 +9766,130 @@ void sum_up_matrix_32_02_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c)
 			:[t1]"=m"(tmp1)
 			:
 		);
-
 		x_sum[jj]=tmp0;
 		x_sum[jj+c_step]=tmp1;
 		jj++;
+	}
+
+	if (c_remain>0){
+		__asm__ __volatile__ (
+			"VXORPD %%zmm14, %%zmm14, %%zmm14 \n\t"
+			"VXORPD %%zmm15, %%zmm15, %%zmm15 \n\t"
+			"vmovupd  0*8(%[x1]), %%zmm4      \n\t"
+			"vmovupd  8*8(%[x1]), %%zmm5      \n\t"
+			"vmovupd 16*8(%[x1]), %%zmm6      \n\t"
+			"vmovupd 24*8(%[x1]), %%zmm7      \n\t"
+			"subq $-32*8, %[x1]               \n\t"
+			:[x1]"=r"(x1)
+			:"0"(x1)
+		);
+
+		int64_t n_unroll=(n>>5), n_remain=n%32;
+		n_unroll--;
+		while( n_unroll-- ){ 
+			__asm__ __volatile__ (
+				"vaddpd  %%zmm4, %%zmm5, %%zmm10    \n\t"
+				"vmovupd  0*8(%[x1]), %%zmm4        \n\t"
+				"vmovupd  8*8(%[x1]), %%zmm5        \n\t"
+				"vaddpd  %%zmm10, %%zmm14, %%zmm14  \n\t"
+				"\n\t"
+				"vaddpd  %%zmm6, %%zmm7, %%zmm11    \n\t"
+				"vmovupd 16*8(%[x1]), %%zmm6        \n\t"
+				"vmovupd 24*8(%[x1]), %%zmm7        \n\t"
+				"vaddpd  %%zmm11, %%zmm15, %%zmm15  \n\t"
+				"\n\t"
+				"subq $-32*8, %[x1]                 \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		__asm__ __volatile__ (
+			"vaddpd  %%zmm4, %%zmm5, %%zmm10    \n\t"
+			"vaddpd  %%zmm10, %%zmm14, %%zmm14  \n\t"
+			"\n\t"
+			"vaddpd  %%zmm6, %%zmm7, %%zmm11    \n\t"
+			"vaddpd  %%zmm11, %%zmm15, %%zmm15  \n\t"
+			"\n\t"
+			"vaddpd  %%zmm14, %%zmm15, %%zmm15  \n\t"
+			::
+		);
+
+		if(n_remain & 16){
+			__asm__ __volatile__ (
+				"vmovupd 0*8(%[x1]), %%zmm1       \n\t"
+				"vaddpd %%zmm1, %%zmm15, %%zmm15  \n\t"
+				"\n\t"
+				"vmovupd 8*8(%[x1]), %%zmm1       \n\t"
+				"vaddpd %%zmm1, %%zmm15, %%zmm15  \n\t"
+				"subq $-16*8, %[x1]                \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 8){
+			__asm__ __volatile__ (
+				"vmovupd 0*8(%[x1]), %%ymm1       \n\t"
+				"vaddpd %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"\n\t"
+				"vmovupd 4*8(%[x1]), %%ymm1       \n\t"
+				"vaddpd %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"subq $-8*8, %[x1]                \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 4){
+			__asm__ __volatile__ (
+				"vmovupd 0*8(%[x1]), %%ymm1       \n\t"
+				"vaddpd %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"subq $-4*8, %[x1]                \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 2){
+			__asm__ __volatile__ (
+				"movupd 0*8(%[x1]), %%xmm1 \n\t"
+				"addpd %%xmm1, %%xmm15     \n\t"
+				"subq $-2*8, %[x1]         \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 1){
+			__asm__ __volatile__ (
+				"pxor      %%xmm1, %%xmm1  \n\t"
+				"movsd  0*8(%[x1]), %%xmm1 \n\t"
+				"addpd %%xmm1, %%xmm15     \n\t"
+				"subq $-1*8, %[x1]         \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		// Extract Result
+		double tmp1;
+		__asm__ __volatile__ (
+			"VEXTRACTF64X4  $0,  %%zmm15, %%ymm0  \n\t"
+			"VEXTRACTF64X4  $1,  %%zmm15, %%ymm1  \n\t"
+			"vaddpd      %%ymm0, %%ymm1,  %%ymm15 \n\t"
+			"\n\t"
+			"VEXTRACTF64X2  $0,  %%ymm15, %%xmm0  \n\t"
+			"VEXTRACTF64X2  $1,  %%ymm15, %%xmm1  \n\t"
+			"addpd               %%xmm1,  %%xmm0  \n\t"
+			"movupd              %%xmm0,  %%xmm1  \n\t"
+			"PSRLDQ         $8,  %%xmm1           \n\t"
+			"addpd               %%xmm1,  %%xmm0  \n\t"
+			"movsd               %%xmm0, %[t1]    \n\t"
+			:[t1]"=m"(tmp1)
+			:
+		);
+		x_sum[jj+c_step]=tmp1;
 	}
 }
 
@@ -9045,160 +10083,125 @@ void sum_up_matrix_32_02_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t 
 		x_sum[jj+c_step]=tmp1;
 		jj++;
 	}
-}
 
-// --------------------------------------------------------------------------------
-void sum_up_matrix_04_02_ASM_P_r8(double *x_sum, double *x0, int64_t n, int64_t c){
-	double *x1, tmp0, tmp1;
-	int64_t c_unroll=(c>>1), c_remain=c%2, c_step=(c>>1), jj;
-	x1 = x0;
-	x1 += c_step * n;
-	for(jj=0; jj<c_unroll; jj++){
-		#pragma omp sections
-		{
-			#pragma omp section
-			{
-				tmp0 = sum_up_04_ASM_r8(x0, n);
-				x_sum[jj]=tmp0;
-				x0 += n;
-			}
-			#pragma omp section
-			{
-				tmp1 = sum_up_04_ASM_r8(x1, n);
-				x_sum[jj+c_step]=tmp1;
-				x1 += n;
-			}
-		}
-	}
-}
+	if (c_remain>0){
+		__asm__ __volatile__ (
+			"VXORPD %%zmm14, %%zmm14, %%zmm14 \n\t"
+			"VXORPD %%zmm15, %%zmm15, %%zmm15 \n\t"
+			"VMOVDQU64  0*8(%[x1]), %%zmm4      \n\t"
+			"VMOVDQU64  8*8(%[x1]), %%zmm5      \n\t"
+			"VMOVDQU64 16*8(%[x1]), %%zmm6      \n\t"
+			"VMOVDQU64 24*8(%[x1]), %%zmm7      \n\t"
+			"subq $-32*8, %[x1]               \n\t"
+			:[x1]"=r"(x1)
+			:"0"(x1)
+		);
 
-void sum_up_matrix_04_02_ASM_P_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
-	int64_t ii, jj, j0;
-    int64_t r00,r01,r02,r03;
-    int64_t r15;
-
-	for(jj=0; jj<c; jj++){
-		j0 = jj*n;
-		r15=0e0;
-		int64_t n_unroll=(n>>2);
+		int64_t n_unroll=(n>>5), n_remain=n%32;
+		n_unroll--;
 		while( n_unroll-- ){ 
-			r00 = *(x  );
-			r01 = *(x+1);
-			r02 = *(x+2);
-			r03 = *(x+3);
-
-			r00 = r00 + r01;
-			r02 = r02 + r03;
-
-            r00 = r00 + r02;
-
-			r15 = r15 + r00;
-			x+=4;
+			__asm__ __volatile__ (
+				"vPADDQ  %%zmm4, %%zmm5, %%zmm10    \n\t"
+				"VMOVDQU64  0*8(%[x1]), %%zmm4        \n\t"
+				"VMOVDQU64  8*8(%[x1]), %%zmm5        \n\t"
+				"vPADDQ  %%zmm10, %%zmm14, %%zmm14  \n\t"
+				"\n\t"
+				"vPADDQ  %%zmm6, %%zmm7, %%zmm11    \n\t"
+				"VMOVDQU64 16*8(%[x1]), %%zmm6        \n\t"
+				"VMOVDQU64 24*8(%[x1]), %%zmm7        \n\t"
+				"vPADDQ  %%zmm11, %%zmm15, %%zmm15  \n\t"
+				"\n\t"
+				"subq $-32*8, %[x1]                 \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
 		}
 
-		int64_t n_remain=n%4;
+		__asm__ __volatile__ (
+			"vPADDQ  %%zmm4, %%zmm5, %%zmm10    \n\t"
+			"vPADDQ  %%zmm10, %%zmm14, %%zmm14  \n\t"
+			"\n\t"
+			"vPADDQ  %%zmm6, %%zmm7, %%zmm11    \n\t"
+			"vPADDQ  %%zmm11, %%zmm15, %%zmm15  \n\t"
+			"\n\t"
+			"vPADDQ  %%zmm14, %%zmm15, %%zmm15  \n\t"
+			::
+		);
+
+		if(n_remain & 16){
+			__asm__ __volatile__ (
+				"VMOVDQU64 0*8(%[x1]), %%zmm1       \n\t"
+				"vPADDQ %%zmm1, %%zmm15, %%zmm15  \n\t"
+				"\n\t"
+				"VMOVDQU64 8*8(%[x1]), %%zmm1       \n\t"
+				"vPADDQ %%zmm1, %%zmm15, %%zmm15  \n\t"
+				"subq $-16*8, %[x1]                \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 8){
+			__asm__ __volatile__ (
+				"vMOVDQU 0*8(%[x1]), %%ymm1       \n\t"
+				"vPADDQ %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"\n\t"
+				"vMOVDQU 4*8(%[x1]), %%ymm1       \n\t"
+				"vPADDQ %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"subq $-8*8, %[x1]                \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
+		if(n_remain & 4){
+			__asm__ __volatile__ (
+				"vMOVDQU 0*8(%[x1]), %%ymm1       \n\t"
+				"vPADDQ %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"subq $-4*8, %[x1]                \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
+		}
+
 		if(n_remain & 2){
-			r00 = *(x);
-			r01 = *(x+1);
-
-            r00 = r00 + r01;
-
-            r15 = r15 + r00;
-			x+=2;
+			__asm__ __volatile__ (
+				"MOVDQU 0*8(%[x1]), %%xmm1 \n\t"
+				"PADDQ %%xmm1, %%xmm15     \n\t"
+				"subq $-2*8, %[x1]         \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
 		}
 
 		if(n_remain & 1){
-			r15 += *(x);
-			x+=1;
+			__asm__ __volatile__ (
+				"pxor      %%xmm1, %%xmm1  \n\t"
+				"MOVQ   0*8(%[x1]), %%xmm1 \n\t"
+				"PADDQ %%xmm1, %%xmm15     \n\t"
+				"subq $-1*8, %[x1]         \n\t"
+				:[x1]"=r"(x1)
+				:"0"(x1)
+			);
 		}
 
-		x_sum[jj]=r15;
+		// Extract Result
+		int64_t tmp1;
+		__asm__ __volatile__ (
+			"VEXTRACTF64X4  $0,  %%zmm15, %%ymm0  \n\t"
+			"VEXTRACTF64X4  $1,  %%zmm15, %%ymm1  \n\t"
+			"vPADDQ      %%ymm0, %%ymm1,  %%ymm15 \n\t"
+			"\n\t"
+			"VEXTRACTI128   $0,  %%ymm15, %%xmm0  \n\t"
+			"VEXTRACTI128   $1,  %%ymm15, %%xmm1  \n\t"
+			"PADDQ               %%xmm1,  %%xmm0  \n\t"
+			"MOVDQU              %%xmm0,  %%xmm1  \n\t"
+			"PSRLDQ         $8,  %%xmm1           \n\t"
+			"PADDQ               %%xmm1,  %%xmm0  \n\t"
+			"MOVQ                %%xmm0, %[t1]    \n\t"
+			:[t1]"=m"(tmp1)
+			:
+		);
+		x_sum[jj+c_step]=tmp1;		
 	}
 }
-
-// --------------------------------------------------------------------------------
-void sum_up_matrix_04_04_ASM_P_r8(double *x_sum, double *x0, int64_t n, int64_t c){
-	double *x1, *x2, *x3;
-	double tmp0, tmp1, tmp2, tmp3;
-	int64_t c_unroll=(c>>2), c_remain=c%4, c_step=(c>>2), jj;
-	x1 = x0;
-	x2 = x0;
-	x3 = x0;
-	x1 += c_step * n;
-	x2 += c_step * n * 2;
-	x3 += c_step * n * 3; 
-	for(jj=0; jj<c_unroll; jj++){
-		#pragma omp sections
-		{
-			#pragma omp section
-			{
-				tmp0 = sum_up_04_ASM_r8(x0, n);
-				x_sum[jj]=tmp0;
-				x0 += n;
-			}
-			#pragma omp section
-			{
-				tmp1 = sum_up_04_ASM_r8(x1, n);
-				x_sum[jj+c_step]=tmp1;
-				x1 += n;
-			}
-			#pragma omp section
-			{
-				tmp2 = sum_up_04_ASM_r8(x2, n);
-				x_sum[jj+c_step*2]=tmp2;
-				x2 += n;
-			}
-			#pragma omp section
-			{
-				tmp3 = sum_up_04_ASM_r8(x3, n);
-				x_sum[jj+c_step*3]=tmp3;
-				x3 += n;
-			}
-		}
-	}
-}
-
-void sum_up_matrix_04_04_ASM_P_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
-	int64_t ii, jj, j0;
-    int64_t r00,r01,r02,r03;
-    int64_t r15;
-
-	for(jj=0; jj<c; jj++){
-		j0 = jj*n;
-		r15=0e0;
-		int64_t n_unroll=(n>>2);
-		while( n_unroll-- ){ 
-			r00 = *(x  );
-			r01 = *(x+1);
-			r02 = *(x+2);
-			r03 = *(x+3);
-
-			r00 = r00 + r01;
-			r02 = r02 + r03;
-
-            r00 = r00 + r02;
-
-			r15 = r15 + r00;
-			x+=4;
-		}
-
-		int64_t n_remain=n%4;
-		if(n_remain & 2){
-			r00 = *(x);
-			r01 = *(x+1);
-
-            r00 = r00 + r01;
-
-            r15 = r15 + r00;
-			x+=2;
-		}
-
-		if(n_remain & 1){
-			r15 += *(x);
-			x+=1;
-		}
-
-		x_sum[jj]=r15;
-	}
-}
-
