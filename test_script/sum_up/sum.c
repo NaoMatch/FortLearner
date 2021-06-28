@@ -6616,3 +6616,464 @@ void sum_up_matrix_unroll_02_08_i8_C_P(int64_t *x_sum, int64_t *x0, int64_t n, i
 	}
 }
 
+
+// ----------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------
+int64_t sum_with_index_loop_i8_c_(int64_t x[], int64_t ids[], int64_t n_x, int64_t n_ids){
+    int64_t res=0e0;
+    int64_t i;
+    for (i=0; i<n_ids; i++){
+        res += x[ids[i]-1];
+    }
+    return(res);
+}
+
+double sum_with_index_loop_r8_c_(double x[], int64_t ids[], int64_t n_x, int64_t n_ids){
+    double res=0e0;
+    int64_t i;
+    for (i=0; i<n_ids; i++){
+        res += x[ids[i]-1];
+    }
+    return(res);
+}
+
+int64_t sum_with_index_loop_02_i8_c_(int64_t x[], int64_t ids[], int64_t n_x, int64_t n_ids){
+    int64_t res=0;
+    int64_t i=0, n_ids_unroll=(n_ids>>1), n_ids_remain=n_ids%2;
+	int64_t r00, r01;
+	int64_t r15=0;
+    while (n_ids_unroll--){
+        r00 = x[ids[i]-1];
+        r01 = x[ids[i+1]-1];
+		r00 = r00 + r01;
+		r15 += r00;
+		i+=2;
+    }
+
+	if (n_ids_remain & 1){
+		r15 += x[ids[i]-1];
+	}
+
+    return(r15);
+}
+
+double sum_with_index_loop_02_r8_c_(double x[], int64_t ids[], int64_t n_x, int64_t n_ids){
+    double res=0e0;
+    int64_t i=0, n_ids_unroll=(n_ids>>1), n_ids_remain=n_ids%2;
+	double r00, r01;
+	double r15=0e0;
+    while (n_ids_unroll--){
+        r00 = x[ids[i]-1];
+        r01 = x[ids[i+1]-1];
+		r00 = r00 + r01;
+		r15 += r00;
+		i+=2;
+    }
+
+	if (n_ids_remain & 1){
+		r15 += x[ids[i]-1];
+	}
+
+    return(r15);
+}
+
+int64_t sum_with_index_loop_04_i8_c_(int64_t x[], int64_t ids[], int64_t n_x, int64_t n_ids){
+    int64_t res=0;
+    int64_t i=0, n_ids_unroll=(n_ids>>2), n_ids_remain=n_ids%4;
+	int64_t r00, r01, r02, r03;
+	int64_t r15=0;
+    while (n_ids_unroll--){
+        r00 = x[ids[i]-1];
+        r01 = x[ids[i+1]-1];
+        r02 = x[ids[i+2]-1];
+        r03 = x[ids[i+3]-1];
+		r00 = r00 + r01;
+		r02 = r02 + r03;
+		r00 = r00 + r02;
+		r15 += r00;
+		i+=4;
+    }
+
+	if (n_ids_remain & 2){
+		r00 = x[ids[i]-1];
+		r01 = x[ids[i+1]-1];
+		r00 = r00 + r01;
+		r15 += r00;
+		i+=2;
+	}
+
+	if (n_ids_remain & 1){
+		r15 += x[ids[i]-1];
+	}
+
+    return(r15);
+}
+
+double sum_with_index_loop_04_r8_c_(double x[], int64_t ids[], int64_t n_x, int64_t n_ids){
+    double res=0e0;
+    int64_t i=0, n_ids_unroll=(n_ids>>2), n_ids_remain=n_ids%4;
+	double r00, r01, r02, r03;
+	double r15=0e0;
+    while (n_ids_unroll--){
+        r00 = x[ids[i]-1];
+        r01 = x[ids[i+1]-1];
+        r02 = x[ids[i+2]-1];
+        r03 = x[ids[i+3]-1];
+		r00 = r00 + r01;
+		r02 = r02 + r03;
+		r00 = r00 + r02;
+		r15 += r00;
+		i+=4;
+    }
+
+	if (n_ids_remain & 2){
+		r00 = x[ids[i]-1];
+		r01 = x[ids[i+1]-1];
+		r00 = r00 + r01;
+		r15 += r00;
+		i+=2;
+	}
+
+	if (n_ids_remain & 1){
+		r15 += x[ids[i]-1];
+	}
+
+    return(r15);
+}
+
+int64_t sum_with_index_loop_08_i8_c_(int64_t x[], int64_t ids[], int64_t n_x, int64_t n_ids){
+    int64_t res=0;
+    int64_t i=0, n_ids_unroll=(n_ids>>3), n_ids_remain=n_ids%8;
+	int64_t r00, r01, r02, r03;
+	int64_t r04, r05, r06, r07;
+	int64_t r15=0;
+    while (n_ids_unroll--){
+        r00 = x[ids[i]-1];
+        r01 = x[ids[i+1]-1];
+        r02 = x[ids[i+2]-1];
+        r03 = x[ids[i+3]-1];
+        r04 = x[ids[i+4]-1];
+        r05 = x[ids[i+5]-1];
+        r06 = x[ids[i+6]-1];
+        r07 = x[ids[i+7]-1];
+		r00 = r00 + r01;
+		r02 = r02 + r03;
+		r04 = r04 + r05;
+		r06 = r06 + r07;
+		r00 = r00 + r02;
+		r04 = r04 + r06;
+		r00 = r00 + r04;
+		r15 += r00;
+		i+=8;
+    }
+
+	if (n_ids_remain & 4){
+		r00 = x[ids[i]-1];
+		r01 = x[ids[i+1]-1];
+		r02 = x[ids[i+2]-1];
+		r03 = x[ids[i+3]-1];
+		r00 = r00 + r01;
+		r02 = r02 + r03;
+		r00 = r00 + r02;
+		r15 += r00;
+		i+=4;
+	}
+
+	if (n_ids_remain & 2){
+		r00 = x[ids[i]-1];
+		r01 = x[ids[i+1]-1];
+		r00 = r00 + r01;
+		r15 += r00;
+		i+=2;
+	}
+
+	if (n_ids_remain & 1){
+		r15 += x[ids[i]-1];
+	}
+
+    return(r15);
+}
+
+double sum_with_index_loop_08_r8_c_(double x[], int64_t ids[], int64_t n_x, int64_t n_ids){
+    double res=0e0;
+    int64_t i=0, n_ids_unroll=(n_ids>>3), n_ids_remain=n_ids%8;
+	double r00, r01, r02, r03;
+	double r04, r05, r06, r07;
+	double r15=0e0;
+    while (n_ids_unroll--){
+        r00 = x[ids[i]-1];
+        r01 = x[ids[i+1]-1];
+        r02 = x[ids[i+2]-1];
+        r03 = x[ids[i+3]-1];
+        r04 = x[ids[i+4]-1];
+        r05 = x[ids[i+5]-1];
+        r06 = x[ids[i+6]-1];
+        r07 = x[ids[i+7]-1];
+		r00 = r00 + r01;
+		r02 = r02 + r03;
+		r04 = r04 + r05;
+		r06 = r06 + r07;
+		r00 = r00 + r02;
+		r04 = r04 + r06;
+		r00 = r00 + r04;
+		r15 += r00;
+		i+=8;
+    }
+
+	if (n_ids_remain & 4){
+		r00 = x[ids[i]-1];
+		r01 = x[ids[i+1]-1];
+		r02 = x[ids[i+2]-1];
+		r03 = x[ids[i+3]-1];
+		r00 = r00 + r01;
+		r02 = r02 + r03;
+		r00 = r00 + r02;
+		r15 += r00;
+		i+=4;
+	}
+
+	if (n_ids_remain & 2){
+		r00 = x[ids[i]-1];
+		r01 = x[ids[i+1]-1];
+		r00 = r00 + r01;
+		r15 += r00;
+		i+=2;
+	}
+
+	if (n_ids_remain & 1){
+		r15 += x[ids[i]-1];
+	}
+
+    return(r15);
+}
+
+int64_t sum_with_index_loop_16_i8_c_(int64_t x[], int64_t ids[], int64_t n_x, int64_t n_ids){
+    int64_t res=0;
+    int64_t i=0, n_ids_unroll=(n_ids>>4), n_ids_remain=n_ids%16;
+	int64_t r00, r01, r02, r03;
+	int64_t r04, r05, r06, r07;
+	int64_t r08, r09, r10, r11;
+	int64_t r12, r13, r14, r15;
+	int64_t tmp=0;
+    while (n_ids_unroll--){
+        r00 = x[ids[i]-1];
+        r01 = x[ids[i+1]-1];
+        r02 = x[ids[i+2]-1];
+        r03 = x[ids[i+3]-1];
+        r04 = x[ids[i+4]-1];
+        r05 = x[ids[i+5]-1];
+        r06 = x[ids[i+6]-1];
+        r07 = x[ids[i+7]-1];
+        r08 = x[ids[i+8]-1];
+        r09 = x[ids[i+9]-1];
+        r10 = x[ids[i+10]-1];
+        r11 = x[ids[i+11]-1];
+        r12 = x[ids[i+12]-1];
+        r13 = x[ids[i+13]-1];
+        r14 = x[ids[i+14]-1];
+        r15 = x[ids[i+15]-1];
+		
+		r00 = r00 + r01;
+		r02 = r02 + r03;
+		r04 = r04 + r05;
+		r06 = r06 + r07;
+		r08 = r08 + r09;
+		r10 = r10 + r11;
+		r12 = r12 + r13;
+		r14 = r14 + r15;
+
+		r00 = r00 + r02;
+		r04 = r04 + r06;
+		r08 = r08 + r10;
+		r12 = r12 + r14;
+
+		r00 = r00 + r04;
+		r08 = r08 + r12;
+		
+		r00 = r00 + r08;
+
+		tmp += r00;
+		i+=16;
+    }
+
+	r15 = tmp;
+
+	if (n_ids_remain & 8){
+		r00 = x[ids[i]-1];
+		r01 = x[ids[i+1]-1];
+		r02 = x[ids[i+2]-1];
+		r03 = x[ids[i+3]-1];
+		r04 = x[ids[i+4]-1];
+		r05 = x[ids[i+5]-1];
+		r06 = x[ids[i+6]-1];
+		r07 = x[ids[i+7]-1];
+
+		r00 = r00 + r01;
+		r02 = r02 + r03;
+		r04 = r04 + r05;
+		r06 = r06 + r07;
+
+		r00 = r00 + r02;
+		r04 = r04 + r06;
+
+		r00 = r00 + r04;
+
+		r15 += r00;
+		i+=8;
+	}
+
+	if (n_ids_remain & 4){
+		r00 = x[ids[i]-1];
+		r01 = x[ids[i+1]-1];
+		r02 = x[ids[i+2]-1];
+		r03 = x[ids[i+3]-1];
+		r00 = r00 + r01;
+		r02 = r02 + r03;
+		r00 = r00 + r02;
+		r15 += r00;
+		i+=4;
+	}
+
+	if (n_ids_remain & 2){
+		r00 = x[ids[i]-1];
+		r01 = x[ids[i+1]-1];
+		r00 = r00 + r01;
+		r15 += r00;
+		i+=2;
+	}
+
+	if (n_ids_remain & 1){
+		r15 += x[ids[i]-1];
+	}
+
+    return(r15);
+}
+
+double sum_with_index_loop_16_r8_c_(double x[], int64_t ids[], int64_t n_x, int64_t n_ids){
+    double res=0e0;
+    int64_t i=0, n_ids_unroll=(n_ids>>4), n_ids_remain=n_ids%16;
+	double r00, r01, r02, r03;
+	double r04, r05, r06, r07;
+	double r08, r09, r10, r11;
+	double r12, r13, r14, r15;
+	double tmp=0e0;
+    while (n_ids_unroll--){
+        r00 = x[ids[i]-1];
+        r01 = x[ids[i+1]-1];
+        r02 = x[ids[i+2]-1];
+        r03 = x[ids[i+3]-1];
+        r04 = x[ids[i+4]-1];
+        r05 = x[ids[i+5]-1];
+        r06 = x[ids[i+6]-1];
+        r07 = x[ids[i+7]-1];
+        r08 = x[ids[i+8]-1];
+        r09 = x[ids[i+9]-1];
+        r10 = x[ids[i+10]-1];
+        r11 = x[ids[i+11]-1];
+        r12 = x[ids[i+12]-1];
+        r13 = x[ids[i+13]-1];
+        r14 = x[ids[i+14]-1];
+        r15 = x[ids[i+15]-1];
+		
+		r00 = r00 + r01;
+		r02 = r02 + r03;
+		r04 = r04 + r05;
+		r06 = r06 + r07;
+		r08 = r08 + r09;
+		r10 = r10 + r11;
+		r12 = r12 + r13;
+		r14 = r14 + r15;
+
+		r00 = r00 + r02;
+		r04 = r04 + r06;
+		r08 = r08 + r10;
+		r12 = r12 + r14;
+
+		r00 = r00 + r04;
+		r08 = r08 + r12;
+		
+		r00 = r00 + r08;
+
+		tmp += r00;
+		i+=16;
+    }
+
+	r15 = tmp;
+
+	if (n_ids_remain & 8){
+		r00 = x[ids[i]-1];
+		r01 = x[ids[i+1]-1];
+		r02 = x[ids[i+2]-1];
+		r03 = x[ids[i+3]-1];
+		r04 = x[ids[i+4]-1];
+		r05 = x[ids[i+5]-1];
+		r06 = x[ids[i+6]-1];
+		r07 = x[ids[i+7]-1];
+
+		r00 = r00 + r01;
+		r02 = r02 + r03;
+		r04 = r04 + r05;
+		r06 = r06 + r07;
+
+		r00 = r00 + r02;
+		r04 = r04 + r06;
+
+		r00 = r00 + r04;
+
+		r15 += r00;
+		i+=8;
+	}
+
+	if (n_ids_remain & 4){
+		r00 = x[ids[i]-1];
+		r01 = x[ids[i+1]-1];
+		r02 = x[ids[i+2]-1];
+		r03 = x[ids[i+3]-1];
+		r00 = r00 + r01;
+		r02 = r02 + r03;
+		r00 = r00 + r02;
+		r15 += r00;
+		i+=4;
+	}
+
+	if (n_ids_remain & 2){
+		r00 = x[ids[i]-1];
+		r01 = x[ids[i+1]-1];
+		r00 = r00 + r01;
+		r15 += r00;
+		i+=2;
+	}
+
+	if (n_ids_remain & 1){
+		r15 += x[ids[i]-1];
+	}
+
+    return(r15);
+}
+
+int64_t sum_with_index_loop_i8_asm_(int64_t x[], int64_t ids[], int64_t n_x, int64_t n_ids){
+    int64_t res=0;
+
+	return res;
+}
+
+double sum_with_index_loop_r8_asm_(double x[], int64_t ids[], int64_t n_x, int64_t n_ids){
+    double res=0e0;
+    int64_t i, idx, n_ids_unroll=(n_ids>>2), dif;
+
+	while(n_ids_unroll--){
+		__asm__ __volatile__ (
+			"vMOVDQU 0*8(%[i]), %%ymm15   \n\t"
+			"\n\t"
+			"VEXTRACTI128   $0,  %%ymm15, %%xmm0 \n\t"
+			"VEXTRACTI128   $0,  %%ymm15, %%xmm1 \n\t"
+			"\n\t"
+			// "addq $1, %%xmm1 \n\t"
+			:[i]"=r"(ids)
+			:"0"(ids)
+		);
+	}
+
+	return res;
+}
+
