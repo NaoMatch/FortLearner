@@ -164,6 +164,7 @@ module mod_stats
         end function        
     end interface
 
+    !> An interface to call extern sum_up_matrix functions in c and inline assembler
     interface
         subroutine sum_up_matrix_C_r8(x_sum, x, n, c) bind(c, name='sum_up_matrix_C_r8')
             import :: c_ptr, c_int64_t
@@ -551,7 +552,7 @@ module mod_stats
 
     end interface
 
-    !> An interface to call extern c functions with inline assembler
+    !> An interface to call extern sum_up_left functions in c and inline assembler
     Interface
         function sum_up_left_assembler_04_c_i8_i8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_04_c_i8_i8')
             Import
@@ -618,6 +619,7 @@ module mod_stats
         end function
     end interface
 
+    !> An interface to call extern minmax functions in c and inline assembler
     Interface
         subroutine minmax_loop_c_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_c_r8')
             Import
@@ -881,7 +883,8 @@ contains
     ! -----------------------------------------------------------------------------
     ! sum_up functions
 
-    !> A function to sum up vector, integer 64bit.
+    include "./include/stats/sum_up/inc_sum_up_vector_variants.f90"
+    !> A function to sum up vector, real 64bit.
     !! Change the function to be executed depending on the size of the vector.
     !! \param sum_up_r8 Sum of vector elements
     !! \param x vector
@@ -909,6 +912,7 @@ contains
 #error "CPU Architecture is not supported. Use '-D_default'."
 #endif
     end function sum_up_r8
+
 
     !> A function to sum up vector, integer 64bit.
     !! Change the function to be executed depending on the size of the vector.
@@ -938,39 +942,113 @@ contains
 #error "CPU Architecture is not supported. Use '-D_default'."
 #endif
     end function sum_up_i8
-    include "./include/stats/sum_up/inc_sum_up_vector_variants.f90"
-    include "./include/stats/sum_up/inc_sum_up_matrix_variants.f90"
 
+
+    include "./include/stats/sum_up/inc_sum_up_matrix_variants.f90"
+    !> A function to sum up matrix column by column, real 64bit.
+    !! Change the function to be executed depending on the size(row, col) of the matrix.
+    !! \param r column sum
+    !! \param x matrix n by c
+    !! \param n number of rows
+    !! \param c number of columns
     subroutine sum_up_matrix_r8(r, x, n, c)
         implicit none
+        integer(kind=8) :: i
+        real(kind=8) :: tmp_sum
+#if _default
         real(kind=8), intent(inout) :: r(c)
         real(kind=8), intent(in)    :: x(n,c)
         integer(kind=8), intent(in) :: n,c
 
-        integer(kind=8) :: i
-        real(kind=8) :: tmp_sum
+        if (n .le. 250000_8) then
+            do i=1, c, 1
+                tmp_sum = sum_up(x(:,i),n)
+                r(i) = tmp_sum
+            end do
+        else
+            call sum_up_matrix_02_04_r8(r, x, n, c)
+        end if
+#elif _x86_64
+        real(kind=8), intent(inout), target :: r(c)
+        real(kind=8), intent(in), target    :: x(n,c)
+        integer(kind=8), intent(in)         :: n,c
 
-        do i=1, c, 1
-            tmp_sum = sum_up(x(:,i),n)
-            r(i) = tmp_sum
-        end do
+        type(c_ptr) :: x_ptr
+        type(c_ptr) :: r_ptr
+
+        x_ptr = c_loc(x)
+        r_ptr = c_loc(r)
+
+        if (n .le. 256_8) then
+            call sum_up_matrix_08_04_ASM_r8(r_ptr, x_ptr, n, c)
+        elseif(n .le. 50000) then
+            do i=1, c, 1
+                tmp_sum = sum_up(x(:,i),n)
+                r(i) = tmp_sum
+            end do
+        else
+            call sum_up_matrix_04_08_C_r8(r_ptr, x_ptr, n, c)
+        end if
+#else 
+#error "CPU Architecture is not supported. Use '-D_default'."
+#endif
     end subroutine sum_up_matrix_r8
 
+    !> A function to sum up matrix column by column, integer 64bit.
+    !! Change the function to be executed depending on the size(row, col) of the matrix.
+    !! \param r column sum
+    !! \param x matrix n by c
+    !! \param n number of rows
+    !! \param c number of columns
     subroutine sum_up_matrix_i8(r, x, n, c)
         implicit none
-        integer(kind=8), intent(inout) :: r(c)
-        integer(kind=8), intent(in)    :: x(n,c)
-        integer(kind=8), intent(in) :: n,c
-
         integer(kind=8) :: i
         integer(kind=8) :: tmp_sum
+#if _default
+        integer(kind=8), intent(inout) :: r(c)
+        integer(kind=8), intent(in)    :: x(n,c)
+        integer(kind=8), intent(in)    :: n,c
 
-        do i=1, c, 1
-            tmp_sum = sum_up(x(:,i),n)
-            r(i) = tmp_sum
-        end do
+        if (n .le. 250000_8) then
+            do i=1, c, 1
+                tmp_sum = sum_up(x(:,i),n)
+                r(i) = tmp_sum
+            end do
+        else
+            call sum_up_matrix_02_04_r8(r, x, n, c)
+        end if
+#elif _x86_64
+        integer(kind=8), intent(inout), target :: r(c)
+        integer(kind=8), intent(in), target    :: x(n,c)
+        integer(kind=8), intent(in)            :: n,c
+
+        type(c_ptr) :: x_ptr
+        type(c_ptr) :: r_ptr
+
+        x_ptr = c_loc(x)
+        r_ptr = c_loc(r)
+
+        if (n .le. 256_8) then
+            call sum_up_matrix_08_04_ASM_i8(r_ptr, x_ptr, n, c)
+        elseif(n .le. 50000) then
+            do i=1, c, 1
+                tmp_sum = sum_up(x(:,i),n)
+                r(i) = tmp_sum
+            end do
+        else
+            call sum_up_matrix_04_08_C_i8(r_ptr, x_ptr, n, c)
+        end if
+#else 
+#error "CPU Architecture is not supported. Use '-D_default'."
+#endif
     end subroutine sum_up_matrix_i8
 
+
+    !> A subroutine to calculate sum up matrix column by column with 'sum_up'(for vector sum up function) openmp, real 64bit.
+    !! \param r column sum
+    !! \param x matrix n by c
+    !! \param n number of rows
+    !! \param c number of columns
     subroutine sum_up_matrix_parallel_r8(r, x, n, c)
         implicit none
         real(kind=8), intent(inout) :: r(c)
@@ -990,6 +1068,12 @@ contains
         !$omp end parallel
     end subroutine sum_up_matrix_parallel_r8
 
+
+    !> A subroutine to calculate sum up matrix column by column with 'sum_up'(for vector sum up function) openmp, integer 64bit.
+    !! \param r column sum
+    !! \param x matrix n by c
+    !! \param n number of rows
+    !! \param c number of columns
     subroutine sum_up_matrix_parallel_i8(r, x, n, c)
         implicit none
         integer(kind=8), intent(inout) :: r(c)
