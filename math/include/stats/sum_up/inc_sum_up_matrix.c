@@ -572,8 +572,7 @@ void sum_up_matrix_16_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 
 // --------------------------------------------------------------------------------
 void sum_up_matrix_32_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
-	int64_t ii, jj, j0;
-    double r00,r01,r02,r03;
+	double r00,r01,r02,r03;
     double r04,r05,r06,r07;
     double r08,r09,r10,r11;
     double r12,r13,r14,r15;
@@ -583,9 +582,9 @@ void sum_up_matrix_32_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
     double r28,r29,r30,r31;
     double tmp0, tmp1;
 
-	for(jj=0; jj<c; jj++){
-		j0 = jj*n;
-		tmp0=0e0, tmp1=0e0;
+	for(int64_t jj=0; jj<c; jj++){
+		tmp0=0e0;
+		tmp1=0e0;
 		int64_t n_unroll=(n>>5);
 		while( n_unroll-- ){ 
 			r00 = *(x  );
@@ -662,11 +661,9 @@ void sum_up_matrix_32_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
 
             r16 = r16 + r24;
 
-			tmp1 = tmp1 + r16;
+			tmp0 = tmp0 + r16;
 			x+=32;
 		}
-
-        tmp0 = tmp0 + tmp1;
 
 		int64_t n_remain=n%32;
 		if(n_remain & 16){
@@ -769,19 +766,17 @@ void sum_up_matrix_32_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
 }
 
 void sum_up_matrix_32_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
-	int64_t ii, jj, j0;
-    double r00,r01,r02,r03;
-    double r04,r05,r06,r07;
-    double r08,r09,r10,r11;
-    double r12,r13,r14,r15;
-    double r16,r17,r18,r19;
-    double r20,r21,r22,r23;
-    double r24,r25,r26,r27;
-    double r28,r29,r30,r31;
-    double tmp0, tmp1;
+    int64_t r00,r01,r02,r03;
+    int64_t r04,r05,r06,r07;
+    int64_t r08,r09,r10,r11;
+    int64_t r12,r13,r14,r15;
+    int64_t r16,r17,r18,r19;
+    int64_t r20,r21,r22,r23;
+    int64_t r24,r25,r26,r27;
+    int64_t r28,r29,r30,r31;
+    int64_t tmp0, tmp1;
 
-	for(jj=0; jj<c; jj++){
-		j0 = jj*n;
+	for(int64_t jj=0; jj<c; jj++){
 		tmp0=0, tmp1=0;
 		int64_t n_unroll=(n>>5);
 		while( n_unroll-- ){ 
@@ -866,100 +861,106 @@ void sum_up_matrix_32_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
         tmp0 = tmp0 + tmp1;
 
 		int64_t n_remain=n%32;
-		if(n_remain & 16){
-			r00 = *(x  );
-			r01 = *(x+1);
-			r02 = *(x+2);
-			r03 = *(x+3);
-			r04 = *(x+4);
-			r05 = *(x+5);
-			r06 = *(x+6);
-			r07 = *(x+7);
-			r08 = *(x+8);
-			r09 = *(x+9);
-			r10 = *(x+10);
-			r11 = *(x+11);
-			r12 = *(x+12);
-			r13 = *(x+13);
-			r14 = *(x+14);
-			r15 = *(x+15);
-
-			r00 = r00 + r01;
-			r02 = r02 + r03;
-            r04 = r04 + r05;
-            r06 = r06 + r07;
-            r08 = r08 + r09;
-            r10 = r10 + r11;
-            r12 = r12 + r13;
-            r14 = r14 + r15;
-
-            r00 = r00 + r02;
-            r04 = r04 + r06;
-            r08 = r08 + r10;
-            r12 = r12 + r14;
-
-            r00 = r00 + r04;
-            r08 = r08 + r12;
-
-            r00 = r00 + r08;
-
-			tmp0 = tmp0 + r00;
-			x+=16;
+		if(n_remain>0){
+			while(n_remain--){
+				tmp0 += *(x);
+				x+=1;
+			}
 		}
+		// if(n_remain & 16){
+		// 	r00 = *(x  );
+		// 	r01 = *(x+1);
+		// 	r02 = *(x+2);
+		// 	r03 = *(x+3);
+		// 	r04 = *(x+4);
+		// 	r05 = *(x+5);
+		// 	r06 = *(x+6);
+		// 	r07 = *(x+7);
+		// 	r08 = *(x+8);
+		// 	r09 = *(x+9);
+		// 	r10 = *(x+10);
+		// 	r11 = *(x+11);
+		// 	r12 = *(x+12);
+		// 	r13 = *(x+13);
+		// 	r14 = *(x+14);
+		// 	r15 = *(x+15);
 
-		if(n_remain & 8){
-			r00 = *(x  );
-			r01 = *(x+1);
-			r02 = *(x+2);
-			r03 = *(x+3);
-			r04 = *(x+4);
-			r05 = *(x+5);
-			r06 = *(x+6);
-			r07 = *(x+7);
+		// 	r00 = r00 + r01;
+		// 	r02 = r02 + r03;
+        //     r04 = r04 + r05;
+        //     r06 = r06 + r07;
+        //     r08 = r08 + r09;
+        //     r10 = r10 + r11;
+        //     r12 = r12 + r13;
+        //     r14 = r14 + r15;
 
-			r00 = r00 + r01;
-			r02 = r02 + r03;
-            r04 = r04 + r05;
-            r06 = r06 + r07;
+        //     r00 = r00 + r02;
+        //     r04 = r04 + r06;
+        //     r08 = r08 + r10;
+        //     r12 = r12 + r14;
 
-            r00 = r00 + r02;
-            r04 = r04 + r06;
+        //     r00 = r00 + r04;
+        //     r08 = r08 + r12;
 
-            r00 = r00 + r04;
+        //     r00 = r00 + r08;
 
-            tmp0 = tmp0 + r00;
-			x+=8;
-		}
+		// 	tmp0 = tmp0 + r00;
+		// 	x+=16;
+		// }
 
-		if(n_remain & 4){
-			r00 = *(x  );
-			r01 = *(x+1);
-			r02 = *(x+2);
-			r03 = *(x+3);
+		// if(n_remain & 8){
+		// 	r00 = *(x  );
+		// 	r01 = *(x+1);
+		// 	r02 = *(x+2);
+		// 	r03 = *(x+3);
+		// 	r04 = *(x+4);
+		// 	r05 = *(x+5);
+		// 	r06 = *(x+6);
+		// 	r07 = *(x+7);
 
-			r00 = r00 + r01;
-			r02 = r02 + r03;
+		// 	r00 = r00 + r01;
+		// 	r02 = r02 + r03;
+        //     r04 = r04 + r05;
+        //     r06 = r06 + r07;
 
-            r00 = r00 + r02;
+        //     r00 = r00 + r02;
+        //     r04 = r04 + r06;
 
-            tmp0 = tmp0 + r00;
-			x+=4;
-		}
+        //     r00 = r00 + r04;
 
-		if(n_remain & 2){
-			r00 = *(x);
-			r01 = *(x+1);
+        //     tmp0 = tmp0 + r00;
+		// 	x+=8;
+		// }
 
-            r00 = r00 + r01;
+		// if(n_remain & 4){
+		// 	r00 = *(x  );
+		// 	r01 = *(x+1);
+		// 	r02 = *(x+2);
+		// 	r03 = *(x+3);
 
-            tmp0 = tmp0 + r00;
-			x+=2;
-		}
+		// 	r00 = r00 + r01;
+		// 	r02 = r02 + r03;
 
-		if(n_remain & 1){
-			tmp0 += *(x);
-			x+=1;
-		}
+        //     r00 = r00 + r02;
+
+        //     tmp0 = tmp0 + r00;
+		// 	x+=4;
+		// }
+
+		// if(n_remain & 2){
+		// 	r00 = *(x);
+		// 	r01 = *(x+1);
+
+        //     r00 = r00 + r01;
+
+        //     tmp0 = tmp0 + r00;
+		// 	x+=2;
+		// }
+
+		// if(n_remain & 1){
+		// 	tmp0 += *(x);
+		// 	x+=1;
+		// }
 
 		x_sum[jj]=tmp0;
 	}
@@ -2494,7 +2495,7 @@ void sum_up_matrix_04_02_C_r8(double *x_sum, double *x0, int64_t n, int64_t c){
     if (c_remain&1){
 		tmp0=0e0;
 		jj=jj+step;
-		int64_t n_unroll=(n>>1);
+		int64_t n_unroll=(n>>2);
 		while( n_unroll-- ){ 
 			r00 = *(x1  );
 			r01 = *(x1+1);
@@ -2511,7 +2512,7 @@ void sum_up_matrix_04_02_C_r8(double *x_sum, double *x0, int64_t n, int64_t c){
             x1+=4;
 		}
 
-		int64_t n_remain=n%2;
+		int64_t n_remain=n%4;
 		if(n_remain & 2){
 			tmp0 += *(x1);
 			tmp0 += *(x1+1);
@@ -2885,12 +2886,12 @@ void sum_up_matrix_04_04_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 		if(n_remain & 2){
 			tmp0 += *(x);
 			tmp1 += *(x1);
+			tmp2 += *(x2);
+			tmp3 += *(x3);
 			tmp0 += *(x+1);
 			tmp1 += *(x1+1);
-			tmp0 += *(x+2);
-			tmp1 += *(x1+2);
-			tmp0 += *(x+3);
-			tmp1 += *(x1+3);
+			tmp2 += *(x2+1);
+			tmp3 += *(x3+1);
 			x+=2;
 			x1+=2;
 			x2+=2;
@@ -3183,7 +3184,7 @@ void sum_up_matrix_04_08_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
 		jj=jj+step*7;
 		while(c_remain--){
 			tmp0=0e0;
-			int64_t n_unroll=(n>>1);
+			int64_t n_unroll=(n>>2);
 			while( n_unroll-- ){ 
 				r00 = *(x7  );
 				r01 = *(x7+1);
@@ -3200,7 +3201,7 @@ void sum_up_matrix_04_08_C_r8(double *x_sum, double *x, int64_t n, int64_t c){
 				x7+=4;
 			}
 
-			int64_t n_remain=n%2;
+			int64_t n_remain=n%4;
 			if(n_remain & 2){
 				tmp0 += *(x7);
 				tmp0 += *(x7+1);
@@ -5637,6 +5638,10 @@ void sum_up_matrix_32_02_C_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 
 // --------------------------------------------------------------------------------
 void sum_up_matrix_04_ASM_r8(double *x_sum, double *x, int64_t n, int64_t c){
+	if (n<4){
+		sum_up_matrix_C_r8(x_sum, x, n, c);
+		return;
+	}
 	for(int64_t jj=0; jj<c; jj++){
 		__asm__ __volatile__ (
 			"vpxor  %%ymm15, %%ymm15, %%ymm15 \n\t"
@@ -5703,6 +5708,10 @@ void sum_up_matrix_04_ASM_r8(double *x_sum, double *x, int64_t n, int64_t c){
 }
 
 void sum_up_matrix_04_ASM_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
+	if (n<4){
+		sum_up_matrix_C_i8(x_sum, x, n, c);
+		return;
+	}
 	for(int64_t jj=0; jj<c; jj++){
 		__asm__ __volatile__ (
 			"vpxor  %%ymm15, %%ymm15, %%ymm15 \n\t"
@@ -5770,6 +5779,10 @@ void sum_up_matrix_04_ASM_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 
 // --------------------------------------------------------------------------------
 void sum_up_matrix_08_ASM_r8(double *x_sum, double *x, int64_t n, int64_t c){
+	if (n<8){
+		sum_up_matrix_C_r8(x_sum, x, n, c);
+		return;
+	}
 	for(int64_t jj=0; jj<c; jj++){
 		__asm__ __volatile__ (
 			"vpxor  %%ymm15, %%ymm15, %%ymm15 \n\t"
@@ -5850,6 +5863,10 @@ void sum_up_matrix_08_ASM_r8(double *x_sum, double *x, int64_t n, int64_t c){
 }
 
 void sum_up_matrix_08_ASM_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
+	if (n<8){
+		sum_up_matrix_C_i8(x_sum, x, n, c);
+		return;
+	}
 	for(int64_t jj=0; jj<c; jj++){
 		__asm__ __volatile__ (
 			"vpxor  %%ymm15, %%ymm15, %%ymm15 \n\t"
@@ -5931,6 +5948,10 @@ void sum_up_matrix_08_ASM_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 
 // --------------------------------------------------------------------------------
 void sum_up_matrix_16_ASM_r8(double *x_sum, double *x, int64_t n, int64_t c){
+	if (n<16){
+		sum_up_matrix_C_r8(x_sum, x, n, c);
+		return;
+	}
 	for(int64_t jj=0; jj<c; jj++){
 		__asm__ __volatile__ (
 			"vpxor  %%ymm14, %%ymm14, %%ymm14  \n\t"
@@ -6035,6 +6056,10 @@ void sum_up_matrix_16_ASM_r8(double *x_sum, double *x, int64_t n, int64_t c){
 }
 
 void sum_up_matrix_16_ASM_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
+	if (n<16){
+		sum_up_matrix_C_i8(x_sum, x, n, c);
+		return;
+	}
 	for(int64_t jj=0; jj<c; jj++){
 		__asm__ __volatile__ (
 			"vpxor  %%ymm14, %%ymm14, %%ymm14  \n\t"
@@ -6140,6 +6165,10 @@ void sum_up_matrix_16_ASM_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 
 // --------------------------------------------------------------------------------
 void sum_up_matrix_32_ASM_r8(double *x_sum, double *x, int64_t n, int64_t c){
+	if (n<32){
+		sum_up_matrix_C_r8(x_sum, x, n, c);
+		return;
+	}
 	for(int64_t jj=0; jj<c; jj++){
 		__asm__ __volatile__ (
 			"vpxor  %%ymm12, %%ymm12, %%ymm12  \n\t"
@@ -6212,9 +6241,9 @@ void sum_up_matrix_32_ASM_r8(double *x_sum, double *x, int64_t n, int64_t c){
 				"vmovupd  4*8(%[x]), %%ymm1        \n\t"
 				"vmovupd  8*8(%[x]), %%ymm2        \n\t"
 				"vmovupd 12*8(%[x]), %%ymm3        \n\t"
-				"vaddpd %%ymm0, %%ymm1, %%ymm1     \n\t"
-				"vaddpd %%ymm2, %%ymm3, %%ymm3     \n\t"
-				"vaddpd %%ymm2, %%ymm2, %%ymm0     \n\t"
+				"vaddpd %%ymm1, %%ymm0, %%ymm0     \n\t"
+				"vaddpd %%ymm3, %%ymm2, %%ymm2     \n\t"
+				"vaddpd %%ymm2, %%ymm0, %%ymm0     \n\t"
 				"vaddpd %%ymm0, %%ymm15, %%ymm15  \n\t"
 				"subq $-16*8, %[x]                 \n\t"
 				:[x]"=r"(x)
@@ -6284,6 +6313,10 @@ void sum_up_matrix_32_ASM_r8(double *x_sum, double *x, int64_t n, int64_t c){
 }
 
 void sum_up_matrix_32_ASM_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
+	if (n<32){
+		sum_up_matrix_C_i8(x_sum, x, n, c);
+		return;
+	}
 	for(int64_t jj=0; jj<c; jj++){
 		__asm__ __volatile__ (
 			"vpxor  %%ymm12, %%ymm12, %%ymm12  \n\t"
@@ -6356,9 +6389,9 @@ void sum_up_matrix_32_ASM_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 				"vMOVDQU  4*8(%[x]), %%ymm1        \n\t"
 				"vMOVDQU  8*8(%[x]), %%ymm2        \n\t"
 				"vMOVDQU 12*8(%[x]), %%ymm3        \n\t"
-				"vpaddq %%ymm0, %%ymm1, %%ymm1     \n\t"
-				"vpaddq %%ymm2, %%ymm3, %%ymm3     \n\t"
-				"vpaddq %%ymm2, %%ymm2, %%ymm0     \n\t"
+				"vpaddq %%ymm1, %%ymm0, %%ymm0     \n\t"
+				"vpaddq %%ymm3, %%ymm2, %%ymm2     \n\t"
+				"vpaddq %%ymm2, %%ymm0, %%ymm0     \n\t"
 				"vpaddq %%ymm0, %%ymm15, %%ymm15  \n\t"
 				"subq $-16*8, %[x]                 \n\t"
 				:[x]"=r"(x)
@@ -6429,6 +6462,10 @@ void sum_up_matrix_32_ASM_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 
 // --------------------------------------------------------------------------------
 void sum_up_matrix_64_ASM_r8(double *x_sum, double *x, int64_t n, int64_t c){
+	if (n<64){
+		sum_up_matrix_C_r8(x_sum, x, n, c);
+		return;
+	}
 	for(int64_t jj=0; jj<c; jj++){
 		__asm__ __volatile__ (
 			"VXORPD   %%zmm12, %%zmm12, %%zmm12  \n\t"
@@ -6479,10 +6516,10 @@ void sum_up_matrix_64_ASM_r8(double *x_sum, double *x, int64_t n, int64_t c){
 		}
 
 		__asm__ __volatile__ (
-			"vaddpd  %%zmm0,  %%zmm1, %%zmm8     \n\t"
-			"vaddpd  %%zmm2,  %%zmm3, %%zmm9     \n\t"
-			"vaddpd  %%zmm4,  %%zmm5, %%zmm10    \n\t"
-			"vaddpd  %%zmm6,  %%zmm7, %%zmm11    \n\t"
+			"vaddpd  %%zmm0,   %%zmm1,  %%zmm8   \n\t"
+			"vaddpd  %%zmm2,   %%zmm3,  %%zmm9   \n\t"
+			"vaddpd  %%zmm4,   %%zmm5,  %%zmm10  \n\t"
+			"vaddpd  %%zmm6,   %%zmm7,  %%zmm11  \n\t"
 			"\n\t"
 			"vaddpd  %%zmm8,   %%zmm12, %%zmm12  \n\t"
 			"vaddpd  %%zmm9,   %%zmm13, %%zmm13  \n\t"
@@ -6495,91 +6532,91 @@ void sum_up_matrix_64_ASM_r8(double *x_sum, double *x, int64_t n, int64_t c){
 			::
 		);
 
-		// if(n_remain & 32){
-		// 	__asm__ __volatile__ (
-		// 		"vmovupd  0*8(%[x]), %%ymm0        \n\t"
-		// 		"vmovupd  4*8(%[x]), %%ymm1        \n\t"
-		// 		"vmovupd  8*8(%[x]), %%ymm2        \n\t"
-		// 		"vmovupd 12*8(%[x]), %%ymm3        \n\t"
-		// 		"vmovupd 16*8(%[x]), %%ymm4        \n\t"
-		// 		"vmovupd 20*8(%[x]), %%ymm5        \n\t"
-		// 		"vmovupd 24*8(%[x]), %%ymm6        \n\t"
-		// 		"vmovupd 28*8(%[x]), %%ymm7        \n\t"
-		// 		"\n\t"
-		// 		"vaddpd %%ymm0, %%ymm1, %%ymm1     \n\t"
-		// 		"vaddpd %%ymm2, %%ymm3, %%ymm3     \n\t"
-		// 		"vaddpd %%ymm4, %%ymm5, %%ymm5     \n\t"
-		// 		"vaddpd %%ymm6, %%ymm7, %%ymm7     \n\t"
-		// 		"\n\t"
-		// 		"vaddpd %%ymm6, %%ymm6, %%ymm4     \n\t"
-		// 		"vaddpd %%ymm2, %%ymm2, %%ymm0     \n\t"
-		// 		"\n\t"
-		// 		"vaddpd %%ymm4, %%ymm4, %%ymm0     \n\t"
-		// 		"vaddpd %%ymm0, %%ymm15, %%ymm15  \n\t"
-		// 		"subq $-16*8, %[x]                 \n\t"
-		// 		:[x]"=r"(x)
-		// 		:"0"(x)
-		// 	);
-		// }
+		if(n_remain & 32){
+			__asm__ __volatile__ (
+				"vmovupd  0*8(%[x]), %%ymm0        \n\t"
+				"vmovupd  4*8(%[x]), %%ymm1        \n\t"
+				"vmovupd  8*8(%[x]), %%ymm2        \n\t"
+				"vmovupd 12*8(%[x]), %%ymm3        \n\t"
+				"vmovupd 16*8(%[x]), %%ymm4        \n\t"
+				"vmovupd 20*8(%[x]), %%ymm5        \n\t"
+				"vmovupd 24*8(%[x]), %%ymm6        \n\t"
+				"vmovupd 28*8(%[x]), %%ymm7        \n\t"
+				"\n\t"
+				"vaddpd %%ymm1, %%ymm0, %%ymm0     \n\t"
+				"vaddpd %%ymm3, %%ymm2, %%ymm2     \n\t"
+				"vaddpd %%ymm5, %%ymm4, %%ymm4     \n\t"
+				"vaddpd %%ymm7, %%ymm6, %%ymm6     \n\t"
+				"\n\t"
+				"vaddpd %%ymm6, %%ymm4, %%ymm4     \n\t"
+				"vaddpd %%ymm2, %%ymm0, %%ymm0     \n\t"
+				"\n\t"
+				"vaddpd %%ymm4, %%ymm0, %%ymm0     \n\t"
+				"vaddpd %%ymm0, %%ymm15, %%ymm15  \n\t"
+				"subq $-32*8, %[x]                 \n\t"
+				:[x]"=r"(x)
+				:"0"(x)
+			);
+		}
 
-		// if(n_remain & 16){
-		// 	__asm__ __volatile__ (
-		// 		"vmovupd  0*8(%[x]), %%ymm0        \n\t"
-		// 		"vmovupd  4*8(%[x]), %%ymm1        \n\t"
-		// 		"vmovupd  8*8(%[x]), %%ymm2        \n\t"
-		// 		"vmovupd 12*8(%[x]), %%ymm3        \n\t"
-		// 		"vaddpd %%ymm0, %%ymm1, %%ymm1     \n\t"
-		// 		"vaddpd %%ymm2, %%ymm3, %%ymm3     \n\t"
-		// 		"vaddpd %%ymm2, %%ymm2, %%ymm0     \n\t"
-		// 		"vaddpd %%ymm0, %%ymm15, %%ymm15  \n\t"
-		// 		"subq $-16*8, %[x]                 \n\t"
-		// 		:[x]"=r"(x)
-		// 		:"0"(x)
-		// 	);
-		// }
+		if(n_remain & 16){
+			__asm__ __volatile__ (
+				"vmovupd  0*8(%[x]), %%ymm0        \n\t"
+				"vmovupd  4*8(%[x]), %%ymm1        \n\t"
+				"vmovupd  8*8(%[x]), %%ymm2        \n\t"
+				"vmovupd 12*8(%[x]), %%ymm3        \n\t"
+				"vaddpd %%ymm1, %%ymm0, %%ymm0     \n\t"
+				"vaddpd %%ymm3, %%ymm2, %%ymm2     \n\t"
+				"vaddpd %%ymm2, %%ymm0, %%ymm0     \n\t"
+				"vaddpd %%ymm0, %%ymm15, %%ymm15  \n\t"
+				"subq $-16*8, %[x]                 \n\t"
+				:[x]"=r"(x)
+				:"0"(x)
+			);
+		}
 
-		// if(n_remain & 8){
-		// 	__asm__ __volatile__ (
-		// 		"vmovupd 0*8(%[x]), %%ymm0        \n\t"
-		// 		"vmovupd 4*8(%[x]), %%ymm1        \n\t"
-		// 		"vaddpd %%ymm0, %%ymm15, %%ymm15  \n\t"
-		// 		"vaddpd %%ymm1, %%ymm15, %%ymm15  \n\t"
-		// 		"subq $-8*8, %[x]                 \n\t"
-		// 		:[x]"=r"(x)
-		// 		:"0"(x)
-		// 	);
-		// }
+		if(n_remain & 8){
+			__asm__ __volatile__ (
+				"vmovupd 0*8(%[x]), %%ymm0        \n\t"
+				"vmovupd 4*8(%[x]), %%ymm1        \n\t"
+				"vaddpd %%ymm0, %%ymm15, %%ymm15  \n\t"
+				"vaddpd %%ymm1, %%ymm15, %%ymm15  \n\t"
+				"subq $-8*8, %[x]                 \n\t"
+				:[x]"=r"(x)
+				:"0"(x)
+			);
+		}
 
-		// if(n_remain & 4){
-		// 	__asm__ __volatile__ (
-		// 		"vmovupd 0*8(%[x]), %%ymm0        \n\t"
-		// 		"vaddpd %%ymm0, %%ymm15, %%ymm15  \n\t"
-		// 		"subq $-4*8, %[x]                 \n\t"
-		// 		:[x]"=r"(x)
-		// 		:"0"(x)
-		// 	);
-		// }
+		if(n_remain & 4){
+			__asm__ __volatile__ (
+				"vmovupd 0*8(%[x]), %%ymm0        \n\t"
+				"vaddpd %%ymm0, %%ymm15, %%ymm15  \n\t"
+				"subq $-4*8, %[x]                 \n\t"
+				:[x]"=r"(x)
+				:"0"(x)
+			);
+		}
 
-		// if(n_remain & 2){
-		// 	__asm__ __volatile__ (
-		// 		"movupd 0*8(%[x]), %%xmm0 \n\t"
-		// 		"addpd %%xmm0, %%xmm15    \n\t"
-		// 		"subq $-2*8, %[x]         \n\t"
-		// 		:[x]"=r"(x)
-		// 		:"0"(x)
-		// 	);
-		// }
+		if(n_remain & 2){
+			__asm__ __volatile__ (
+				"movupd 0*8(%[x]), %%xmm0 \n\t"
+				"addpd %%xmm0, %%xmm15    \n\t"
+				"subq $-2*8, %[x]         \n\t"
+				:[x]"=r"(x)
+				:"0"(x)
+			);
+		}
 
-		// if(n_remain & 1){
-		// 	__asm__ __volatile__ (
-		// 		"pxor      %%xmm0, %%xmm0 \n\t"
-		// 		"movsd  0*8(%[x]), %%xmm0 \n\t"
-		// 		"addpd %%xmm0, %%xmm15    \n\t"
-		// 		"subq $-1*8, %[x]         \n\t"
-		// 		:[x]"=r"(x)
-		// 		:"0"(x)
-		// 	);
-		// }
+		if(n_remain & 1){
+			__asm__ __volatile__ (
+				"pxor      %%xmm0, %%xmm0 \n\t"
+				"movsd  0*8(%[x]), %%xmm0 \n\t"
+				"addpd %%xmm0, %%xmm15    \n\t"
+				"subq $-1*8, %[x]         \n\t"
+				:[x]"=r"(x)
+				:"0"(x)
+			);
+		}
 
 		// Extract Result
 		double tmp0;
@@ -6604,6 +6641,10 @@ void sum_up_matrix_64_ASM_r8(double *x_sum, double *x, int64_t n, int64_t c){
 }
 
 void sum_up_matrix_64_ASM_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
+	if (n<64){
+		sum_up_matrix_C_i8(x_sum, x, n, c);
+		return;
+	}
 	for(int64_t jj=0; jj<c; jj++){
 		__asm__ __volatile__ (
 			"VXORPD   %%zmm12, %%zmm12, %%zmm12  \n\t"
@@ -6681,15 +6722,15 @@ void sum_up_matrix_64_ASM_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 				"vMOVDQU 24*8(%[x]), %%ymm6        \n\t"
 				"vMOVDQU 28*8(%[x]), %%ymm7        \n\t"
 				"\n\t"
-				"vPADDQ %%ymm0, %%ymm1, %%ymm1     \n\t"
-				"vPADDQ %%ymm2, %%ymm3, %%ymm3     \n\t"
-				"vPADDQ %%ymm4, %%ymm5, %%ymm5     \n\t"
-				"vPADDQ %%ymm6, %%ymm7, %%ymm7     \n\t"
+				"vPADDQ %%ymm1, %%ymm0, %%ymm0     \n\t"
+				"vPADDQ %%ymm3, %%ymm2, %%ymm2     \n\t"
+				"vPADDQ %%ymm5, %%ymm4, %%ymm4     \n\t"
+				"vPADDQ %%ymm7, %%ymm6, %%ymm6     \n\t"
 				"\n\t"
-				"vPADDQ %%ymm6, %%ymm6, %%ymm4     \n\t"
-				"vPADDQ %%ymm2, %%ymm2, %%ymm0     \n\t"
+				"vPADDQ %%ymm6, %%ymm4, %%ymm4     \n\t"
+				"vPADDQ %%ymm2, %%ymm0, %%ymm0     \n\t"
 				"\n\t"
-				"vPADDQ %%ymm4, %%ymm4, %%ymm0     \n\t"
+				"vPADDQ %%ymm4, %%ymm0, %%ymm0     \n\t"
 				"vPADDQ %%ymm0, %%ymm15, %%ymm15  \n\t"
 				"subq $-16*8, %[x]                 \n\t"
 				:[x]"=r"(x)
@@ -6703,9 +6744,9 @@ void sum_up_matrix_64_ASM_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 				"vMOVDQU  4*8(%[x]), %%ymm1        \n\t"
 				"vMOVDQU  8*8(%[x]), %%ymm2        \n\t"
 				"vMOVDQU 12*8(%[x]), %%ymm3        \n\t"
-				"vPADDQ %%ymm0, %%ymm1, %%ymm1     \n\t"
-				"vPADDQ %%ymm2, %%ymm3, %%ymm3     \n\t"
-				"vPADDQ %%ymm2, %%ymm2, %%ymm0     \n\t"
+				"vPADDQ %%ymm1, %%ymm0, %%ymm0     \n\t"
+				"vPADDQ %%ymm3, %%ymm2, %%ymm2     \n\t"
+				"vPADDQ %%ymm2, %%ymm0, %%ymm0     \n\t"
 				"vPADDQ %%ymm0, %%ymm15, %%ymm15  \n\t"
 				"subq $-16*8, %[x]                 \n\t"
 				:[x]"=r"(x)
@@ -6780,6 +6821,11 @@ void sum_up_matrix_64_ASM_i8(int64_t *x_sum, int64_t *x, int64_t n, int64_t c){
 
 // --------------------------------------------------------------------------------
 void sum_up_matrix_04_02_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c){
+	if (n<4){
+		sum_up_matrix_C_r8(x_sum, x0, n, c);
+		return;
+	}
+
 	double *x1;
 	int64_t c_unroll=(c>>1), c_remain=c%2, c_step=(c>>1), jj=0;
 	x1 = x0;
@@ -6946,6 +6992,10 @@ void sum_up_matrix_04_02_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c)
 }
 
 void sum_up_matrix_04_02_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t c){
+	if (n<4){
+		sum_up_matrix_C_i8(x_sum, x0, n, c);
+		return;
+	}
 	int64_t *x1;
 	int64_t c_unroll=(c>>1), c_remain=c%2, c_step=(c>>1), jj=0;
 	x1 = x0;
@@ -7118,6 +7168,10 @@ void sum_up_matrix_04_02_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t 
 
 // --------------------------------------------------------------------------------
 void sum_up_matrix_04_04_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c){
+	if (n<4){
+		sum_up_matrix_C_r8(x_sum, x0, n, c);
+		return;
+	}
 	double *x1, *x2, *x3;
 	int64_t c_unroll=(c>>2), c_remain=c%4, c_step=(c>>2), jj=0;
 	x1 = x0;
@@ -7360,6 +7414,10 @@ void sum_up_matrix_04_04_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c)
 }
 
 void sum_up_matrix_04_04_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t c){
+	if (n<4){
+		sum_up_matrix_C_i8(x_sum, x0, n, c);
+		return;
+	}
 	int64_t *x1, *x2, *x3;
 	int64_t c_unroll=(c>>2), c_remain=c%4, c_step=(c>>2), jj=0;
 	x1 = x0;
@@ -7604,6 +7662,10 @@ void sum_up_matrix_04_04_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t 
 
 // --------------------------------------------------------------------------------
 void sum_up_matrix_04_04_ASM_Pre_r8(double *x_sum, double *x0, int64_t n, int64_t c){
+	if (n<4){
+		sum_up_matrix_C_r8(x_sum, x0, n, c);
+		return;
+	}
 	double *x1, *x2, *x3;
 	int64_t c_unroll=(c>>2), c_remain=c%4, c_step=(c>>2), jj=0;
 	x1 = x0;
@@ -7850,6 +7912,10 @@ void sum_up_matrix_04_04_ASM_Pre_r8(double *x_sum, double *x0, int64_t n, int64_
 }
 
 void sum_up_matrix_04_04_ASM_Pre_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t c){
+	if (n<4){
+		sum_up_matrix_C_i8(x_sum, x0, n, c);
+		return;
+	}
 	int64_t *x1, *x2, *x3;
 	int64_t c_unroll=(c>>2), c_remain=c%4, c_step=(c>>2), jj=0;
 	x1 = x0;
@@ -8026,6 +8092,10 @@ void sum_up_matrix_04_04_ASM_Pre_i8(int64_t *x_sum, int64_t *x0, int64_t n, int6
 
 // --------------------------------------------------------------------------------
 void sum_up_matrix_08_02_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c){
+	if (n<8){
+		sum_up_matrix_C_r8(x_sum, x0, n, c);
+		return;
+	}
 	double *x1;
 	int64_t c_unroll=(c>>1), c_remain=c%2, c_step=(c>>1), jj=0;
 	x1 = x0;
@@ -8229,6 +8299,10 @@ void sum_up_matrix_08_02_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c)
 }
 
 void sum_up_matrix_08_02_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t c){
+	if (n<8){
+		sum_up_matrix_C_i8(x_sum, x0, n, c);
+		return;
+	}
 	int64_t *x1;
 	int64_t c_unroll=(c>>1), c_remain=c%2, c_step=(c>>1), jj=0;
 	x1 = x0;
@@ -8433,6 +8507,10 @@ void sum_up_matrix_08_02_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t 
 
 // --------------------------------------------------------------------------------
 void sum_up_matrix_08_04_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c){
+	if (n<8){
+		sum_up_matrix_C_r8(x_sum, x0, n, c);
+		return;
+	}
 	double *x1, *x2, *x3;
 	int64_t c_unroll=(c>>2), c_remain=c%4, c_step=(c>>2), jj=0;
 	x1 = x0;
@@ -8730,6 +8808,10 @@ void sum_up_matrix_08_04_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c)
 }
 
 void sum_up_matrix_08_04_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t c){
+	if (n<8){
+		sum_up_matrix_C_i8(x_sum, x0, n, c);
+		return;
+	}
 	int64_t *x1, *x2, *x3;
 	int64_t c_unroll=(c>>2), c_remain=c%4, c_step=(c>>2), jj=0;
 	x1 = x0;
@@ -9029,6 +9111,10 @@ void sum_up_matrix_08_04_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t 
 
 // --------------------------------------------------------------------------------
 void sum_up_matrix_16_02_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c){
+	if (n<16){
+		sum_up_matrix_C_r8(x_sum, x0, n, c);
+		return;
+	}
 	double *x1;
 	int64_t c_unroll=(c>>1), c_remain=c%2, c_step=(c>>1), jj=0;
 	x1 = x0;
@@ -9274,13 +9360,9 @@ void sum_up_matrix_16_02_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c)
 
 		if(n_remain & 1){
 			__asm__ __volatile__ (
-				"pxor      %%xmm0, %%xmm0  \n\t"
 				"pxor      %%xmm1, %%xmm1  \n\t"
-				"movsd  0*8(%[x0]), %%xmm0 \n\t"
-				"addpd %%xmm0, %%xmm14     \n\t"
 				"movsd  0*8(%[x1]), %%xmm1 \n\t"
 				"addpd %%xmm1, %%xmm15     \n\t"
-				"subq $-1*8, %[x0]         \n\t"
 				"subq $-1*8, %[x1]         \n\t"
 				:[x1]"=r"(x1)
 				:"0"(x1)
@@ -9307,6 +9389,10 @@ void sum_up_matrix_16_02_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c)
 }
 
 void sum_up_matrix_16_02_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t c){
+	if (n<16){
+		sum_up_matrix_C_i8(x_sum, x0, n, c);
+		return;
+	}
 	int64_t *x1;
 	int64_t c_unroll=(c>>1), c_remain=c%2, c_step=(c>>1), jj=0;
 	x1 = x0;
@@ -9582,6 +9668,10 @@ void sum_up_matrix_16_02_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t 
 
 // --------------------------------------------------------------------------------
 void sum_up_matrix_32_02_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c){
+	if (n<32){
+		sum_up_matrix_C_r8(x_sum, x0, n, c);
+		return;
+	}
 	double *x1;
 	int64_t c_unroll=(c>>1), c_remain=c%2, c_step=(c>>1), jj=0;
 	x1 = x0;
@@ -9894,6 +9984,10 @@ void sum_up_matrix_32_02_ASM_r8(double *x_sum, double *x0, int64_t n, int64_t c)
 }
 
 void sum_up_matrix_32_02_ASM_i8(int64_t *x_sum, int64_t *x0, int64_t n, int64_t c){
+	if (n<32){
+		sum_up_matrix_C_i8(x_sum, x0, n, c);
+		return;
+	}
 	int64_t *x1;
 	int64_t c_unroll=(c>>1), c_remain=c%2, c_step=(c>>1), jj=0;
 	x1 = x0;
