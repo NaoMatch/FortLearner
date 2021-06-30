@@ -131,7 +131,7 @@ program main_sum_up_vector
             n_iter=maxval((/5000000000_8/n_i8/c_i8, 1_8/))
             n_iter=maxval((/1000000000_8/n_i8/c_i8, 1_8/))
             ! n_iter=maxval((/100000000_8/n_i8/c_i8, 1_8/))
-            ! n_iter=1
+            ! n_iter=10
 
             print*, '============================================================='
             do iter_types=1, n_types, 1
