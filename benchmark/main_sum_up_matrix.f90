@@ -27,25 +27,26 @@ program main_sum_up_vector
     types = hoge
     types(1)  = "sum_up_matrix_intrinsic    :"
     types(2)  = "sum_up_matrix_best?        :"
-    types(3)  = "sum_up_matrix_parallel     :"
+    ! types(3)  = "sum_up_matrix_parallel     :"
     ! types(4)  = "sum_up_matrix_loop         :"
     ! types(5)  = "sum_up_matrix_02_F         :"
     ! types(6)  = "sum_up_matrix_04_F         :"
     ! types(7)  = "sum_up_matrix_08_F         :"
     ! types(8)  = "sum_up_matrix_16_F         :"
     ! types(9)  = "sum_up_matrix_32_F         :"
-    types(10) = "sum_up_matrix_02_02_F      :"
-    types(11) = "sum_up_matrix_02_04_F      :"
-    types(12) = "sum_up_matrix_02_08_F      :"
-    types(13) = "sum_up_matrix_02_16_F      :"
+    ! types(10) = "sum_up_matrix_02_02_F      :"
+    ! types(11) = "sum_up_matrix_02_04_F      :"
+    ! types(12) = "sum_up_matrix_02_08_F      :"
+    ! types(13) = "sum_up_matrix_02_16_F      :"
     types(14) = "sum_up_matrix_04_02_F      :"
     types(15) = "sum_up_matrix_04_04_F      :"
     types(16) = "sum_up_matrix_04_08_F      :"
     types(17) = "sum_up_matrix_08_02_F      :"
     types(18) = "sum_up_matrix_08_04_F      :"
-    types(19) = "sum_up_matrix_16_02_F      :"
-    types(20) = "sum_up_matrix_16_04_F      :"
-    types(21) = "sum_up_matrix_32_02_F      :"
+    ! types(19) = "sum_up_matrix_16_02_F      :"
+    ! types(20) = "sum_up_matrix_16_04_F      :"
+    ! types(21) = "sum_up_matrix_32_02_F      :"
+    ! 
     ! types(22) = "sum_up_matrix_02_F_P       :"
     ! types(23) = "sum_up_matrix_04_F_P       :"
     ! types(24) = "sum_up_matrix_08_F_P       :"
@@ -73,13 +74,14 @@ program main_sum_up_vector
     ! types(46) = "sum_up_matrix_16_04_F_P2   :"
     ! types(47) = "sum_up_matrix_32_02_F_P1   :"
     ! types(48) = "sum_up_matrix_32_02_F_P2   :"
-    types(49) = "sum_up_matrix_C            :"
-    types(50) = "sum_up_matrix_02_C         :"
-    types(51) = "sum_up_matrix_04_C         :"
-    types(52) = "sum_up_matrix_08_C         :"
-    types(53) = "sum_up_matrix_16_C         :"
-    types(54) = "sum_up_matrix_32_C         :"
-    types(55) = "sum_up_matrix_64_C         :"
+    ! 
+    ! types(49) = "sum_up_matrix_C            :"
+    ! types(50) = "sum_up_matrix_02_C         :"
+    ! types(51) = "sum_up_matrix_04_C         :"
+    ! types(52) = "sum_up_matrix_08_C         :"
+    ! types(53) = "sum_up_matrix_16_C         :"
+    ! types(54) = "sum_up_matrix_32_C         :"
+    ! types(55) = "sum_up_matrix_64_C         :"
     types(56) = "sum_up_matrix_02_02_C      :"
     types(57) = "sum_up_matrix_02_04_C      :"
     types(58) = "sum_up_matrix_02_08_C      :"
@@ -101,12 +103,12 @@ program main_sum_up_vector
     types(74) = "sum_up_matrix_08_02_ASM    :"
     types(75) = "sum_up_matrix_08_04_ASM    :"
     types(76) = "sum_up_matrix_16_02_ASM    :"
-    types(77) = "sum_up_matrix_32_02_ASM    :"
+    ! types(77) = "sum_up_matrix_32_02_ASM    :"
     ! types(80) = "sum_up_matrix_C_hybrid     :"
     ! types(81) = "sum_up_matrix_04_04_ASM_Pre:"
 
-    do j=3, 8, 1
-        c_i8 = 2**j + (2**j-1)
+    do j=2, 8, 1
+        c_i8 = 2**j
 
         write (filename_r8, '("time_sum_up_matrix_r8_", i4.4, "_.txt")') c_i8
         write (filename_i8, '("time_sum_up_matrix_i8_", i4.4, "_.txt")') c_i8
@@ -114,8 +116,8 @@ program main_sum_up_vector
         open(10, file=filename_r8)
         open(20, file=filename_i8)
 
-        do k=10, 25, 1
-            n_i8 = 2**k + 31
+        do k=4, 48, 1
+            n_i8 = minval((/2d0**(k/2d0), 10000000d0/))
             allocate(vec_r8(c_i8), vec_i8(c_i8))
             allocate(x_r8(n_i8,c_i8), x_i8(n_i8,c_i8))
             x_r8_ptr   = c_loc(x_r8)
@@ -127,7 +129,7 @@ program main_sum_up_vector
             x_i8 = x_r8
             ! n_iter=maxval((/10000000000_8/n_i8/c_i8, 1_8/))
             n_iter=maxval((/5000000000_8/n_i8/c_i8, 1_8/))
-            ! n_iter=maxval((/500000000_8/n_i8/c_i8, 1_8/))
+            n_iter=maxval((/1000000000_8/n_i8/c_i8, 1_8/))
             ! n_iter=maxval((/100000000_8/n_i8/c_i8, 1_8/))
             ! n_iter=1
 
