@@ -621,196 +621,196 @@ module mod_stats
 
     !> An interface to call extern minmax functions in c and inline assembler
     Interface
-        subroutine minmax_loop_c_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_c_r8')
+        subroutine get_minmax_c_r8(x_min, x_max, x, n) Bind(C,Name='get_minmax_c_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_c_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_c_i8')
+        subroutine get_minmax_c_i8(x_min, x_max, x, n) Bind(C,Name='get_minmax_c_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_02_c_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_02_c_r8')
+        subroutine get_minmax_unroll_02_c_r8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_02_c_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_02_c_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_02_c_i8')
+        subroutine get_minmax_unroll_02_c_i8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_02_c_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_04_c_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_04_c_r8')
+        subroutine get_minmax_unroll_04_c_r8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_04_c_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_04_c_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_04_c_i8')
+        subroutine get_minmax_unroll_04_c_i8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_04_c_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_08_c_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08_c_r8')
+        subroutine get_minmax_unroll_08_c_r8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_08_c_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_08_c_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08_c_i8')
+        subroutine get_minmax_unroll_08_c_i8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_08_c_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_16_c_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16_c_r8')
+        subroutine get_minmax_unroll_16_c_r8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_16_c_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_16_c_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16_c_i8')
+        subroutine get_minmax_unroll_16_c_i8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_16_c_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_a_r8')
+        subroutine get_minmax_a_r8(x_min, x_max, x, n) Bind(C,Name='get_minmax_a_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_a_i8')
+        subroutine get_minmax_a_i8(x_min, x_max, x, n) Bind(C,Name='get_minmax_a_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_02_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_02_a_r8')
+        subroutine get_minmax_unroll_02_a_r8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_02_a_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_02_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_02_a_i8')
+        subroutine get_minmax_unroll_02_a_i8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_02_a_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_04_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_04_a_r8')
+        subroutine get_minmax_unroll_04_a_r8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_04_a_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_04_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_04_a_i8')
+        subroutine get_minmax_unroll_04_a_i8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_04_a_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_08_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08_a_r8')
+        subroutine get_minmax_unroll_08_a_r8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_08_a_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_08_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08_a_i8')
+        subroutine get_minmax_unroll_08_a_i8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_08_a_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_08z_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08z_a_r8')
+        subroutine get_minmax_unroll_08z_a_r8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_08z_a_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_08z_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08z_a_i8')
+        subroutine get_minmax_unroll_08z_a_i8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_08z_a_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_16_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16_a_r8')
+        subroutine get_minmax_unroll_16_a_r8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_16_a_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_16_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16_a_i8')
+        subroutine get_minmax_unroll_16_a_i8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_16_a_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_16z_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16z_a_r8')
+        subroutine get_minmax_unroll_16z_a_r8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_16z_a_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_16z_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16z_a_i8')
+        subroutine get_minmax_unroll_16z_a_i8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_16z_a_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_32_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_32_a_r8')
+        subroutine get_minmax_unroll_32_a_r8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_32_a_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_32_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_32_a_i8')
+        subroutine get_minmax_unroll_32_a_i8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_32_a_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_64_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_64_a_r8')
+        subroutine get_minmax_unroll_64_a_r8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_64_a_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_64_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_64_a_i8')
+        subroutine get_minmax_unroll_64_a_i8(x_min, x_max, x, n) Bind(C,Name='get_minmax_unroll_64_a_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
@@ -837,18 +837,10 @@ module mod_stats
         module procedure sum_of_matrix_i8
     end interface sum_of_matrix
 
-    !> Interface to call get_minmax_r4, get_minmax_real64, get_minmax_int32, get_minmax_int64
     interface get_minmax
-        module procedure get_minmax_r4
-        module procedure get_minmax_r8
-        module procedure get_minmax_i4
-        module procedure get_minmax_i8
+        module procedure get_minmax_hybrid_r8
+        module procedure get_minmax_hybrid_i8
     end interface get_minmax
-
-    interface minmax
-        module procedure minmax_hybrid_r8
-        module procedure minmax_hybrid_i8
-    end interface minmax
 
     !> Interface to call mean_value_of_vector_r4, mean_value_of_vector_r8, mean_value_of_vector_i4, mean_value_of_vector_i8
     interface mean  
@@ -1169,29 +1161,54 @@ contains
     ! -----------------------------------------------------------------------------
     ! -----------------------------------------------------------------------------
     ! minmax functions
-    subroutine minmax_hybrid_r8(min, max, x, n)
+    subroutine get_minmax_hybrid_r8(min, max, x, n)
         implicit none
         real(kind=8), intent(inout) :: min, max
         real(kind=8), intent(in)    :: x(n)
         integer(kind=8), intent(in) :: n
-        if (n .le. 256_8) then
-            call minmax_loop_unroll_08_a_r8(min, max, x, n)
-        else
-            call minmax_loop_unroll_16_a_r8(min, max, x, n)
+#if _default
+        if (n .le. 64_8) then
+            min = minval(x)
+            max = maxval(x)
+        elseif(n .le. 5000000_8) then
+            call get_minmax_02_F_r8(min, max, x, n)
         end if
-    end subroutine minmax_hybrid_r8
+#elif _x86_64
+        if (n .le. 256_8) then
+            call get_minmax_unroll_08z_a_r8(min, max, x, n)
+        elseif(n .le. 15000_8) then
+            call get_minmax_unroll_16z_a_r8(min, max, x, n)
+        else
+            call get_minmax_unroll_16_a_r8(min, max, x, n)
+        end if
+#else 
+#error "CPU Architecture is not supported. Use '-D_default'."
+#endif
+    end subroutine get_minmax_hybrid_r8
 
-    subroutine minmax_hybrid_i8(min, max, x, n)
+    subroutine get_minmax_hybrid_i8(min, max, x, n)
         implicit none
         integer(kind=8), intent(inout) :: min, max
         integer(kind=8), intent(in)    :: x(n)
         integer(kind=8), intent(in)    :: n
-        if (n .le. 256_8) then
-            call minmax_loop_unroll_04_a_i8(min, max, x, n)
-        else
-            call minmax_loop_unroll_16_a_i8(min, max, x, n)
+#if _default
+        if (n .le. 64_8) then
+            call get_minmax_04_F_i8(min, max, x, n)
+        elseif(n .le. 5000000_8) then
+            call get_minmax_08_F_i8(min, max, x, n)
         end if
-    end subroutine minmax_hybrid_i8
+#elif _x86_64
+        if (n .le. 256_8) then
+            call get_minmax_unroll_08z_a_i8(min, max, x, n)
+        elseif(n .le. 15000_8) then
+            call get_minmax_unroll_64_a_i8(min, max, x, n)
+        elseif(n .gt. 70000_8) then
+            call get_minmax_unroll_16_a_i8(min, max, x, n)
+        end if
+#else 
+#error "CPU Architecture is not supported. Use '-D_default'."
+#endif
+    end subroutine get_minmax_hybrid_i8
 
     ! -----------------------------------------------------------------------------
     ! -----------------------------------------------------------------------------
