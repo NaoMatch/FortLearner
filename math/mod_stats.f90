@@ -635,6 +635,20 @@ module mod_stats
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
+        subroutine minmax_loop_unroll_02_c_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_02_c_r8')
+            Import
+            Real(c_double)            :: x_min, x_max
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_02_c_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_02_c_i8')
+            Import
+            Integer(c_int64_t)            :: x_min, x_max
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end subroutine    
+
         subroutine minmax_loop_unroll_04_c_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_04_c_r8')
             Import
             Real(c_double)            :: x_min, x_max
@@ -663,84 +677,140 @@ module mod_stats
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_14_c_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_14_c_r8')
+        subroutine minmax_loop_unroll_16_c_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16_c_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_14_c_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_14_c_i8')
+        subroutine minmax_loop_unroll_16_c_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16_c_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_02_ams_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_02_ams_r8')
+        subroutine minmax_loop_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_a_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_02_ams_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_02_ams_i8')
+        subroutine minmax_loop_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_a_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_04_ams_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_04_ams_r8')
+        subroutine minmax_loop_unroll_02_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_02_a_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_04_ams_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_04_ams_i8')
+        subroutine minmax_loop_unroll_02_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_02_a_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_08_ams_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08_ams_r8')
+        subroutine minmax_loop_unroll_04_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_04_a_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_08_ams_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08_ams_i8')
+        subroutine minmax_loop_unroll_04_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_04_a_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_16_ams_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16_ams_r8')
+        subroutine minmax_loop_unroll_08_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08_a_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_16_ams_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16_ams_i8')
+        subroutine minmax_loop_unroll_08_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08_a_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_32_ams_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_32_ams_r8')
+        subroutine minmax_loop_unroll_08z_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08z_a_r8')
             Import
             Real(c_double)            :: x_min, x_max
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n)
         end subroutine    
 
-        subroutine minmax_loop_unroll_32_ams_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_32_ams_i8')
+        subroutine minmax_loop_unroll_08z_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_08z_a_i8')
+            Import
+            Integer(c_int64_t)            :: x_min, x_max
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_16_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16_a_r8')
+            Import
+            Real(c_double)            :: x_min, x_max
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_16_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16_a_i8')
+            Import
+            Integer(c_int64_t)            :: x_min, x_max
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_16z_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16z_a_r8')
+            Import
+            Real(c_double)            :: x_min, x_max
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_16z_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_16z_a_i8')
+            Import
+            Integer(c_int64_t)            :: x_min, x_max
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_32_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_32_a_r8')
+            Import
+            Real(c_double)            :: x_min, x_max
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_32_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_32_a_i8')
+            Import
+            Integer(c_int64_t)            :: x_min, x_max
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_64_a_r8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_64_a_r8')
+            Import
+            Real(c_double)            :: x_min, x_max
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n)
+        end subroutine    
+
+        subroutine minmax_loop_unroll_64_a_i8(x_min, x_max, x, n) Bind(C,Name='minmax_loop_unroll_64_a_i8')
             Import
             Integer(c_int64_t)            :: x_min, x_max
             Integer(c_int64_t),Value      :: n
@@ -1105,9 +1175,9 @@ contains
         real(kind=8), intent(in)    :: x(n)
         integer(kind=8), intent(in) :: n
         if (n .le. 256_8) then
-            call minmax_loop_unroll_08_ams_r8(min, max, x, n)
+            call minmax_loop_unroll_08_a_r8(min, max, x, n)
         else
-            call minmax_loop_unroll_16_ams_r8(min, max, x, n)
+            call minmax_loop_unroll_16_a_r8(min, max, x, n)
         end if
     end subroutine minmax_hybrid_r8
 
@@ -1117,9 +1187,9 @@ contains
         integer(kind=8), intent(in)    :: x(n)
         integer(kind=8), intent(in)    :: n
         if (n .le. 256_8) then
-            call minmax_loop_unroll_04_ams_i8(min, max, x, n)
+            call minmax_loop_unroll_04_a_i8(min, max, x, n)
         else
-            call minmax_loop_unroll_16_ams_i8(min, max, x, n)
+            call minmax_loop_unroll_16_a_i8(min, max, x, n)
         end if
     end subroutine minmax_hybrid_i8
 
