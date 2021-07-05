@@ -57,7 +57,7 @@ int64_t minval_i8(int64_t x, int64_t y){
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
-void minmax_loop_c_r8(double *min, double *max, double x[], int64_t n){
+void get_minmax_c_r8(double *min, double *max, double x[], int64_t n){
     double tmp_min =   HUGE_VAL;
     double tmp_max = - HUGE_VAL;
 
@@ -72,7 +72,7 @@ void minmax_loop_c_r8(double *min, double *max, double x[], int64_t n){
     *max = tmp_max;
 }
 
-void minmax_loop_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
+void get_minmax_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
     int64_t tmp_min = INT64_MAX;
     int64_t tmp_max = INT64_MIN;
 
@@ -90,7 +90,7 @@ void minmax_loop_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
-void minmax_loop_unroll_02_c_r8(double *min, double *max, double x[], int64_t n){
+void get_minmax_unroll_02_c_r8(double *min, double *max, double x[], int64_t n){
     double tmp_min =   HUGE_VAL;
     double tmp_max = - HUGE_VAL;
 
@@ -116,7 +116,7 @@ void minmax_loop_unroll_02_c_r8(double *min, double *max, double x[], int64_t n)
     *max = tmp_max;
 }
 
-void minmax_loop_unroll_02_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
+void get_minmax_unroll_02_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
     int64_t tmp_min = INT64_MAX;
     int64_t tmp_max = INT64_MIN;
 
@@ -145,7 +145,7 @@ void minmax_loop_unroll_02_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
-void minmax_loop_unroll_04_c_r8(double *min, double *max, double x[], int64_t n){
+void get_minmax_unroll_04_c_r8(double *min, double *max, double x[], int64_t n){
     double tmp_min =   HUGE_VAL;
     double tmp_max = - HUGE_VAL;
 
@@ -182,7 +182,7 @@ void minmax_loop_unroll_04_c_r8(double *min, double *max, double x[], int64_t n)
     *max = tmp_max;
 }
 
-void minmax_loop_unroll_04_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
+void get_minmax_unroll_04_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
     int64_t tmp_min = INT64_MAX;
     int64_t tmp_max = INT64_MIN;
 
@@ -222,7 +222,7 @@ void minmax_loop_unroll_04_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
-void minmax_loop_unroll_08_c_r8(double *min, double *max, double x[], int64_t n){
+void get_minmax_unroll_08_c_r8(double *min, double *max, double x[], int64_t n){
     double tmp_min =   HUGE_VAL;
     double tmp_max = - HUGE_VAL;
 
@@ -276,7 +276,7 @@ void minmax_loop_unroll_08_c_r8(double *min, double *max, double x[], int64_t n)
     *max = tmp_max;
 }
 
-void minmax_loop_unroll_08_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
+void get_minmax_unroll_08_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
     int64_t tmp_min = INT64_MAX;
     int64_t tmp_max = INT64_MIN;
 
@@ -333,7 +333,7 @@ void minmax_loop_unroll_08_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
-void minmax_loop_unroll_16_c_r8(double *min, double *max, double x[], int64_t n){
+void get_minmax_unroll_16_c_r8(double *min, double *max, double x[], int64_t n){
     double tmp_min =   HUGE_VAL;
     double tmp_max = - HUGE_VAL;
 
@@ -421,7 +421,7 @@ void minmax_loop_unroll_16_c_r8(double *min, double *max, double x[], int64_t n)
     *max = tmp_max;
 }
 
-void minmax_loop_unroll_16_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
+void get_minmax_unroll_16_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
     int64_t tmp_min = INT64_MAX;
     int64_t tmp_max = INT64_MIN;
 
@@ -512,7 +512,7 @@ void minmax_loop_unroll_16_c_i8(int64_t *min, int64_t *max, int64_t x[], int64_t
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
-void minmax_loop_a_r8(double *min, double *max, double x[], int64_t n){
+void get_minmax_a_r8(double *min, double *max, double x[], int64_t n){
     double tmp_min, tmp_max;
 	int64_t n_unroll=n;
 
@@ -564,7 +564,7 @@ void minmax_loop_a_r8(double *min, double *max, double x[], int64_t n){
 	*max = tmp_max;
 }
 
-void minmax_loop_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
+void get_minmax_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
     int64_t tmp_min, tmp_max;
 	int64_t n_unroll=n;
 
@@ -619,9 +619,9 @@ void minmax_loop_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
-void minmax_loop_unroll_02_a_r8(double *min, double *max, double x[], int64_t n){
+void get_minmax_unroll_02_a_r8(double *min, double *max, double x[], int64_t n){
 	if (n<2){
-		minmax_loop_c_r8(min, max, x, n);
+		get_minmax_c_r8(min, max, x, n);
         return;
 	}
 
@@ -701,9 +701,9 @@ void minmax_loop_unroll_02_a_r8(double *min, double *max, double x[], int64_t n)
 	*max = tmp_max;
 }
 
-void minmax_loop_unroll_02_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
+void get_minmax_unroll_02_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
 	if (n<2){
-		minmax_loop_c_i8(min, max, x, n);
+		get_minmax_c_i8(min, max, x, n);
         return;
 	}
 
@@ -786,9 +786,9 @@ void minmax_loop_unroll_02_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
-void minmax_loop_unroll_04_a_r8(double *min, double *max, double x[], int64_t n){
+void get_minmax_unroll_04_a_r8(double *min, double *max, double x[], int64_t n){
 	if (n<4){
-		minmax_loop_c_r8(min, max, x, n);
+		get_minmax_c_r8(min, max, x, n);
         return;
 	}
 
@@ -892,9 +892,9 @@ void minmax_loop_unroll_04_a_r8(double *min, double *max, double x[], int64_t n)
 	*max = tmp_max;
 }
 
-void minmax_loop_unroll_04_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
+void get_minmax_unroll_04_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
 	if (n<4){
-		minmax_loop_c_i8(min, max, x, n);
+		get_minmax_c_i8(min, max, x, n);
         return;
 	}
 
@@ -1002,9 +1002,9 @@ void minmax_loop_unroll_04_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
-void minmax_loop_unroll_08_a_r8(double *min, double *max, double x[], int64_t n){
+void get_minmax_unroll_08_a_r8(double *min, double *max, double x[], int64_t n){
 	if (n<8){
-		minmax_loop_c_r8(min, max, x, n);
+		get_minmax_c_r8(min, max, x, n);
         return;
 	}
 
@@ -1133,9 +1133,9 @@ void minmax_loop_unroll_08_a_r8(double *min, double *max, double x[], int64_t n)
 	*max = tmp_max;
 }
 
-void minmax_loop_unroll_08_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
+void get_minmax_unroll_08_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
 	if (n<8){
-		minmax_loop_c_i8(min, max, x, n);
+		get_minmax_c_i8(min, max, x, n);
         return;
 	}
 
@@ -1267,9 +1267,9 @@ void minmax_loop_unroll_08_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
-void minmax_loop_unroll_08z_a_r8(double *min, double *max, double x[], int64_t n){
+void get_minmax_unroll_08z_a_r8(double *min, double *max, double x[], int64_t n){
 	if (n<8){
-		minmax_loop_c_r8(min, max, x, n);
+		get_minmax_c_r8(min, max, x, n);
         return;
 	}
 
@@ -1390,9 +1390,9 @@ void minmax_loop_unroll_08z_a_r8(double *min, double *max, double x[], int64_t n
 	*max = tmp_max;
 }
 
-void minmax_loop_unroll_08z_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
+void get_minmax_unroll_08z_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
 	if (n<8){
-		minmax_loop_c_i8(min, max, x, n);
+		get_minmax_c_i8(min, max, x, n);
         return;
 	}
 
@@ -1517,9 +1517,9 @@ void minmax_loop_unroll_08z_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
-void minmax_loop_unroll_16_a_r8(double *min, double *max, double x[], int64_t n){
+void get_minmax_unroll_16_a_r8(double *min, double *max, double x[], int64_t n){
 	if (n<16){
-		minmax_loop_c_r8(min, max, x, n);
+		get_minmax_c_r8(min, max, x, n);
         return;
 	}
 
@@ -1693,9 +1693,9 @@ void minmax_loop_unroll_16_a_r8(double *min, double *max, double x[], int64_t n)
 	*max = tmp_max;
 }
 
-void minmax_loop_unroll_16_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
+void get_minmax_unroll_16_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
 	if (n<16){
-		minmax_loop_c_i8(min, max, x, n);
+		get_minmax_c_i8(min, max, x, n);
         return;
 	}
 
@@ -1871,9 +1871,9 @@ void minmax_loop_unroll_16_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
-void minmax_loop_unroll_16z_a_r8(double *min, double *max, double x[], int64_t n){
+void get_minmax_unroll_16z_a_r8(double *min, double *max, double x[], int64_t n){
 	if (n<16){
-		minmax_loop_c_r8(min, max, x, n);
+		get_minmax_c_r8(min, max, x, n);
         return;
 	}
 
@@ -2022,9 +2022,9 @@ void minmax_loop_unroll_16z_a_r8(double *min, double *max, double x[], int64_t n
 	*max = tmp_max;
 }
 
-void minmax_loop_unroll_16z_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
+void get_minmax_unroll_16z_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
 	if (n<16){
-		minmax_loop_c_i8(min, max, x, n);
+		get_minmax_c_i8(min, max, x, n);
         return;
 	}
 
@@ -2175,9 +2175,9 @@ void minmax_loop_unroll_16z_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
-void minmax_loop_unroll_32_a_r8(double *min, double *max, double x[], int64_t n){
+void get_minmax_unroll_32_a_r8(double *min, double *max, double x[], int64_t n){
 	if (n<32){
-		minmax_loop_c_r8(min, max, x, n);
+		get_minmax_c_r8(min, max, x, n);
         return;
 	}
 
@@ -2370,9 +2370,9 @@ void minmax_loop_unroll_32_a_r8(double *min, double *max, double x[], int64_t n)
 	*max = tmp_max;
 }
 
-void minmax_loop_unroll_32_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
+void get_minmax_unroll_32_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
 	if (n<32){
-		minmax_loop_c_i8(min, max, x, n);
+		get_minmax_c_i8(min, max, x, n);
         return;
 	}
 
@@ -2567,9 +2567,9 @@ void minmax_loop_unroll_32_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
-void minmax_loop_unroll_64_a_r8(double *min, double *max, double x[], int64_t n){
+void get_minmax_unroll_64_a_r8(double *min, double *max, double x[], int64_t n){
 	if (n<64){
-		minmax_loop_c_r8(min, max, x, n);
+		get_minmax_c_r8(min, max, x, n);
         return;
 	}
 
@@ -2773,7 +2773,7 @@ void minmax_loop_unroll_64_a_r8(double *min, double *max, double x[], int64_t n)
             __asm__ __volatile__ (
                 "movsd   0*8(%[x]), %%xmm15 \n\t"
                 "minpd %%xmm15,     %%xmm2  \n\t"
-                "maxpd %%xmm15,     %%xmm4  \n\t"
+                "maxpd %%xmm15,     %%xmm6  \n\t"
                 "subq $-1*8, %[x]           \n\t"
                 :[x]"=r"(x)
                 :"0"(x)
@@ -2783,7 +2783,7 @@ void minmax_loop_unroll_64_a_r8(double *min, double *max, double x[], int64_t n)
 
 	__asm__ __volatile__(
         "movsd  %%xmm2, %[min]                 \n\t"
-        "movsd  %%xmm4, %[max]                 \n\t"
+        "movsd  %%xmm6, %[max]                 \n\t"
 		"\n\t"
         :[min]"=m"(tmp_min), [max]"=m"(tmp_max)
         :
@@ -2793,9 +2793,9 @@ void minmax_loop_unroll_64_a_r8(double *min, double *max, double x[], int64_t n)
 	*max = tmp_max;
 }
 
-void minmax_loop_unroll_64_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
+void get_minmax_unroll_64_a_i8(int64_t *min, int64_t *max, int64_t x[], int64_t n){
 	if (n<64){
-		minmax_loop_c_i8(min, max, x, n);
+		get_minmax_c_i8(min, max, x, n);
         return;
 	}
 
