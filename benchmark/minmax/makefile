@@ -6,7 +6,7 @@ asm              := ./mod/inc_sum_up_vector_c.out \
 compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
-opt              := -O2
+opt              := -O3
 
 # Preprocessor
 # -D_default: use Fortran only
