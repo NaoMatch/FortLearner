@@ -33,3 +33,127 @@ subroutine get_minmax_i8(min_val, max_val, vector, n_samples)
     integer(kind=8) :: n, n_samples_unroll, j
     include "./include/stats/get_minmax/inc_get_minmax_detail.f90"
 end subroutine get_minmax_i8
+
+subroutine get_minmax_loop_F_r8(min, max, vec, n)
+    implicit none
+    real(kind=8), intent(inout) :: min, max
+    real(kind=8), intent(in)    :: vec(n)
+    integer(kind=8), intent(in) :: n
+
+    integer(kind=8) :: i
+    real(kind=8)    :: r00
+    include "./include/stats/get_minmax/inc_get_minmax_loop.f90"
+end subroutine get_minmax_loop_F_r8
+
+subroutine get_minmax_loop_F_i8(min, max, vec, n)
+    implicit none
+    integer(kind=8), intent(inout) :: min, max
+    integer(kind=8), intent(in)    :: vec(n)
+    integer(kind=8), intent(in)    :: n
+
+    integer(kind=8) :: i
+    integer(kind=8) :: r00
+    include "./include/stats/get_minmax/inc_get_minmax_loop.f90"
+end subroutine get_minmax_loop_F_i8
+
+subroutine get_minmax_02_F_r8(min, max, vec, n)
+    implicit none
+    real(kind=8), intent(inout) :: min, max
+    real(kind=8), intent(in)    :: vec(n)
+    integer(kind=8), intent(in) :: n
+
+    integer(kind=8) :: i, n_unroll, n_remain, unroll_size
+    real(kind=8)    :: r00, r01
+    include "./include/stats/get_minmax/inc_get_minmax_02.f90"
+end subroutine get_minmax_02_F_r8
+
+subroutine get_minmax_02_F_i8(min, max, vec, n)
+    implicit none
+    integer(kind=8), intent(inout) :: min, max
+    integer(kind=8), intent(in)    :: vec(n)
+    integer(kind=8), intent(in)    :: n
+
+    integer(kind=8) :: i, n_unroll, n_remain, unroll_size
+    integer(kind=8) :: r00, r01
+    include "./include/stats/get_minmax/inc_get_minmax_02.f90"
+end subroutine get_minmax_02_F_i8
+
+subroutine get_minmax_04_F_r8(min, max, vec, n)
+    implicit none
+    real(kind=8), intent(inout) :: min, max
+    real(kind=8), intent(in)    :: vec(n)
+    integer(kind=8), intent(in) :: n
+
+    integer(kind=8) :: i, n_unroll, n_remain, unroll_size
+    real(kind=8)    :: r00, r01, r02, r03
+    include "./include/stats/get_minmax/inc_get_minmax_04.f90"
+end subroutine get_minmax_04_F_r8
+
+subroutine get_minmax_04_F_i8(min, max, vec, n)
+    implicit none
+    integer(kind=8), intent(inout) :: min, max
+    integer(kind=8), intent(in)    :: vec(n)
+    integer(kind=8), intent(in)    :: n
+
+    integer(kind=8) :: i, n_unroll, n_remain, unroll_size
+    integer(kind=8) :: r00, r01, r02, r03
+    include "./include/stats/get_minmax/inc_get_minmax_04.f90"
+end subroutine get_minmax_04_F_i8
+
+subroutine get_minmax_08_F_r8(min, max, vec, n)
+    implicit none
+    real(kind=8), intent(inout) :: min, max
+    real(kind=8), intent(in)    :: vec(n)
+    integer(kind=8), intent(in) :: n
+
+    integer(kind=8) :: i, n_unroll, n_remain, unroll_size
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    include "./include/stats/get_minmax/inc_get_minmax_08.f90"
+end subroutine get_minmax_08_F_r8
+
+subroutine get_minmax_08_F_i8(min, max, vec, n)
+    implicit none
+    integer(kind=8), intent(inout) :: min, max
+    integer(kind=8), intent(in)    :: vec(n)
+    integer(kind=8), intent(in)    :: n
+
+    integer(kind=8) :: i, n_unroll, n_remain, unroll_size
+    integer(kind=8) :: r00, r01, r02, r03
+    integer(kind=8) :: r04, r05, r06, r07
+    include "./include/stats/get_minmax/inc_get_minmax_08.f90"
+end subroutine get_minmax_08_F_i8
+
+subroutine get_minmax_16_F_r8(min, max, vec, n)
+    implicit none
+    real(kind=8), intent(inout) :: min, max
+    real(kind=8), intent(in)    :: vec(n)
+    integer(kind=8), intent(in) :: n
+
+    integer(kind=8) :: i, n_unroll, n_remain, unroll_size
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+    include "./include/stats/get_minmax/inc_get_minmax_16.f90"
+end subroutine get_minmax_16_F_r8
+
+subroutine get_minmax_16_F_i8(min, max, vec, n)
+    implicit none
+    integer(kind=8), intent(inout) :: min, max
+    integer(kind=8), intent(in)    :: vec(n)
+    integer(kind=8), intent(in)    :: n
+
+    integer(kind=8) :: i, n_unroll, n_remain, unroll_size
+    integer(kind=8) :: r00, r01, r02, r03
+    integer(kind=8) :: r04, r05, r06, r07
+    integer(kind=8) :: r08, r09, r10, r11
+    integer(kind=8) :: r12, r13, r14, r15
+    include "./include/stats/get_minmax/inc_get_minmax_16.f90"
+end subroutine get_minmax_16_F_i8
+
+
+
+
+
+
