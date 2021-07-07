@@ -819,17 +819,6 @@ module mod_stats
     end interface
 
     !> Interface to call sum_up_left_r4, sum_up_left_with_indices_real32
-    interface sum_up_left
-        module procedure sum_up_left_r4
-        module procedure sum_up_left_r8
-        module procedure sum_up_left_i4
-        module procedure sum_up_left_i4_r4_threshold
-        module procedure sum_up_left_i8
-        module procedure sum_up_left_i8_r8_threshold
-        module procedure sum_up_left_hybrid_r8
-        module procedure sum_up_left_hybrid_i8
-    end interface sum_up_left
-
     interface sum_of_matrix
         module procedure sum_of_matrix_r4
         module procedure sum_of_matrix_r8
@@ -1156,11 +1145,11 @@ contains
     end subroutine sum_up_matrix_parallel_i8
 
 
-
     ! -----------------------------------------------------------------------------
     ! -----------------------------------------------------------------------------
     ! -----------------------------------------------------------------------------
     ! minmax functions
+    ! include "./include/stats/get_minmax/inc_get_minmax.f90"
     subroutine get_minmax_hybrid_r8(min, max, x, n)
         implicit none
         real(kind=8), intent(inout) :: min, max
@@ -1258,14 +1247,14 @@ contains
     !! \param vector input 1-dim vector
     !! \param num size of input 1-dim vector
     !! \param threshold threshold value
-    function sum_up_left_r4(vector, threshold, n_samples)
+    function sum_up_left_r4(x, y, threshold_y, n_samples)
         implicit none
         real(kind=4)                :: sum_up_left_r4
-        real(kind=4), intent(in)    :: vector(n_samples)
-        real(kind=4), intent(in)    :: threshold
+        real(kind=4), intent(in)    :: x(n_samples), y(n_samples)
+        real(kind=4), intent(in)    :: threshold_y
         integer(kind=4), intent(in) :: n_samples
         integer(kind=4)             :: n, factor
-        real(kind=4)                :: val, tmp_sum, zero=0
+        real(kind=4)                :: val_x, val_y, tmp_sum, zero=0
         include "./include/stats/sum_up_left/inc_sum_up_left_detail.f90"
         sum_up_left_r4 = tmp_sum
     end function sum_up_left_r4
