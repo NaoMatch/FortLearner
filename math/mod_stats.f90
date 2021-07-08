@@ -554,69 +554,428 @@ module mod_stats
 
     !> An interface to call extern sum_up_left functions in c and inline assembler
     Interface
-        function sum_up_left_assembler_04_c_i8_i8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_04_c_i8_i8')
+        function sum_up_left_loop_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_C_i8')
             Import
-            Integer(c_int64_t)            :: sum_up_left_assembler_04_c_i8_i8
+            Integer(c_int64_t)            :: sum_up_left_loop_C_i8
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n), y(n)
             Integer(c_int64_t),Value      :: v
         end function    
 
-        function sum_up_left_assembler_04_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_04_c_r8_r8')
+        function sum_up_left_loop_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_C_r8')
             Import
-            Real(c_double)            :: sum_up_left_assembler_04_c_r8_r8
+            Real(c_double)            :: sum_up_left_loop_C_r8
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n), y(n)
             Real(c_double),Value  :: v
         end function    
 
-        function sum_up_left_assembler_08_c_i8_i8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_08_c_i8_i8')
+        function sum_up_left_loop_02_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_02_C_i8')
             Import
-            Integer(c_int64_t)            :: sum_up_left_assembler_08_c_i8_i8
+            Integer(c_int64_t)            :: sum_up_left_loop_02_C_i8
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n), y(n)
             Integer(c_int64_t),Value      :: v
         end function    
 
-        function sum_up_left_assembler_08_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_08_c_r8_r8')
+        function sum_up_left_loop_02_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_02_C_r8')
             Import
-            Real(c_double)            :: sum_up_left_assembler_08_c_r8_r8
+            Real(c_double)            :: sum_up_left_loop_02_C_r8
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n), y(n)
             Real(c_double),Value  :: v
         end function    
 
-        function sum_up_left_assembler_20_c_i8_i8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_20_c_i8_i8')
+        function sum_up_left_loop_04_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_04_C_i8')
             Import
-            Integer(c_int64_t)            :: sum_up_left_assembler_20_c_i8_i8
+            Integer(c_int64_t)            :: sum_up_left_loop_04_C_i8
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n), y(n)
             Integer(c_int64_t),Value      :: v
         end function    
 
-        function sum_up_left_assembler_20_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_20_c_r8_r8')
+        function sum_up_left_loop_04_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_04_C_r8')
             Import
-            Real(c_double)            :: sum_up_left_assembler_20_c_r8_r8
+            Real(c_double)            :: sum_up_left_loop_04_C_r8
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n), y(n)
             Real(c_double),Value  :: v
         end function    
 
-        function sum_up_left_assembler_24_c_i8_i8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_24_c_i8_i8')
+        function sum_up_left_loop_08_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_08_C_i8')
             Import
-            Integer(c_int64_t)            :: sum_up_left_assembler_24_c_i8_i8
+            Integer(c_int64_t)            :: sum_up_left_loop_08_C_i8
             Integer(c_int64_t),Value      :: n
             Integer(c_int64_t),Intent(In) :: x(n), y(n)
             Integer(c_int64_t),Value      :: v
         end function    
 
-        function sum_up_left_assembler_24_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_24_c_r8_r8')
+        function sum_up_left_loop_08_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_08_C_r8')
             Import
-            Real(c_double)            :: sum_up_left_assembler_24_c_r8_r8
+            Real(c_double)            :: sum_up_left_loop_08_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_loop_16_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_16_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_16_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_16_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_16_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_16_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_loop_branchless_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_loop_branchless_02_ver01_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_02_ver01_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_02_ver01_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_02_ver01_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_02_ver01_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_02_ver01_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_loop_branchless_02_ver02_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_02_ver02_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_02_ver02_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_02_ver02_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_02_ver02_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_02_ver02_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_loop_branchless_02_ver03_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_02_ver03_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_02_ver03_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_02_ver03_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_02_ver03_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_02_ver03_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_loop_branchless_02_ver04_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_02_ver04_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_02_ver04_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_02_ver04_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_02_ver04_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_02_ver04_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_loop_branchless_04_ver01_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_04_ver01_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_04_ver01_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_04_ver01_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_04_ver01_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_04_ver01_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_loop_branchless_04_ver02_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_04_ver02_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_04_ver02_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_04_ver02_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_04_ver02_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_04_ver02_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_loop_branchless_04_ver03_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_04_ver03_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_04_ver03_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_04_ver03_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_04_ver03_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_04_ver03_C_r8
             Integer(c_int64_t),Value  :: n
             Real(c_double),Intent(In) :: x(n), y(n)
             Real(c_double),Value  :: v
         end function
+
+        function sum_up_left_loop_branchless_04_ver04_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_04_ver04_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_04_ver04_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_04_ver04_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_04_ver04_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_04_ver04_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_loop_branchless_04_ver05_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_04_ver05_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_04_ver05_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_04_ver05_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_04_ver05_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_04_ver05_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+
+
+
+        function sum_up_left_loop_branchless_08_ver01_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_08_ver01_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_08_ver01_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_08_ver01_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_08_ver01_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_08_ver01_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_loop_branchless_08_ver02_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_08_ver02_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_08_ver02_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_08_ver02_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_08_ver02_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_08_ver02_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_loop_branchless_08_ver03_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_08_ver03_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_08_ver03_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_08_ver03_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_08_ver03_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_08_ver03_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_loop_branchless_08_ver04_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_08_ver04_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_08_ver04_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_08_ver04_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_08_ver04_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_08_ver04_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+        function sum_up_left_loop_branchless_08_ver05_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_08_ver05_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_08_ver05_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_08_ver05_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_08_ver05_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_08_ver05_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        function sum_up_left_loop_branchless_16_C_i8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_16_C_i8')
+            Import
+            Integer(c_int64_t)            :: sum_up_left_loop_branchless_16_C_i8
+            Integer(c_int64_t),Value      :: n
+            Integer(c_int64_t),Intent(In) :: x(n), y(n)
+            Integer(c_int64_t),Value      :: v
+        end function    
+
+        function sum_up_left_loop_branchless_16_C_r8(x,y,v,n) Bind(C,Name='sum_up_left_loop_branchless_16_C_r8')
+            Import
+            Real(c_double)            :: sum_up_left_loop_branchless_16_C_r8
+            Integer(c_int64_t),Value  :: n
+            Real(c_double),Intent(In) :: x(n), y(n)
+            Real(c_double),Value  :: v
+        end function    
+
+
+        ! function sum_up_left_assembler_04_c_i8_i8(x,y,v,n) Bind(C,Name='sum_up_left_assembler_04_c_i8_i8')
+        !     Import
+        !     Integer(c_int64_t)            :: sum_up_left_assembler_04_c_i8_i8
+        !     Integer(c_int64_t),Value      :: n
+        !     Integer(c_int64_t),Intent(In) :: x(n), y(n)
+        !     Integer(c_int64_t),Value      :: v
+        ! end function    
+
+        ! function sum_up_left_assembler_04_c_r8_r8(x,y,v,n) Bind(C,Name='sum_up_left_assembler_04_c_r8_r8')
+        !     Import
+        !     Real(c_double)            :: sum_up_left_assembler_04_c_r8_r8
+        !     Integer(c_int64_t),Value  :: n
+        !     Real(c_double),Intent(In) :: x(n), y(n)
+        !     Real(c_double),Value  :: v
+        ! end function    
+
+        ! function sum_up_left_assembler_08_c_i8_i8(x,y,v,n) Bind(C,Name='sum_up_left_assembler_08_c_i8_i8')
+        !     Import
+        !     Integer(c_int64_t)            :: sum_up_left_assembler_08_c_i8_i8
+        !     Integer(c_int64_t),Value      :: n
+        !     Integer(c_int64_t),Intent(In) :: x(n), y(n)
+        !     Integer(c_int64_t),Value      :: v
+        ! end function    
+
+        ! function sum_up_left_assembler_08_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_08_c_r8_r8')
+        !     Import
+        !     Real(c_double)            :: sum_up_left_assembler_08_c_r8_r8
+        !     Integer(c_int64_t),Value  :: n
+        !     Real(c_double),Intent(In) :: x(n), y(n)
+        !     Real(c_double),Value  :: v
+        ! end function    
+
+        ! function sum_up_left_assembler_20_c_i8_i8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_20_c_i8_i8')
+        !     Import
+        !     Integer(c_int64_t)            :: sum_up_left_assembler_20_c_i8_i8
+        !     Integer(c_int64_t),Value      :: n
+        !     Integer(c_int64_t),Intent(In) :: x(n), y(n)
+        !     Integer(c_int64_t),Value      :: v
+        ! end function    
+
+        ! function sum_up_left_assembler_20_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_20_c_r8_r8')
+        !     Import
+        !     Real(c_double)            :: sum_up_left_assembler_20_c_r8_r8
+        !     Integer(c_int64_t),Value  :: n
+        !     Real(c_double),Intent(In) :: x(n), y(n)
+        !     Real(c_double),Value  :: v
+        ! end function    
+
+        ! function sum_up_left_assembler_24_c_i8_i8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_24_c_i8_i8')
+        !     Import
+        !     Integer(c_int64_t)            :: sum_up_left_assembler_24_c_i8_i8
+        !     Integer(c_int64_t),Value      :: n
+        !     Integer(c_int64_t),Intent(In) :: x(n), y(n)
+        !     Integer(c_int64_t),Value      :: v
+        ! end function    
+
+        ! function sum_up_left_assembler_24_c_r8_r8(x,y,n,v) Bind(C,Name='sum_up_left_assembler_24_c_r8_r8')
+        !     Import
+        !     Real(c_double)            :: sum_up_left_assembler_24_c_r8_r8
+        !     Integer(c_int64_t),Value  :: n
+        !     Real(c_double),Intent(In) :: x(n), y(n)
+        !     Real(c_double),Value  :: v
+        ! end function
     end interface
 
     !> An interface to call extern minmax functions in c and inline assembler
@@ -1213,13 +1572,13 @@ contains
         integer(kind=8), intent(in) :: x(n), y(n), v
         integer(kind=8), intent(in) :: n
         integer(kind=8)             :: sum_up_left_hybrid_i8
-        if (n .le. 256_8) then
-            sum_up_left_hybrid_i8 = sum_up_left_assembler_08_c_i8_i8(x, y, n, v)
-        elseif ( n .le. 10000000_8 ) then
-            sum_up_left_hybrid_i8 = sum_up_left_assembler_24_c_i8_i8(x, y, n, v)
-        else
-            sum_up_left_hybrid_i8 = sum_up_left_assembler_08_c_i8_i8(x, y, n, v)
-        end if
+        ! if (n .le. 256_8) then
+        !     sum_up_left_hybrid_i8 = sum_up_left_assembler_08_c_i8_i8(x, y, n, v)
+        ! elseif ( n .le. 10000000_8 ) then
+        !     sum_up_left_hybrid_i8 = sum_up_left_assembler_24_c_i8_i8(x, y, n, v)
+        ! else
+        !     sum_up_left_hybrid_i8 = sum_up_left_assembler_08_c_i8_i8(x, y, n, v)
+        ! end if
     end function sum_up_left_hybrid_i8
 
     !> A function to sum up vector, integer 64bit.
@@ -1232,13 +1591,13 @@ contains
         real(kind=8), intent(in)    :: x(n), y(n), v
         integer(kind=8), intent(in) :: n
         real(kind=8)                :: sum_up_left_hybrid_r8
-        if (n .le. 3000_8) then
-            sum_up_left_hybrid_r8 = sum_up_left_assembler_08_c_r8_r8(x, y, n, v)
-        elseif ( n .le. 10000000_8 ) then
-            sum_up_left_hybrid_r8 = sum_up_left_assembler_20_c_r8_r8(x, y, n, v)
-        else
-            sum_up_left_hybrid_r8 = sum_up_left_assembler_04_c_r8_r8(x, y, n, v)
-        end if
+        ! if (n .le. 3000_8) then
+        !     sum_up_left_hybrid_r8 = sum_up_left_assembler_08_c_r8_r8(x, y, n, v)
+        ! elseif ( n .le. 10000000_8 ) then
+        !     sum_up_left_hybrid_r8 = sum_up_left_assembler_20_c_r8_r8(x, y, n, v)
+        ! else
+        !     sum_up_left_hybrid_r8 = sum_up_left_assembler_04_c_r8_r8(x, y, n, v)
+        ! end if
     end function sum_up_left_hybrid_r8
 
     !> A subroutine to the sum of values less than or equal the threshold from a 1-dim array. \n
