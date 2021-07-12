@@ -2357,7 +2357,6 @@ void get_minmax_unroll_32_a_r8(double *min, double *max, double x[], int64_t n){
         }
     }
 
-
 	__asm__ __volatile__(
         "movsd  %%xmm0, %[min]                 \n\t"
         "movsd  %%xmm2, %[max]                 \n\t"
