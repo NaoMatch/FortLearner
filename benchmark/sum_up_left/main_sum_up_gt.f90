@@ -64,21 +64,20 @@ program main_sum_up_gt
     types(25)  = "count_and_sum_up_gt_loop_16_A            :"
     types(26)  = "count_and_sum_up_gt_loop_32_A            :"
 
-
     filename_r8 = "time_sum_up_gt_r8.txt"
     filename_i8 = "time_sum_up_gt_i8.txt"
 
     open(10, file=filename_r8)
     open(20, file=filename_i8)
 
-    k_s = 30
+    k_s = 4
     k_e = 48
     cnt_iter = k_e - k_s
     k_remain = cnt_iter
     cnt_k = 1
     num_select = 10
-    thre_y_r8 = +49d0
-    thre_y_i8 = +49_8
+    thre_y_r8 = +0d0
+    thre_y_i8 = +0_8
 
     call date_and_time(values=s_value)
     do k=k_s, k_e, 1
@@ -96,8 +95,8 @@ program main_sum_up_gt
         y_i8 = y_r8
 
         ! n_iter=maxval((/10000000000_8/n_i8, 1_8/))
-        n_iter=maxval((/5000000000_8/n_i8, 1_8/))
-        ! n_iter=maxval((/1000000000_8/n_i8, 1_8/))
+        ! n_iter=maxval((/5000000000_8/n_i8, 1_8/))
+        n_iter=maxval((/2000000000_8/n_i8, 1_8/))
         ! n_iter=maxval((/500000000_8/n_i8, 1_8/))
         ! n_iter=maxval((/50000000_8/n_i8, 1_8/))
         ! n_iter=1; is_stop=.true.
@@ -138,7 +137,7 @@ program main_sum_up_gt
                 end select
             end do
             call date_and_time(values=date_value2); times(iter_types) = time_diff(date_value1, date_value2)/dble(n_iter)
-            print "(A, i15, f30.15, f30.15, i30)", types(iter_types), n_i8, real(times(iter_types)), res_r8, cnt_i8
+            print "(A, i15, f30.15, f15.7, i15)", types(iter_types), n_i8, real(times(iter_types)), real(res_r8), int(cnt_i8)
         end do
         write(10,*) k, n_i8, times
 
@@ -178,8 +177,8 @@ program main_sum_up_gt
                 end select
             end do
             call date_and_time(values=date_value2); times(iter_types) = time_diff(date_value1, date_value2)/dble(n_iter)
-            print "(A, i15, f30.15, i30, i30)", types(iter_types), n_i8, real(times(iter_types)), & 
-                res_i8, cnt_i8
+            print "(A, i15, f30.15, i15, i15)", types(iter_types), n_i8, real(times(iter_types)), & 
+                int(res_i8), int(cnt_i8)
         end do
         write(20,*) k, n_i8, times
         deallocate(x_r8, x_i8)

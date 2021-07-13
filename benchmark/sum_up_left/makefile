@@ -15,12 +15,12 @@ option := -cpp -D_x86_64 -fopenmp
 
 
 pre_f:
-	# $(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_const.f90 -o ./mod/mod_const.out
-	# $(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_common.f90 -o ./mod/mod_common.out
-	# $(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_timer.f90 -o ./mod/mod_timer.out
-	# $(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_random.f90 -o ./mod/mod_random.out
-	# $(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_sort.f90 -o ./mod/mod_sort.out
-	# $(compiler_fortran) $(opt) $(option) -w -c ../../math/mod_stats.f90 -o ./mod/mod_stats.out
+	$(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_const.f90 -o ./mod/mod_const.out
+	$(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_common.f90 -o ./mod/mod_common.out
+	$(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_timer.f90 -o ./mod/mod_timer.out
+	$(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_random.f90 -o ./mod/mod_random.out
+	$(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_sort.f90 -o ./mod/mod_sort.out
+	$(compiler_fortran) $(opt) $(option) -w -c ../../math/mod_stats.f90 -o ./mod/mod_stats.out
 
 pre_c:
 	# $(compiler_clang) $(mod) $(option) -c ../../math/include/stats/sum_up/inc_sum_up_vector.c    $(opt) -o ./mod/inc_sum_up_vector_c.out
