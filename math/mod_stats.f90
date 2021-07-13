@@ -1313,6 +1313,11 @@ module mod_stats
         end subroutine    
     end interface
 
+    interface count_and_sum_up_gt
+        module procedure count_and_sum_up_gt_r8
+        module procedure count_and_sum_up_gt_i8
+    end interface count_and_sum_up_gt
+
     !> Interface to call sum_up_left_r4, sum_up_left_with_indices_real32
     interface sum_of_matrix
         module procedure sum_of_matrix_r4
@@ -1638,6 +1643,66 @@ contains
         !$omp end do
         !$omp end parallel
     end subroutine sum_up_matrix_parallel_i8
+
+
+    ! -----------------------------------------------------------------------------
+    ! -----------------------------------------------------------------------------
+    ! -----------------------------------------------------------------------------
+    subroutine count_and_sum_up_gt_r8(sum_gt, cnt_gt, x, y, v, n)
+        implicit none
+        real(kind=8), intent(inout)    :: sum_gt
+        integer(kind=8), intent(inout) :: cnt_gt
+        real(kind=8), intent(in)       :: x(n), y(n)
+        real(kind=8), intent(in)       :: v
+        integer(kind=8), intent(in)    :: n
+#if _default
+        if (n .le. 16000_8) then
+            call count_and_sum_up_gt_loop_16_if_F_r8(sum_gt, cnt_gt, x, y, v, n)
+        else
+            call count_and_sum_up_gt_loop_branchless_16_F_r8(sum_gt, cnt_gt, x, y, v, n)
+        end if
+#elif _x86_64
+        if (n .le. 64_8) then
+            call count_and_sum_up_gt_loop_16_if_F_r8(sum_gt, cnt_gt, x, y, v, n)
+        elseif(n .le. 3000_8) then
+            call count_and_sum_up_gt_loop_08_A_r8(sum_gt, cnt_gt, x, y, v, n)
+        elseif(n .le. 1000000_8) then
+            call count_and_sum_up_gt_loop_32_A_r8(sum_gt, cnt_gt, x, y, v, n)
+        else
+            call count_and_sum_up_gt_loop_04_A_r8(sum_gt, cnt_gt, x, y, v, n)
+        end if
+#else 
+#error "CPU Architecture is not supported. Use '-D_default'."
+#endif
+    end subroutine count_and_sum_up_gt_r8
+
+
+    subroutine count_and_sum_up_gt_i8(sum_gt, cnt_gt, x, y, v, n)
+        implicit none
+        integer(kind=8), intent(inout) :: sum_gt
+        integer(kind=8), intent(inout) :: cnt_gt
+        integer(kind=8), intent(in)    :: x(n), y(n)
+        integer(kind=8), intent(in)    :: v
+        integer(kind=8), intent(in)    :: n
+#if _default
+        if (n .le. 16000_8) then
+            call count_and_sum_up_gt_loop_16_if_F_i8(sum_gt, cnt_gt, x, y, v, n)
+        else
+            call count_and_sum_up_gt_loop_branchless_16_F_i8(sum_gt, cnt_gt, x, y, v, n)
+        end if
+#elif _x86_64
+        if (n .le. 3000_8) then
+            call count_and_sum_up_gt_loop_16_if_F_i8(sum_gt, cnt_gt, x, y, v, n)
+        elseif(n .le. 1000000_8) then
+            call count_and_sum_up_gt_loop_32_A_i8(sum_gt, cnt_gt, x, y, v, n)
+        else
+            call count_and_sum_up_gt_loop_04_A_i8(sum_gt, cnt_gt, x, y, v, n)
+        end if
+#else 
+#error "CPU Architecture is not supported. Use '-D_default'."
+#endif
+    end subroutine count_and_sum_up_gt_i8
+
 
 
     ! -----------------------------------------------------------------------------
