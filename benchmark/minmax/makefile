@@ -15,18 +15,19 @@ option := -cpp -D_x86_64 -fopenmp
 
 
 pre_f:
-	$(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_const.f90 -o ./mod/mod_const.out
-	$(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_common.f90 -o ./mod/mod_common.out
-	$(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_timer.f90 -o ./mod/mod_timer.out
-	$(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_random.f90 -o ./mod/mod_random.out
-	$(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_sort.f90 -o ./mod/mod_sort.out
-	$(compiler_fortran) $(opt) $(option) -w -c ../../math/mod_stats.f90 -o ./mod/mod_stats.out
+	# $(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_const.f90 -o ./mod/mod_const.out
+	# $(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_common.f90 -o ./mod/mod_common.out
+	# $(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_timer.f90 -o ./mod/mod_timer.out
+	# $(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_random.f90 -o ./mod/mod_random.out
+	# $(compiler_fortran) $(opt) $(option) -w -c ../../common/mod_sort.f90 -o ./mod/mod_sort.out
+	# $(compiler_fortran) $(opt) $(option) -w -c ../../math/mod_stats.f90 -o ./mod/mod_stats.out
 
 pre_c:
 	# $(compiler_clang) $(mod) $(option) -c ../../math/include/stats/sum_up/inc_sum_up_vector.c    $(opt) -o ./mod/inc_sum_up_vector_c.out
 	# $(compiler_clang) $(mod) $(option) -c ../../math/include/stats/sum_up/inc_sum_up_matrix.c    $(opt) -o ./mod/inc_sum_up_matrix_c.out ./mod/inc_sum_up_vector_c.out
 	# $(compiler_clang) $(mod) $(option) -c ../../math/include/stats/sum_up_left/inc_sum_up_left.c $(opt) -o ./mod/inc_sum_up_left_c.out
-	$(compiler_clang) $(mod) $(option) -c ../../math/include/stats/get_minmax/inc_get_minmax.c   $(opt) -o ./mod/inc_get_minmax.out
+	# $(compiler_clang) $(mod) $(option) -c ../../math/include/stats/get_minmax/inc_get_minmax.c   $(opt) -o ./mod/inc_get_minmax.out
+	$(compiler_clang) $(mod) $(option) -c ./get_matrix_minmax.c   $(opt) -o ./mod/get_matrix_minmax.out
 
 minmax:
 	make pre_c
@@ -40,6 +41,23 @@ minmax:
 	$(asm)  $(option) $(mod) \
 	main_minmax.f90 -o main_minmax.out
 	./main_minmax.out
+
+minmax_with_index:
+	make pre_f
+	make pre_c
+	$(compiler_fortran) $(opt) $(option) -w -c ./mod_get_matrix_minmax.f90 -o ./mod/mod_get_matrix_minmax.out
+	$(compiler_fortran) -w -unroll $(opt) \
+	./mod/mod_const.out \
+	./mod/mod_common.out \
+	./mod/mod_timer.out \
+	./mod/mod_random.out \
+	./mod/mod_sort.out \
+	./mod/mod_stats.out \
+	./mod/mod_get_matrix_minmax.out \
+	$(asm)  $(option) $(mod) \
+	./mod/get_matrix_minmax.out \
+	main_minmax_with_index.f90 -o main_minmax_with_index.out
+	./main_minmax_with_index.out
 
 
 
