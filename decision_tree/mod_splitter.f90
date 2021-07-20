@@ -20,6 +20,9 @@ module mod_splitter
         procedure :: split_extra_tree_regressor
         procedure :: split_extra_tree_regressor_indivisuals
 
+        procedure :: split_extra_tree_regressor_speed_up
+        procedure :: split_extra_tree_regressor_speed_up_indivisuals
+
         procedure :: split_clouds_regressor
         procedure :: split_clouds_regressor_indivisuals
 
@@ -285,6 +288,10 @@ contains
         integer(kind=8) :: factor
         integer(kind=8) :: ini_f_idx, fin_f_idx
         real(kind=8) :: min_val, max_val, rand_val, threshold
+        integer(kind=8), save :: tot_time_minmax=0_8
+        integer(kind=8), save :: tot_time_sum_up=0_8
+        integer(kind=8), save :: tot_time_collect=0_8
+        integer(kind=8) :: date_value1(8), date_value2(8)
 
         allocate(tot_p(data_holder_ptr%n_outputs))
         allocate(tot_l(data_holder_ptr%n_outputs))
@@ -309,6 +316,7 @@ contains
         allocate(feature_ids(node_ptr%n_columns))
         if (is_permute_per_node) call permutation(feature_indices, n_columns)
 
+
         do i=1, node_ptr%n_samples, 1
             idx = node_ptr%indices(i)
             tmp_y(i,:) = data_holder_ptr%y_ptr%y_r8_ptr(idx,:)
@@ -323,14 +331,18 @@ contains
             if ( node_ptr%is_used(fid) .and. hparam_ptr%skip_used_features ) cycle
 
             ! Collect Data
+            call date_and_time(values=date_value1)
             do i=1, node_ptr%n_samples, 1
                 idx = node_ptr%indices(i)
                 tmp_f(i) = data_holder_ptr%x_ptr%x_r8_ptr(idx, fid)
             end do
+            call date_and_time(values=date_value2)
+            tot_time_collect = tot_time_collect + time_diff(date_value1, date_value2)
 
             ! Extract Min-Max Values and generate threshold
+            call date_and_time(values=date_value1)
             if (hparam_ptr%min_samples_leaf .eq. 1_8) then
-                call get_minmax(min_val, max_val, tmp_f, node_ptr%n_samples)
+                call get_minmax_r8(min_val, max_val, tmp_f, node_ptr%n_samples)
             else
                 allocate(tmp_f_copy(node_ptr%n_samples))
                 do i=1, node_ptr%n_samples, 1
@@ -340,6 +352,8 @@ contains
                 call quick_select_upper(max_val, tmp_f_copy, node_ptr%n_samples, hparam_ptr%min_samples_leaf)
                 deallocate(tmp_f_copy)
             end if
+            call date_and_time(values=date_value2)
+            tot_time_minmax = tot_time_minmax + time_diff(date_value1, date_value2)
 
             ! Useless Feature Case
             if (min_val .eq. max_val) then
@@ -354,11 +368,15 @@ contains
 
                 tot_l   = 0d0
                 count_l = 0
+                call date_and_time(values=date_value1)
                 do i=1, node_ptr%n_samples, 1
                     factor = tmp_f(i) .le. threshold
                     tot_l = tot_l + tmp_y(i,:) * factor
                     count_l = count_l + factor
                 end do
+                call date_and_time(values=date_value2)
+                tot_time_sum_up = tot_time_sum_up + time_diff(date_value1, date_value2)
+
                 count_r = node_ptr%n_samples - count_l
                 if (count_l .eq. 0_8 .or. count_r .eq. 0_8) cycle
 
@@ -410,7 +428,212 @@ contains
         node_ptr%response_l = res_l
         node_ptr%response_r = res_r
         call node_ptr%hparam_check(hparam_ptr)
+
+        print*, "======================================================"
+        print*, "Collect: ", tot_time_collect
+        print*, "MinMax : ", tot_time_minmax
+        print*, "Sum_Up : ", tot_time_sum_up
     end subroutine split_extra_tree_regressor_indivisuals
+
+
+    !> A subroutine to split node by extremely randomized way.
+    subroutine split_extra_tree_regressor_speed_up(this, node_ptrs, data_holder_ptr, hparam_ptr, & 
+        n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
+        implicit none
+        class(node_splitter)               :: this
+        type(node_axis_ptr), intent(inout) :: node_ptrs(:)
+        type(data_holder), pointer         :: data_holder_ptr
+        type(hparam_decisiontree), pointer :: hparam_ptr
+        integer(kind=8), intent(in)        :: n_columns
+        integer(kind=8), intent(inout)     :: feature_indices(n_columns)
+        integer(kind=8), intent(in)        :: feature_indices_scanning_range(2)
+        logical(kind=4), intent(in)        :: is_permute_per_node
+        integer(kind=8) :: n
+
+        if ( size(node_ptrs) .eq. 1 ) then
+            call this%split_extra_tree_regressor_speed_up_indivisuals(node_ptrs(1)%node_ptr, data_holder_ptr, hparam_ptr, &
+                n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
+        else
+            do n=1, size(node_ptrs), 1
+                call this%split_extra_tree_regressor_speed_up_indivisuals(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr, &
+                    n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
+            end do
+        end if
+    end subroutine split_extra_tree_regressor_speed_up
+
+
+    !> A subroutine to split node by extremely randomized way.
+    subroutine split_extra_tree_regressor_speed_up_indivisuals(this, node_ptr, data_holder_ptr, hparam_ptr, &
+        n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
+        implicit none
+        class(node_splitter)               :: this
+        type(node_axis), pointer           :: node_ptr
+        type(data_holder), pointer         :: data_holder_ptr
+        type(hparam_decisiontree), pointer :: hparam_ptr
+        integer(kind=8), intent(in)        :: n_columns
+        integer(kind=8), intent(inout)     :: feature_indices(n_columns)
+        integer(kind=8), intent(in)        :: feature_indices_scanning_range(2)
+        logical(kind=4), intent(in)        :: is_permute_per_node
+
+        real(kind=8) :: n_rows_inv, n_outs_inv
+        real(kind=8), allocatable :: res_l(:), res_r(:), sum_l(:), sum_r(:), avg_l(:), avg_r(:)
+        real(kind=8), allocatable :: tot_p(:), tot_l(:), tot_r(:)
+        real(kind=8) :: gain, gain_best, best_threshold
+        integer(kind=8) :: i_start, i_stop, fid, f, i, j, best_fid, r
+        integer(kind=8) :: count_l, count_r, idx, count_eval
+        integer(kind=8) :: n_samples_l, n_samples_r
+        real(kind=8), allocatable :: tmp_f(:), tmp_y(:,:), tmp_f_copy(:)
+        integer(kind=8), allocatable :: feature_ids(:), indices(:)
+        integer(kind=8) :: factor
+        integer(kind=8) :: ini_f_idx, fin_f_idx
+        real(kind=8) :: min_val, max_val, rand_val, threshold
+        integer(kind=8), save :: tot_time_minmax=0_8
+        integer(kind=8), save :: tot_time_sum_up=0_8
+        integer(kind=8), save :: tot_time_collect=0_8
+        integer(kind=8) :: date_value1(8), date_value2(8)
+
+        allocate(tot_p(data_holder_ptr%n_outputs))
+        allocate(tot_l(data_holder_ptr%n_outputs))
+        allocate(tot_r(data_holder_ptr%n_outputs))
+        allocate(res_l(data_holder_ptr%n_outputs))
+        allocate(res_r(data_holder_ptr%n_outputs))
+        allocate(sum_l(data_holder_ptr%n_outputs))
+        allocate(sum_r(data_holder_ptr%n_outputs))
+        allocate(avg_l(data_holder_ptr%n_outputs))
+        allocate(avg_r(data_holder_ptr%n_outputs))
+        node_ptr%n_outputs = data_holder_ptr%n_outputs
+
+        gain_best = - huge(0d0)
+        n_rows_inv = 1d0 / dble(node_ptr%n_samples)
+        n_outs_inv = 1d0 / dble(node_ptr%n_outputs)
+        tot_p = node_ptr%sum_p
+        count_eval = 0_8
+
+        allocate(tmp_y(node_ptr%n_samples, node_ptr%n_outputs))
+        allocate(tmp_f(node_ptr%n_samples))
+        allocate(indices(node_ptr%n_samples))
+        allocate(feature_ids(node_ptr%n_columns))
+        if (is_permute_per_node) call permutation(feature_indices, n_columns)
+
+
+        do i=1, node_ptr%n_samples, 1
+            idx = node_ptr%indices(i)
+            tmp_y(i,:) = data_holder_ptr%y_ptr%y_r8_ptr(idx,:)
+        end do
+
+        ini_f_idx = feature_indices_scanning_range(1)
+        fin_f_idx = feature_indices_scanning_range(2)
+        do f=ini_f_idx, fin_f_idx, 1
+            fid = feature_indices(f)
+            ! Useless or Used Feature Skip
+            if ( node_ptr%is_useless(fid) ) cycle
+            if ( node_ptr%is_used(fid) .and. hparam_ptr%skip_used_features ) cycle
+
+            ! Collect Data
+            call date_and_time(values=date_value1)
+            do i=1, node_ptr%n_samples, 1
+                idx = node_ptr%indices(i)
+                tmp_f(i) = data_holder_ptr%x_ptr%x_r8_ptr(idx, fid)
+            end do
+            call date_and_time(values=date_value2)
+            tot_time_collect = tot_time_collect + time_diff(date_value1, date_value2)
+
+            ! Extract Min-Max Values and generate threshold
+            call date_and_time(values=date_value1)
+            if (hparam_ptr%min_samples_leaf .eq. 1_8) then
+                call get_minmax(min_val, max_val, tmp_f, node_ptr%n_samples)
+            else
+                allocate(tmp_f_copy(node_ptr%n_samples))
+                do i=1, node_ptr%n_samples, 1
+                    tmp_f_copy(i) = tmp_f(i)
+                end do
+                call quick_select_lower(min_val, tmp_f_copy, node_ptr%n_samples, hparam_ptr%min_samples_leaf)
+                call quick_select_upper(max_val, tmp_f_copy, node_ptr%n_samples, hparam_ptr%min_samples_leaf)
+                deallocate(tmp_f_copy)
+            end if
+            call date_and_time(values=date_value2)
+            tot_time_minmax = tot_time_minmax + time_diff(date_value1, date_value2)
+
+            ! Useless Feature Case
+            if (min_val .eq. max_val) then
+                node_ptr%is_useless(fid) = t_
+                cycle
+            end if
+
+            do r=1, hparam_ptr%n_repeats
+                ! Random Split
+                call random_number(rand_val)
+                threshold = (max_val-min_val) * rand_val + min_val
+
+                tot_l   = 0d0
+                count_l = 0
+                call date_and_time(values=date_value1)
+                ! do i=1, node_ptr%n_samples, 1
+                !     factor = tmp_f(i) .le. threshold
+                !     tot_l = tot_l + tmp_y(i,:) * factor
+                !     count_l = count_l + factor
+                ! end do
+                call count_and_sum_up_gt_r8(tot_r(1), count_r, tmp_y(:,1), tmp_f, threshold, node_ptr%n_samples)
+                call date_and_time(values=date_value2)
+                tot_time_sum_up = tot_time_sum_up + time_diff(date_value1, date_value2)
+
+                count_l = node_ptr%n_samples - count_r
+                if (count_l .eq. 0_8 .or. count_r .eq. 0_8) cycle
+
+                tot_l   = tot_p - tot_r
+                avg_l = tot_l / dble(count_l)
+                avg_r = tot_r / dble(count_r)
+                gain = dble(count_l*count_r)*n_rows_inv * sum( (avg_l-avg_r)**2d0 ) * n_outs_inv
+                if (gain_best .lt. gain) then
+                    gain_best = gain
+                    best_fid = fid
+                    best_threshold = threshold
+                    res_l = avg_l
+                    res_r = avg_r
+                    n_samples_l = count_l
+                    n_samples_r = count_r
+                    sum_l = tot_l
+                    sum_r = tot_r
+                    count_eval = count_eval+1
+                end if
+            end do
+            if ( hparam_ptr%max_features .ne. -1 ) then
+                if ( hparam_ptr%max_features .le. f .and. count_eval .ge. 1 ) then
+                    exit
+                end if
+            end if
+        end do
+
+        node_ptr%is_trained = t_
+        node_ptr%eval_counter = count_eval
+        node_ptr%gain_best = gain_best
+
+        if ( count_eval .eq. 0 ) then
+            node_ptr%is_terminal = t_
+            return
+        end if
+
+        node_ptr%feature_id_ = best_fid
+        node_ptr%threshold_ = best_threshold
+
+        allocate(node_ptr%sum_l(node_ptr%n_outputs))
+        allocate(node_ptr%sum_r(node_ptr%n_outputs))
+        allocate(node_ptr%response_l(node_ptr%n_outputs))
+        allocate(node_ptr%response_r(node_ptr%n_outputs))
+
+        node_ptr%sum_l = sum_l
+        node_ptr%sum_r = sum_r
+        node_ptr%n_samples_l = n_samples_l
+        node_ptr%n_samples_r = n_samples_r
+        node_ptr%response_l = res_l
+        node_ptr%response_r = res_r
+        call node_ptr%hparam_check(hparam_ptr)
+
+        print*, "======================================================"
+        print*, "Collect: ", tot_time_collect
+        print*, "MinMax : ", tot_time_minmax
+        print*, "Sum_Up : ", tot_time_sum_up
+    end subroutine split_extra_tree_regressor_speed_up_indivisuals
 
 
     !> A subroutine to split node by 'clouds'.
