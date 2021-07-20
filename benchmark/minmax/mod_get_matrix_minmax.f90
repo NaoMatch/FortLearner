@@ -52,15 +52,64 @@ module mod_get_matrix_minmax
             integer(c_int64_t), value :: n_indices, n_cols, n_rows
         end subroutine get_matrix_minmax_loop_08_A
 
+        subroutine get_matrix_minmax_loop_08z_A(min_vals, max_vals, mat_t, indices, n_indices, n_cols, n_rows) & 
+            Bind(C,Name='get_matrix_minmax_loop_08z_A')
+            Import
+            type(c_ptr), value        :: min_vals, max_vals, mat_t, indices
+            integer(c_int64_t), value :: n_indices, n_cols, n_rows
+        end subroutine get_matrix_minmax_loop_08z_A
+
         subroutine get_matrix_minmax_loop_16_A(min_vals, max_vals, mat_t, indices, n_indices, n_cols, n_rows) & 
             Bind(C,Name='get_matrix_minmax_loop_16_A')
             Import
             type(c_ptr), value        :: min_vals, max_vals, mat_t, indices
             integer(c_int64_t), value :: n_indices, n_cols, n_rows
         end subroutine get_matrix_minmax_loop_16_A
+
+        subroutine get_matrix_minmax_loop_16z_A(min_vals, max_vals, mat_t, indices, n_indices, n_cols, n_rows) & 
+            Bind(C,Name='get_matrix_minmax_loop_16z_A')
+            Import
+            type(c_ptr), value        :: min_vals, max_vals, mat_t, indices
+            integer(c_int64_t), value :: n_indices, n_cols, n_rows
+        end subroutine get_matrix_minmax_loop_16z_A
     end interface
 
+    ! interface 
+    !     subroutine get_indices_diff(indices_diff, indices, n_indices) & 
+    !         Bind(C,Name='get_indices_diff')
+    !         Import
+    !         type(c_ptr), value        :: indices_diff, indices
+    !         integer(c_int64_t), value :: n_indices
+    !     end subroutine get_indices_diff
+    ! end interface 
+
+
+
+
 contains
+
+    subroutine get_indices_diff(indices_diff, indices, n_indices)
+        integer(kind=8), intent(inout) :: indices_diff(n_indices)
+        integer(kind=8), intent(in)    :: indices(n_indices)
+        integer(kind=8), intent(in)    :: n_indices
+
+        integer(kind=8) :: n_idx
+        integer(kind=8) :: idx, start_idx
+        integer(kind=8) :: idx_unroll_size
+        integer(kind=8) :: n_idx_unroll, n_idx_remain
+
+        n_idx = n_indices-1
+        idx_unroll_size=1
+        n_idx_remain = mod(n_indices, idx_unroll_size)
+        n_idx_unroll = n_indices - n_idx_remain
+
+        start_idx=1
+        indices_diff(1) = indices(1)-start_idx
+
+        do idx=2, n_idx_unroll, 1
+            indices_diff(idx) = indices(idx)-indices(idx-1)
+        end do
+    end subroutine get_indices_diff
 
     subroutine get_matrix_minmax_col_major_loop_with_index(min_vals, max_vals, mat_t, indices, n_indices, n_rows, n_cols)
         implicit none
