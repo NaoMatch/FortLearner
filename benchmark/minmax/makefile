@@ -1,6 +1,6 @@
 asm              := ./mod/inc_sum_up_vector_c.out \
 					./mod/inc_sum_up_matrix_c.out \
-                    ./mod/inc_sum_up_left_c.out   \
+                    ./mod/inc_sum_up_gt_c.out   \
 					./mod/inc_get_minmax.out
 
 compiler_fortran := gfortran
@@ -25,7 +25,7 @@ pre_f:
 pre_c:
 	# $(compiler_clang) $(mod) $(option) -c ../../math/include/stats/sum_up/inc_sum_up_vector.c    $(opt) -o ./mod/inc_sum_up_vector_c.out
 	# $(compiler_clang) $(mod) $(option) -c ../../math/include/stats/sum_up/inc_sum_up_matrix.c    $(opt) -o ./mod/inc_sum_up_matrix_c.out ./mod/inc_sum_up_vector_c.out
-	# $(compiler_clang) $(mod) $(option) -c ../../math/include/stats/sum_up_left/inc_sum_up_left.c $(opt) -o ./mod/inc_sum_up_left_c.out
+	# $(compiler_clang) $(mod) $(option) -c ../../math/include/stats/sum_up_gt/inc_sum_up_gt.c $(opt) -o ./mod/inc_sum_up_gt_c.out
 	# $(compiler_clang) $(mod) $(option) -c ../../math/include/stats/get_minmax/inc_get_minmax.c   $(opt) -o ./mod/inc_get_minmax.out
 	$(compiler_clang) $(mod) $(option) -c ./get_matrix_minmax.c   $(opt) -o ./mod/get_matrix_minmax.out
 
