@@ -1,4 +1,5 @@
 module mod_get_matrix_minmax
+    !$ use omp_lib
     use iso_c_binding
     implicit none
 
@@ -45,6 +46,13 @@ module mod_get_matrix_minmax
             integer(c_int64_t), value :: n_indices, n_cols, n_rows
         end subroutine get_matrix_minmax_loop_04_A
 
+        subroutine get_matrix_minmax_loop_04x_A(min_vals, max_vals, mat_t, indices, n_indices, n_cols, n_rows) & 
+            Bind(C,Name='get_matrix_minmax_loop_04x_A')
+            Import
+            type(c_ptr), value        :: min_vals, max_vals, mat_t, indices
+            integer(c_int64_t), value :: n_indices, n_cols, n_rows
+        end subroutine get_matrix_minmax_loop_04x_A
+
         subroutine get_matrix_minmax_loop_08_A(min_vals, max_vals, mat_t, indices, n_indices, n_cols, n_rows) & 
             Bind(C,Name='get_matrix_minmax_loop_08_A')
             Import
@@ -73,17 +81,6 @@ module mod_get_matrix_minmax
             integer(c_int64_t), value :: n_indices, n_cols, n_rows
         end subroutine get_matrix_minmax_loop_16z_A
     end interface
-
-    ! interface 
-    !     subroutine get_indices_diff(indices_diff, indices, n_indices) & 
-    !         Bind(C,Name='get_indices_diff')
-    !         Import
-    !         type(c_ptr), value        :: indices_diff, indices
-    !         integer(c_int64_t), value :: n_indices
-    !     end subroutine get_indices_diff
-    ! end interface 
-
-
 
 
 contains
