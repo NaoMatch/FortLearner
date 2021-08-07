@@ -8,7 +8,7 @@ function mean_value_of_vector_r8(vector, n_samples)
     real(kind=8)    :: buffer(15)
     integer(kind=8) :: i, i_unroll, j, buffer_size=15
 
-    include "./include/stats/mean_value_of_vector/inc_mean_value_of_vector_detail.f90"
+    tmp_sum = sum_up(vector, n_samples)
     mean_value_of_vector_r8 = tmp_sum / dble(n_samples)
 end function mean_value_of_vector_r8
 
