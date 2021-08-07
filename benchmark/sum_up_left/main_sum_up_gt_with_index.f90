@@ -13,7 +13,7 @@ program main_sum_up_gt_with_index
     real(kind=8), allocatable, target :: min_vals(:), max_vals(:), thr_vals(:)
     real(kind=8), allocatable, target :: sum_vals(:)
     real(kind=8), allocatable, target :: sum_vals_orig(:)
-    real(kind=8), allocatable, target :: mat(:,:), mat_t(:,:), f(:), y(:), y_subset(:)
+    real(kind=8), allocatable, target :: mat(:,:), mat_t(:,:), f(:), y(:), y_subset(:), fff(:,:)
     real(kind=8), allocatable, target :: thresholds(:)
     integer(kind=8), allocatable, target :: indices(:), indices_diff(:), indices_full(:), cnt_vals(:), cnt_vals_orig(:)
     integer(kind=8)           :: n_rows, n_cols, idx, n_idxs, cnt_gt
@@ -24,18 +24,20 @@ program main_sum_up_gt_with_index
     real(kind=8), allocatable :: times(:)
     character(len=60), allocatable :: types(:)
     character(len=30) :: hoge
-    integer(kind=8)   :: r, c, d, ccc
+    integer(kind=8)   :: r, c, d, ccc, n_iter_min
     real(kind=8)   :: rate
     character(len=256) :: filename_r8
     logical(kind=4) :: is_stop
 
-    n_rows_test = (/1000, 10000, 100000, 1000000, 10000000/)
-    n_cols_test = (/32,    8,     16,     32,      64/)
+    n_rows_test = (/10000000, 10000, 100000, 1000000, 10000000/)
+    n_cols_test = (/4,    8,     16,     32,      64/) * 10
     n_divs_test = (/1,    2,     4,      8,       16/)
-    ! n_cols_test = n_cols_test + 15
+    n_cols_test = n_cols_test
     is_stop = .false.
 
     n_iter_base = 500000000_8
+    ! n_iter_base = 28_8
+    n_iter_min = 28_8
     ! n_iter_base = 5000000_8
     ! n_iter_base = 1; is_stop = .true.
     n_types = 99
@@ -44,19 +46,27 @@ program main_sum_up_gt_with_index
     hoge = "hoge fuga piyo"
     types = hoge
     types(1)  = "call count_and_sum_up_fast                      :"
-    ! types(2)  = "call count_and_sum_up_loop_with_index           :"
-    ! types(3)  = "call count_and_sum_up_loop_with_index_02        :"
-    ! types(4)  = "call count_and_sum_up_loop_with_index_04        :"
-    ! types(5)  = "call count_and_sum_up_loop_with_index_08        :"
-    ! types(6)  = "call get_matrix_sum_up_gt_with_index_C          :"
-    ! types(7)  = "call get_matrix_sum_up_gt_with_index_C_02       :"
-    ! types(8)  = "call get_matrix_sum_up_gt_with_index_C_04       :"
-    ! types(9)  = "call get_matrix_sum_up_gt_with_index_C_08       :"
-    types(10) = "call get_matrix_sum_up_gt_with_index_A_02       :"
-    types(11) = "call get_matrix_sum_up_gt_with_index_A_04       :"
-    types(12) = "call get_matrix_sum_up_gt_with_index_A_04x      :"
-    types(13) = "call get_matrix_sum_up_gt_with_index_A_08       :"
-    types(14) = "call get_matrix_sum_up_gt_with_index_A_16       :"
+    types(2)  = "call count_and_sum_up_loop_with_index           :"
+    types(3)  = "call count_and_sum_up_loop_with_index_02        :"
+    types(4)  = "call count_and_sum_up_loop_with_index_04        :"
+    types(5)  = "call count_and_sum_up_loop_with_index_08        :"
+    types(6)  = "call get_matrix_sum_up_gt_with_index_C          :"
+    types(7)  = "call get_matrix_sum_up_gt_with_index_C_02       :"
+    types(8)  = "call get_matrix_sum_up_gt_with_index_C_04       :"
+    types(9)  = "call get_matrix_sum_up_gt_with_index_C_08       :"
+    ! types(10) = "call get_matrix_sum_up_gt_with_index_A_02       :"
+    ! types(11) = "call get_matrix_sum_up_gt_with_index_A_04       :"
+    ! types(12) = "call get_matrix_sum_up_gt_with_index_A_04x      :"
+    ! types(13) = "call get_matrix_sum_up_gt_with_index_A_08       :"
+    ! types(14) = "call get_matrix_sum_up_gt_with_index_A_16       :"
+    types(15) = "call get_matrix_sum_up_gt_with_index_A_02_ver02 :"
+    types(16) = "call get_matrix_sum_up_gt_with_index_A_04_ver02 :"
+    types(17) = "call get_matrix_sum_up_gt_with_index_A_08_ver02 :"
+    types(18) = "call get_matrix_sum_up_gt_with_index_A_16_ver02 :"
+    types(19) = "call get_matrix_sum_up_gt_with_index_A_04_02    :"
+    types(20) = "call get_matrix_sum_up_gt_with_index_A_04_04    :"
+    types(21) = "call get_matrix_sum_up_gt_with_index_A_08_02    :"
+    types(22) = "call get_matrix_sum_up_gt_with_index_A_08_04    :"
 
     do c=1, size(n_cols_test), 1
         n_cols = n_cols_test(c)
@@ -95,6 +105,7 @@ program main_sum_up_gt_with_index
                 n_idxs = n_rows / dble(n_divs_test(d))
 
                 allocate(f(n_idxs))
+                allocate(fff(n_idxs, n_cols))
                 allocate(y_subset(n_idxs))
                 allocate(indices(n_idxs), indices_diff(n_idxs))
                 indices = indices_full(1:n_idxs)
@@ -102,7 +113,7 @@ program main_sum_up_gt_with_index
                 indices_ptr = c_loc(indices)
                 
                 call get_indices_diff(indices_diff, indices, n_idxs)
-                indices_diff = [indices_diff, 0_8]
+                ! indices_diff = [indices_diff]
                 indices_diff_ptr = c_loc(indices_diff)
 
                 n_iter=maxval((/n_iter_base/n_rows/n_cols*n_divs_test(d), 1_8/))
@@ -115,6 +126,7 @@ program main_sum_up_gt_with_index
 
                 do ccc=1, n_cols, 1
                     f = mat(indices,ccc)
+                    fff(:,ccc) = mat(indices,ccc)
                     y_subset = y(indices)
                     sum_vals_orig(ccc) = sum( pack(y_subset, mask=f>thr_vals(ccc)))
                     cnt_vals_orig(ccc) = size(pack(f, mask=f>thr_vals(ccc)))
@@ -130,11 +142,12 @@ program main_sum_up_gt_with_index
                         select case(iter_types)
                             case  (1) 
                                 do i=1, n_cols, 1
-                                    do j=1, n_idxs, 1
-                                        idx = indices(j)
-                                        f(j) = mat(idx,i)
-                                    end do
-                                    call count_and_sum_up_gt(sum_gt, cnt_gt, y_subset, f, thr_vals(i), n_idxs)
+                                    ! do j=1, n_idxs, 1
+                                    !     idx = indices(j)
+                                    !     f(j) = mat(idx,i)
+                                    ! end do
+                                    ! call count_and_sum_up_gt(sum_gt, cnt_gt, y_subset, f, thr_vals(i), n_idxs)
+                                    call count_and_sum_up_gt(sum_gt, cnt_gt, y_subset, fff(:,i), thr_vals(i), n_idxs)
                                     sum_vals(i) = sum_gt
                                     cnt_vals(i) = cnt_gt
                                 end do
@@ -179,11 +192,53 @@ program main_sum_up_gt_with_index
                                     mat_t_ptr, y_ptr, indices_diff_ptr, & 
                                     n_idxs, n_rows, n_cols)
                             case (13) 
+                                if (n_cols<8) exit
                                 call get_matrix_sum_up_gt_with_index_A_08(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
                                     mat_t_ptr, y_ptr, indices_diff_ptr, & 
                                     n_idxs, n_rows, n_cols)
                             case (14) 
+                                if (n_cols<16) exit
                                 call get_matrix_sum_up_gt_with_index_A_16(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                                    n_idxs, n_rows, n_cols)
+                            case (15) 
+                                if (n_cols<2) exit
+                                call get_matrix_sum_up_gt_with_index_A_02_ver02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                                    n_idxs, n_rows, n_cols)
+                            case (16) 
+                                if (n_cols<4) exit
+                                call get_matrix_sum_up_gt_with_index_A_04_ver02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                                    n_idxs, n_rows, n_cols)
+                            case (17) 
+                                if (n_cols<8) exit
+                                call get_matrix_sum_up_gt_with_index_A_08_ver02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                                    n_idxs, n_rows, n_cols)
+                            case (18) 
+                                if (n_cols<16) exit
+                                call get_matrix_sum_up_gt_with_index_A_16_ver02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                                    n_idxs, n_rows, n_cols)
+                            case (19) 
+                                if (n_cols<4) exit
+                                call get_matrix_sum_up_gt_with_index_A_04_02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                                    n_idxs, n_rows, n_cols)
+                            case (20) 
+                                if (n_cols<4) exit
+                                call get_matrix_sum_up_gt_with_index_A_04_04(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                                    n_idxs, n_rows, n_cols)
+                            case (21) 
+                                if (n_cols<4) exit
+                                call get_matrix_sum_up_gt_with_index_A_08_02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                                    n_idxs, n_rows, n_cols)
+                            case (22) 
+                                if (n_cols<4) exit
+                                call get_matrix_sum_up_gt_with_index_A_08_04(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
                                     mat_t_ptr, y_ptr, indices_diff_ptr, & 
                                     n_idxs, n_rows, n_cols)
                         end select
@@ -201,8 +256,8 @@ program main_sum_up_gt_with_index
                     ! print*, cnt_vals_orig
                 end do
 
-                deallocate(y_subset, f, indices, indices_diff)
-                ! if (is_stop) stop "HOGEHOGE"
+                deallocate(y_subset, f, fff, indices, indices_diff)
+                if (is_stop) stop "HOGEHOGE"
             end do
 
 

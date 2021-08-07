@@ -27,10 +27,10 @@ program main_minmax_with_index
     real(kind=8)   :: rate
     character(len=256) :: filename_r8
 
-    n_rows_test = (/1000, 10000, 100000, 1000000, 10000000/)
-    n_cols_test = (/4,    8,     16,     32,      64/)
+    n_rows_test = (/10000000, 10000, 100000, 1000000, 10000000/)
+    n_cols_test = (/28,    8,     16,     32,      64/)
     n_divs_test = (/1,    2,     4,      8,       16/)
-    n_cols_test = n_cols_test + 15
+    ! n_cols_test = n_cols_test + 15
 
     n_iter_base = 500000000_8
     ! n_iter_base = 1

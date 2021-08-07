@@ -500,26 +500,50 @@ void get_matrix_minmax_loop_04_A(double *min_vals, double *max_vals, double *mat
             );
         }
 
-        while(c_remain--){
-            __asm__ __volatile__ (
-                "movsd 0*8(%[min]), %%xmm0   \n\t"
-                "movsd 0*8(%[max]), %%xmm1   \n\t"
-                "\n\t"
-                "movsd 0*8(%[mat]), %%xmm2   \n\t"
-                "\n\t"
-                "minpd %%xmm2, %%xmm0 \n\t"
-                "maxpd %%xmm2, %%xmm1 \n\t"
-                "\n\t"
-                "movsd %%xmm0, 0*8(%[min])   \n\t"
-                "movsd %%xmm1, 0*8(%[max])   \n\t"
-                "\n\t"
-                "subq $-1*8, %[min]            \n\t"
-                "subq $-1*8, %[max]            \n\t"
-                "subq $-1*8, %[mat]            \n\t"
-                "\n\t"
-                :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
-                :"0"(min_vals), "1"(max_vals), "2"(mat_t)
-            );
+        if(c_remain>0){
+            if (c_remain&2){
+                __asm__ __volatile__ (
+                    "movupd 0*8(%[min]), %%xmm0   \n\t"
+                    "movupd 0*8(%[max]), %%xmm1   \n\t"
+                    "\n\t"
+                    "movupd 0*8(%[mat]), %%xmm2   \n\t"
+                    "\n\t"
+                    "minpd %%xmm2, %%xmm0 \n\t"
+                    "maxpd %%xmm2, %%xmm1 \n\t"
+                    "\n\t"
+                    "movupd %%xmm0, 0*8(%[min])   \n\t"
+                    "movupd %%xmm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-2*8, %[min]            \n\t"
+                    "subq $-2*8, %[max]            \n\t"
+                    "subq $-2*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
+
+            if (c_remain&1){
+                __asm__ __volatile__ (
+                    "movsd 0*8(%[min]), %%xmm0   \n\t"
+                    "movsd 0*8(%[max]), %%xmm1   \n\t"
+                    "\n\t"
+                    "movsd 0*8(%[mat]), %%xmm2   \n\t"
+                    "\n\t"
+                    "minpd %%xmm2, %%xmm0 \n\t"
+                    "maxpd %%xmm2, %%xmm1 \n\t"
+                    "\n\t"
+                    "movsd %%xmm0, 0*8(%[min])   \n\t"
+                    "movsd %%xmm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-1*8, %[min]            \n\t"
+                    "subq $-1*8, %[max]            \n\t"
+                    "subq $-1*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
         }
 
         shift = (indices_diff[i]-1)*n_cols*8;
@@ -591,27 +615,52 @@ void get_matrix_minmax_loop_04x_A(double *min_vals, double *max_vals, double *ma
             );
         }
 
-        while(c_remain--){
-            __asm__ __volatile__ (
-                "movsd 0*8(%[min]), %%xmm0   \n\t"
-                "movsd 0*8(%[max]), %%xmm1   \n\t"
-                "\n\t"
-                "movsd 0*8(%[mat]), %%xmm2   \n\t"
-                "\n\t"
-                "minpd %%xmm2, %%xmm0 \n\t"
-                "maxpd %%xmm2, %%xmm1 \n\t"
-                "\n\t"
-                "movsd %%xmm0, 0*8(%[min])   \n\t"
-                "movsd %%xmm1, 0*8(%[max])   \n\t"
-                "\n\t"
-                "subq $-1*8, %[min]            \n\t"
-                "subq $-1*8, %[max]            \n\t"
-                "subq $-1*8, %[mat]            \n\t"
-                "\n\t"
-                :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
-                :"0"(min_vals), "1"(max_vals), "2"(mat_t)
-            );
+        if(c_remain>0){
+            if (c_remain&2){
+                __asm__ __volatile__ (
+                    "movupd 0*8(%[min]), %%xmm0   \n\t"
+                    "movupd 0*8(%[max]), %%xmm1   \n\t"
+                    "\n\t"
+                    "movupd 0*8(%[mat]), %%xmm2   \n\t"
+                    "\n\t"
+                    "minpd %%xmm2, %%xmm0 \n\t"
+                    "maxpd %%xmm2, %%xmm1 \n\t"
+                    "\n\t"
+                    "movupd %%xmm0, 0*8(%[min])   \n\t"
+                    "movupd %%xmm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-2*8, %[min]            \n\t"
+                    "subq $-2*8, %[max]            \n\t"
+                    "subq $-2*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
+
+            if (c_remain&1){
+                __asm__ __volatile__ (
+                    "movsd 0*8(%[min]), %%xmm0   \n\t"
+                    "movsd 0*8(%[max]), %%xmm1   \n\t"
+                    "\n\t"
+                    "movsd 0*8(%[mat]), %%xmm2   \n\t"
+                    "\n\t"
+                    "minpd %%xmm2, %%xmm0 \n\t"
+                    "maxpd %%xmm2, %%xmm1 \n\t"
+                    "\n\t"
+                    "movsd %%xmm0, 0*8(%[min])   \n\t"
+                    "movsd %%xmm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-1*8, %[min]            \n\t"
+                    "subq $-1*8, %[max]            \n\t"
+                    "subq $-1*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
         }
+
 
         shift = (indices_diff[i]-1)*n_cols*8;
         __asm__ __volatile__ (
@@ -682,27 +731,74 @@ void get_matrix_minmax_loop_08_A(double *min_vals, double *max_vals, double *mat
             );
         }
 
-        while(c_remain--){
-            __asm__ __volatile__ (
-                "movsd 0*8(%[min]), %%xmm0   \n\t"
-                "movsd 0*8(%[max]), %%xmm1   \n\t"
-                "\n\t"
-                "movsd 0*8(%[mat]), %%xmm2   \n\t"
-                "\n\t"
-                "minpd %%xmm2, %%xmm0 \n\t"
-                "maxpd %%xmm2, %%xmm1 \n\t"
-                "\n\t"
-                "movsd %%xmm0, 0*8(%[min])   \n\t"
-                "movsd %%xmm1, 0*8(%[max])   \n\t"
-                "\n\t"
-                "subq $-1*8, %[min]            \n\t"
-                "subq $-1*8, %[max]            \n\t"
-                "subq $-1*8, %[mat]            \n\t"
-                "\n\t"
-                :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
-                :"0"(min_vals), "1"(max_vals), "2"(mat_t)
-            );
+        if(c_remain>0){
+            if (c_remain&4){
+                __asm__ __volatile__ (
+                    "vmovupd 0*8(%[min]), %%ymm0   \n\t"
+                    "vmovupd 0*8(%[max]), %%ymm1   \n\t"
+                    "\n\t"
+                    "vmovupd 0*8(%[mat]), %%ymm2   \n\t"
+                    "\n\t"
+                    "vminpd %%ymm2, %%ymm0, %%ymm0 \n\t"
+                    "vmaxpd %%ymm2, %%ymm1, %%ymm1 \n\t"
+                    "\n\t"
+                    "vmovupd %%ymm0, 0*8(%[min])   \n\t"
+                    "vmovupd %%ymm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-4*8, %[min]            \n\t"
+                    "subq $-4*8, %[max]            \n\t"
+                    "subq $-4*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
+
+            if (c_remain&2){
+                __asm__ __volatile__ (
+                    "movupd 0*8(%[min]), %%xmm0   \n\t"
+                    "movupd 0*8(%[max]), %%xmm1   \n\t"
+                    "\n\t"
+                    "movupd 0*8(%[mat]), %%xmm2   \n\t"
+                    "\n\t"
+                    "minpd %%xmm2, %%xmm0 \n\t"
+                    "maxpd %%xmm2, %%xmm1 \n\t"
+                    "\n\t"
+                    "movupd %%xmm0, 0*8(%[min])   \n\t"
+                    "movupd %%xmm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-2*8, %[min]            \n\t"
+                    "subq $-2*8, %[max]            \n\t"
+                    "subq $-2*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
+
+            if (c_remain&1){
+                __asm__ __volatile__ (
+                    "movsd 0*8(%[min]), %%xmm0   \n\t"
+                    "movsd 0*8(%[max]), %%xmm1   \n\t"
+                    "\n\t"
+                    "movsd 0*8(%[mat]), %%xmm2   \n\t"
+                    "\n\t"
+                    "minpd %%xmm2, %%xmm0 \n\t"
+                    "maxpd %%xmm2, %%xmm1 \n\t"
+                    "\n\t"
+                    "movsd %%xmm0, 0*8(%[min])   \n\t"
+                    "movsd %%xmm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-1*8, %[min]            \n\t"
+                    "subq $-1*8, %[max]            \n\t"
+                    "subq $-1*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
         }
+
 
         shift = (indices_diff[i]-1)*n_cols*8;
         __asm__ __volatile__ (
@@ -762,26 +858,72 @@ void get_matrix_minmax_loop_08z_A(double *min_vals, double *max_vals, double *ma
             );
         }
 
-        while(c_remain--){
-            __asm__ __volatile__ (
-                "movsd 0*8(%[min]), %%xmm0   \n\t"
-                "movsd 0*8(%[max]), %%xmm1   \n\t"
-                "\n\t"
-                "movsd 0*8(%[mat]), %%xmm2   \n\t"
-                "\n\t"
-                "minpd %%xmm2, %%xmm0 \n\t"
-                "maxpd %%xmm2, %%xmm1 \n\t"
-                "\n\t"
-                "movsd %%xmm0, 0*8(%[min])   \n\t"
-                "movsd %%xmm1, 0*8(%[max])   \n\t"
-                "\n\t"
-                "subq $-1*8, %[min]            \n\t"
-                "subq $-1*8, %[max]            \n\t"
-                "subq $-1*8, %[mat]            \n\t"
-                "\n\t"
-                :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
-                :"0"(min_vals), "1"(max_vals), "2"(mat_t)
-            );
+        if(c_remain>0){
+            if (c_remain&4){
+                __asm__ __volatile__ (
+                    "vmovupd 0*8(%[min]), %%ymm0   \n\t"
+                    "vmovupd 0*8(%[max]), %%ymm1   \n\t"
+                    "\n\t"
+                    "vmovupd 0*8(%[mat]), %%ymm2   \n\t"
+                    "\n\t"
+                    "vminpd %%ymm2, %%ymm0, %%ymm0 \n\t"
+                    "vmaxpd %%ymm2, %%ymm1, %%ymm1 \n\t"
+                    "\n\t"
+                    "vmovupd %%ymm0, 0*8(%[min])   \n\t"
+                    "vmovupd %%ymm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-4*8, %[min]            \n\t"
+                    "subq $-4*8, %[max]            \n\t"
+                    "subq $-4*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
+
+            if (c_remain&2){
+                __asm__ __volatile__ (
+                    "movupd 0*8(%[min]), %%xmm0   \n\t"
+                    "movupd 0*8(%[max]), %%xmm1   \n\t"
+                    "\n\t"
+                    "movupd 0*8(%[mat]), %%xmm2   \n\t"
+                    "\n\t"
+                    "minpd %%xmm2, %%xmm0 \n\t"
+                    "maxpd %%xmm2, %%xmm1 \n\t"
+                    "\n\t"
+                    "movupd %%xmm0, 0*8(%[min])   \n\t"
+                    "movupd %%xmm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-2*8, %[min]            \n\t"
+                    "subq $-2*8, %[max]            \n\t"
+                    "subq $-2*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
+
+            if (c_remain&1){
+                __asm__ __volatile__ (
+                    "movsd 0*8(%[min]), %%xmm0   \n\t"
+                    "movsd 0*8(%[max]), %%xmm1   \n\t"
+                    "\n\t"
+                    "movsd 0*8(%[mat]), %%xmm2   \n\t"
+                    "\n\t"
+                    "minpd %%xmm2, %%xmm0 \n\t"
+                    "maxpd %%xmm2, %%xmm1 \n\t"
+                    "\n\t"
+                    "movsd %%xmm0, 0*8(%[min])   \n\t"
+                    "movsd %%xmm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-1*8, %[min]            \n\t"
+                    "subq $-1*8, %[max]            \n\t"
+                    "subq $-1*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
         }
 
         shift = (indices_diff[i]-1)*n_cols*8;
@@ -878,26 +1020,94 @@ void get_matrix_minmax_loop_16_A(double *min_vals, double *max_vals, double *mat
             );
         }
 
-        while(c_remain--){
-            __asm__ __volatile__ (
-                "movsd 0*8(%[min]), %%xmm0   \n\t"
-                "movsd 0*8(%[max]), %%xmm1   \n\t"
-                "\n\t"
-                "movsd 0*8(%[mat]), %%xmm2   \n\t"
-                "\n\t"
-                "minpd %%xmm2, %%xmm0 \n\t"
-                "maxpd %%xmm2, %%xmm1 \n\t"
-                "\n\t"
-                "movsd %%xmm0, 0*8(%[min])   \n\t"
-                "movsd %%xmm1, 0*8(%[max])   \n\t"
-                "\n\t"
-                "subq $-1*8, %[min]            \n\t"
-                "subq $-1*8, %[max]            \n\t"
-                "subq $-1*8, %[mat]            \n\t"
-                "\n\t"
-                :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
-                :"0"(min_vals), "1"(max_vals), "2"(mat_t)
-            );
+        if(c_remain>0){
+            if (c_remain&8){
+                __asm__ __volatile__ (
+                    "vmovupd 0*8(%[min]), %%zmm0   \n\t"
+                    "vmovupd 0*8(%[max]), %%zmm1   \n\t"
+                    "\n\t"
+                    "vmovupd 0*8(%[mat]), %%zmm2   \n\t"
+                    "\n\t"
+                    "vminpd %%zmm2, %%zmm0, %%zmm0 \n\t"
+                    "vmaxpd %%zmm2, %%zmm1, %%zmm1 \n\t"
+                    "\n\t"
+                    "vmovupd %%zmm0, 0*8(%[min])   \n\t"
+                    "vmovupd %%zmm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-8*8, %[min]            \n\t"
+                    "subq $-8*8, %[max]            \n\t"
+                    "subq $-8*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
+
+            if (c_remain&4){
+                __asm__ __volatile__ (
+                    "vmovupd 0*8(%[min]), %%ymm0   \n\t"
+                    "vmovupd 0*8(%[max]), %%ymm1   \n\t"
+                    "\n\t"
+                    "vmovupd 0*8(%[mat]), %%ymm2   \n\t"
+                    "\n\t"
+                    "vminpd %%ymm2, %%ymm0, %%ymm0 \n\t"
+                    "vmaxpd %%ymm2, %%ymm1, %%ymm1 \n\t"
+                    "\n\t"
+                    "vmovupd %%ymm0, 0*8(%[min])   \n\t"
+                    "vmovupd %%ymm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-4*8, %[min]            \n\t"
+                    "subq $-4*8, %[max]            \n\t"
+                    "subq $-4*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
+
+            if (c_remain&2){
+                __asm__ __volatile__ (
+                    "movupd 0*8(%[min]), %%xmm0   \n\t"
+                    "movupd 0*8(%[max]), %%xmm1   \n\t"
+                    "\n\t"
+                    "movupd 0*8(%[mat]), %%xmm2   \n\t"
+                    "\n\t"
+                    "minpd %%xmm2, %%xmm0 \n\t"
+                    "maxpd %%xmm2, %%xmm1 \n\t"
+                    "\n\t"
+                    "movupd %%xmm0, 0*8(%[min])   \n\t"
+                    "movupd %%xmm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-2*8, %[min]            \n\t"
+                    "subq $-2*8, %[max]            \n\t"
+                    "subq $-2*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
+
+            if (c_remain&1){
+                __asm__ __volatile__ (
+                    "movsd 0*8(%[min]), %%xmm0   \n\t"
+                    "movsd 0*8(%[max]), %%xmm1   \n\t"
+                    "\n\t"
+                    "movsd 0*8(%[mat]), %%xmm2   \n\t"
+                    "\n\t"
+                    "minpd %%xmm2, %%xmm0 \n\t"
+                    "maxpd %%xmm2, %%xmm1 \n\t"
+                    "\n\t"
+                    "movsd %%xmm0, 0*8(%[min])   \n\t"
+                    "movsd %%xmm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-1*8, %[min]            \n\t"
+                    "subq $-1*8, %[max]            \n\t"
+                    "subq $-1*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
         }
 
         shift = (indices_diff[i]-1)*n_cols*8;
@@ -969,28 +1179,95 @@ void get_matrix_minmax_loop_16z_A(double *min_vals, double *max_vals, double *ma
             );
         }
 
-        while(c_remain--){
-            __asm__ __volatile__ (
-                "movsd 0*8(%[min]), %%xmm0   \n\t"
-                "movsd 0*8(%[max]), %%xmm1   \n\t"
-                "\n\t"
-                "movsd 0*8(%[mat]), %%xmm2   \n\t"
-                "\n\t"
-                "minpd %%xmm2, %%xmm0 \n\t"
-                "maxpd %%xmm2, %%xmm1 \n\t"
-                "\n\t"
-                "movsd %%xmm0, 0*8(%[min])   \n\t"
-                "movsd %%xmm1, 0*8(%[max])   \n\t"
-                "\n\t"
-                "subq $-1*8, %[min]            \n\t"
-                "subq $-1*8, %[max]            \n\t"
-                "subq $-1*8, %[mat]            \n\t"
-                "\n\t"
-                :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
-                :"0"(min_vals), "1"(max_vals), "2"(mat_t)
-            );
-        }
+        if(c_remain>0){
+            if (c_remain&8){
+                __asm__ __volatile__ (
+                    "vmovupd 0*8(%[min]), %%zmm0   \n\t"
+                    "vmovupd 0*8(%[max]), %%zmm1   \n\t"
+                    "\n\t"
+                    "vmovupd 0*8(%[mat]), %%zmm2   \n\t"
+                    "\n\t"
+                    "vminpd %%zmm2, %%zmm0, %%zmm0 \n\t"
+                    "vmaxpd %%zmm2, %%zmm1, %%zmm1 \n\t"
+                    "\n\t"
+                    "vmovupd %%zmm0, 0*8(%[min])   \n\t"
+                    "vmovupd %%zmm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-8*8, %[min]            \n\t"
+                    "subq $-8*8, %[max]            \n\t"
+                    "subq $-8*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
 
+            if (c_remain&4){
+                __asm__ __volatile__ (
+                    "vmovupd 0*8(%[min]), %%ymm0   \n\t"
+                    "vmovupd 0*8(%[max]), %%ymm1   \n\t"
+                    "\n\t"
+                    "vmovupd 0*8(%[mat]), %%ymm2   \n\t"
+                    "\n\t"
+                    "vminpd %%ymm2, %%ymm0, %%ymm0 \n\t"
+                    "vmaxpd %%ymm2, %%ymm1, %%ymm1 \n\t"
+                    "\n\t"
+                    "vmovupd %%ymm0, 0*8(%[min])   \n\t"
+                    "vmovupd %%ymm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-4*8, %[min]            \n\t"
+                    "subq $-4*8, %[max]            \n\t"
+                    "subq $-4*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
+
+            if (c_remain&2){
+                __asm__ __volatile__ (
+                    "movupd 0*8(%[min]), %%xmm0   \n\t"
+                    "movupd 0*8(%[max]), %%xmm1   \n\t"
+                    "\n\t"
+                    "movupd 0*8(%[mat]), %%xmm2   \n\t"
+                    "\n\t"
+                    "minpd %%xmm2, %%xmm0 \n\t"
+                    "maxpd %%xmm2, %%xmm1 \n\t"
+                    "\n\t"
+                    "movupd %%xmm0, 0*8(%[min])   \n\t"
+                    "movupd %%xmm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-2*8, %[min]            \n\t"
+                    "subq $-2*8, %[max]            \n\t"
+                    "subq $-2*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
+
+            if (c_remain&1){
+                __asm__ __volatile__ (
+                    "movsd 0*8(%[min]), %%xmm0   \n\t"
+                    "movsd 0*8(%[max]), %%xmm1   \n\t"
+                    "\n\t"
+                    "movsd 0*8(%[mat]), %%xmm2   \n\t"
+                    "\n\t"
+                    "minpd %%xmm2, %%xmm0 \n\t"
+                    "maxpd %%xmm2, %%xmm1 \n\t"
+                    "\n\t"
+                    "movsd %%xmm0, 0*8(%[min])   \n\t"
+                    "movsd %%xmm1, 0*8(%[max])   \n\t"
+                    "\n\t"
+                    "subq $-1*8, %[min]            \n\t"
+                    "subq $-1*8, %[max]            \n\t"
+                    "subq $-1*8, %[mat]            \n\t"
+                    "\n\t"
+                    :[min]"=r"(min_vals), [max]"=r"(max_vals), [mat]"=r"(mat_t)
+                    :"0"(min_vals), "1"(max_vals), "2"(mat_t)
+                );
+            }
+        }
         shift = (indices_diff[i]-1)*n_cols*8;
         __asm__ __volatile__ (
             "addq %[shift], %[mat]             \n\t"

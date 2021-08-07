@@ -61,13 +61,6 @@ module mod_matrix_sum_up_gt_with_index
             integer(c_int64_t), value :: n_idxs, n_cols, n_rows
         end subroutine get_matrix_sum_up_gt_with_index_A_08
 
-        subroutine get_matrix_sum_up_gt_with_index_A_08z(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, n_idxs, n_rows, n_cols) &
-            Bind(C,Name='get_matrix_sum_up_gt_with_index_A_08z')
-            Import
-            type(c_ptr), value :: sum_vals, cnt_vals, thr_vals, mat_t, y, indices
-            integer(c_int64_t), value :: n_idxs, n_cols, n_rows
-        end subroutine get_matrix_sum_up_gt_with_index_A_08z
-
         subroutine get_matrix_sum_up_gt_with_index_A_16(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, n_idxs, n_rows, n_cols) &
             Bind(C,Name='get_matrix_sum_up_gt_with_index_A_16')
             Import
@@ -75,12 +68,69 @@ module mod_matrix_sum_up_gt_with_index
             integer(c_int64_t), value :: n_idxs, n_cols, n_rows
         end subroutine get_matrix_sum_up_gt_with_index_A_16
 
-        subroutine get_matrix_sum_up_gt_with_index_A_16z(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, n_idxs, n_rows, n_cols) &
-            Bind(C,Name='get_matrix_sum_up_gt_with_index_A_16z')
+        subroutine get_matrix_sum_up_gt_with_index_A_02_ver02(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
+            n_idxs, n_rows, n_cols) &
+            Bind(C,Name='get_matrix_sum_up_gt_with_index_A_02_ver02')
             Import
             type(c_ptr), value :: sum_vals, cnt_vals, thr_vals, mat_t, y, indices
             integer(c_int64_t), value :: n_idxs, n_cols, n_rows
-        end subroutine get_matrix_sum_up_gt_with_index_A_16z
+        end subroutine get_matrix_sum_up_gt_with_index_A_02_ver02
+
+        subroutine get_matrix_sum_up_gt_with_index_A_04_ver02(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
+            n_idxs, n_rows, n_cols) &
+            Bind(C,Name='get_matrix_sum_up_gt_with_index_A_04_ver02')
+            Import
+            type(c_ptr), value :: sum_vals, cnt_vals, thr_vals, mat_t, y, indices
+            integer(c_int64_t), value :: n_idxs, n_cols, n_rows
+        end subroutine get_matrix_sum_up_gt_with_index_A_04_ver02
+
+        subroutine get_matrix_sum_up_gt_with_index_A_08_ver02(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
+            n_idxs, n_rows, n_cols) &
+            Bind(C,Name='get_matrix_sum_up_gt_with_index_A_08_ver02')
+            Import
+            type(c_ptr), value :: sum_vals, cnt_vals, thr_vals, mat_t, y, indices
+            integer(c_int64_t), value :: n_idxs, n_cols, n_rows
+        end subroutine get_matrix_sum_up_gt_with_index_A_08_ver02
+
+        subroutine get_matrix_sum_up_gt_with_index_A_16_ver02(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
+            n_idxs, n_rows, n_cols) &
+            Bind(C,Name='get_matrix_sum_up_gt_with_index_A_16_ver02')
+            Import
+            type(c_ptr), value :: sum_vals, cnt_vals, thr_vals, mat_t, y, indices
+            integer(c_int64_t), value :: n_idxs, n_cols, n_rows
+        end subroutine get_matrix_sum_up_gt_with_index_A_16_ver02
+
+        subroutine get_matrix_sum_up_gt_with_index_A_04_02(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
+            n_idxs, n_rows, n_cols) &
+            Bind(C,Name='get_matrix_sum_up_gt_with_index_A_04_02')
+            Import
+            type(c_ptr), value :: sum_vals, cnt_vals, thr_vals, mat_t, y, indices
+            integer(c_int64_t), value :: n_idxs, n_cols, n_rows
+        end subroutine get_matrix_sum_up_gt_with_index_A_04_02
+
+        subroutine get_matrix_sum_up_gt_with_index_A_04_04(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
+            n_idxs, n_rows, n_cols) &
+            Bind(C,Name='get_matrix_sum_up_gt_with_index_A_04_04')
+            Import
+            type(c_ptr), value :: sum_vals, cnt_vals, thr_vals, mat_t, y, indices
+            integer(c_int64_t), value :: n_idxs, n_cols, n_rows
+        end subroutine get_matrix_sum_up_gt_with_index_A_04_04
+
+        subroutine get_matrix_sum_up_gt_with_index_A_08_02(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
+            n_idxs, n_rows, n_cols) &
+            Bind(C,Name='get_matrix_sum_up_gt_with_index_A_08_02')
+            Import
+            type(c_ptr), value :: sum_vals, cnt_vals, thr_vals, mat_t, y, indices
+            integer(c_int64_t), value :: n_idxs, n_cols, n_rows
+        end subroutine get_matrix_sum_up_gt_with_index_A_08_02
+
+        subroutine get_matrix_sum_up_gt_with_index_A_08_04(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
+            n_idxs, n_rows, n_cols) &
+            Bind(C,Name='get_matrix_sum_up_gt_with_index_A_08_04')
+            Import
+            type(c_ptr), value :: sum_vals, cnt_vals, thr_vals, mat_t, y, indices
+            integer(c_int64_t), value :: n_idxs, n_cols, n_rows
+        end subroutine get_matrix_sum_up_gt_with_index_A_08_04
     end interface 
     
 contains
