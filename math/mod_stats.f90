@@ -3,6 +3,7 @@ module mod_stats
     use iso_c_binding
     use mod_const
     use mod_sort
+    use mod_common
     implicit none
 
     !> An interface to call sum_up function with inline assembler and Fortran
@@ -30,7 +31,7 @@ module mod_stats
     include "./include/stats/sum_up_gt/inc_count_and_sum_up_gt_interface_to_C.f90"
 
     include "./include/stats/get_minmax/inc_get_minmax_interface_to_C.f90"
-
+    include "./include/stats/get_minmax/inc_get_matrix_minmax_interface_to_C.f90"
 
     interface count_and_sum_up_gt
         module procedure count_and_sum_up_gt_r8
@@ -49,6 +50,10 @@ module mod_stats
         module procedure get_minmax_hybrid_r8
         module procedure get_minmax_hybrid_i8
     end interface get_minmax
+
+    interface get_matrix_minmax
+        module procedure get_matrix_minmax_r8
+    end interface get_matrix_minmax
 
     !> Interface to call mean_value_of_vector_r4, mean_value_of_vector_r8, mean_value_of_vector_i4, mean_value_of_vector_i8
     interface mean  
@@ -292,7 +297,7 @@ contains
                 r(i) = tmp_sum
             end do
         else
-            call sum_up_matrix_02_04_r8(r, x, n, c)
+            call sum_up_matrix_02_04_i8(r, x, n, c)
         end if
 #elif _x86_64
         integer(kind=8), intent(inout), target :: r(c)
@@ -485,7 +490,49 @@ contains
 #endif
     end subroutine get_minmax_hybrid_i8
 
+    include "./include/stats/get_minmax/inc_get_matrix_minmax_F.f90"
+    subroutine get_matrix_minmax_r8(min_vals, max_vals, mat_t, indices, n_indices, n_rows, n_cols)
+        implicit none
+        real(kind=8), intent(inout), target :: min_vals(n_cols), max_vals(n_cols)
+        real(kind=8), intent(in)   , target :: mat_t(n_cols, n_rows)
+        integer(kind=8), intent(in), target :: indices(n_indices)
+        integer(kind=8), intent(in)         :: n_indices, n_rows, n_cols
+#if _default
+        call get_matrix_minmax_col_major_loop_with_index(min_vals, max_vals, mat_t, indices, n_indices, n_rows, n_cols)
+#elif _x86_64
+        type(c_ptr) :: min_vals_ptr, max_vals_ptr, mat_t_ptr, indices_diff_ptr
+        integer(kind=8), allocatable, target :: indices_diff(:)
 
+        min_vals = huge(0d0)
+        max_vals = -huge(0d0)
+
+        allocate(indices_diff(n_indices))
+        call get_indices_diff(indices_diff, indices, n_indices)
+
+        min_vals_ptr = c_loc(min_vals)
+        max_vals_ptr = c_loc(max_vals)
+        mat_t_ptr    = c_loc(mat_t)
+        indices_diff_ptr = c_loc(indices_diff)
+
+        if (n_cols .lt. 4_8) then
+            call get_matrix_minmax_col_major_loop_with_index(min_vals, max_vals, mat_t, indices, &
+                    n_indices, n_rows, n_cols)
+        elseif(n_cols .lt. 8_8) then
+            call get_matrix_minmax_loop_04_A(min_vals_ptr, max_vals_ptr, mat_t_ptr, indices_diff_ptr, &
+                    n_indices, n_rows, n_cols)
+        elseif(n_cols .lt. 16_8) then
+            call get_matrix_minmax_loop_08z_A(min_vals_ptr, max_vals_ptr, mat_t_ptr, indices_diff_ptr, &
+                    n_indices, n_rows, n_cols)
+        else
+            call get_matrix_minmax_loop_16z_A(min_vals_ptr, max_vals_ptr, mat_t_ptr, indices_diff_ptr, &
+                    n_indices, n_rows, n_cols)
+        end if
+#else 
+#error "CPU Architecture is not supported. Use '-D_default'."
+#endif
+    end subroutine get_matrix_minmax_r8
+
+    include "../../math/include/stats/variance_value_of_vector/inc_variance_value_of_vector_detail_new.f90"
     function variance_fast_r8(x, n)
         implicit none
         real(kind=8)                :: variance_fast_r8

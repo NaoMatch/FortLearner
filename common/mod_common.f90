@@ -156,6 +156,28 @@ module mod_common
 
 contains
 
+    subroutine get_indices_diff(indices_diff, indices, n_indices)
+        integer(kind=8), intent(inout) :: indices_diff(n_indices)
+        integer(kind=8), intent(in)    :: indices(n_indices)
+        integer(kind=8), intent(in)    :: n_indices
+
+        integer(kind=8) :: n_idx
+        integer(kind=8) :: idx, start_idx
+        integer(kind=8) :: idx_unroll_size
+        integer(kind=8) :: n_idx_unroll, n_idx_remain
+
+        n_idx = n_indices-1
+        idx_unroll_size=1
+        n_idx_remain = mod(n_indices, idx_unroll_size)
+        n_idx_unroll = n_indices - n_idx_remain
+
+        start_idx=1
+        indices_diff(1) = indices(1)-start_idx
+
+        do idx=2, n_idx_unroll, 1
+            indices_diff(idx) = indices(idx)-indices(idx-1)
+        end do
+    end subroutine get_indices_diff
 
     !> A function to binary search from left.
     !> 'vector' must be sorted by ascending order.
