@@ -31,12 +31,19 @@ module mod_stats
     include "./include/stats/sum_up_gt/inc_count_and_sum_up_gt_interface_to_C.f90"
 
     include "./include/stats/get_minmax/inc_get_minmax_interface_to_C.f90"
+
     include "./include/stats/get_minmax/inc_get_matrix_minmax_interface_to_C.f90"
+
+    include "./include/stats/sum_up_gt/inc_matrix_count_and_sum_up_gt_interface_to_C.f90"
 
     interface count_and_sum_up_gt
         module procedure count_and_sum_up_gt_r8
         module procedure count_and_sum_up_gt_i8
     end interface count_and_sum_up_gt
+
+    interface get_matrix_count_and_sum_up_gt
+        module procedure get_matrix_count_and_sum_up_r8
+    end interface get_matrix_count_and_sum_up_gt
 
     !> Interface to call sum_up_left_r4, sum_up_left_with_indices_real32
     interface sum_of_matrix
@@ -434,6 +441,46 @@ contains
 #endif
     end subroutine count_and_sum_up_gt_i8
 
+
+    include "./include/stats/sum_up_gt/inc_matrix_count_and_sum_up_gt.f90"
+    subroutine get_matrix_count_and_sum_up_r8(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, n_indices, n_rows, n_cols)
+        implicit none
+        real(kind=8), intent(inout), target    :: sum_vals(n_cols)
+        integer(kind=8), intent(inout), target :: cnt_vals(n_cols)
+        real(kind=8), intent(inout), target    :: thr_vals(n_cols)
+        real(kind=8), intent(in)   , target    :: mat_t(n_cols, n_rows), y(n_rows)
+        integer(kind=8), intent(in), target    :: indices(n_indices)
+        integer(kind=8), intent(in)            :: n_indices, n_rows, n_cols
+#if _default
+        call get_matrix_count_and_sum_up_gt_with_index_08(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, n_indices, n_rows, n_cols)
+#elif _x86_64
+        type(c_ptr) :: sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, mat_t_ptr, y_ptr, indices_diff_ptr
+        integer(kind=8), allocatable, target :: indices_diff(:)
+
+        sum_vals = 0d0
+        cnt_vals = 0_8
+
+        allocate(indices_diff(n_indices))
+        call get_indices_diff(indices_diff, indices, n_indices)
+
+        sum_vals_ptr = c_loc(sum_vals)
+        cnt_vals_ptr = c_loc(cnt_vals)
+        thr_vals_ptr = c_loc(thr_vals)
+        mat_t_ptr    = c_loc(mat_t)
+        y_ptr        = c_loc(y)
+        indices_diff_ptr = c_loc(indices_diff)
+
+        if (n_cols .ge. 4_8 .and. n_rows .ge. 4_8) then
+            call get_matrix_count_and_sum_up_gt_with_index_A_04_04(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, mat_t_ptr, y_ptr, & 
+                    indices_diff_ptr, n_indices, n_rows, n_cols)
+        else
+            call get_matrix_count_and_sum_up_gt_with_index_08(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
+                    n_indices, n_rows, n_cols)
+        end if
+#else 
+#error "CPU Architecture is not supported. Use '-D_default'."
+#endif
+    end subroutine get_matrix_count_and_sum_up_r8
 
 
     ! -----------------------------------------------------------------------------
