@@ -3,18 +3,21 @@ compiler_clang   := gcc
 mod              := -J mod/
 opt              := -O3
 option           := -cpp -D_x86_64 -fopenmp -fbounds-check
+
 asm              := ./mod/inc_sum_up_vector_c.out \
 					./mod/inc_sum_up_matrix_c.out \
                     ./mod/inc_sum_up_gt_c.out     \
 					./mod/inc_get_minmax.out      \
 					./mod/inc_variance_value_of_vector.out \
-					./mod/inc_get_matrix_minmax.out
+					./mod/inc_get_matrix_minmax.out \
+					./mod/inc_get_matrix_count_and_sum_up_gt.out					
+
 common           := ./mod/mod_const.out \
 					./mod/mod_common.out \
 					./mod/mod_timer.out \
 					./mod/mod_random.out \
 					./mod/mod_sort.out \
-					./mod/mod_stats.out \
+					./mod/mod_stats.out
 
 build:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_const.f90  -o ./mod/mod_const.out
@@ -29,9 +32,11 @@ build:
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/get_minmax/inc_get_minmax.c                             -o ./mod/inc_get_minmax.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/get_minmax/inc_get_matrix_minmax.c                      -o ./mod/inc_get_matrix_minmax.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/variance_value_of_vector/inc_variance_value_of_vector.c -o ./mod/inc_variance_value_of_vector.out
+	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/sum_up_gt/inc_get_matrix_count_and_sum_up_gt.c          -o ./mod/inc_get_matrix_count_and_sum_up_gt.out
 
 test:
 	make main_stats_count_and_sum_up_gt
+	make main_stats_count_and_sum_up_gt_matrix_with_index
 	make main_stats_get_minmax
 	make main_stats_get_matrix_minmax_with_index
 	make main_stats_mean_matrix
@@ -61,6 +66,13 @@ main_stats_get_matrix_minmax_with_index:
 	$(asm) $(option) $(mod) $(opt) \
 	main_stats_get_matrix_minmax_with_index.f90 -o main_stats_get_matrix_minmax_with_index.out
 	./main_stats_get_matrix_minmax_with_index.out
+
+main_stats_count_and_sum_up_gt_matrix_with_index:
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main_stats_count_and_sum_up_gt_matrix_with_index.f90 -o main_stats_count_and_sum_up_gt_matrix_with_index.out
+	./main_stats_count_and_sum_up_gt_matrix_with_index.out
 
 main_stats_mean_matrix:
 	$(compiler_fortran) -w -unroll \
