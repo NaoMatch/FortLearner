@@ -95,7 +95,36 @@ module mod_linalg
         module procedure vector2sum1_r8
     end interface vector2sum1
 
+    include "./include/linalg_ax_plus_y/inc_ax_plus_y_interface_to_C.f90"
+    interface ax_plus_y
+        module procedure ax_plus_y_r8
+    end interface ax_plus_y
+
+
 contains
+
+    include "./include/linalg_ax_plus_y/inc_ax_plus_y.f90"
+    subroutine ax_plus_y_r8(a, x, y, n)
+        implicit none
+        real(kind=8), intent(in)    :: a
+        real(kind=8), intent(in)    :: x(n)
+        real(kind=8), intent(inout) :: y(n)
+        integer(kind=8), intent(in) :: n
+#if _default
+        call ax_plus_y_16_F_r8(a, x, y, n)
+#elif _x86_64
+        if (n .le. 32) then
+            call ax_plus_y_32z_A(a, x, y, n)
+        elseif ( n .le. 500000 ) then
+            call ax_plus_y_32z_A(a, x, y, n)
+        else
+            call ax_plus_y_16_F_r8(a, x, y, n)
+        end if
+#else 
+#error "CPU Architecture is not supported. Use '-D_default'."
+#endif        
+    end subroutine ax_plus_y_r8
+
 
 
     !> A subroutine to the Cholesky decomposition of a real symmetric matrix
