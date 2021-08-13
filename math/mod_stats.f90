@@ -579,7 +579,7 @@ contains
 #endif
     end subroutine get_matrix_minmax_r8
 
-    include "../../math/include/stats/variance_value_of_vector/inc_variance_value_of_vector_detail_new.f90"
+    include "./include/stats/variance_value_of_vector/inc_variance_value_of_vector_detail_new.f90"
     function variance_fast_r8(x, n)
         implicit none
         real(kind=8)                :: variance_fast_r8
