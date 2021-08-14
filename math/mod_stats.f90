@@ -7,11 +7,13 @@ module mod_stats
     implicit none
 
     !> An interface to call sum_up function with inline assembler and Fortran
+    include "./include/stats/sum_up/inc_sum_up_interface_to_C.f90"
     interface sum_up
         module procedure sum_up_r8
         module procedure sum_up_i8
     end interface sum_up
 
+    include "./include/stats/sum_of_matrix/inc_sum_of_matrix_interface_to_C.f90"
     interface sum_up_matrix
         module procedure sum_up_matrix_r8
         module procedure sum_up_matrix_i8
@@ -22,25 +24,13 @@ module mod_stats
         module procedure sum_up_matrix_parallel_i8
     end interface sum_up_matrix_parallel
 
-    include "./include/stats/sum_up/inc_sum_up_interface_to_C.f90"
-
-    include "./include/stats/variance_value_of_vector/inc_variance_interface_to_C.f90"
-
-    include "./include/stats/sum_of_matrix/inc_sum_of_matrix_interface_to_C.f90"
-
     include "./include/stats/sum_up_gt/inc_count_and_sum_up_gt_interface_to_C.f90"
-
-    include "./include/stats/get_minmax/inc_get_minmax_interface_to_C.f90"
-
-    include "./include/stats/get_minmax/inc_get_matrix_minmax_interface_to_C.f90"
-
-    include "./include/stats/sum_up_gt/inc_matrix_count_and_sum_up_gt_interface_to_C.f90"
-
     interface count_and_sum_up_gt
         module procedure count_and_sum_up_gt_r8
         module procedure count_and_sum_up_gt_i8
     end interface count_and_sum_up_gt
 
+    include "./include/stats/sum_up_gt/inc_matrix_count_and_sum_up_gt_interface_to_C.f90"
     interface get_matrix_count_and_sum_up_gt
         module procedure get_matrix_count_and_sum_up_r8
     end interface get_matrix_count_and_sum_up_gt
@@ -53,11 +43,14 @@ module mod_stats
         module procedure sum_of_matrix_i8
     end interface sum_of_matrix
 
+
+    include "./include/stats/get_minmax/inc_get_minmax_interface_to_C.f90"
     interface get_minmax
         module procedure get_minmax_hybrid_r8
         module procedure get_minmax_hybrid_i8
     end interface get_minmax
 
+    include "./include/stats/get_minmax/inc_get_matrix_minmax_interface_to_C.f90"
     interface get_matrix_minmax
         module procedure get_matrix_minmax_r8
     end interface get_matrix_minmax
@@ -89,6 +82,7 @@ module mod_stats
     end interface variance
 
     !> Interface to call variance_value_of_vector_r4, variance_value_of_vector_r8, variance_value_of_vector_i4, variance_value_of_vector_i8
+    include "./include/stats/variance_value_of_vector/inc_variance_interface_to_C.f90"
     interface variance_fast
         module procedure variance_fast_r8     ! place in "./include/stats/variance_value_of_vector/inc_variance_value_of_vector.f90"
     end interface variance_fast
@@ -100,6 +94,11 @@ module mod_stats
         module procedure covariance_value_of_vectors_i4      ! place in "./include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
         module procedure covariance_value_of_vectors_i8      ! place in "./include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors.f90"
     end interface covariance
+
+    include "./include/stats/covariance_value_of_vectors/inc_covariance_interface_to_C.f90"
+    interface covariance_fast
+        module procedure covariance_fast_r8
+    end interface covariance_fast
 
     interface covariance_matrix
         module procedure covariance_matrix_of_matrix_r4
@@ -594,7 +593,20 @@ contains
 #endif
     end function variance_fast_r8
 
-
+    include "./include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors_fast.f90"
+    function covariance_fast_r8(x, y, n)
+        implicit none
+        real(kind=8)                :: covariance_fast_r8
+        real(kind=8), intent(in)    :: x(n), y(n)
+        integer(kind=8), intent(in) :: n
+#if _default
+        covariance_fast_r8 = covariance_loo_16_F(x, y, n)
+#elif _x86_64
+        covariance_fast_r8 = covariance_loop_16z_A(x, y, n)
+#else 
+#error "CPU Architecture is not supported. Use '-D_default'."
+#endif
+    end function covariance_fast_r8
 
 
 
