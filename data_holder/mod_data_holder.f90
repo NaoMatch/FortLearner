@@ -46,6 +46,7 @@ module mod_data_holder
 
         type(x_pointer) :: x_ptr
         type(y_pointer) :: y_ptr
+        type(x_pointer) :: x_t_ptr
         integer(kind=4), allocatable :: x_hist(:,:)
 
         type(work_space), allocatable :: works(:)
@@ -55,6 +56,7 @@ module mod_data_holder
         type(discretizer) :: disc
         ! 
         type(work_space), allocatable :: x_hist_row(:)
+        ! real(kind=8), pointer :: x_t_ptr
     contains
         procedure :: preprocess_store_colwise
         procedure :: preprocess_random_rotate
@@ -65,10 +67,37 @@ module mod_data_holder
     interface data_holder
         module procedure :: new_data_holder_i4_r4
         module procedure :: new_data_holder_r8_r8
+        module procedure :: new_data_holder_r8_r8_new
         module procedure :: new_data_holder_r8_i8
     end interface data_holder
 
+
 contains
+    function new_data_holder_r8_r8_new(x, y, x_t)
+        implicit none
+        type(data_holder)    :: new_data_holder_r8_r8_new
+        real(kind=8), target :: x(:,:)
+        real(kind=8), target :: y(:,:)
+        real(kind=8), target :: x_t(:,:)
+
+        integer(kind=8) :: x_shape(2), y_shape(2)
+        type(error)     :: err
+
+        x_shape = shape(x)
+        y_shape = shape(y)
+        call err % sample_size_mismatch(x_shape, "x", y_shape, "y", "data_holder")
+
+        new_data_holder_r8_r8_new % n_outputs            =  y_shape(2)
+        new_data_holder_r8_r8_new % n_samples            =  x_shape(1)
+        new_data_holder_r8_r8_new % n_columns            =  x_shape(2)
+        new_data_holder_r8_r8_new % x_shape              =  x_shape
+        new_data_holder_r8_r8_new % y_shape              =  y_shape
+        new_data_holder_r8_r8_new % x_ptr % x_r8_ptr     => x
+        new_data_holder_r8_r8_new % y_ptr % y_r8_ptr     => y
+        new_data_holder_r8_r8_new % x_t_ptr % x_r8_ptr   => x_t
+
+        new_data_holder_r8_r8_new % is_preprocessed = f_
+    end function new_data_holder_r8_r8_new
 
     !> A subroutine to override data_holder.
     !> 'x' and 'y' are associated to 'x_ptr' and 'y_ptr'.
@@ -87,13 +116,13 @@ contains
         y_shape = shape(y)
         call err % sample_size_mismatch(x_shape, "x", y_shape, "y", "data_holder")
 
-        new_data_holder_r8_r8 % n_outputs         =  y_shape(2)
-        new_data_holder_r8_r8 % n_samples         =  x_shape(1)
-        new_data_holder_r8_r8 % n_columns         =  x_shape(2)
-        new_data_holder_r8_r8 % x_shape           =  x_shape
-        new_data_holder_r8_r8 % y_shape           =  y_shape
-        new_data_holder_r8_r8 % x_ptr % x_r8_ptr  => x
-        new_data_holder_r8_r8 % y_ptr % y_r8_ptr  => y
+        new_data_holder_r8_r8 % n_outputs          =  y_shape(2)
+        new_data_holder_r8_r8 % n_samples          =  x_shape(1)
+        new_data_holder_r8_r8 % n_columns          =  x_shape(2)
+        new_data_holder_r8_r8 % x_shape            =  x_shape
+        new_data_holder_r8_r8 % y_shape            =  y_shape
+        new_data_holder_r8_r8 % x_ptr % x_r8_ptr   => x
+        new_data_holder_r8_r8 % y_ptr % y_r8_ptr   => y
 
         new_data_holder_r8_r8 % is_preprocessed = f_
     end function new_data_holder_r8_r8
