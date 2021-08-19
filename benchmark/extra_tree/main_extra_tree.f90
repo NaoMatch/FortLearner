@@ -9,6 +9,7 @@ program main_extra_tree
 
     integer(kind=8) :: date_value1(8), date_value2(8), time_dt, time_et, time_cl, time_lw
 
+    integer(kind=8)    :: n_samples_trains(5), n_columns_trains(5)
     integer(kind=8)    :: n_samples_train, n_columns_train 
     integer(kind=8)    :: n_samples_test, n_columns_test
     logical(kind=4)    :: skip_header
@@ -31,155 +32,116 @@ program main_extra_tree
     type(data_holder), pointer    :: dholder_ptr, dholder_t_ptr
     type(extra_tree_regressor)    :: et_reg_slow, et_reg_fast, et_reg_fast_more
 
-    integer(kind=8)    :: i, n_leaf_nodes, max_leaf_nodes
+    integer(kind=8)    :: i, n_leaf_nodes, max_leaf_nodes, iii, jjj, n_iters(5), n_iter
     integer(kind=8)    :: iter, max_iter, power
 
+    n_samples_trains = (/100_8, 1000_8, 10000_8, 100000_8, 1000000_8/)
+    n_columns_trains = (/10_8, 50_8, 100_8, 200_8, 400_8/)
+    n_iters = (/100_8, 100_8, 10_8, 5_8, 5_8/)
 
-    print*, '============================================================='
-    print*, "Input Data Shape: "
-    n_samples_train  = 412206
-    n_samples_test   = 103139
-    n_columns_train  = 90_8
-    n_columns_test   = 90_8
-    skip_header = f_
-    dtype_in = "r"
-    dtype_out = "r"
-    print*, "    train (row x col): ", n_samples_train, n_columns_train
-    print*, "    test  (row x col): ", n_samples_test, n_columns_test
-    print*, "    skip header:       ", skip_header
-    print*, "    data type input:   ", dtype_in
-    print*, "    data type output:  ", dtype_out
+    open(100, file="timer.csv")
+    do iii=1, 5, 1
+        print*, '============================================================='
+        print*, "Input Data Shape: "
+        n_samples_train  = n_samples_trains(iii)
+        n_iter = n_iters(iii)
+        do jjj=1, 5, 1
+            n_columns_train  = n_columns_trains(jjj) 
+            skip_header = f_
+            dtype_in = "r"
+            dtype_out = "r"
+            print*, "    train (row x col): ", n_samples_train, n_columns_train
+            print*, "    skip header:       ", skip_header
+            print*, "    data type input:   ", dtype_in
+            print*, "    data type output:  ", dtype_out
 
-    print*, '============================================================='
-    print*, "File Names: "
-    file_name_x_train_csv = "../../../uci_data/05_YearPredictionMSD/YearPredictionMSD_x_train.txt"
-    file_name_y_train_csv = "../../../uci_data/05_YearPredictionMSD/YearPredictionMSD_y_train.txt"
-    file_name_x_train_bin = "../../../uci_data/05_YearPredictionMSD/YearPredictionMSD_x_train.bin"
-    file_name_y_train_bin = "../../../uci_data/05_YearPredictionMSD/YearPredictionMSD_y_train.bin"
-    file_name_x_test_csv  = "../../../uci_data/05_YearPredictionMSD/YearPredictionMSD_x_valid.txt"
-    file_name_y_test_csv  = "../../../uci_data/05_YearPredictionMSD/YearPredictionMSD_y_valid.txt"
-    file_name_x_test_bin  = "../../../uci_data/05_YearPredictionMSD/YearPredictionMSD_x_valid.bin"
-    file_name_y_test_bin  = "../../../uci_data/05_YearPredictionMSD/YearPredictionMSD_y_valid.bin"
-    print*, "   x_train csv -> bin: ", trim(file_name_x_train_csv), " -> ", trim(file_name_x_train_bin)
-    print*, "   y_train csv -> bin: ", trim(file_name_y_train_csv), " -> ", trim(file_name_y_train_bin)
-    print*, "   x_test  csv -> bin: ", trim(file_name_x_test_csv),  " -> ", trim(file_name_x_test_bin)
-    print*, "   y_test  csv -> bin: ", trim(file_name_y_test_csv),  " -> ", trim(file_name_y_test_bin)
+            print*, '============================================================='
+            print*, "File Names: "
+            ! file_name_x_train_csv = "../../../uci_data/97_make_regression/make_regression_x_0000001000x00100.csv"
+            ! file_name_y_train_csv = "../../../uci_data/97_make_regression/make_regression_y_0000001000x00100.csv"
+            ! file_name_x_train_bin = "../../../uci_data/97_make_regression/make_regression_x_0000001000x00100.bin"
+            ! file_name_y_train_bin = "../../../uci_data/97_make_regression/make_regression_y_0000001000x00100.bin"
 
-
-    ! print*, '============================================================='
-    ! print*, "Input Data Shape: "
-    ! n_samples_train  = 9000000_8
-    ! n_samples_test   = 1000000_8
-    ! n_columns_train  = 28_8
-    ! n_columns_test   = 28_8
-    ! skip_header = f_
-    ! dtype_in = "r"
-    ! dtype_out = "r"
-    ! print*, "    train (row x col): ", n_samples_train, n_columns_train
-    ! print*, "    test  (row x col): ", n_samples_test, n_columns_test
-    ! print*, "    skip header:       ", skip_header
-    ! print*, "    data type input:   ", dtype_in
-    ! print*, "    data type output:  ", dtype_out
-
-    ! print*, '============================================================='
-    ! print*, "File Names: "
-    ! file_name_x_train_csv = "../../../uci_data/98_Higgs/HIGGS_train_x.csv"
-    ! file_name_y_train_csv = "../../../uci_data/98_Higgs/HIGGS_train_y.csv"
-    ! file_name_x_train_bin = "../../../uci_data/98_Higgs/HIGGS_train_x.bin"
-    ! file_name_y_train_bin = "../../../uci_data/98_Higgs/HIGGS_train_y.bin"
-    ! file_name_x_test_csv  = "../../../uci_data/98_Higgs/HIGGS_valid_x.csv"
-    ! file_name_y_test_csv  = "../../../uci_data/98_Higgs/HIGGS_valid_y.csv"
-    ! file_name_x_test_bin  = "../../../uci_data/98_Higgs/HIGGS_valid_x.bin"
-    ! file_name_y_test_bin  = "../../../uci_data/98_Higgs/HIGGS_valid_y.bin"
-    ! print*, "   x_train csv -> bin: ", trim(file_name_x_train_csv), " -> ", trim(file_name_x_train_bin)
-    ! print*, "   y_train csv -> bin: ", trim(file_name_y_train_csv), " -> ", trim(file_name_y_train_bin)
-    ! print*, "   x_test  csv -> bin: ", trim(file_name_x_test_csv),  " -> ", trim(file_name_x_test_bin)
-    print*, "   y_test  csv -> bin: ", trim(file_name_y_test_csv),  " -> ", trim(file_name_y_test_bin)
+            write (file_name_x_train_csv, & 
+                    '("../../../uci_data/97_make_regression/make_regression_x_", i10.10, "x", i5.5, ".csv")') & 
+                    n_samples_train, n_columns_train
+            write (file_name_y_train_csv, & 
+                    '("../../../uci_data/97_make_regression/make_regression_y_", i10.10, "x", i5.5, ".csv")') & 
+                    n_samples_train, n_columns_train
+            write (file_name_x_train_bin, & 
+                    '("../../../uci_data/97_make_regression/make_regression_x_", i10.10, "x", i5.5, ".bin")') & 
+                    n_samples_train, n_columns_train
+            write (file_name_y_train_bin, & 
+                    '("../../../uci_data/97_make_regression/make_regression_y_", i10.10, "x", i5.5, ".bin")') & 
+                    n_samples_train, n_columns_train
+            print*, file_name_x_train_csv
+            print*, file_name_y_train_csv
+            print*, file_name_x_train_bin
+            print*, file_name_y_train_bin
+            print*, "   x_train csv -> bin: ", trim(file_name_x_train_csv), " -> ", trim(file_name_x_train_bin)
+            print*, "   y_train csv -> bin: ", trim(file_name_y_train_csv), " -> ", trim(file_name_y_train_bin)
 
 
-!     print*, '============================================================='
-!     print*, "CSV to Binary"
-!     print*, "    x_train"
-!     call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
-!         n_samples_train, n_columns_train, skip_header, dtype_in, dtype_out)
-!     print*, "    y_train"
-!     call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
-!         n_samples_train, 1_8, skip_header, "i", dtype_out)
-!     print*, "    x_test"
-!     call read2bin_2d(file_name_x_test_csv, file_name_x_test_bin, &
-!         n_samples_test, n_columns_test, skip_header, dtype_in, dtype_out)
-!     print*, "    y_test"
-!     call read2bin_2d(file_name_y_test_csv, file_name_y_test_bin, &
-!         n_samples_test, 1_8, skip_header, "i", dtype_out)
-
-    print*, '============================================================='
-    print*, "Read Binary"
-    print*, "    x_train"
-    call read_bin_2d(file_name_x_train_bin, x_train)
-    print*, "    y_train"
-    call read_bin_2d(file_name_y_train_bin, y_train)
-    print*, "    x_test"
-    call read_bin_2d(file_name_x_test_bin, x_test)
-    print*, "    y_test"
-    call read_bin_2d(file_name_y_test_bin, y_test)
-
-    print*, '============================================================='
-    print*, "data_holder"
-    x_train_t = transpose(x_train)
-    x_test_t  = transpose(x_test)
-    dholder   = data_holder(x_train, y_train, is_trans_x=f_)
-    dholder_t = data_holder(x_train_t, y_train, is_trans_x=t_)
-    dholder_ptr => dholder
-    dholder_t_ptr => dholder_t
-
-        max_leaf_nodes = 100
-
-    ! print*, '============================================================='
-    ! print*, "Start Training ExtraTree_old"
-    ! call date_and_time(values=date_value1)
-    ! et_reg_slow = extra_tree_regressor(max_leaf_nodes=max_leaf_nodes, fashion="best", n_repeats=1_8, & 
-    !         min_samples_leaf=1_8)
-    ! call et_reg_slow%fit(dholder_ptr)
-    ! call date_and_time(values=date_value2)
-    ! y_train_pred_et = et_reg_slow%predict(x_train)
-    ! y_test_pred_et = et_reg_slow%predict(x_test)
-    ! time_et = time_diff(date_value1, date_value2)
-    ! print*, "=============================================================================="
-    ! print*, " ----- ExtraTree, Naive Implementation max_leaf_node=100"
-    ! print*, "TrainMSE: ", real(metric%mean_square_error(y_train(:,1), y_train_pred_et(:,1)))
-    ! print*, "Test_MSE: ", real(metric%mean_square_error(y_test(:,1), y_test_pred_et(:,1)))
-    ! print*, "TIme    : ", real(time_et), "[msec]"
+            ! print*, '============================================================='
+            ! print*, "CSV to Binary"
+            ! print*, "    x_train"
+            ! call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
+            !     n_samples_train, n_columns_train, skip_header, dtype_in, dtype_out)
+            ! print*, "    y_train"
+            ! call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
+            !     n_samples_train, 1_8, skip_header, dtype_in, dtype_out)
+            ! cycle
 
 
-    print*, '============================================================='
-    print*, "Start Training ExtraTree_Fast"
-    call date_and_time(values=date_value1)
-    et_reg_fast = extra_tree_regressor(max_leaf_nodes=max_leaf_nodes, fashion="best", n_repeats=1_8, & 
-            min_samples_leaf=1_8)
-    call et_reg_fast%fit(dholder_ptr)
-    call date_and_time(values=date_value2)
-    y_train_pred_et = et_reg_fast%predict(x_train)
-    y_test_pred_et = et_reg_fast%predict(x_test)
-    time_et = time_diff(date_value1, date_value2)
-    print*, "=============================================================================="
-    print*, " ----- ExtraTree, Naive Implementation max_leaf_node=100"
-    print*, "TrainMSE: ", real(metric%mean_square_error(y_train(:,1), y_train_pred_et(:,1)))
-    print*, "Test_MSE: ", real(metric%mean_square_error(y_test(:,1), y_test_pred_et(:,1)))
-    print*, "TIme    : ", real(time_et), "[msec]"
+            print*, '============================================================='
+            print*, "Read Binary"
+            print*, "    x_train"
+            call read_bin_2d(file_name_x_train_bin, x_train)
+            print*, "    y_train"
+            call read_bin_2d(file_name_y_train_bin, y_train)
 
-    print*, '============================================================='
-    print*, "Start Training ExtraTree_Fast_MORE"
-    call date_and_time(values=date_value1)
-    et_reg_fast_more = extra_tree_regressor(max_leaf_nodes=max_leaf_nodes, fashion="best", n_repeats=1_8, & 
-            min_samples_leaf=1_8)
-    call et_reg_fast_more%fit_faster(dholder_t_ptr)
-    call date_and_time(values=date_value2)
-    y_train_pred_et = et_reg_fast_more%predict(x_train)
-    y_test_pred_et = et_reg_fast_more%predict(x_test)
-    time_et = time_diff(date_value1, date_value2)
-    print*, "=============================================================================="
-    print*, " ----- ExtraTree, Naive Implementation max_leaf_node=100"
-    print*, "TrainMSE: ", real(metric%mean_square_error(y_train(:,1), y_train_pred_et(:,1)))
-    print*, "Test_MSE: ", real(metric%mean_square_error(y_test(:,1), y_test_pred_et(:,1)))
-    print*, "TIme    : ", real(time_et), "[msec]"
+            print*, '============================================================='
+            print*, "data_holder"
+            x_train_t = transpose(x_train)
+            dholder   = data_holder(x_train, y_train, is_trans_x=f_)
+            dholder_t = data_holder(x_train_t, y_train, is_trans_x=t_)
+            dholder_ptr => dholder
+            dholder_t_ptr => dholder_t
+
+            max_leaf_nodes = 100
+            print*, '============================================================='
+            print*, "Start Training ExtraTree_Fast"
+            et_reg_fast = extra_tree_regressor(max_leaf_nodes=max_leaf_nodes, fashion="best", n_repeats=1_8, & 
+                    min_samples_leaf=1_8)
+            call date_and_time(values=date_value1)
+            do iter=1, n_iter
+                call et_reg_fast%fit(dholder_ptr)
+            end do
+            call date_and_time(values=date_value2)
+            y_train_pred_et = et_reg_fast%predict(x_train)
+            time_et = time_diff(date_value1, date_value2)
+            print*, "=============================================================================="
+            print*, " ----- ExtraTree, Naive Implementation max_leaf_node=100"
+            print*, "TrainMSE: ", real(metric%mean_square_error(y_train(:,1), y_train_pred_et(:,1)))
+            print*, "TIme    : ", n_samples_train, n_columns_train, real(time_et), "[msec]", real(time_et)/n_iter, "[msec]"
+            write(100, *) "NORMAL", n_samples_train, n_columns_train, real(time_et), "[msec]", real(time_et)/n_iter, "[msec]"
+
+            print*, '============================================================='
+            print*, "Start Training ExtraTree_Fast_MORE"
+            et_reg_fast_more = extra_tree_regressor(max_leaf_nodes=max_leaf_nodes, fashion="best", n_repeats=1_8, & 
+                    min_samples_leaf=1_8)
+            call date_and_time(values=date_value1)
+            do iter=1, n_iter
+                call et_reg_fast_more%fit_faster(dholder_t_ptr)
+            end do
+            call date_and_time(values=date_value2)
+            y_train_pred_et = et_reg_fast_more%predict(x_train)
+            time_et = time_diff(date_value1, date_value2)
+            print*, "=============================================================================="
+            print*, " ----- ExtraTree, Naive Implementation max_leaf_node=100"
+            print*, "TrainMSE: ", real(metric%mean_square_error(y_train(:,1), y_train_pred_et(:,1)))
+            print*, "TIme    : ", n_samples_train, n_columns_train, real(time_et), "[msec]", real(time_et)/n_iter, "[msec]"
+            write(100, *) "FASTER", n_samples_train, n_columns_train, real(time_et), "[msec]", real(time_et)/n_iter, "[msec]"
+        end do
+    end do
 end program main_extra_tree
