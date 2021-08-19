@@ -230,7 +230,7 @@ contains
 
         call this%postprocess(this%is_classification)
 
-        print*, "SplitTime: ", time_splti
+        ! print*, "SplitTime: ", time_splti
     end subroutine fit_extra_tree_regressor
 
     subroutine fit_extra_tree_regressor_faster(this, data_holder_ptr, print_node, &
@@ -306,7 +306,7 @@ contains
 
         call this%postprocess(this%is_classification)
 
-        print*, "SplitTime: ", time_splti
+        ! print*, "SplitTime: ", time_splti
     end subroutine fit_extra_tree_regressor_faster
 
 
