@@ -451,7 +451,8 @@ contains
         integer(kind=8), intent(in), target    :: indices(n_indices)
         integer(kind=8), intent(in)            :: n_indices, n_rows, n_cols
 #if _default
-        call get_matrix_count_and_sum_up_gt_with_index_08(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, n_indices, n_rows, n_cols)
+        call get_matrix_count_and_sum_up_gt_with_index_08(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
+            n_indices, n_rows, n_cols)
 #elif _x86_64
         type(c_ptr) :: sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, mat_t_ptr, y_ptr, indices_diff_ptr
         integer(kind=8), allocatable, target :: indices_diff(:)
@@ -521,6 +522,8 @@ contains
         if (n .le. 64_8) then
             call get_minmax_04_F_i8(min, max, x, n)
         elseif(n .le. 5000000_8) then
+            call get_minmax_08_F_i8(min, max, x, n)
+        else
             call get_minmax_08_F_i8(min, max, x, n)
         end if
 #elif _x86_64
@@ -600,7 +603,7 @@ contains
         real(kind=8), intent(in)    :: x(n), y(n)
         integer(kind=8), intent(in) :: n
 #if _default
-        covariance_fast_r8 = covariance_loo_16_F(x, y, n)
+        covariance_fast_r8 = covariance_loop_16_F(x, y, n)
 #elif _x86_64
         covariance_fast_r8 = covariance_loop_16z_A(x, y, n)
 #else 

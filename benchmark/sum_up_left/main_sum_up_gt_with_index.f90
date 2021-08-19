@@ -1,9 +1,10 @@
 program main_sum_up_gt_with_index
+    use iso_c_binding
     use mod_random
     use mod_sort
     use mod_timer
-    use mod_stats
-    use mod_matrix_sum_up_gt_with_index
+    use mod_stats, only: get_matrix_count_and_sum_up_gt, count_and_sum_up_gt
+    ! use mod_matrix_sum_up_gt_with_index
     implicit none
 
     integer(kind=8) :: date_value1(8), date_value2(8)
@@ -32,7 +33,8 @@ program main_sum_up_gt_with_index
     n_rows_test = (/1000, 10000, 100000, 1000000, 10000000/)
     n_cols_test = (/4,    8,     16,     32,      64/)
     n_divs_test = (/1,    2,     4,      8,       16/)
-    n_cols_test = n_cols_test
+    n_cols_test = 28_8
+    n_divs_test = 10
     is_stop = .false.
 
     n_iter_base = 500000000_8
@@ -47,26 +49,26 @@ program main_sum_up_gt_with_index
     types = hoge
     types(1)  = "call count_and_sum_up_fast                      :"
     types(2)  = "call count_and_sum_up_loop_with_index           :"
-    types(3)  = "call count_and_sum_up_loop_with_index_02        :"
-    types(4)  = "call count_and_sum_up_loop_with_index_04        :"
-    types(5)  = "call count_and_sum_up_loop_with_index_08        :"
-    types(6)  = "call get_matrix_sum_up_gt_with_index_C          :"
-    types(7)  = "call get_matrix_sum_up_gt_with_index_C_02       :"
-    types(8)  = "call get_matrix_sum_up_gt_with_index_C_04       :"
-    types(9)  = "call get_matrix_sum_up_gt_with_index_C_08       :"
+    ! types(3)  = "call count_and_sum_up_loop_with_index_02        :"
+    ! types(4)  = "call count_and_sum_up_loop_with_index_04        :"
+    ! types(5)  = "call count_and_sum_up_loop_with_index_08        :"
+    ! types(6)  = "call get_matrix_sum_up_gt_with_index_C          :"
+    ! types(7)  = "call get_matrix_sum_up_gt_with_index_C_02       :"
+    ! types(8)  = "call get_matrix_sum_up_gt_with_index_C_04       :"
+    ! types(9)  = "call get_matrix_sum_up_gt_with_index_C_08       :"
     ! types(10) = "call get_matrix_sum_up_gt_with_index_A_02       :"
     ! types(11) = "call get_matrix_sum_up_gt_with_index_A_04       :"
     ! types(12) = "call get_matrix_sum_up_gt_with_index_A_04x      :"
     ! types(13) = "call get_matrix_sum_up_gt_with_index_A_08       :"
     ! types(14) = "call get_matrix_sum_up_gt_with_index_A_16       :"
-    types(15) = "call get_matrix_sum_up_gt_with_index_A_02_ver02 :"
-    types(16) = "call get_matrix_sum_up_gt_with_index_A_04_ver02 :"
-    types(17) = "call get_matrix_sum_up_gt_with_index_A_08_ver02 :"
-    types(18) = "call get_matrix_sum_up_gt_with_index_A_16_ver02 :"
-    types(19) = "call get_matrix_sum_up_gt_with_index_A_04_02    :"
-    types(20) = "call get_matrix_sum_up_gt_with_index_A_04_04    :"
-    types(21) = "call get_matrix_sum_up_gt_with_index_A_08_02    :"
-    types(22) = "call get_matrix_sum_up_gt_with_index_A_08_04    :"
+    ! types(15) = "call get_matrix_sum_up_gt_with_index_A_02_ver02 :"
+    ! types(16) = "call get_matrix_sum_up_gt_with_index_A_04_ver02 :"
+    ! types(17) = "call get_matrix_sum_up_gt_with_index_A_08_ver02 :"
+    ! types(18) = "call get_matrix_sum_up_gt_with_index_A_16_ver02 :"
+    ! types(19) = "call get_matrix_sum_up_gt_with_index_A_04_02    :"
+    ! types(20) = "call get_matrix_sum_up_gt_with_index_A_04_04    :"
+    ! types(21) = "call get_matrix_sum_up_gt_with_index_A_08_02    :"
+    ! types(22) = "call get_matrix_sum_up_gt_with_index_A_08_04    :"
 
     do c=1, size(n_cols_test), 1
         n_cols = n_cols_test(c)
@@ -152,102 +154,104 @@ program main_sum_up_gt_with_index
                                     cnt_vals(i) = cnt_gt
                                 end do
                             case  (2) 
-                                call get_matrix_sum_up_gt_with_index(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
+                                call get_matrix_count_and_sum_up_gt(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
                                     n_idxs, n_rows, n_cols)
-                            case  (3) 
-                                call get_matrix_sum_up_gt_with_index_02(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
-                                    n_idxs, n_rows, n_cols)
-                            case  (4) 
-                                call get_matrix_sum_up_gt_with_index_04(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
-                                    n_idxs, n_rows, n_cols)
-                            case  (5) 
-                                call get_matrix_sum_up_gt_with_index_08(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
-                                    n_idxs, n_rows, n_cols)
-                            case  (6) 
-                                call get_matrix_sum_up_gt_with_index_C(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case  (7) 
-                                call get_matrix_sum_up_gt_with_index_C_02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case  (8) 
-                                call get_matrix_sum_up_gt_with_index_C_04(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case  (9) 
-                                call get_matrix_sum_up_gt_with_index_C_08(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case (10) 
-                                call get_matrix_sum_up_gt_with_index_A_02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case (11) 
-                                call get_matrix_sum_up_gt_with_index_A_04(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case (12) 
-                                call get_matrix_sum_up_gt_with_index_A_04x(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case (13) 
-                                if (n_cols<8) exit
-                                call get_matrix_sum_up_gt_with_index_A_08(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case (14) 
-                                if (n_cols<16) exit
-                                call get_matrix_sum_up_gt_with_index_A_16(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case (15) 
-                                if (n_cols<2) exit
-                                call get_matrix_sum_up_gt_with_index_A_02_ver02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case (16) 
-                                if (n_cols<4) exit
-                                call get_matrix_sum_up_gt_with_index_A_04_ver02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case (17) 
-                                if (n_cols<8) exit
-                                call get_matrix_sum_up_gt_with_index_A_08_ver02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case (18) 
-                                if (n_cols<16) exit
-                                call get_matrix_sum_up_gt_with_index_A_16_ver02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case (19) 
-                                if (n_cols<4) exit
-                                call get_matrix_sum_up_gt_with_index_A_04_02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case (20) 
-                                if (n_cols<4) exit
-                                call get_matrix_sum_up_gt_with_index_A_04_04(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case (21) 
-                                if (n_cols<4) exit
-                                call get_matrix_sum_up_gt_with_index_A_08_02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
-                                    n_idxs, n_rows, n_cols)
-                            case (22) 
-                                if (n_cols<4) exit
-                                call get_matrix_sum_up_gt_with_index_A_08_04(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
-                                    mat_t_ptr, y_ptr, indices_diff_ptr, & 
-                                    n_idxs, n_rows, n_cols)
+                            ! case  (3) 
+                            !     call get_matrix_sum_up_gt_with_index_02(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case  (4) 
+                            !     call get_matrix_sum_up_gt_with_index_04(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case  (5) 
+                            !     call get_matrix_sum_up_gt_with_index_08(sum_vals, cnt_vals, thr_vals, mat_t, y, indices, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case  (6) 
+                            !     call get_matrix_sum_up_gt_with_index_C(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case  (7) 
+                            !     call get_matrix_sum_up_gt_with_index_C_02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case  (8) 
+                            !     call get_matrix_sum_up_gt_with_index_C_04(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case  (9) 
+                            !     call get_matrix_sum_up_gt_with_index_C_08(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case (10) 
+                            !     call get_matrix_sum_up_gt_with_index_A_02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case (11) 
+                            !     call get_matrix_sum_up_gt_with_index_A_04(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case (12) 
+                            !     call get_matrix_sum_up_gt_with_index_A_04x(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case (13) 
+                            !     if (n_cols<8) exit
+                            !     call get_matrix_sum_up_gt_with_index_A_08(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case (14) 
+                            !     if (n_cols<16) exit
+                            !     call get_matrix_sum_up_gt_with_index_A_16(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case (15) 
+                            !     if (n_cols<2) exit
+                            !     call get_matrix_sum_up_gt_with_index_A_02_ver02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case (16) 
+                            !     if (n_cols<4) exit
+                            !     call get_matrix_sum_up_gt_with_index_A_04_ver02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case (17) 
+                            !     if (n_cols<8) exit
+                            !     call get_matrix_sum_up_gt_with_index_A_08_ver02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case (18) 
+                            !     if (n_cols<16) exit
+                            !     call get_matrix_sum_up_gt_with_index_A_16_ver02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case (19) 
+                            !     if (n_cols<4) exit
+                            !     call get_matrix_sum_up_gt_with_index_A_04_02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case (20) 
+                            !     if (n_cols<4) exit
+                            !     call get_matrix_sum_up_gt_with_index_A_04_04(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case (21) 
+                            !     if (n_cols<4) exit
+                            !     call get_matrix_sum_up_gt_with_index_A_08_02(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
+                            ! case (22) 
+                            !     if (n_cols<4) exit
+                            !     call get_matrix_sum_up_gt_with_index_A_08_04(sum_vals_ptr, cnt_vals_ptr, thr_vals_ptr, & 
+                            !         mat_t_ptr, y_ptr, indices_diff_ptr, & 
+                            !         n_idxs, n_rows, n_cols)
                         end select
                     end do
                     call date_and_time(values=date_value2)
                     times(iter_types) = time_diff(date_value1, date_value2)/dble(n_iter)
                     rate = 1/dble(n_divs_test(d))*100
-                    print "(A, i15, i15, f12.4, f30.15, f30.15, i15)", types(iter_types), n_cols, n_rows, rate, &
-                        real(times(iter_types)), sum(sum_vals-sum_vals_orig), sum(cnt_vals-cnt_vals_orig)
+                    ! print "(A, i15, i15, f12.4, f30.15, f30.15, i15)", types(iter_types), n_cols, n_rows, rate, &
+                    !     real(times(iter_types)), sum(sum_vals-sum_vals_orig), sum(cnt_vals-cnt_vals_orig)
+                    print*, sum_vals
+                    print*, cnt_vals
                     ! print*, sum_vals
                     ! print*, sum_vals_orig
                     ! print*, sum_vals/sum_vals_orig
