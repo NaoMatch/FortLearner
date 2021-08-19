@@ -11,6 +11,13 @@ doxygen
 make  
 graphviz
 
+# Benchmark
+## extra_tree_regressor(second)
+| Data: shape(#Row, #Col)         | Scikit-learn: ExtraTreeRegressor.fit() | FortLearner: extra_tree_regressor%fit() | FortLearner: extra_tree_regressor%fit_faster() | 
+| ------------------------------- | -------------------------------- | --------------------------------- | -------------------------------------------- | 
+| YearPredictionMSD: (412206, 90) | 3.12                             | 2.1                               | 0.800                                        | 
+
+
 # Implemented
 * Linear Regression: see sample_scripts/main_linear_regression.f90
   * linear_regression
