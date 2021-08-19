@@ -198,6 +198,9 @@ contains
         integer(kind=8), save :: tot_time=0
         real(kind=8), ALLOCATABLE :: tmp_r(:)
         integer(kind=4), ALLOCATABLE :: bin_indices(:)
+
+        real(kind=8), pointer :: tmp_x_ptr(:,:)
+
         if (node_ptr%depth .eq. 0_8) tot_time = 0
 
         if ( node_ptr%is_terminal ) return
@@ -252,16 +255,29 @@ contains
                 end if
             end do
         else
-            do i=1, node_ptr%n_samples
-                idx = node_ptr%indices(i)
-                if ( data_holder_ptr%x_ptr%x_r8_ptr(idx, fid) .le. node_ptr%threshold_ ) then
-                    node_axis_l%indices(cnt_l) = idx
-                    cnt_l = cnt_l + 1
-                else
-                    node_axis_r%indices(cnt_r) = idx
-                    cnt_r = cnt_r + 1
-                end if
-            end do
+            if (data_holder_ptr % is_trans_x) then
+                do i=1, node_ptr%n_samples
+                    idx = node_ptr%indices(i)
+                    if ( data_holder_ptr%x_t_ptr%x_r8_ptr(fid, idx) .le. node_ptr%threshold_ ) then
+                        node_axis_l%indices(cnt_l) = idx
+                        cnt_l = cnt_l + 1
+                    else
+                        node_axis_r%indices(cnt_r) = idx
+                        cnt_r = cnt_r + 1
+                    end if
+                end do
+            else
+                do i=1, node_ptr%n_samples
+                    idx = node_ptr%indices(i)
+                    if ( data_holder_ptr%x_ptr%x_r8_ptr(idx, fid) .le. node_ptr%threshold_ ) then
+                        node_axis_l%indices(cnt_l) = idx
+                        cnt_l = cnt_l + 1
+                    else
+                        node_axis_r%indices(cnt_r) = idx
+                        cnt_r = cnt_r + 1
+                    end if
+                end do
+            end if
         end if
 
         node_axis_l%response = node_ptr%response_l
