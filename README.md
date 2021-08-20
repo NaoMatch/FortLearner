@@ -1,6 +1,9 @@
 # FortLearner
 Machine learning scripts for Fortranner.  
 
+# Update
+2021/08/20: linear_regression, ridge_regression, lasso_regression, add model dump & load
+
 ## requirement
 gfortran >= 7.4.0  
 gcc >= 7.4.0  
