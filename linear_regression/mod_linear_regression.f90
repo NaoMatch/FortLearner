@@ -22,6 +22,8 @@ module mod_linear_regression
         procedure :: predict
         procedure :: predict_simple
         procedure :: predict_multiple
+        procedure :: dump => dump_model
+        procedure :: load => load_model
     end type
 
 
@@ -260,6 +262,7 @@ contains
         this%intercept_ = 0d0
         if ( this%hparam%fit_intercept ) this%intercept_ = weights(n_columns_with)
 
+        this%n_columns = n_columns
         this%is_trained = t_
         this%is_simple = f_
     end subroutine fit_linear_regression_multiple
@@ -405,6 +408,7 @@ contains
         this%intercept_ = 0d0
         if ( this%hparam%fit_intercept ) this%intercept_ = weights(n_columns_with)
 
+        this%n_columns = n_columns
         this%is_trained = t_
         this%is_simple = f_
     end subroutine fit_ridge_regression_multiple
@@ -574,6 +578,7 @@ contains
 
         this%coefs_ = weights
         this%intercept_ = w0
+        this%n_columns = n_columns
         this%is_trained = t_
         this%is_simple = f_
 
@@ -642,5 +647,51 @@ contains
             predict(n,1) = predict(n,1) + this%intercept_
         end do
     end subroutine predict_multiple
+
+
+    subroutine dump_model(this, file_name)
+        implicit none
+        class(base_linear_regressor) :: this
+        character(len=*)           :: file_name
+
+        open(10, file=file_name, form='unformatted', status="replace")
+        if (.not. this % is_trained) then
+            print*, trim(this % algo_name),  " is not trained. Cannot dump model."
+            write(10) f_ ! dump fail
+            stop
+        end if
+
+        write(10) t_ ! dump success
+        write(10) this%algo_name
+        write(10) this%n_columns
+        write(10) this%coef_
+        if (.not. this % is_simple)  write(10) this%coefs_
+        write(10) this%intercept_
+        close(10)
+    end subroutine
+
+    subroutine load_model(this, file_name)
+        implicit none
+        class(base_linear_regressor) :: this
+        character(len=*)           :: file_name
+        logical(kind=4) :: is_dump_success
+
+        open(10, file=file_name, form='unformatted')
+        read(10) is_dump_success
+        if (.not. is_dump_success) then
+            print*, trim(file_name),  " failed dump of the model."
+            stop
+        end if
+        read(10) this%algo_name
+        read(10) this%n_columns
+        read(10) this%coef_
+        if (.not. this % is_simple)  then
+            allocate(this%coefs_(this%n_columns))
+            read(10) this%coefs_
+        end if
+        read(10) this%intercept_
+        close(10)
+        this%is_trained = t_
+    end subroutine
 
 end module mod_linear_regression
