@@ -2,15 +2,15 @@
 Machine learning scripts for Fortranner.  
 
 # Update
-2021/08/22: add model dump & load to decision_tree_regressor, extra_tree_regressor, clouds_regressor, lawu_regressor
+2021/08/22: add model dump & load to decision_tree_regressor, extra_tree_regressor, clouds_regressor, lawu_regressor  
 2021/08/20: add model dump & load to linear_regression, ridge_regression, lasso_regression
 
 # requirement
 gfortran >= 7.4.0  
 gcc >= 7.4.0  
-X86_64
 
 ### option
+x86_64
 doxygen  
 make  
 graphviz
