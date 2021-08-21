@@ -658,6 +658,7 @@ contains
         if (.not. this % is_trained) then
             print*, trim(this % algo_name),  " is not trained. Cannot dump model."
             write(10) f_ ! dump fail
+            close(10)
             stop
         end if
 
