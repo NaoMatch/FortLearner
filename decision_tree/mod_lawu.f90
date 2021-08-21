@@ -63,6 +63,7 @@ contains
 
         tmp%is_axis_parallel = t_
         tmp%hparam%algo_name = "lawu_regressor"
+        tmp%algo_name = tmp%hparam%algo_name
 
         fashion_list(1) = "best"
         fashion_list(2) = "depth"
@@ -210,13 +211,13 @@ contains
             this%results%split_thresholds_, this%results%split_features_, this%results%is_terminals_, &
             data_holder_ptr%disc)
 
-
         if (allocated(this%mean_y)) deallocate(this%mean_y)
         allocate(this%mean_y(data_holder_ptr%n_outputs))
         this%mean_y = mean_y
         do n=1, data_holder_ptr%n_samples, 1
             data_holder_ptr%y_ptr%y_r8_ptr(n,:) = y_copy(n,:)
         end do
+        this % is_trained = t_
     end subroutine fit_lawu_regressor
 
 

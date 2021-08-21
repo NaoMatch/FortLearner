@@ -60,6 +60,7 @@ contains
 
         tmp%is_axis_parallel = t_
         tmp%hparam%algo_name = "clouds_regressor"
+        tmp%algo_name = "clouds_regressor"
 
         fashion_list(1) = "best"
         fashion_list(2) = "depth"
@@ -179,6 +180,8 @@ contains
                 call this%print_info(this%root_node_axis_ptr)
             end if
         end if
+
+        this % is_trained = t_
     end subroutine fit_clouds_regressor
 
 

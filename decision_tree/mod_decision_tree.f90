@@ -50,6 +50,7 @@ contains
 
         tmp%is_axis_parallel = t_
         tmp%hparam%algo_name = "decision_tree_regressor"
+        tmp % algo_name = tmp%hparam%algo_name
 
         fashion_list(1) = "best"
         fashion_list(2) = "depth"
@@ -144,6 +145,7 @@ contains
         end if
 
         call this%postprocess(this%is_classification)
+        this%is_trained = t_
     end subroutine fit_decision_tree_regressor
 
 end module mod_decision_tree
