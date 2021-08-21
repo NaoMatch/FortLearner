@@ -53,6 +53,7 @@ contains
 
         tmp%is_axis_parallel = t_
         tmp%hparam%algo_name = "extra_tree_regressor"
+        tmp % algo_name = tmp%hparam%algo_name
 
         fashion_list(1) = "best"
         fashion_list(2) = "depth"
@@ -81,85 +82,6 @@ contains
         tmp%lr_layer = 0d0
         new_extra_tree_regressor = tmp
     end function new_extra_tree_regressor
-
-
-    !> A subtouine to fit regressor of 'extra_tree'. 
-    !! \return returns fitted regressor tree
-    !! \param data_holder_ptr pointer of data_holder 
-    !! \param print_node ***OPTIONAL*** if True, print node informations
-    !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
-    !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
-    ! subroutine fit_extra_tree_regressor(this, data_holder_ptr, print_node, &
-    !     feature_indices, feature_indices_scanning_range)
-    !     implicit none
-
-    !     class(extra_tree_regressor) :: this
-    !     type(data_holder), pointer     :: data_holder_ptr
-    !     logical(kind=4), OPTIONAL      :: print_node
-    !     integer(kind=8), optional      :: feature_indices(:)
-    !     integer(kind=8), optional      :: feature_indices_scanning_range(2)
-
-    !     type(node_axis), target            :: root_node
-    !     type(hparam_decisiontree), target  :: hparam
-    !     type(hparam_decisiontree), pointer :: hparam_ptr
-    !     type(node_axis_ptr), allocatable   :: selected_node_ptrs(:)
-    !     logical(kind=4)                    :: is_permute_per_node
-
-    !     logical(kind=4) :: is_stop
-    !     type(node_splitter) :: splitter
-    !     integer(kind=8) :: depth, n_columns, n
-    !     integer(kind=8), allocatable :: feature_indices_(:), feature_indices_scanning_range_(:)
-    !     integer(kind=8) :: date_value1(8), date_value2(8)
-    !     integer(kind=8), save :: time_splti=0
-
-    !     include "./include/set_feature_indices_and_scanning_range.f90"
-
-    !     call this%init(data_holder_ptr)
-
-    !     if (associated(this%root_node_axis_ptr)) nullify(this%root_node_axis_ptr)
-    !     this%root_node_axis_ptr => root_node
-    !     call this%init_root_node(data_holder_ptr, is_classification=this%is_classification)
-
-    !     hparam = this%hparam
-    !     hparam_ptr => hparam
-    !     call this%root_node_axis_ptr%hparam_check(hparam_ptr)
-    !     call this%induction_stop_check(hparam_ptr, is_stop)
-    !     if ( is_stop ) return
-
-    !     depth = 1
-    !     do while (t_)
-    !         is_stop = f_
-    !         if (allocated(selected_node_ptrs)) deallocate(selected_node_ptrs)
-    !         allocate(selected_node_ptrs(0))
-
-    !         call this%extract_split_node_ptrs_axis(selected_node_ptrs, depth)
-
-    !         call date_and_time(values=date_value1)
-    !         call splitter%split_extra_tree_regressor(selected_node_ptrs, data_holder_ptr, hparam_ptr, &
-    !             n_columns, feature_indices_, feature_indices_scanning_range_, is_permute_per_node)
-    !         call date_and_time(values=date_value2)
-    !         time_splti = time_splti + time_diff(date_value1, date_value2)
-
-
-    !         call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, this%is_classification, &
-    !             this%lr_layer)
-
-    !         call this%induction_stop_check(hparam_ptr, is_stop)
-    !         if (is_stop) exit
-    !         depth = depth + 1
-    !     end do
-    !     call termination_node_ptr_axis(this%root_node_axis_ptr)
-        
-    !     if ( present(print_node) ) then
-    !         if ( print_node ) then
-    !             call this%print_info(this%root_node_axis_ptr)
-    !         end if
-    !     end if
-
-    !     call this%postprocess(this%is_classification)
-
-    !     print*, "SplitTime: ", time_splti
-    ! end subroutine fit_extra_tree_regressor
 
 
     subroutine fit_extra_tree_regressor(this, data_holder_ptr, print_node, &
@@ -229,7 +151,7 @@ contains
         end if
 
         call this%postprocess(this%is_classification)
-
+        this % is_trained = t_
         ! print*, "SplitTime: ", time_splti
     end subroutine fit_extra_tree_regressor
 
