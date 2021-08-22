@@ -2,8 +2,8 @@
 Machine learning scripts for Fortranner.  
 
 # Update
-2021/08/22: set '#include <stdint.h>' to inc_covariance_value_of_vectors.C
-2021/08/22: add benchmark for decision_tree_regressor.
+2021/08/22: set '#include <stdint.h>' to inc_covariance_value_of_vectors.C  
+2021/08/22: add benchmark for decision_tree_regressor.  
 2021/08/22: add model dump & load to decision_tree_regressor, extra_tree_regressor, clouds_regressor, lawu_regressor  
 2021/08/20: add model dump & load to linear_regression, ridge_regression, lasso_regression
 
