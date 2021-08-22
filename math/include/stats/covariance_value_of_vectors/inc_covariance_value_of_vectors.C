@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdint.h>
 #define ALIGN_SIZE  32
 #define ALIGN_CHECK 0x1f // 00001111
 
