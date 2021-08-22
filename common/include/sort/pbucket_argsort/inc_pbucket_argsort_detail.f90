@@ -1,20 +1,24 @@
 if (n_samples .eq. 0) return ! Fast Return
 
+! print*, "pbquick_sort", 1
 vector_min = minval(vector)
 vector_max = maxval(vector)
 if (vector_min .eq. vector_max) return ! Fast Return
 
+! print*, "pbquick_sort", 2
 rec_depth_opt = 0
 if (present(rec_depth)) rec_depth_opt = rec_depth
 
 ! -----------------------------------------------------------------------
 ! n_sampling = sqrt(real(n_samples, kind=kind(n_sampling)))
+! print*, "pbquick_sort", 3
 n_sampling = int(n_samples/dble(1000), kind=kind(n_sampling))
 if ( n_sampling .eq. int(0, kind=kind(n_sampling)) ) then
     call quick_argsort(vector, indices, n_samples)
     return
 end if
 
+! print*, "pbquick_sort", 4
 allocate(sampling_indices(n_sampling))
 allocate(values(n_sampling))
 call rand_integer(one, n_samples, sampling_indices, n_sampling)
@@ -36,6 +40,7 @@ else
 end if
 
 ! -----------------------------------------------------------------------
+! print*, "pbquick_sort", 5
 allocate(works(n_buckets))
 allocate(counters(n_buckets))
 allocate(sizes(n_buckets))
@@ -51,10 +56,16 @@ max_val = n_buckets-1.0
 factor = diff * max_val
 diff = - vector_min * factor + 1
 
+! print*, "pbquick_sort", 6, size(counters)
 do i=1, n_samples, 1
     tmp_v = vector(i)
     tmp_i = indices(i)
-    bucket_idx = int( tmp_v * factor + diff, kind=kind(bucket_idx))
+    bucket_idx = maxval( & 
+        (/ &
+            int( tmp_v * factor + diff, kind=kind(bucket_idx)),  &
+            int( 1,                     kind=kind(bucket_idx))   &
+        /) &
+    )
     cnt_b = counters(bucket_idx)
     size_b = sizes(bucket_idx)
 
@@ -80,6 +91,7 @@ do i=1, n_samples, 1
 end do
 
 ! Sort Arrays
+! print*, "pbquick_sort", 7
 ini = 1
 do b=1, n_buckets
     fin = ini + counters(b) - 2
