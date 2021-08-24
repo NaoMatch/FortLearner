@@ -162,9 +162,28 @@ module mod_stats
         module procedure groupby_count_i8
     end interface groupby_count
 
+    include "./include/stats/get_minmax_vector2vector/inc_get_minmax_vector2vector_interface_to_C.f90"
+    interface get_minmax_vector2vector
+        module procedure get_minmax_vector2vector_r8
+    end interface get_minmax_vector2vector
+
 contains
 
-    ! include "./include/stats/variance_value_of_vector/inc_variance_value_of_vector_detail_new.f90"
+    include "./include/stats/get_minmax_vector2vector/inc_get_minmax_vector2vector.f90"
+    subroutine get_minmax_vector2vector_r8(vals, min_vals, max_vals, n)
+        implicit none
+        real(kind=8), intent(in)    :: vals(n)
+        real(kind=8), intent(inout) :: min_vals(n), max_vals(n)
+        integer(kind=8), intent(in) :: n
+#if _default
+        call get_minmax_vector2vector_02_F_r8(vals, min_vals, max_vals, n)
+#elif _x86_64
+        call get_minmax_vector2vector_08z_A_r8(vals, min_vals, max_vals, n)
+#else 
+#error "CPU Architecture is not supported. Use '-D_default'."
+#endif
+    end subroutine get_minmax_vector2vector_r8
+
 
     ! -----------------------------------------------------------------------------
     ! -----------------------------------------------------------------------------
