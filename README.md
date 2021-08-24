@@ -2,6 +2,7 @@
 Machine learning scripts for Fortranner.  
 
 # Update
+2021/08/24: add new 'get_minmax'.  
 2021/08/22: add benchmark for lawu_regressor.  
 2021/08/22: add benchmark for clouds_regressor.  
 2021/08/22: set '#include <stdint.h>' to inc_covariance_value_of_vectors.C  
