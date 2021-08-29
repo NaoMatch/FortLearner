@@ -13,6 +13,8 @@ asm              := ./mod/inc_sum_up_vector_c.out \
 					./mod/inc_get_matrix_count_and_sum_up_gt.out \
 					./mod/inc_ax_plus_y.out \
 					./mod/inc_covariance_value_of_vectors.out \
+					./mod/inc_get_minmax_vector2vector.out \
+					./mod/inc_get_matrix_minmax_parallel.out \
 
 common           := 	./mod/mod_const.out \
 						./mod/mod_common.out \
@@ -61,6 +63,7 @@ build:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_extra_tree.f90          -o ./mod/mod_extra_tree.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_clouds.f90          -o ./mod/mod_clouds.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_lawu.f90          -o ./mod/mod_lawu.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../linear_regression/mod_linear_regression.f90          -o ./mod/mod_linear_regression.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/sum_up/inc_sum_up_vector.c                                       -o ./mod/inc_sum_up_vector_c.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/sum_up/inc_sum_up_matrix.c                                       -o ./mod/inc_sum_up_matrix_c.out ./mod/inc_sum_up_vector_c.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/sum_up_gt/inc_sum_up_gt.c                                        -o ./mod/inc_sum_up_gt_c.out
@@ -70,9 +73,10 @@ build:
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/sum_up_gt/inc_get_matrix_count_and_sum_up_gt.c                   -o ./mod/inc_get_matrix_count_and_sum_up_gt.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../linalg/include/linalg_ax_plus_y/inc_ax_plus_y.c                                     -o ./mod/inc_ax_plus_y.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors.c    -o ./mod/inc_covariance_value_of_vectors.out
+	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/get_minmax_vector2vector/inc_get_minmax_vector2vector.c    -o ./mod/inc_get_minmax_vector2vector.out
+	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/get_minmax/inc_get_matrix_minmax_parallel.c                      -o ./mod/inc_get_matrix_minmax_parallel.out
 
 test:
-	make build
 	make main_decision_tree_clouds
 	make main_decision_tree_decision_tree
 	make main_decision_tree_extra_tree
@@ -86,6 +90,7 @@ test:
 	make main_stats_covariance_of_vectors
 	make main_stats_get_minmax
 	make main_stats_get_matrix_minmax_with_index
+	make main_stats_get_matrix_minmax_with_index_parallel
 	make main_stats_mean_matrix
 	make main_stats_mean_vector
 	make main_stats_sum_up_matrix
@@ -177,6 +182,14 @@ main_stats_get_matrix_minmax_with_index:
 	$(asm) $(option) $(mod) $(opt) \
 	main_stats_get_matrix_minmax_with_index.f90 -o main_stats_get_matrix_minmax_with_index.out
 	./main_stats_get_matrix_minmax_with_index.out
+
+main_stats_get_matrix_minmax_with_index_parallel:
+	make build
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main_stats_get_matrix_minmax_with_index_parallel.f90 -o main_stats_get_matrix_minmax_with_index_parallel.out
+	./main_stats_get_matrix_minmax_with_index_parallel.out
 
 main_stats_count_and_sum_up_gt_matrix_with_index:
 	$(compiler_fortran) -w -unroll \
