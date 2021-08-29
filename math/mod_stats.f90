@@ -1,5 +1,6 @@
 !> A module to calculate simple statistics.
 module mod_stats
+    !$ use omp_lib
     use iso_c_binding
     use mod_const
     use mod_sort
@@ -54,6 +55,11 @@ module mod_stats
     interface get_matrix_minmax
         module procedure get_matrix_minmax_r8
     end interface get_matrix_minmax
+
+    include "./include/stats/get_minmax/inc_get_matrix_minmax_parallel_interface_to_C.f90"
+    interface get_matrix_minmax_parallel
+        module procedure get_matrix_minmax_parallel_r8
+    end interface get_matrix_minmax_parallel
 
     !> Interface to call mean_value_of_vector_r4, mean_value_of_vector_r8, mean_value_of_vector_i4, mean_value_of_vector_i8
     interface mean  
@@ -183,6 +189,7 @@ contains
 #error "CPU Architecture is not supported. Use '-D_default'."
 #endif
     end subroutine get_minmax_vector2vector_r8
+
 
 
     ! -----------------------------------------------------------------------------
@@ -599,6 +606,35 @@ contains
 #error "CPU Architecture is not supported. Use '-D_default'."
 #endif
     end subroutine get_matrix_minmax_r8
+
+
+    include "./include/stats/get_minmax/inc_get_matrix_minmax_parallel_F.f90"
+    subroutine get_matrix_minmax_parallel_r8(min_vals, max_vals, mat_t, indices, n_indices, n_rows, n_cols, n_thds)
+        implicit none
+        real(kind=8), intent(inout), target :: min_vals(n_cols), max_vals(n_cols)
+        real(kind=8), intent(in)   , target :: mat_t(n_cols, n_rows)
+        integer(kind=8), intent(in), target :: indices(n_indices)
+        integer(kind=8), intent(in)         :: n_indices, n_rows, n_cols, n_thds
+#if _default
+        call get_matrix_minmax_with_index_parallel_04_F_r8(min_vals, max_vals, mat_t, indices, n_indices, n_rows, n_cols, n_thds)
+#elif _x86_64
+        type(c_ptr) :: min_vals_ptr, max_vals_ptr, mat_t_ptr, indices_ptr
+
+        min_vals = huge(0d0)
+        max_vals = -huge(0d0)
+
+        min_vals_ptr = c_loc(min_vals)
+        max_vals_ptr = c_loc(max_vals)
+        mat_t_ptr    = c_loc(mat_t)
+        indices_ptr  = c_loc(indices)
+
+        call get_matrix_minmax_with_index_parallel_32z_A_r8(min_vals_ptr, max_vals_ptr, mat_t_ptr, indices_ptr, &
+                    n_indices, n_rows, n_cols, n_thds)
+#else 
+#error "CPU Architecture is not supported. Use '-D_default'."
+#endif
+    end subroutine get_matrix_minmax_parallel_r8
+
 
     include "./include/stats/variance_value_of_vector/inc_variance_value_of_vector_detail_new.f90"
     function variance_fast_r8(x, n)
