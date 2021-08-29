@@ -3,7 +3,6 @@ program main_minmax_with_index
     use mod_sort
     use mod_timer
     use mod_stats
-    use mod_get_matrix_minmax
     implicit none
 
     integer(kind=8) :: date_value1(8), date_value2(8)
