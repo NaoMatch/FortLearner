@@ -36,6 +36,11 @@ module mod_stats
         module procedure get_matrix_count_and_sum_up_r8
     end interface get_matrix_count_and_sum_up_gt
 
+    include "./include/stats/sum_up_gt/inc_count_and_sum_up_gt_vector2vector_interface_to_C.f90"
+    interface get_count_and_sum_up_gt_vector2vector
+        module procedure get_count_and_sum_up_gt_vector2vector_r8
+    end interface get_count_and_sum_up_gt_vector2vector
+
     !> Interface to call sum_up_left_r4, sum_up_left_with_indices_real32
     interface sum_of_matrix
         module procedure sum_of_matrix_r4
@@ -407,6 +412,24 @@ contains
         !$omp end parallel
     end subroutine sum_up_matrix_parallel_i8
 
+
+    include "./include/stats/sum_up_gt/inc_count_and_sum_up_gt_vector2vector.f90"
+    subroutine get_count_and_sum_up_gt_vector2vector_r8(x_vals, thr_vals, sum_vals, cnt_vals, y_val, n)
+        implicit none
+        real(kind=8), intent(in)       :: x_vals(n)
+        real(kind=8), intent(in)       :: thr_vals(n)
+        real(kind=8), intent(inout)    :: sum_vals(n)
+        integer(kind=8), intent(inout) :: cnt_vals(n)
+        real(kind=8), intent(in)       :: y_val
+        integer(kind=8), intent(in)    :: n
+#if _default
+        call count_and_sum_up_gt_vector2vector_16_F_r8(x_vals, thr_vals, sum_vals, cnt_vals, y_val, n)
+#elif _x86_64
+        call count_and_sum_up_gt_vector2vector_16z_A_r8(x_vals, thr_vals, sum_vals, cnt_vals, y_val, n)
+#else 
+#error "CPU Architecture is not supported. Use '-D_default'."
+#endif
+    end subroutine get_count_and_sum_up_gt_vector2vector_r8
 
     ! -----------------------------------------------------------------------------
     ! -----------------------------------------------------------------------------
