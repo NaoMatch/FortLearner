@@ -16,6 +16,7 @@ asm              := ./mod/inc_sum_up_vector_c.out \
 					./mod/inc_get_minmax_vector2vector.out \
 					./mod/inc_get_matrix_minmax_parallel.out \
 					./mod/inc_get_count_and_sum_up_gt_vector2vector.out \
+					./mod/inc_get_matrix_count_and_sum_up_gt_parallel.out \
 
 common           := 	./mod/mod_const.out \
 						./mod/mod_common.out \
@@ -77,6 +78,7 @@ build:
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/get_minmax_vector2vector/inc_get_minmax_vector2vector.c    -o ./mod/inc_get_minmax_vector2vector.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/get_minmax/inc_get_matrix_minmax_parallel.c                      -o ./mod/inc_get_matrix_minmax_parallel.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/sum_up_gt/inc_get_count_and_sum_up_gt_vector2vector.c            -o ./mod/inc_get_count_and_sum_up_gt_vector2vector.out
+	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/sum_up_gt/inc_get_matrix_count_and_sum_up_gt_parallel.c          -o ./mod/inc_get_matrix_count_and_sum_up_gt_parallel.out
 
 test:
 	make main_decision_tree_clouds
