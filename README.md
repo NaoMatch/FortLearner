@@ -2,9 +2,9 @@
 Machine learning scripts for Fortranner.  
 
 # WIP:
-get_matrix_count_and_sum_up_parallel_r8; parallel version of 'get_matrix_count_and_sum_up_r8'.
 
 # Update
+2021/08/31: add new 'get_matrix_count_and_sum_up_parallel_r8' for extra_tree_regressor (useless).  
 2021/08/29: add new 'get_matrix_minmax_parallel' for extra_tree_regressor.  
 2021/08/24: add new 'get_minmax'.  
 2021/08/22: add benchmark for lawu_regressor.  
