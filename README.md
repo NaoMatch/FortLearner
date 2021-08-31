@@ -2,6 +2,7 @@
 Machine learning scripts for Fortranner.  
 
 # WIP:
+accelerate 'count_and_sum_up_gt_loop_XX_A_r8' by using AVX512 instruction.  
 
 # Update
 2021/08/31: add new 'get_matrix_count_and_sum_up_parallel_r8' for extra_tree_regressor (useless).  
