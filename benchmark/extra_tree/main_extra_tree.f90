@@ -39,6 +39,10 @@ program main_extra_tree
     n_columns_trains = (/10_8, 50_8, 100_8, 200_8, 400_8/)
     n_iters = (/100_8, 100_8, 10_8, 5_8, 5_8/)
 
+        n_samples_trains = n_samples_trains(size(n_samples_trains):1:-1)
+        n_columns_trains = n_columns_trains(size(n_columns_trains):1:-1)
+        n_iters = n_iters(size(n_iters):1:-1)
+
     open(100, file="timer.csv")
     do iii=1, 5, 1
         print*, '============================================================='
@@ -102,6 +106,7 @@ program main_extra_tree
 
             print*, '============================================================='
             print*, "data_holder"
+            allocate(x_train_t(n_columns_train, n_samples_train))
             x_train_t = transpose(x_train)
             dholder   = data_holder(x_train, y_train, is_trans_x=f_)
             dholder_t = data_holder(x_train_t, y_train, is_trans_x=t_)
@@ -110,7 +115,7 @@ program main_extra_tree
 
             max_leaf_nodes = 100
             print*, '============================================================='
-            print*, "Start Training ExtraTree_Fast"
+            print*, "Start Training ExtraTree"
             et_reg_fast = extra_tree_regressor(max_leaf_nodes=max_leaf_nodes, fashion="best", n_repeats=1_8, & 
                     min_samples_leaf=1_8)
             call date_and_time(values=date_value1)
@@ -127,9 +132,9 @@ program main_extra_tree
             write(100, *) "NORMAL", n_samples_train, n_columns_train, real(time_et), "[msec]", real(time_et)/n_iter, "[msec]"
 
             print*, '============================================================='
-            print*, "Start Training ExtraTree_Fast_MORE"
+            print*, "Start Training ExtraTree_Fast_MORE w/o OpenMP"
             et_reg_fast_more = extra_tree_regressor(max_leaf_nodes=max_leaf_nodes, fashion="best", n_repeats=1_8, & 
-                    min_samples_leaf=1_8)
+                    min_samples_leaf=1_8, n_threads=1_8)
             call date_and_time(values=date_value1)
             do iter=1, n_iter
                 call et_reg_fast_more%fit_faster(dholder_t_ptr)
@@ -142,6 +147,25 @@ program main_extra_tree
             print*, "TrainMSE: ", real(metric%mean_square_error(y_train(:,1), y_train_pred_et(:,1)))
             print*, "TIme    : ", n_samples_train, n_columns_train, real(time_et), "[msec]", real(time_et)/n_iter, "[msec]"
             write(100, *) "FASTER", n_samples_train, n_columns_train, real(time_et), "[msec]", real(time_et)/n_iter, "[msec]"
+
+            print*, '============================================================='
+            print*, "Start Training ExtraTree_Fast_MORE w OpenMP"
+            et_reg_fast_more = extra_tree_regressor(max_leaf_nodes=max_leaf_nodes, fashion="best", n_repeats=1_8, & 
+                    min_samples_leaf=1_8, n_threads=8_8)
+            call date_and_time(values=date_value1)
+            do iter=1, n_iter
+                call et_reg_fast_more%fit_faster(dholder_t_ptr)
+            end do
+            call date_and_time(values=date_value2)
+            y_train_pred_et = et_reg_fast_more%predict(x_train)
+            time_et = time_diff(date_value1, date_value2)
+            print*, "=============================================================================="
+            print*, " ----- ExtraTree, Naive Implementation max_leaf_node=100"
+            print*, "TrainMSE: ", real(metric%mean_square_error(y_train(:,1), y_train_pred_et(:,1)))
+            print*, "TIme    : ", n_samples_train, n_columns_train, real(time_et), "[msec]", real(time_et)/n_iter, "[msec]"
+            write(100, *) "FASTER", n_samples_train, n_columns_train, real(time_et), "[msec]", real(time_et)/n_iter, "[msec]"
+
+            deallocate(x_train_t)
         end do
     end do
 end program main_extra_tree
