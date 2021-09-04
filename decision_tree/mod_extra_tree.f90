@@ -37,7 +37,8 @@ contains
     !! \param max_features maximum number of features in node split phase
     !! \param n_repeats number of iterations to find the best split extremely randomly
     function new_extra_tree_regressor(&
-        max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features, n_repeats &
+        max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features, n_repeats, &
+        n_threads &
         )
         implicit none
         type(extra_tree_regressor) :: new_extra_tree_regressor
@@ -49,6 +50,7 @@ contains
         character(len=*), optional :: fashion
         integer(kind=8), optional :: max_features
         integer(kind=8), optional :: n_repeats
+        integer(kind=8), optional :: n_threads
         character(len=256) :: fashion_list(5)
 
         tmp%is_axis_parallel = t_
@@ -68,6 +70,7 @@ contains
         if ( present(fashion) ) tmp%hparam%fashion = fashion
         if ( present(max_features) ) tmp%hparam%max_features = max_features
         if ( present(n_repeats) ) tmp%hparam%n_repeats = n_repeats
+        if ( present(n_threads) ) tmp%hparam%num_threads_in_node = n_threads
 
         call tmp%hparam%validate_int_range("max_depth",        tmp%hparam%max_depth,        1_8, huge(1_8))
         call tmp%hparam%validate_int_range("max_leaf_nodes",   tmp%hparam%max_leaf_nodes,   2_8, huge(1_8))
@@ -75,6 +78,7 @@ contains
         call tmp%hparam%validate_char_list("fashion",          tmp%hparam%fashion,          fashion_list)
         call tmp%hparam%validate_int_range("max_features",     tmp%hparam%max_features,     1_8, huge(1_8), exception=-1_8)
         call tmp%hparam%validate_int_range("n_repeats",        tmp%hparam%n_repeats,        1_8, huge(1_8))
+        call tmp%hparam%validate_int_range("n_threads",        tmp%hparam%num_threads_in_node,        1_8, huge(1_8))
 
         tmp%hparam%fashion_int = tmp%hparam%convert_char_to_int(tmp%hparam%fashion, fashion_list)
         tmp%is_hist = f_

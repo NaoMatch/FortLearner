@@ -530,8 +530,14 @@ contains
         allocate(min_vals(data_holder_ptr%n_columns))
         allocate(max_vals(data_holder_ptr%n_columns))
         call date_and_time(values=date_value1)
-        call get_matrix_minmax(min_vals, max_vals, data_holder_ptr%x_t_ptr%x_r8_ptr, & 
-            node_ptr%indices, node_ptr%n_samples, data_holder_ptr%n_samples, data_holder_ptr%n_columns)
+        if (hparam_ptr%num_threads_in_node .eq. 1_8) then
+            call get_matrix_minmax(min_vals, max_vals, data_holder_ptr%x_t_ptr%x_r8_ptr, & 
+                node_ptr%indices, node_ptr%n_samples, data_holder_ptr%n_samples, data_holder_ptr%n_columns)
+        else
+            call get_matrix_minmax_parallel(min_vals, max_vals, data_holder_ptr%x_t_ptr%x_r8_ptr, & 
+                node_ptr%indices, node_ptr%n_samples, data_holder_ptr%n_samples, data_holder_ptr%n_columns, &
+                hparam_ptr%num_threads_in_node)
+        end if
         call date_and_time(values=date_value2)
         tot_time_minmax = tot_time_minmax + time_diff(date_value1, date_value2)
         ! print*, min_vals-minval(data_holder_ptr%x_t_ptr%x_r8_ptr, dim=2)

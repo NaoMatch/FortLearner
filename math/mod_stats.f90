@@ -694,7 +694,9 @@ contains
         mat_t_ptr    = c_loc(mat_t)
         indices_ptr  = c_loc(indices)
 
-        call get_matrix_minmax_with_index_parallel_32z_A_r8(min_vals_ptr, max_vals_ptr, mat_t_ptr, indices_ptr, &
+        ! call get_matrix_minmax_with_index_parallel_32z_A_r8(min_vals_ptr, max_vals_ptr, mat_t_ptr, indices_ptr, &
+        !             n_indices, n_rows, n_cols, n_thds)
+        call get_matrix_minmax_with_index_parallel_01_C_r8(min_vals_ptr, max_vals_ptr, mat_t_ptr, indices_ptr, &
                     n_indices, n_rows, n_cols, n_thds)
 #else 
 #error "CPU Architecture is not supported. Use '-D_default'."
