@@ -19,6 +19,7 @@ Machine learning scripts for Fortranner.
 # requirement
 gfortran >= 7.4.0  
 gcc >= 7.4.0  
+openmp  
 
 ### option
 x86_64  
