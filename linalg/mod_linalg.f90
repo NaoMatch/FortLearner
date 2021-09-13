@@ -1,5 +1,6 @@
 !> A module for Linear Algebra.
 module mod_linalg
+    use iso_c_binding
     use mod_common
     use mod_const
     use mod_stats
@@ -57,6 +58,7 @@ module mod_linalg
         module procedure :: multi_mat_vec_i4
         module procedure :: multi_mat_vec_i8
     end interface multi_mat_vec
+    include "./include/linalg_multi_mat_vec/inc_multi_mat_vec_interface_to_C.f90"
 
     !> Interface to call rotate_from_both_side
     interface rotate_from_both_side
@@ -280,6 +282,7 @@ contains
         include "./include/linalg_multi_mat_vec/inc_multi_mat_vec_detail.f90"
     end subroutine multi_mat_vec_r4
     include "./include/linalg_multi_mat_vec/inc_multi_mat_vec.f90"
+    include "./include/linalg_multi_mat_vec/inc_multi_mat_vec_variants.f90"
 
 
     subroutine multi_mat_vec_with_indices_r8(matrix, input_vector, output_vector, indices, n_rows, n_cols, n_samples)
