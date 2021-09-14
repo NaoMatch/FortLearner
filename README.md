@@ -21,6 +21,8 @@ Add Create Dataset Scripts.
 gfortran >= 7.4.0  
 gcc >= 7.4.0  
 openmp  
+Python >= 3.7.3  (to create sample datasets)  
+scikit-learn >= 0.23.2  (to create sample datasets)  
 
 ### option
 x86_64  
