@@ -2,9 +2,10 @@
 Machine learning scripts for Fortranner.  
 
 # WIP:
-
+Add Create Dataset Scripts.  
 
 # Update
+2021/09/14: 'multi_mat_x_vec' with simd.  
 2021/09/04: Parallel implementation of 'extra_tree_regressor'.  
 2021/08/31: add new 'get_matrix_count_and_sum_up_parallel_r8' for extra_tree_regressor (useless).  
 2021/08/29: add new 'get_matrix_minmax_parallel' for extra_tree_regressor.  
