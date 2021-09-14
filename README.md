@@ -102,8 +102,6 @@ LW = lawu_regressor(FL) , There is no counterpart to scikit-learn.
 * Dimensionality Reduction:
   * pca
  
-# WIP
-  
 # ToDo
 * Decision Tree
   * Axis-Parallel
