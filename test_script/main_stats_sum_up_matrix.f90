@@ -11,7 +11,7 @@ program main_stats_sum_up_matrix
 
     vec_size = (/100, 1000, 10000, 100000, 1000000/)
 
-    print*, "           n_samples                 diff"
+    print*, "           n_samples                 fast                     naive       diff"
     do i=1, 5, 1
         n_columns = 50
         n_samples = vec_size(i)
@@ -23,7 +23,7 @@ program main_stats_sum_up_matrix
         call sum_up_matrix(sum_vals_fast, mat, n_samples, n_columns)
         sum_vals_naive = sum(mat, dim=1)
 
-        print*, n_samples, sum(sum_vals_fast-sum_vals_naive)
+        print*, n_samples, sum(sum_vals_fast), sum(sum_vals_naive), sum(sum_vals_fast-sum_vals_naive)
 
         deallocate(mat)
         deallocate(sum_vals_fast, sum_vals_naive)

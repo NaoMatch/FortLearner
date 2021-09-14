@@ -56,7 +56,8 @@ program main_stats_count_and_sum_up_gt_matrix_with_index
                 end do
                 call count_and_sum_up_gt(sum_vals_naive(l), cnt_vals_naive(l), y_subset, vec, thr_vals(l), n_indices)
             end do
-            print*, sum(sum_vals_fast-sum_vals_naive), sum(cnt_vals_fast-cnt_vals_naive)
+            print*, n_samples, sum(sum_vals_fast), sum(sum_vals_naive), sum(sum_vals_fast-sum_vals_naive)
+            print*, n_samples, sum(cnt_vals_fast), sum(cnt_vals_naive), sum(cnt_vals_fast-cnt_vals_naive)
 
         deallocate(mat, mat_t, vec, y_subset, y, idx_full, idx, sum_vals_fast, sum_vals_naive, & 
             cnt_vals_fast, cnt_vals_naive, thr_vals)
