@@ -15,6 +15,7 @@ program main_mat_x_vec
 
     integer(kind=8)   :: s, c, n_samples, n_columns, n_types, iter_types, iter, n_iter, base_iter
     type(c_ptr)       :: mat_ptr
+    integer(kind=8)   :: n_samples_list(5), n_columns_list(5)
 
     n_types = 99
     allocate(times(0:n_types))
@@ -75,11 +76,17 @@ program main_mat_x_vec
     base_iter = 5000000000_8
     ! base_iter = 5000000_8
     ! base_iter = 1
-    do s=10, 50, 4
-        n_samples = minval((/2d0**(s/2d0), 10000000d0/)) + 31
 
-        do c=1, 1, 1
+    n_samples_list = (/100_8, 1000_8, 10000_8, 100000_8, 1000000_8/)
+    n_columns_list = (/10_8, 50_8, 100_8, 200_8, 400_8/)
+
+    do s=1, size(n_samples_list), 1
+        ! n_samples = minval((/2d0**(s/2d0), 10000000d0/)) + 31
+        n_samples = n_samples_list(s)
+
+        do c=1, size(n_columns_list), 1
             n_columns = 32*c + 7
+            n_columns = n_columns_list(c)
             n_iter = maxval((/1_8, base_iter/n_samples/n_columns/))
 
             allocate(mat(n_samples, n_columns), mat_t(n_columns, n_samples))
@@ -102,9 +109,9 @@ program main_mat_x_vec
                 call date_and_time(values=date_value1)
                 do iter=1, n_iter, 1
                     select case(iter_types)
-                        case  (0);  CALL DGEMV( "N", n_samples, n_columns, 1d0, mat, &
-                                            n_samples, vec, 1_8, 0d0, res,&
-                                            1_8 )
+                        ! case  (0);  CALL DGEMV( "N", n_samples, n_columns, 1d0, mat, &
+                        !                     n_samples, vec, 1_8, 0d0, res,&
+                        !                     1_8 )
                         case  (1); call multi_mat_vec(mat, vec, res, n_samples, n_columns)
                         case  (2); call multi_mat_vec_01x01_N_F_r8(mat, vec, res, n_samples, n_columns)
                         case  (3); call multi_mat_vec_02x01_N_F_r8(mat, vec, res, n_samples, n_columns)
