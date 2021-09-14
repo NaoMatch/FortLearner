@@ -1,4 +1,4 @@
-program main_stats_covariance
+program main_stats_covariance_of_vectors
     use mod_timer
     use mod_stats, only: covariance_fast, mean
     implicit none
@@ -32,4 +32,4 @@ program main_stats_covariance
     end do
 
 
-end program main_stats_covariance
+end program main_stats_covariance_of_vectors

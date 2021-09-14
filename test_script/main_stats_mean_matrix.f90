@@ -11,7 +11,7 @@ program main_stats_mean_matrix
 
     vec_size = (/100, 1000, 10000, 100000, 1000000/)
 
-    print*, "           n_samples                 diff"
+    print*, "           n_samples                 fast                     naive         diff"
     do i=1, 5, 1
         n_columns = 50
         n_samples = vec_size(i)
@@ -23,7 +23,7 @@ program main_stats_mean_matrix
         avg_vals_fast = mean(mat, n_samples, n_columns)
         avg_vals_naive = sum(mat, dim=1)/dble(n_samples)
 
-        print*, n_samples, sum(avg_vals_fast-avg_vals_naive)
+        print*, n_samples, sum(avg_vals_fast), sum(avg_vals_naive), sum(avg_vals_fast-avg_vals_naive)
 
         deallocate(mat)
         deallocate(avg_vals_fast, avg_vals_naive)

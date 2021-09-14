@@ -49,7 +49,8 @@ program main_stats_get_matrix_minmax_with_index_parallel
                 end do
                 call get_minmax_hybrid_r8(min_vals_naive(l), max_vals_naive(l), vec, n_indices)
             end do
-            print*, sum(min_vals_fast-min_vals_naive), sum(max_vals_fast-max_vals_naive)
+            print*, n_samples, sum(min_vals_fast), sum(min_vals_naive), sum(min_vals_fast-min_vals_naive)
+            print*, n_samples, sum(max_vals_fast), sum(max_vals_naive), sum(max_vals_fast-max_vals_naive)
 
         deallocate(mat, mat_t, vec, idx_full, idx, min_vals_fast, min_vals_naive, max_vals_fast, max_vals_naive)
         end do

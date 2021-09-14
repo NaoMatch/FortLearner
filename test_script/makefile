@@ -17,6 +17,7 @@ asm              := ./mod/inc_sum_up_vector_c.out \
 					./mod/inc_get_matrix_minmax_parallel.out \
 					./mod/inc_get_count_and_sum_up_gt_vector2vector.out \
 					./mod/inc_get_matrix_count_and_sum_up_gt_parallel.out \
+					./mod/inc_multi_mat_vec.out \
 
 common           := 	./mod/mod_const.out \
 						./mod/mod_common.out \
@@ -79,8 +80,11 @@ build:
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/get_minmax/inc_get_matrix_minmax_parallel.c                      -o ./mod/inc_get_matrix_minmax_parallel.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/sum_up_gt/inc_get_count_and_sum_up_gt_vector2vector.c            -o ./mod/inc_get_count_and_sum_up_gt_vector2vector.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/sum_up_gt/inc_get_matrix_count_and_sum_up_gt_parallel.c          -o ./mod/inc_get_matrix_count_and_sum_up_gt_parallel.out
+	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../linalg/include/linalg_multi_mat_vec/inc_multi_mat_vec.c                               -o ./mod/inc_multi_mat_vec.out
 
 test:
+	make build
+	python create_datasets.py
 	make main_decision_tree_clouds
 	make main_decision_tree_decision_tree
 	make main_decision_tree_extra_tree
