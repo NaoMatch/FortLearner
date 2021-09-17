@@ -71,6 +71,8 @@ module mod_node
         type(node_oblq), allocatable :: node_l
         type(node_oblq), allocatable :: node_r
         type(node_oblq), ALLOCATABLE :: node_c(:)
+    contains
+        procedure :: print_node_info_oblq
     end type node_oblq
 
     !> A type for pointer array of node_axis
@@ -149,6 +151,31 @@ contains
         print*, "No. Sample_right: ", this%n_samples_r
         print*, "P = L + R:        ", this%n_samples .eq. this%n_samples_l + this%n_samples_r
     end subroutine print_node_info_axis
+
+    subroutine print_node_info_oblq(this)
+        implicit none
+        class(node_oblq) :: this
+
+        ! if ( .not. this%is_terminal ) return
+
+        print*, "==========================================================================================="
+        print*, "==========================================================================================="
+        print*, "Depth:            ", this%depth
+        print*, "Is Terminal:      ", this%is_terminal
+        print*, "Is Trained:       ", this%is_trained
+        print*, "Split Coefficient:", this%coef_
+        print*, "Split Intercept  :", this%intercept_
+        print*, "Split threshold:  ", this%threshold_
+        ! print*, "Node Label:       ", this%label_
+        print*, "Response:         ", this%response
+        print*, "Impurity:         ", this%impurity
+        print*, "Gain:             ", this%gain_best
+
+        print*, "No. Sample:       ", this%n_samples
+        print*, "No. Sample_left:  ", this%n_samples_l
+        print*, "No. Sample_right: ", this%n_samples_r
+        print*, "P = L + R:        ", this%n_samples .eq. this%n_samples_l + this%n_samples_r
+    end subroutine print_node_info_oblq
 
 
 end module mod_node
