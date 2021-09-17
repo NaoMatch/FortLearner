@@ -50,7 +50,7 @@ module mod_hyperparameter
         integer(kind=8) :: criterion_int            = 0 ! c
         integer(kind=8) :: criterion_boost_int      = 0
         integer(kind=8) :: verbose                  = 0
-        integer(kind=8) :: max_epoch                = 300
+        integer(kind=8) :: max_epoch                = 1000
         integer(kind=8) :: max_patient              = 100
         integer(kind=8) :: max_retry                = 100
         integer(kind=8) :: max_alpha                = 10
@@ -88,6 +88,7 @@ module mod_hyperparameter
         real(kind=8)    :: lambda1                  = 0d0
         real(kind=8)    :: lambda2                  = 1d0
         real(kind=8)    :: row_sampling             = 1d0
+        real(kind=8)    :: initial_temperature      = 1000d0
         logical(kind=4) :: skip_used_features       = f_
         logical(kind=4) :: boot_strap               = f_
         logical(kind=4) :: random_splitter          = f_

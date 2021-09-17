@@ -19,12 +19,12 @@ module mod_woodworking_tools
 
     interface extract_train_resutls
         module procedure :: extract_train_results_axis
-        ! module procedure :: extract_train_results_oblq
+        module procedure :: extract_train_results_oblq
     end interface extract_train_resutls
 
     interface extract_best_split_node
         module procedure :: extract_best_split_node_axis
-        ! module procedure :: extract_best_split_node_oblq
+        module procedure :: extract_best_split_node_oblq
     end interface extract_best_split_node
 
     ! interface extract_most_left_unsplit_node
@@ -34,23 +34,28 @@ module mod_woodworking_tools
 
     interface count_leaf_nodes
         module procedure :: count_leaf_nodes_axis
-        ! module procedure :: count_leaf_nodes_oblq
+        module procedure :: count_leaf_nodes_oblq
     end interface count_leaf_nodes
 
     interface check_splittable_leaf
         module procedure :: check_splittable_leaf_axis
-        ! module procedure :: check_splittable_leaf_oblq
+        module procedure :: check_splittable_leaf_oblq
     end interface check_splittable_leaf
 
     interface count_all_nodes
         module procedure :: count_all_nodes_axis
-        ! module procedure :: count_all_nodes_oblq
+        module procedure :: count_all_nodes_oblq
     end interface count_all_nodes
 
     interface adopting_twins
         module procedure :: adopting_twins_axis
-        ! module procedure :: adopting_twins_oblq
+        module procedure :: adopting_twins_oblq
     end interface adopting_twins
+
+    interface termination_node_ptr
+        module procedure :: termination_node_ptr_axis
+        module procedure :: termination_node_ptr_oblq
+    end interface termination_node_ptr
 
 contains
 
@@ -65,6 +70,7 @@ contains
         class(train_results) :: this
         integer(kind=8), intent(in) :: n_nodes, n_features, n_outputs
         logical(kind=4), intent(in) :: is_classification
+        
         if (allocated(this%split_features_)) deallocate(this%split_features_)
         if (allocated(this%coefs_)) deallocate(this%coefs_)
         if (allocated(this%split_thresholds_)) deallocate(this%split_thresholds_)
@@ -108,8 +114,34 @@ contains
         end if
     end subroutine extract_train_results_axis
 
+    recursive subroutine extract_train_results_oblq(root_node_ptr, results, node_id, is_classification, is_root)
+        implicit none
+        type(node_oblq), pointer, intent(in) :: root_node_ptr
+        type(train_results) :: results
+        integer(kind=8), intent(inout) :: node_id
+        logical(kind=4), intent(in) :: is_classification, is_root
 
-    !> A subtoutine to count leaf(terminal) node.
+        if (is_root) node_id=0_8
+        node_id = node_id + 1_8
+
+        if (allocated(root_node_ptr%coef_)) then
+            results%coefs_(node_id,:) = root_node_ptr%coef_
+            results%intercepts_(node_id) = root_node_ptr%intercept_
+        else
+            results%coefs_(node_id,:) = -2
+            results%intercepts_(node_id) = -2
+        end if
+        results%split_thresholds_(node_id) = root_node_ptr%threshold_
+        results%is_terminals_(node_id) = root_node_ptr%is_terminal
+        results%responses_(node_id,:) = root_node_ptr%response
+        if (.not. root_node_ptr%is_terminal) then
+            call extract_train_results_oblq(root_node_ptr%node_l, results, node_id, is_classification, is_root=f_)
+            call extract_train_results_oblq(root_node_ptr%node_r, results, node_id, is_classification, is_root=f_)
+        end if
+    end subroutine extract_train_results_oblq
+
+
+    !> A subtoutine to count leaf(terminal) axis-parallel split node.
     !! \return returns number of leaf nodes
     !! \param root_node_ptr root node pointer
     !! \param n_leaf_nodes number of leaf nodes
@@ -131,8 +163,30 @@ contains
         end if
     end subroutine count_leaf_nodes_axis
 
+    !> A subtoutine to count leaf(terminal) oblique split node.
+    !! \return returns number of leaf nodes
+    !! \param root_node_ptr root node pointer
+    !! \param n_leaf_nodes number of leaf nodes
+    !! \param is_root is root node or not
+    recursive subroutine count_leaf_nodes_oblq(root_node_ptr, n_leaf_nodes, is_root)
+        implicit none
+        type(node_oblq), pointer, intent(in) :: root_node_ptr
+        integer(kind=8), intent(inout) :: n_leaf_nodes
+        logical(kind=4), intent(in) :: is_root
 
-    !> A subtoutine to check existence of splittable node
+        if (is_root) n_leaf_nodes=0_8
+
+        if ( allocated(root_node_ptr%node_l) ) then
+            call count_leaf_nodes_oblq(root_node_ptr%node_l, n_leaf_nodes, is_root=f_)
+            call count_leaf_nodes_oblq(root_node_ptr%node_r, n_leaf_nodes, is_root=f_)
+        else
+            n_leaf_nodes = n_leaf_nodes + 1
+            return
+        end if
+    end subroutine count_leaf_nodes_oblq
+
+
+    !> A subtoutine to check existence of splittable axis-parallel node
     !! \return returns exist splittable node or not
     !! \param root_node_ptr root node pointer
     !! \param exist_splittable_leaf exist splittable node or not
@@ -150,6 +204,25 @@ contains
             end if
         end if
     end subroutine check_splittable_leaf_axis
+
+    !> A subtoutine to check existence of splittable oblique node
+    !! \return returns exist splittable node or not
+    !! \param root_node_ptr root node pointer
+    !! \param exist_splittable_leaf exist splittable node or not
+    recursive subroutine check_splittable_leaf_oblq(root_node_ptr, exist_splittable_leaf)
+        implicit none
+        type(node_oblq), pointer, intent(in) :: root_node_ptr
+        logical(kind=4), intent(inout)       :: exist_splittable_leaf
+        if ( allocated(root_node_ptr%node_l) ) then
+            call check_splittable_leaf_oblq(root_node_ptr%node_l, exist_splittable_leaf)
+            call check_splittable_leaf_oblq(root_node_ptr%node_r, exist_splittable_leaf)
+        else
+            if ( .not. root_node_ptr%is_terminal ) then
+                exist_splittable_leaf = t_
+                return
+            end if
+        end if
+    end subroutine check_splittable_leaf_oblq
 
 
     !> A subtoutine to count all(root, internal, leaf) nodes.
@@ -170,6 +243,20 @@ contains
             call count_all_nodes_axis(root_node_ptr%node_r, n_nodes, is_root=f_)
         end if
     end subroutine count_all_nodes_axis
+
+    recursive subroutine count_all_nodes_oblq(root_node_ptr, n_nodes, is_root)
+        implicit none
+        type(node_oblq), pointer, intent(in) :: root_node_ptr
+        integer(kind=8), intent(inout) :: n_nodes
+        logical(kind=4), intent(in) :: is_root
+
+        if (is_root) n_nodes=0_8
+        n_nodes = n_nodes + 1
+        if ( allocated(root_node_ptr%node_l) ) then
+            call count_all_nodes_oblq(root_node_ptr%node_l, n_nodes, is_root=f_)
+            call count_all_nodes_oblq(root_node_ptr%node_r, n_nodes, is_root=f_)
+        end if
+    end subroutine count_all_nodes_oblq
 
 
     !> A subroutine to adopting child nodes to 'node_ptr'.
@@ -394,6 +481,96 @@ contains
     end subroutine adopting_twins_axis
 
 
+    subroutine adopting_twins_oblq(node_ptr, data_holder_ptr, hparam_ptr, is_classification, lr_layer, is_hist)
+        implicit none
+        type(node_oblq), pointer :: node_ptr
+        type(data_holder), pointer :: data_holder_ptr
+        type(hparam_decisiontree), pointer :: hparam_ptr
+        logical(kind=4)           :: is_classification
+        real(kind=8)              :: lr_layer
+        logical(kind=4), optional :: is_hist
+
+        integer(kind=8) :: date_value1(8), date_value2(8)
+        type(node_oblq), target :: node_oblq_l, node_oblq_r
+        integer(kind=8) :: i, cnt_l, cnt_r, cls, idx, fid
+        real(kind=8), allocatable :: f(:), tmp_y(:,:)
+        real(kind=8) :: avg, imp
+        logical(kind=4) :: is_hist_optional
+        integer(kind=8) :: n_samples_unroll, n_columns_unroll, j, jk, ik, k, row_idx, bin_idx, row_idx_next
+        integer(kind=4) :: counter, factor
+        integer(kind=8), save :: tot_time=0
+        real(kind=8), ALLOCATABLE :: tmp_x(:,:), tmp_r(:)
+        integer(kind=4), ALLOCATABLE :: bin_indices(:)
+
+        real(kind=8), pointer :: tmp_x_ptr(:,:)
+
+        if (node_ptr%depth .eq. 0_8) tot_time = 0
+
+        if ( node_ptr%is_terminal ) return
+
+        if (allocated(node_ptr%node_l)) return
+
+        is_hist_optional = f_
+        if (present(is_hist)) is_hist_optional = is_hist
+
+        ! Left Child Node
+        node_oblq_l%depth     = node_ptr%depth+1
+        node_oblq_l%n_columns = node_ptr%n_columns
+        node_oblq_l%n_samples = node_ptr%n_samples_l
+        node_oblq_l%sum_p     = node_ptr%sum_l
+        call node_oblq_l%hparam_check(hparam_ptr)
+        allocate(node_oblq_l%indices(node_oblq_l%n_samples))
+
+        node_oblq_r%depth     = node_ptr%depth+1
+        node_oblq_r%n_columns = node_ptr%n_columns
+        node_oblq_r%n_samples = node_ptr%n_samples_r
+        node_oblq_r%sum_p     = node_ptr%sum_r
+        call node_oblq_r%hparam_check(hparam_ptr)
+        allocate(node_oblq_r%indices(node_oblq_r%n_samples))
+
+        allocate(tmp_x(node_ptr%n_samples, node_ptr%n_columns))
+        allocate(tmp_r(node_ptr%n_samples))
+        do i=1, node_ptr % n_samples, 1
+            idx = node_ptr % indices(i)
+            tmp_x(i,:) = data_holder_ptr % x_ptr % x_r8_ptr(idx,:)
+        end do
+        call multi_mat_vec(tmp_x, node_ptr%coef_, tmp_r, node_ptr%n_samples, node_ptr%n_columns)
+        tmp_r = tmp_r + node_ptr%intercept_
+
+        cnt_l=1
+        cnt_r=1
+        do i=1, node_ptr%n_samples
+            idx = node_ptr%indices(i)
+            if ( tmp_r(i) .le. node_ptr%threshold_ ) then
+                node_oblq_l%indices(cnt_l) = idx
+                cnt_l = cnt_l + 1
+            else
+                node_oblq_r%indices(cnt_r) = idx
+                cnt_r = cnt_r + 1
+            end if
+        end do
+
+        node_oblq_l%response = node_ptr%response_l
+        imp = 0d0
+        do i=1, node_oblq_l%n_samples
+            idx = node_oblq_l%indices(i)
+            imp = imp + sum((data_holder_ptr%y_ptr%y_r8_ptr(idx,:) - node_oblq_l%response) ** 2d0)
+        end do
+        node_oblq_l%impurity = imp / dble(node_oblq_l%n_samples) / dble(node_ptr%n_outputs)
+
+        node_oblq_r%response = node_ptr%response_r
+        imp = 0d0
+        do i=1, node_oblq_r%n_samples
+            idx = node_oblq_r%indices(i)
+            imp = imp + sum((data_holder_ptr%y_ptr%y_r8_ptr(idx,:) - node_oblq_r%response) ** 2d0)
+        end do
+        node_oblq_r%impurity = imp / dble(node_oblq_r%n_samples) / dble(node_ptr%n_outputs)
+
+        node_ptr%node_l = node_oblq_l
+        node_ptr%node_r = node_oblq_r
+    end subroutine adopting_twins_oblq
+
+
     !> A subtoutine to extract maximum gain node (already split and not terminal).
     !! \return returns maximum gain split node pointer
     !! \param root_node_ptr root node pointer
@@ -419,6 +596,27 @@ contains
     end subroutine extract_best_split_node_axis
 
 
+    recursive subroutine extract_best_split_node_oblq(root_node_ptr, best_split_node_ptr)
+        implicit none
+        type(node_oblq), pointer, intent(in)    :: root_node_ptr
+        type(node_oblq), pointer, intent(inout) :: best_split_node_ptr
+
+        if ( allocated(root_node_ptr%node_l) ) then
+            call extract_best_split_node_oblq(root_node_ptr%node_l, best_split_node_ptr)
+            call extract_best_split_node_oblq(root_node_ptr%node_r, best_split_node_ptr)
+        else
+            if ( .not. root_node_ptr%is_terminal .and. .not. associated(best_split_node_ptr) ) then
+                best_split_node_ptr => root_node_ptr
+            end if
+
+            if ( .not. root_node_ptr%is_terminal .and. root_node_ptr%gain_best .gt. best_split_node_ptr%gain_best & 
+                .and. root_node_ptr%is_trained ) then
+                best_split_node_ptr => root_node_ptr
+            end if
+        end if
+    end subroutine extract_best_split_node_oblq
+
+
     !> A subroutine to extract all unsplit node pointers, for best-first fashion.
     !! \return returns all unsplit node pointers
     !! \param root_node_ptr root node pointer
@@ -438,6 +636,27 @@ contains
             end if
         end if
     end subroutine extract_unsplit_node_ptrs_axis
+
+
+    !> A subroutine to extract all unsplit node pointers, for best-first fashion.
+    !! \return returns all unsplit node pointers
+    !! \param root_node_ptr root node pointer
+    !! \param unsplit_node_ptrs all unsplit node pointers
+    recursive subroutine extract_unsplit_node_ptrs_oblq(root_node_ptr, unsplit_node_ptrs)
+        implicit none
+        type(node_oblq), pointer, intent(in)            :: root_node_ptr
+        type(node_oblq_ptr), allocatable, intent(inout) :: unsplit_node_ptrs(:)
+        type(node_oblq_ptr)                             :: node_ptr
+        if ( allocated(root_node_ptr%node_l) ) then
+            call extract_unsplit_node_ptrs_oblq(root_node_ptr%node_l, unsplit_node_ptrs)
+            call extract_unsplit_node_ptrs_oblq(root_node_ptr%node_r, unsplit_node_ptrs)
+        else
+            if ( .not. root_node_ptr%is_terminal .and. .not. root_node_ptr%is_trained ) then
+                node_ptr%node_ptr => root_node_ptr
+                unsplit_node_ptrs = [unsplit_node_ptrs, node_ptr]
+            end if
+        end if
+    end subroutine extract_unsplit_node_ptrs_oblq
 
 
     !> A subroutine to extract most left node pointer, for depth-first fashion.
@@ -464,6 +683,30 @@ contains
     end subroutine extract_most_left_unsplit_node_ptr_axis
 
 
+    !> A subroutine to extract most left node pointer, for depth-first fashion.
+    !! \return returns most left node pointer
+    !! \param root_node_ptr root node pointer
+    !! \param most_left_node_ptr most left node pointer
+    recursive subroutine extract_most_left_unsplit_node_ptr_oblq(root_node_ptr, most_left_node_ptrs)
+        implicit none
+        type(node_oblq), pointer, intent(in)    :: root_node_ptr
+        type(node_oblq_ptr), allocatable, intent(inout) :: most_left_node_ptrs(:)
+        type(node_oblq_ptr) :: node_ptr
+
+        if ( size(most_left_node_ptrs) .ge. 1 ) return
+
+        if ( allocated(root_node_ptr%node_l) ) then
+            call extract_most_left_unsplit_node_ptr_oblq(root_node_ptr%node_l, most_left_node_ptrs)
+            call extract_most_left_unsplit_node_ptr_oblq(root_node_ptr%node_r, most_left_node_ptrs)
+        else
+            if ( .not. root_node_ptr%is_terminal .and. .not. root_node_ptr%is_trained ) then
+                node_ptr%node_ptr => root_node_ptr
+                most_left_node_ptrs = [most_left_node_ptrs, node_ptr]
+            end if
+        end if
+    end subroutine extract_most_left_unsplit_node_ptr_oblq
+
+
     !> A subroutine to extract specific depht node pointers, for level-wise fashion.
     !! \return returns most left node pointer
     !! \param root_node_ptr root node pointer
@@ -487,6 +730,27 @@ contains
             end if
         end if
     end subroutine extract_specific_depth_node_ptrs_axis
+
+
+    recursive subroutine extract_specific_depth_node_ptrs_oblq(root_node_ptr, specific_depth, specific_depth_node_ptrs)
+        implicit none
+        type(node_oblq), pointer, intent(in)            :: root_node_ptr
+        integer(kind=8), intent(in)                     :: specific_depth
+        type(node_oblq_ptr), allocatable, intent(inout) :: specific_depth_node_ptrs(:)
+        type(node_oblq_ptr)                             :: node_ptr
+
+        if ( allocated(root_node_ptr%node_l) ) then
+            call extract_specific_depth_node_ptrs_oblq(root_node_ptr%node_l, specific_depth, specific_depth_node_ptrs)
+            call extract_specific_depth_node_ptrs_oblq(root_node_ptr%node_r, specific_depth, specific_depth_node_ptrs)
+        else
+            if ( .not. root_node_ptr%is_terminal & 
+                .and. .not. root_node_ptr%is_trained & 
+                .and. root_node_ptr%depth .eq. specific_depth) then
+                node_ptr%node_ptr => root_node_ptr
+                specific_depth_node_ptrs = [specific_depth_node_ptrs, node_ptr]
+            end if
+        end if
+    end subroutine extract_specific_depth_node_ptrs_oblq
 
 
     !> A subroutine to extract largest impurity node pointer, for impurity-first fashion.
@@ -519,6 +783,32 @@ contains
     end subroutine extract_largetst_impurity_node_ptr_axis
 
 
+    recursive subroutine extract_largetst_impurity_node_ptr_oblq(root_node_ptr, largest_impurity_node_ptrs)
+        implicit none
+        type(node_oblq), pointer, intent(in)    :: root_node_ptr
+        type(node_oblq_ptr), allocatable, intent(inout) :: largest_impurity_node_ptrs(:)
+        type(node_oblq_ptr)  :: node_ptr
+
+        if ( allocated(root_node_ptr%node_l) ) then
+            call extract_largetst_impurity_node_ptr_oblq(root_node_ptr%node_l, largest_impurity_node_ptrs)
+            call extract_largetst_impurity_node_ptr_oblq(root_node_ptr%node_r, largest_impurity_node_ptrs)
+        else
+            
+            if (  size(largest_impurity_node_ptrs) .eq. 0 ) then
+                node_ptr%node_ptr => root_node_ptr
+                largest_impurity_node_ptrs = [largest_impurity_node_ptrs, node_ptr]
+            end if
+
+            if (      .not. root_node_ptr%is_terminal & 
+                .and. .not. root_node_ptr%is_trained & 
+                .and. root_node_ptr%impurity .gt. largest_impurity_node_ptrs(1)%node_ptr%impurity) then
+                node_ptr%node_ptr => root_node_ptr
+                largest_impurity_node_ptrs(1) = node_ptr
+            end if
+        end if
+    end subroutine extract_largetst_impurity_node_ptr_oblq
+
+
     !> A subroutine to extract largest sample node pointer, for sample-first fashion.
     !! \return returns largest sample node pointer
     !! \param root_node_ptr root node pointer
@@ -549,6 +839,32 @@ contains
     end subroutine extract_largetst_sample_node_ptr_axis
 
 
+    recursive subroutine extract_largetst_sample_node_ptr_oblq(root_node_ptr, largest_sample_node_ptrs)
+        implicit none
+        type(node_oblq), pointer, intent(in)    :: root_node_ptr
+        type(node_oblq_ptr), allocatable, intent(inout) :: largest_sample_node_ptrs(:)
+        type(node_oblq_ptr)  :: node_ptr
+
+        if ( allocated(root_node_ptr%node_l) ) then
+            call extract_largetst_sample_node_ptr_oblq(root_node_ptr%node_l, largest_sample_node_ptrs)
+            call extract_largetst_sample_node_ptr_oblq(root_node_ptr%node_r, largest_sample_node_ptrs)
+        else
+            
+            if ( size(largest_sample_node_ptrs) .eq. 0 ) then
+                node_ptr%node_ptr => root_node_ptr
+                largest_sample_node_ptrs = [largest_sample_node_ptrs, node_ptr]
+            end if
+
+            if (      .not. root_node_ptr%is_terminal & 
+                .and. .not. root_node_ptr%is_trained & 
+                .and. root_node_ptr%n_samples .gt. largest_sample_node_ptrs(1)%node_ptr%n_samples) then
+                node_ptr%node_ptr => root_node_ptr
+                largest_sample_node_ptrs(1) = node_ptr
+            end if
+        end if
+    end subroutine extract_largetst_sample_node_ptr_oblq
+
+
     !> A subroutine that replaces information to become a leaf node
     !! \param root_node_ptr root node pointer
     recursive subroutine termination_node_ptr_axis(root_node_ptr)
@@ -569,6 +885,28 @@ contains
             root_node_ptr%n_samples_r = 0_8
         end if
     end subroutine termination_node_ptr_axis
+
+    !> A subroutine that replaces information to become a leaf node
+    !! \param root_node_ptr root node pointer
+    recursive subroutine termination_node_ptr_oblq(root_node_ptr)
+        implicit none
+        type(node_oblq), pointer, intent(in) :: root_node_ptr
+
+        if ( allocated(root_node_ptr%node_l) ) then
+            root_node_ptr%is_trained = t_
+            root_node_ptr%is_terminal = f_
+            call termination_node_ptr_oblq(root_node_ptr%node_l)
+            call termination_node_ptr_oblq(root_node_ptr%node_r)
+        else
+            root_node_ptr%is_trained = t_
+            root_node_ptr%is_terminal = t_
+            if(allocated(root_node_ptr%coef_)) deallocate(root_node_ptr%coef_)
+            root_node_ptr%intercept_ = -2d0
+            root_node_ptr%threshold_ = -2d0
+            root_node_ptr%n_samples_l = 0_8
+            root_node_ptr%n_samples_r = 0_8
+        end if
+    end subroutine termination_node_ptr_oblq
 
 
     !> A function to extract maximum number of bins

@@ -43,6 +43,7 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_extra_tree.out \
 						./mod/mod_clouds.out \
 						./mod/mod_lawu.out \
+						./mod/mod_sadt_regressor.out \
 
 build:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_const.f90                    -o ./mod/mod_const.out
@@ -66,6 +67,7 @@ build:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_extra_tree.f90          -o ./mod/mod_extra_tree.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_clouds.f90          -o ./mod/mod_clouds.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_lawu.f90          -o ./mod/mod_lawu.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_sadt.f90          -o ./mod/mod_sadt.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../linear_regression/mod_linear_regression.f90          -o ./mod/mod_linear_regression.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/sum_up/inc_sum_up_vector.c                                       -o ./mod/inc_sum_up_vector_c.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/sum_up/inc_sum_up_matrix.c                                       -o ./mod/inc_sum_up_matrix_c.out ./mod/inc_sum_up_vector_c.out
