@@ -6,9 +6,10 @@ cd test_script
 make test  
 
 # WIP:
-sadt_regressor, simulated-annealing decision tree.    
+refactering simulated annealing  
 
 # Update
+2021/09/17: implement sadt_regressor, simulated-annealing decision tree.  
 2021/09/14: Add Create Dataset Scripts.  
 2021/09/14: 'multi_mat_x_vec' with simd.  
 2021/09/04: Parallel implementation of 'extra_tree_regressor'.  
@@ -119,6 +120,7 @@ LW = lawu_regressor(FL) , There is no counterpart to scikit-learn.
     * residual likelihood forest
     * slow-growing tree
 * Ensemble Trees
+    * WildWood
 * Gradient Boosting Decision Tree
   * Axis-Parallel
     * Xgboost
