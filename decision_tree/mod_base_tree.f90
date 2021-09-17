@@ -21,6 +21,7 @@ module mod_base_tree
         ! Oblique
         type(node_oblq), pointer         :: root_node_oblq_ptr
         real(kind=8), allocatable        :: coefs_(:,:)
+        real(kind=8), allocatable        :: intercepts_(:)
         ! Common
         real(kind=8), allocatable        :: split_thresholds_(:)
         logical(kind=4), allocatable     :: is_terminals_(:)
@@ -42,14 +43,15 @@ module mod_base_tree
         procedure :: postprocess
         procedure :: predict => predict_response
         procedure :: extract_split_node_ptrs_axis
-        ! procedure :: extract_split_node_ptrs_oblq
+        procedure :: extract_split_node_ptrs_oblq
         procedure :: adopt_node_ptrs_axis
-        ! procedure :: adopt_node_ptrs_oblq
+        procedure :: adopt_node_ptrs_oblq
 
         procedure :: dump => dump_tree
         procedure :: load => load_tree
 
         procedure :: print_info
+        procedure :: print_info_oblq
     end type base_tree
 
 contains
@@ -275,6 +277,22 @@ contains
     end subroutine print_info
 
 
+    recursive subroutine print_info_oblq(this, root_node_ptr_oblq)
+        implicit none
+        class(base_tree) :: this
+        type(node_oblq), pointer :: root_node_ptr_oblq
+        type(node_oblq), pointer :: node_l_ptr_oblq, node_r_ptr_oblq
+        print*, "print"
+        call root_node_ptr_oblq%print_node_info_oblq()
+        if ( allocated(root_node_ptr_oblq%node_l) ) then
+            node_l_ptr_oblq => root_node_ptr_oblq%node_l
+            node_r_ptr_oblq => root_node_ptr_oblq%node_r
+            call this%print_info_oblq(node_l_ptr_oblq)
+            call this%print_info_oblq(node_r_ptr_oblq)
+        end if
+    end subroutine print_info_oblq
+
+
     !> A subtouine to fit regressor of 'classificaton and regression tree'. 
     subroutine induction_stop_check(this, hparam_ptr, is_stop)
         implicit none
@@ -285,11 +303,12 @@ contains
         logical(kind=4) :: exist_splittable_leaf
         is_stop = f_
 
+
         ! Max Leaf Node
         if (associated(this%root_node_axis_ptr)) then
             call count_leaf_nodes(this%root_node_axis_ptr, n_leaf_nodes, is_root=t_)
         elseif (associated(this%root_node_oblq_ptr)) then
-            ! call count_leaf_nodes(this%root_node_oblq_ptr, n_leaf_nodes, is_root=t_)
+            call count_leaf_nodes(this%root_node_oblq_ptr, n_leaf_nodes, is_root=t_)
         end if
         this%n_leaf_nodes_ = n_leaf_nodes
         ! print*, "N_LEAF_NODES : ", n_leaf_nodes
@@ -304,7 +323,7 @@ contains
         if (associated(this%root_node_axis_ptr)) then
             call check_splittable_leaf(this%root_node_axis_ptr, exist_splittable_leaf)
         elseif (associated(this%root_node_oblq_ptr)) then
-            ! call check_splittable_leaf(this%root_node_oblq_ptr, exist_splittable_leaf)
+            call check_splittable_leaf(this%root_node_oblq_ptr, exist_splittable_leaf)
         end if
         if (.not. exist_splittable_leaf) then
             ! print*, "STOP: NO SPLITTABLE LEAF"
@@ -319,15 +338,24 @@ contains
         implicit none
         class(base_tree)           :: this
         type(data_holder), pointer :: data_holder_ptr
+
+        ! Nullify Node Pointers
         if ( associated(this%root_node_axis_ptr) ) nullify(this%root_node_axis_ptr)
         if ( associated(this%root_node_oblq_ptr) ) nullify(this%root_node_oblq_ptr)
 
         this%is_trained = f_
+        ! Axis-Parallel
         if ( allocated(this%split_features_) ) deallocate(this%split_features_)
-        if ( allocated(this%coefs_) ) deallocate(this%coefs_)
         if ( allocated(this%split_thresholds_) ) deallocate(this%split_thresholds_)
+
+        ! Oblique
+        if ( allocated(this%coefs_) ) deallocate(this%coefs_)
+        if ( allocated(this%intercepts_) ) deallocate(this%intercepts_)
+
+        ! Common
         if ( allocated(this%is_terminals_) ) deallocate(this%is_terminals_)
 
+        ! Train data info
         this%n_samples_ = data_holder_ptr%n_samples
         this%n_columns_ = data_holder_ptr%n_columns
         this%n_outputs_ = data_holder_ptr%n_outputs
@@ -376,34 +404,34 @@ contains
             this%root_node_axis_ptr%n_columns = this%n_columns_
             this%root_node_axis_ptr%n_samples = this%n_samples_
         else
-            ! allocate(this%root_node_oblq_ptr%indices(this%n_samples_))
-            ! allocate(this%root_node_oblq_ptr%is_used(this%n_columns_))
-            ! allocate(this%root_node_oblq_ptr%is_useless(this%n_columns_))
-            ! allocate(this%root_node_oblq_ptr%sum_p(this%n_outputs_))
-            ! this%root_node_oblq_ptr%is_used = f_
-            ! this%root_node_oblq_ptr%is_useless = f_
-            ! allocate(this%root_node_oblq_ptr%coef_(this%n_columns_))
+            allocate(this%root_node_oblq_ptr%indices(this%n_samples_))
+            allocate(this%root_node_oblq_ptr%is_used(this%n_columns_))
+            allocate(this%root_node_oblq_ptr%is_useless(this%n_columns_))
+            allocate(this%root_node_oblq_ptr%sum_p(this%n_outputs_))
+            this%root_node_oblq_ptr%is_used = f_
+            this%root_node_oblq_ptr%is_useless = f_
+            allocate(this%root_node_oblq_ptr%coef_(this%n_columns_))
 
-            ! if ( this%hparam%boot_strap ) then
-            !     call rand_integer(1_8, this%n_samples_, this%root_node_oblq_ptr%indices, this%n_samples_)
-            !     call quick_sort(this%root_node_oblq_ptr%indices, this%n_samples_)
-            ! else
-            !     do i=1, this%n_samples_, 1
-            !         this%root_node_oblq_ptr%indices(i) = i
-            !     end do
-            ! end if
+            if ( this%hparam%boot_strap ) then
+                call rand_integer(1_8, this%n_samples_, this%root_node_oblq_ptr%indices, this%n_samples_)
+                call quick_sort(this%root_node_oblq_ptr%indices, this%n_samples_)
+            else
+                do i=1, this%n_samples_, 1
+                    this%root_node_oblq_ptr%indices(i) = i
+                end do
+            end if
 
-            ! if (is_classification) then
-            !     ! pass
-            ! else
-            !     this%root_node_oblq_ptr%sum_p = sum(data_holder_ptr%y_ptr%y_r8_ptr, dim=1)
-            !     this%root_node_oblq_ptr%response = mean(data_holder_ptr%y_ptr%y_r8_ptr, this%n_samples_, this%n_outputs_)
-            !     this%root_node_oblq_ptr%impurity = sum(variance(data_holder_ptr%y_ptr%y_r8_ptr, this%n_samples_, this%n_outputs_, &
-            !                                                 this%root_node_oblq_ptr%response)) / dble(this%n_outputs_)
-            ! end if
-            ! this%root_node_oblq_ptr%depth = 0_8 
-            ! this%root_node_oblq_ptr%n_columns = this%n_columns_
-            ! this%root_node_oblq_ptr%n_samples = this%n_samples_
+            if (is_classification) then
+                ! pass
+            else
+                this%root_node_oblq_ptr%sum_p = sum(data_holder_ptr%y_ptr%y_r8_ptr, dim=1)
+                this%root_node_oblq_ptr%response = mean(data_holder_ptr%y_ptr%y_r8_ptr, this%n_samples_, this%n_outputs_)
+                this%root_node_oblq_ptr%impurity = sum(variance(data_holder_ptr%y_ptr%y_r8_ptr, this%n_samples_, this%n_outputs_, &
+                                                            this%root_node_oblq_ptr%response)) / dble(this%n_outputs_)
+            end if
+            this%root_node_oblq_ptr%depth = 0_8 
+            this%root_node_oblq_ptr%n_columns = this%n_columns_
+            this%root_node_oblq_ptr%n_samples = this%n_samples_
         end if
     end subroutine init_root_node
 
@@ -431,6 +459,31 @@ contains
                 call extract_largetst_sample_node_ptr_axis(this%root_node_axis_ptr, selected_node_ptrs)
         end select
     end subroutine extract_split_node_ptrs_axis
+
+
+    !> A subroutine to extract 'axis-parallel' node pointer(s) to be split.
+    !> Which nodes are extracted is determined by hyperparameter 'fashion'. 
+    !! \return returns axis-parallel' node pointer(s) to be split
+    !! \param selected_node_ptrs selected axis-parallel' node pointer(s)
+    !! \param depth depth of nodes to be extracted for level-wise fashion.
+    subroutine extract_split_node_ptrs_oblq(this, selected_node_ptrs, depth)
+        implicit none
+        class(base_tree)                                :: this
+        type(node_oblq_ptr), allocatable, intent(inout) :: selected_node_ptrs(:)
+        integer(kind=8), optional                       :: depth
+        select case(this%hparam%fashion_int)
+            case(1_8) ! best-first
+                call extract_unsplit_node_ptrs_oblq(this%root_node_oblq_ptr, selected_node_ptrs)
+            case(2_8) ! depth-first
+                call extract_most_left_unsplit_node_ptr_oblq(this%root_node_oblq_ptr, selected_node_ptrs)
+            case(3_8) ! level-wise
+                call extract_specific_depth_node_ptrs_oblq(this%root_node_oblq_ptr, depth-1, selected_node_ptrs)
+            case(4_8) ! impurity-first
+                call extract_largetst_impurity_node_ptr_oblq(this%root_node_oblq_ptr, selected_node_ptrs)
+            case(5_8) ! sample-first
+                call extract_largetst_sample_node_ptr_oblq(this%root_node_oblq_ptr, selected_node_ptrs)
+        end select
+    end subroutine extract_split_node_ptrs_oblq
 
 
     !> Which nodes are extracted is determined by hyperparameter 'fashion'. 
@@ -474,6 +527,41 @@ contains
     end subroutine adopt_node_ptrs_axis
 
 
+    subroutine adopt_node_ptrs_oblq(this, node_ptrs, data_holder_ptr, hparam_ptr, is_classification, lr_layer, is_hist)
+        implicit none
+        class(base_tree) :: this
+        type(node_oblq_ptr), allocatable, intent(inout) :: node_ptrs(:)
+        type(data_holder), pointer                      :: data_holder_ptr
+        type(hparam_decisiontree), pointer              :: hparam_ptr
+        logical(kind=4)                                 :: is_classification
+        real(kind=8)                                    :: lr_layer
+        logical(kind=4), optional                       :: is_hist
+
+        logical(kind=4)          :: is_hist_optional
+        type(node_oblq), pointer :: selected_node_ptr
+        integer(kind=8)          :: n, n_nodes
+
+        is_hist_optional = f_
+        if (present(is_hist)) is_hist_optional = is_hist
+
+        select case(this%hparam%fashion_int)
+            case(1_8) ! best
+                ! print*, '============================================================='
+                ! call count_all_nodes_oblq(this%root_node_oblq_ptr, n_nodes, is_root=.true.)
+                ! print*, "No. Nodes: ", n_nodes
+                if ( associated(selected_node_ptr) ) nullify(selected_node_ptr)
+                call extract_best_split_node_oblq(this%root_node_oblq_ptr, selected_node_ptr)
+                call adopting_twins_oblq(selected_node_ptr, data_holder_ptr, hparam_ptr, is_classification, &
+                    this%lr_layer, is_hist=is_hist_optional)
+            case(2_8:5_8) ! others
+                do n=1, size(node_ptrs), 1
+                    call adopting_twins_oblq(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr, & 
+                        is_classification, this%lr_layer, is_hist=is_hist_optional)
+                end do
+        end select
+    end subroutine adopt_node_ptrs_oblq
+
+
     !> A function to predict responses.
     !> If classification tree, returns class probabiities.
     !> If regression tree, returns responses.
@@ -513,8 +601,10 @@ contains
                 is_layer_wise_sum=this%is_layer_wise_sum, &
                 lr_layer=this%lr_layer)
         else
-            ! call predict_response_oblq(this%results, x_ptr, indices, & 
-            !     predict_response, n_samples, this%n_outputs_, is_root=t_)
+            call predict_response_oblq(this%results, x_ptr, indices, & 
+                predict_response, n_samples, this%n_outputs_, is_root=t_, & 
+                is_layer_wise_sum=this%is_layer_wise_sum, &
+                lr_layer=this%lr_layer)
         end if
         return
         990 continue
@@ -621,6 +711,98 @@ contains
     end subroutine predict_response_axis
 
 
+    recursive subroutine predict_response_oblq(result, x_ptr, indices, responses, n_samples, n_outputs, &
+        is_root, is_layer_wise_sum, lr_layer)
+        implicit none
+        type(train_results)   :: result
+        real(kind=8), pointer :: x_ptr(:,:)
+        integer(kind=8)       :: indices(n_samples)
+        real(kind=8)          :: responses(:,:)
+        integer(kind=8)       :: n_samples, n_outputs
+        logical(kind=4)       :: is_root
+        logical(kind=4)       :: is_layer_wise_sum
+        real(kind=8)          :: lr_layer
+
+        integer(kind=8), save        :: node_id
+        integer(kind=8)              :: idx, i, fid
+        integer(kind=8)              :: count_l, count_r, factor
+        real(kind=8)                 :: threshold
+        real(kind=8), allocatable    :: res(:), tmp_x(:,:), tmp_r(:)
+        logical(kind=4), allocatable :: lt_thresholds(:)
+        integer(kind=8), allocatable :: indices_l(:), indices_r(:)
+
+        if (is_root) node_id = 0_8
+        node_id = node_id + 1_8
+        
+        if (n_samples .eq. 0 .and. result%is_terminals_(node_id)) return
+        if (n_samples .eq. 0) goto 999
+
+        if (is_layer_wise_sum) then
+            allocate(res(result%n_outputs_))
+            res = lr_layer * result%responses_(node_id,:)
+            do i=1, n_samples
+                idx = indices(i)
+                responses(idx,:) = responses(idx,:) + res
+            end do
+            if (result%is_terminals_(node_id)) return
+        else
+            if ( result%is_terminals_(node_id) ) then
+                allocate(res(result%n_outputs_))
+                res = result%responses_(node_id,:)
+                do i=1, n_samples
+                    idx = indices(i)
+                    responses(idx,:) = res
+                end do
+                return
+            end if
+        end if
+
+        allocate(tmp_x(n_samples, result%n_columns_))
+        allocate(tmp_r(n_samples))
+        do i=1, n_samples, 1
+            idx = indices(i)
+            tmp_x(i,:) = x_ptr(idx, :)
+        end do
+        threshold = result%split_thresholds_(node_id)
+        call multi_mat_vec(tmp_x, result%coefs_(node_id,:), tmp_r, n_samples, result%n_columns_)
+
+        allocate(lt_thresholds(n_samples))
+        lt_thresholds = tmp_r .le. threshold
+        count_l = count(lt_thresholds)
+        count_r = n_samples - count_l
+        allocate(indices_l(count_l))
+        allocate(indices_r(count_r))
+        indices_l = -1_8
+        indices_r = -1_8
+        count_l = 1_8
+        count_r = 1_8
+        do i=1, n_samples, 1
+            idx = indices(i)
+            if (lt_thresholds(i)) then
+                indices_l(count_l) = idx
+                count_l = count_l + 1_8
+            else
+                indices_r(count_r) = idx
+                count_r = count_r + 1_8
+            end if
+        end do
+
+        999 continue
+        if ( .not. allocated(indices_l) .and. .not. allocated(indices_r)) then
+            count_l = 1_8
+            count_r = 1_8
+            allocate(indices_l(0_8))
+            allocate(indices_r(0_8))
+        end if
+
+        call predict_response_oblq(result, x_ptr, indices_l, responses, count_l-1, n_outputs, & 
+            is_root=f_, is_layer_wise_sum=is_layer_wise_sum, lr_layer=lr_layer)
+        call predict_response_oblq(result, x_ptr, indices_r, responses, count_r-1, n_outputs, &
+            is_root=f_, is_layer_wise_sum=is_layer_wise_sum, lr_layer=lr_layer)
+        ! deallocate(indices_l, indices_r, tmp_f, lt_thresholds)
+    end subroutine predict_response_oblq
+
+
     !> Postprocess for Tree.
     !> Extract training results, and nullify node pointers
     subroutine postprocess(this, is_classification)
@@ -640,32 +822,24 @@ contains
             call count_all_nodes(node_axis_ptr, n_nodes, is_root=t_)
             allocate(this%split_features_(n_nodes))
         else
-            ! node_oblq_ptr => this%root_node_oblq_ptr
-            ! call count_all_nodes(node_oblq_ptr, n_nodes, is_root=t_)
-            ! allocate(this%coefs_(n_nodes, this%n_columns_))
+            node_oblq_ptr => this%root_node_oblq_ptr
+            call count_all_nodes(node_oblq_ptr, n_nodes, is_root=t_)
+            allocate(this%coefs_(n_nodes, this%n_columns_))
         end if
 
-        if ( allocated(this%split_thresholds_) ) deallocate(this%split_thresholds_)
-        if ( allocated(this%is_terminals_) ) deallocate(this%is_terminals_)
-        if ( allocated(this%responses_) ) deallocate(this%responses_)
-
-        allocate(this%split_thresholds_(n_nodes))
-        allocate(this%is_terminals_(n_nodes))
-        allocate(this%responses_(n_nodes, this%n_outputs_))
         call results%alloc(n_nodes, this%n_columns_, this%n_outputs_, is_classification)
-
         if ( associated(this%root_node_axis_ptr) ) then
             call extract_train_results_axis(node_axis_ptr, results, node_id, & 
                 is_classification=is_classification, is_root=t_)
         else
-            ! call extract_train_results_oblq(node_oblq_ptr, results, node_id, & 
-            !     is_classification=is_classification, is_root=t_)
+            call extract_train_results_oblq(node_oblq_ptr, results, node_id, & 
+                is_classification=is_classification, is_root=t_)
         end if
 
         if ( associated(this%root_node_axis_ptr) ) then
             this%split_features_ = results%split_features_
         else
-            ! this%coefs_ = results%coefs_
+            this%coefs_ = results%coefs_
         end if
 
         this%split_thresholds_ = results%split_thresholds_
