@@ -89,6 +89,8 @@ module mod_hyperparameter
         real(kind=8)    :: lambda2                  = 1d0
         real(kind=8)    :: row_sampling             = 1d0
         real(kind=8)    :: initial_temperature      = 1000d0
+        real(kind=8)    :: minimum_temperature      = 0.0001d0
+        real(kind=8)    :: cooling_rate             = 0.99d0
         logical(kind=4) :: skip_used_features       = f_
         logical(kind=4) :: boot_strap               = f_
         logical(kind=4) :: random_splitter          = f_

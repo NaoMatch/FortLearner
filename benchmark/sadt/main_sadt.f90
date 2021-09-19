@@ -5,6 +5,7 @@ program main_sadt
     use mod_metric
     use mod_data_holder
     use mod_decision_tree
+    use mod_extra_tree
     use mod_sadt
     use mod_scaler
     implicit none
@@ -35,6 +36,7 @@ program main_sadt
     type(data_holder), pointer    :: dholder_ptr, dholder_t_ptr
     type(sadt_regressor)          :: sadt_reg
     type(decision_tree_regressor) :: dt_reg
+    type(extra_tree_regressor)    :: et_reg
     integer(kind=8)               :: max_leaf_nodes
     type(minmax_scaler)           :: mm_scaler
 
@@ -43,7 +45,9 @@ program main_sadt
     n_iters          = (/100_8, 100_8, 10_8, 5_8, 5_8/)
     n_samples_trains = (/10000_8, 1000_8, 10000_8, 100000_8, 1000000_8/)
     n_columns_trains = (/50_8, 50_8, 100_8, 200_8, 400_8/)
+    n_iters = 10
     n_iters = 1
+    max_leaf_nodes = 4
 
     ! n_samples_trains = n_samples_trains(size(n_samples_trains):1:-1)
     ! n_columns_trains = n_columns_trains(size(n_columns_trains):1:-1)
@@ -57,7 +61,8 @@ program main_sadt
         n_samples_train  = n_samples_trains(iii)
         n_samples_train = 412206
         n_iter = n_iters(iii)
-        n_iter = 1_8
+        ! n_iter = 1_8
+        allocate(y_train_pred_et(n_samples_train,1))
         do jjj=1, size(n_columns_trains), 1
             n_columns_train  = n_columns_trains(jjj) 
             n_columns_train = 90
@@ -125,7 +130,6 @@ program main_sadt
             dholder_ptr => dholder
             dholder_t_ptr => dholder_t
 
-            max_leaf_nodes = 8
             print*, '============================================================='
             print*, "Start Training SADT_Regressor"
             sadt_reg = sadt_regressor(max_leaf_nodes=max_leaf_nodes, fashion="best", min_samples_leaf=1_8)
@@ -145,16 +149,59 @@ program main_sadt
 
             print*, '============================================================='
             print*, "Start Training decision_tree_Regressor"
-            dt_reg = decision_tree_regressor(max_leaf_nodes=max_leaf_nodes, fashion="best", min_samples_leaf=1_8)
+            dt_reg = decision_tree_regressor(max_leaf_nodes=max_leaf_nodes, fashion="best", min_samples_leaf=1_8, & 
+                max_features=45_8, boot_strap=f_)
             call date_and_time(values=date_value1)
+            y_train_pred_et = 0d0
             do iter=1, n_iter
                 call dt_reg%fit(dholder_ptr, print_node=f_)
+                y_train_pred_et = y_train_pred_et + dt_reg%predict(x_train)
             end do
+            y_train_pred_et = y_train_pred_et / dble(n_iter)
             call date_and_time(values=date_value2)
-            y_train_pred_et = dt_reg%predict(x_train)
+            ! y_train_pred_et = dt_reg%predict(x_train)
             time_sadt = time_diff(date_value1, date_value2)
             print*, "=============================================================================="
             print*, " ----- decision_tree_Regressor, Naive Implementation max_leaf_node=100"
+            print*, "TrainMSE: ", real(metric%mean_square_error(y_train(:,1), y_train_pred_et(:,1)))
+            print*, "TIme    : ", n_samples_train, n_columns_train, real(time_sadt), "[msec]", real(time_sadt)/n_iter, "[msec]"
+            ! write(100, *) "NORMAL", n_samples_train, n_columns_train, real(time_sadt), "[msec]", real(time_sadt)/n_iter, "[msec]"
+
+            print*, '============================================================='
+            print*, "Start Training extra_tree_regressor"
+            et_reg = extra_tree_regressor(max_leaf_nodes=max_leaf_nodes, fashion="best", min_samples_leaf=1_8, n_repeats=1_8)
+            call date_and_time(values=date_value1)
+            y_train_pred_et = 0d0
+            do iter=1, n_iter
+                call et_reg%fit(dholder_ptr, print_node=f_)
+                y_train_pred_et = y_train_pred_et + et_reg%predict(x_train)
+            end do
+            y_train_pred_et = y_train_pred_et / dble(n_iter)
+            call date_and_time(values=date_value2)
+            ! y_train_pred_et = et_reg%predict(x_train)
+            time_sadt = time_diff(date_value1, date_value2)
+            print*, "=============================================================================="
+            print*, " ----- extra_tree_regressor, Naive Implementation max_leaf_node=100"
+            print*, "TrainMSE: ", real(metric%mean_square_error(y_train(:,1), y_train_pred_et(:,1)))
+            print*, "TIme    : ", n_samples_train, n_columns_train, real(time_sadt), "[msec]", real(time_sadt)/n_iter, "[msec]"
+            ! write(100, *) "NORMAL", n_samples_train, n_columns_train, real(time_sadt), "[msec]", real(time_sadt)/n_iter, "[msec]"
+
+            print*, '============================================================='
+            print*, "Start Training extra_tree_regressor"
+            et_reg = extra_tree_regressor(max_leaf_nodes=max_leaf_nodes, fashion="best", min_samples_leaf=1_8, n_repeats=1_8, & 
+                n_threads=4_8)
+            call date_and_time(values=date_value1)
+            y_train_pred_et = 0d0
+            do iter=1, n_iter
+                call et_reg%fit_faster(dholder_t_ptr, print_node=f_)
+                y_train_pred_et = y_train_pred_et + et_reg%predict(x_train)
+            end do
+            y_train_pred_et = y_train_pred_et / dble(n_iter)
+            call date_and_time(values=date_value2)
+            ! y_train_pred_et = et_reg%predict(x_train)
+            time_sadt = time_diff(date_value1, date_value2)
+            print*, "=============================================================================="
+            print*, " ----- extra_tree_regressor, Naive Implementation max_leaf_node=100"
             print*, "TrainMSE: ", real(metric%mean_square_error(y_train(:,1), y_train_pred_et(:,1)))
             print*, "TIme    : ", n_samples_train, n_columns_train, real(time_sadt), "[msec]", real(time_sadt)/n_iter, "[msec]"
             ! write(100, *) "NORMAL", n_samples_train, n_columns_train, real(time_sadt), "[msec]", real(time_sadt)/n_iter, "[msec]"
@@ -163,6 +210,7 @@ program main_sadt
             deallocate(x_train_t)
             stop
         end do
+        deallocate(y_train_pred_et)
     end do
 
 

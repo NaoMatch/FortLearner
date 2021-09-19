@@ -9,6 +9,7 @@ module mod_splitter
     use mod_linalg
     use mod_discretizer
     use mod_node
+    use mod_optimization
     implicit none
     
     !> A Node Spliiter Class
@@ -50,6 +51,7 @@ module mod_splitter
     !     procedure :: loss => loss_wodt_objective
     ! end type wodt_objective
 
+    type(node_oblq)  :: node_temp
 
 contains
     !------------------------------------------------------------------------------------------------------------------------------------------ 
@@ -99,7 +101,7 @@ contains
         integer(kind=8) :: i_start, i_stop, fid, f, i, j, best_fid, r
         integer(kind=8) :: count_l, count_r, idx, count_eval
         integer(kind=8) :: n_samples_l, n_samples_r
-        real(kind=8), allocatable :: tmp_x(:,:), tmp_y(:,:), tmp_f_copy(:), tmp_r(:)
+        real(kind=8), allocatable, target :: tmp_x(:,:), tmp_y(:,:), tmp_f_copy(:), tmp_r(:)
         integer(kind=8), allocatable :: feature_ids(:), indices(:)
         integer(kind=8) :: factor
         integer(kind=8) :: ini_f_idx, fin_f_idx
@@ -109,7 +111,7 @@ contains
         integer(kind=8), save :: tot_time_collect=0_8
         integer(kind=8) :: date_value1(8), date_value2(8)
         integer(kind=8) :: e
-        real(kind=8), allocatable :: coefs_current(:)
+        real(kind=8), allocatable :: coefs_current(:), coefs_minimum(:)
         real(kind=8) :: intercept_current
         real(kind=8), allocatable :: coefs_new(:)
         real(kind=8) :: intercept_new
@@ -124,6 +126,7 @@ contains
         integer(kind=8) :: cnt_current_l, cnt_current_r
         real(kind=8)    :: temperature, initial_temperature
         real(kind=8)    :: transition_proba, proba
+        type(simulated_annmealing) :: sim_ann
 
         allocate(tot_p(data_holder_ptr%n_outputs))
         allocate(tot_l(data_holder_ptr%n_outputs))
@@ -144,8 +147,10 @@ contains
         initial_temperature = hparam_ptr % initial_temperature
         temperature = initial_temperature
 
-        allocate(tmp_y(node_ptr%n_samples, node_ptr%n_outputs))
-        allocate(tmp_x(node_ptr%n_samples, node_ptr%n_columns))
+        if (allocated(node_temp%tmp_y)) deallocate(node_temp%tmp_y)
+        if (allocated(node_temp%tmp_x)) deallocate(node_temp%tmp_x)
+        allocate(node_temp%tmp_y(node_ptr%n_samples, node_ptr%n_outputs))
+        allocate(node_temp%tmp_x(node_ptr%n_samples, node_ptr%n_columns+1))
         allocate(tmp_r(node_ptr%n_samples))
         allocate(indices(node_ptr%n_samples))
 
@@ -154,24 +159,33 @@ contains
 
         do i=1, node_ptr%n_samples, 1
             idx = node_ptr%indices(i)
-            tmp_y(i,:) = data_holder_ptr%y_ptr%y_r8_ptr(idx,:)
-            tmp_x(i,:) = data_holder_ptr%x_ptr%x_r8_ptr(idx,:)
+            node_temp%tmp_y(i,:) = data_holder_ptr%y_ptr%y_r8_ptr(idx,:)
+            node_temp%tmp_x(i,1:node_ptr%n_columns) = data_holder_ptr%x_ptr%x_r8_ptr(idx,:)
+            node_temp%tmp_x(i,node_ptr%n_columns+1) = 1d0 ! intercept
         end do
 
-        allocate(coefs_current(node_ptr%n_columns), coefs_new(node_ptr%n_columns), coefs_add(node_ptr%n_columns))
+        node_temp % tot_sum = sum(node_temp%tmp_y(:,1))
+        node_temp % tot_cnt = tot_cnt
+        node_temp % n_samples = node_ptr % n_samples
+        node_temp % n_columns = node_ptr % n_columns
+        
+        allocate(coefs_current(node_ptr%n_columns+1), coefs_minimum(node_ptr%n_columns+1))
         call random_number(coefs_current)
-        call random_number(intercept_current)
-        coefs_current     = 2d0*coefs_current     - 1d0
-        intercept_current = 2d0*intercept_current - 1d0
+        coefs_current = 2d0*coefs_current - 1d0
 
-        ! Set Initial Value
-        call multi_mat_vec(tmp_x, coefs_current, tmp_r, node_ptr%n_samples, node_ptr%n_columns)
-        tmp_r = tmp_r + intercept_current
+        sim_ann = simulated_annmealing(& 
+            initial_temperature=hparam_ptr%initial_temperature, & 
+            minimum_temperature=hparam_ptr%minimum_temperature, & 
+            max_iter=hparam_ptr%max_epoch, &
+            cooling_rate=hparam_ptr%cooling_rate)
+        coefs_minimum = sim_ann%optimize(coefs_current, node_loss)
+
+        call multi_mat_vec(node_temp%tmp_x, coefs_minimum, tmp_r, node_ptr%n_samples, node_ptr%n_columns+1)
         tmp_sum_l = 0d0
         tmp_cnt_l = 0_8
         do j=1, node_ptr % n_samples, 1
             factor = tmp_r(j) .le. 0d0
-            tmp_sum_l = tmp_sum_l + factor * tmp_y(j,1)
+            tmp_sum_l = tmp_sum_l + factor * node_temp%tmp_y(j,1)
             tmp_cnt_l = tmp_cnt_l + factor
         end do
         tmp_sum_r = tot_sum - tmp_sum_l
@@ -181,106 +195,38 @@ contains
         gain_current = tmp_cnt_l * tmp_cnt_r / dble(tot_cnt) * (tmp_avg_l - tmp_avg_r)**2d0
         ! print*, "gain_current: ", gain_current
 
-
-        call random_number(coefs_add)
-        call random_number(intercept_add)
-        coefs_add     = coefs_add - .5d0
-        intercept_add = intercept_add - .5d0
-        coefs_new     = coefs_current     + coefs_add
-        intercept_new = intercept_current + intercept_add
-
-        do e=1, hparam_ptr%max_epoch, 1
-            tmp_r = 0d0
-            call multi_mat_vec(tmp_x, coefs_new, tmp_r, node_ptr%n_samples, node_ptr%n_columns)
-            tmp_r = tmp_r + intercept_new
-            tmp_sum_l = 0d0
-            tmp_cnt_l = 0_8
-
-            do j=1, node_ptr % n_samples, 1
-                factor = tmp_r(j) .le. 0d0
-                tmp_sum_l = tmp_sum_l + factor * tmp_y(j,1)
-                tmp_cnt_l = tmp_cnt_l + factor
-            end do
-            tmp_sum_r = tot_sum - tmp_sum_l
-            tmp_cnt_r = tot_cnt - tmp_cnt_l
-            tmp_avg_l = tmp_sum_l / dble(tmp_cnt_l)
-            tmp_avg_r = tmp_sum_r / dble(tmp_cnt_r)
-            gain_new = tmp_cnt_l * tmp_cnt_r / dble(tot_cnt) * (tmp_avg_l - tmp_avg_r)**2d0
-            gain_diff = gain_current - gain_new
-            ! print*, '============================================================='
-            ! print*, "gain_current: ", gain_current
-            ! print*, "gain_new    : ", gain_new
-            ! print*, "gain_diff   : ", gain_diff
-            ! print*, "       Left : ", tmp_sum_l, tmp_cnt_l, tmp_avg_l
-            ! print*, "       RIght: ", tmp_sum_r, tmp_cnt_r, tmp_avg_r
-            if ( gain_new .gt. gain_current ) then
-                gain_current = gain_new
-                coefs_current = coefs_new
-                intercept_current = intercept_new
-                sum_current_l = tmp_sum_l
-                sum_current_r = tmp_sum_r
-                avg_current_l = tmp_avg_l
-                avg_current_r = tmp_avg_r
-                cnt_current_l = tmp_cnt_l
-                cnt_current_r = tmp_cnt_r
-                ! if (abs(1d0 - gain_diff/gain_current) .ge. 1d0) then
-                !     temperature = temperature * 0.99
-                ! else
-                !     temperature = temperature * abs(1d0 - gain_diff/gain_current)
-                ! end if
-                count_eval = count_eval + 1
-            else
-                transition_proba = minval( (/ exp(-gain_diff/temperature), 1d0 /) )
-                ! print*, "transition_proba: ", transition_proba, gain_diff, temperature, initial_temperature
-                call random_number(proba)
-                if ( proba .lt. transition_proba ) then
-                    gain_current = gain_new
-                    coefs_current = coefs_new
-                    intercept_current = intercept_new
-                    sum_current_l = tmp_sum_l
-                    sum_current_r = tmp_sum_r
-                    avg_current_l = tmp_avg_l
-                    avg_current_r = tmp_avg_r
-                    cnt_current_l = tmp_cnt_l
-                    cnt_current_r = tmp_cnt_r
-                    ! if (abs(1d0 - gain_diff/gain_current) .ge. 1d0) then
-                    !     temperature = temperature * 0.99
-                    ! else
-                    !     temperature = temperature * abs(1d0 - gain_diff/gain_current)
-                    ! end if
-                end if
-                count_eval = count_eval + 1
-            end if
-            temperature = temperature / log(e+0d0)
-
-
-            call random_number(coefs_add)
-            call random_number(intercept_add)
-            coefs_add     = coefs_add - .5d0
-            intercept_add = intercept_add - .5d0
-            coefs_new     = coefs_current     + coefs_add
-            intercept_new = intercept_current + intercept_add
-        end do
+        coefs_current = coefs_minimum(1:node_ptr%n_columns)
+        intercept_current = coefs_minimum(node_ptr%n_columns+1)
+        sum_current_l = tmp_sum_l
+        sum_current_r = tmp_sum_r
+        avg_current_l = tmp_avg_l
+        avg_current_r = tmp_avg_r
+        cnt_current_l = tmp_cnt_l
+        cnt_current_r = tmp_cnt_r
 
         ! print*, '============================================================='
         ! print*, "gain_current: ", gain_current
         ! print*, "       Left : ", sum_current_l, cnt_current_l, avg_current_l
         ! print*, "       RIght: ", sum_current_r, cnt_current_r, avg_current_r
 
+        ! print*, 5
         node_ptr%is_trained = t_
         node_ptr%eval_counter = count_eval
         node_ptr%gain_best = gain_current
 
-        if ( count_eval .eq. 0 ) then
+        ! print*, 6
+        if ( all(coefs_minimum .eq. coefs_current) ) then
             node_ptr%is_terminal = t_
             return
         end if
 
+        ! print*, 7
         allocate(node_ptr%sum_l(node_ptr%n_outputs))
         allocate(node_ptr%sum_r(node_ptr%n_outputs))
         allocate(node_ptr%response_l(node_ptr%n_outputs))
         allocate(node_ptr%response_r(node_ptr%n_outputs))
 
+        ! print*, 8
         node_ptr%coef_ = coefs_current
         node_ptr%intercept_ = intercept_current
         node_ptr%threshold_ = 0d0
@@ -296,6 +242,12 @@ contains
         ! print*, "Collect: ", tot_time_collect
         ! print*, "MinMax : ", tot_time_minmax
         ! print*, "Sum_Up : ", tot_time_sum_up
+    contains
+        function node_loss(x)
+            real(kind=8) :: node_loss
+            real(kind=8), intent(in) :: x(:)
+            node_loss = node_temp%loss_mse(x)
+        end function node_loss
     end subroutine split_sadt_regressor_indivisuals
 
 

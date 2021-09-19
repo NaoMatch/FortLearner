@@ -33,6 +33,14 @@ module mod_optimization
         procedure :: optimize => optimize_bfgs
     end type bfgs
 
+    type, extends(opt_method) :: simulated_annmealing
+        real(kind=8) :: initial_temperature = .1d0
+        real(kind=8) :: minimum_temperature = 0.0000001d0
+        real(kind=8) :: cooling_rate = 0.9d0
+    contains
+        procedure :: optimize => optimize_simulated_annmealing
+    end type simulated_annmealing
+
 
     interface steepest_descent
         module procedure :: new_steepest_descent
@@ -46,9 +54,13 @@ module mod_optimization
         module procedure :: new_bfgs
     end interface bfgs
 
+    interface simulated_annmealing
+        module procedure :: new_simulated_annmealing
+    end interface simulated_annmealing
+
 contains
 
-
+    ! Armijo Conditions
     subroutine armijo_condition(this, alpha, theta, theta_update, loss_ini, loss, grad_ini, grad)
         implicit none
         class(line_search) :: this
@@ -96,57 +108,7 @@ contains
         end do
     end subroutine armijo_condition
 
-
-    ! subroutine wolfe_condition(this, alpha, theta_update, data_holder_ptr, probas, n_samples, n_columns)
-    !     implicit none
-    !     class(logistic_regression)  :: this
-    !     real(kind=8), intent(inout) :: alpha
-    !     real(kind=8), intent(in)    :: theta_update(n_columns+1)
-    !     type(data_holder), pointer  :: data_holder_ptr
-    !     real(kind=8), intent(inout) :: probas(n_samples,1)
-    !     integer(kind=8), intent(in) :: n_samples, n_columns
-
-    !     real(kind=8), parameter :: xi1=0.001d0
-    !     real(kind=8), parameter :: xi2=0.9d0
-    !     real(kind=8), parameter :: tau=0.6d0
-    !     real(kind=8), ALLOCATABLE :: theta_fix(:)
-    !     real(kind=8) :: intercept_fix
-
-    !     real(kind=8) :: lhs_a, rhs_a
-    !     real(kind=8) :: lhs_w, rhs_w
-    !     real(kind=8) :: tmp_1, tmp_2
-    !     real(kind=8) :: grad(n_columns+1)
-
-    !     theta_fix = this%thetas_
-    !     intercept_fix = this%intercept_
-    !     tmp_1 = this%compute_loss(data_holder_ptr, probas, n_samples)
-
-    !     call this%compute_grad(grad, data_holder_ptr, probas, n_samples, n_columns)
-    !     tmp_2 = inner_product(grad, theta_update, n_columns+1)
-
-    !     do while (t_)
-    !         this%thetas_ = theta_fix - alpha * theta_update(1:n_columns)
-    !         this%intercept_ = intercept_fix - alpha * theta_update(n_columns+1)
-    !         probas = this%predict(data_holder_ptr%x_ptr%x_r8_ptr)
-
-    !         lhs_a = this%compute_loss(data_holder_ptr, probas, n_samples)
-    !         rhs_a = tmp_1 - xi1 * alpha * tmp_2
-
-    !         call this%compute_grad(grad, data_holder_ptr, probas, n_samples, n_columns)
-    !         lhs_w = sum(theta_update * grad)
-    !         rhs_w = xi2 * tmp_2
-
-    !         if ( all((/lhs_a .gt. rhs_a, lhs_w .lt. rhs_w/)) ) then
-    !             alpha = alpha * tau
-    !         else
-    !             exit
-    !         end if
-    !     end do
-    !     this%thetas_ = theta_fix
-    !     this%intercept_ = intercept_fix
-    ! end subroutine wolfe_condition
-
-
+    ! Object
     function new_steepest_descent(max_iter, tolerance, alpha_ini)
         implicit none
         type(steepest_descent) :: new_steepest_descent
@@ -182,6 +144,23 @@ contains
         if (present(tolerance)) new_bfgs % tolerance = tolerance
         if (present(alpha_ini)) new_bfgs % alpha_ini = alpha_ini
     end function new_bfgs
+
+    function new_simulated_annmealing(max_iter, tolerance, & 
+        initial_temperature, minimum_temperature, cooling_rate)
+        implicit none
+        type(simulated_annmealing) :: new_simulated_annmealing
+        integer(kind=8), optional  :: max_iter
+        real(kind=8), optional     :: tolerance
+        real(kind=8), optional     :: initial_temperature
+        real(kind=8), optional     :: minimum_temperature
+        real(kind=8), optional     :: cooling_rate
+
+        if (present(max_iter)) new_simulated_annmealing % max_iter = max_iter
+        if (present(tolerance)) new_simulated_annmealing % tolerance = tolerance
+        if (present(initial_temperature)) new_simulated_annmealing % initial_temperature = initial_temperature
+        if (present(minimum_temperature)) new_simulated_annmealing % minimum_temperature = minimum_temperature
+        if (present(cooling_rate)) new_simulated_annmealing % cooling_rate = cooling_rate
+    end function new_simulated_annmealing
 
 
     function optimize_steepest_descent(this, x_ini, loss, grad)
@@ -222,7 +201,6 @@ contains
         end do
         optimize_steepest_descent = x0
     end function optimize_steepest_descent
-
 
     function optimize_newton_method(this, x_ini, loss, grad, hess)
         implicit none
@@ -301,7 +279,6 @@ contains
         end do
         optimize_newton_method = x0
     end function optimize_newton_method
-
 
     function optimize_bfgs(this, x_ini, loss, grad)
         implicit none
@@ -431,6 +408,70 @@ contains
         end do
         optimize_bfgs = x0
     end function optimize_bfgs
+
+    function optimize_simulated_annmealing(this, x_ini, loss)
+        implicit none
+        class(simulated_annmealing) :: this
+        real(kind=8), allocatable   :: optimize_simulated_annmealing(:)
+        real(kind=8), intent(in)    :: x_ini(:)
+
+        integer(kind=8)           :: iter, n_param
+        real(kind=8)              :: temperature
+        real(kind=8)              :: proba, random
+        real(kind=8)              :: loss_min, loss_new, loss_diff
+        real(kind=8), allocatable :: x_min(:), x_new(:), x_add(:)
+        real(kind=8) :: min_val, max_val
+
+        interface
+            function loss(x)
+                real(kind=8) :: loss
+                real(kind=8), intent(in) :: x(:)
+            end function loss
+        end interface
+
+        ! print*, "annealing", 1
+        n_param = size(x_ini)
+        allocate(x_min(n_param), x_new(n_param), x_add(n_param))
+
+        ! print*, "annealing", 2
+        temperature = this % initial_temperature
+        ! print*, "annealing", 2, 1
+        x_min = x_ini
+        ! print*, "annealing", 2, 2
+        loss_min = loss(x_min)
+
+        ! print*, "annealing", 3, loss_min
+        min_val = -.5d0
+        max_val = +.5d0
+
+        ! print*, "annealing", 4
+        do iter=1, this%max_iter, 1
+            call random_number(x_add)
+            x_add = (max_val-min_val) * x_add + min_val
+            x_new = x_min + x_add
+            loss_new = loss(x_new)
+
+            loss_diff = loss_min - loss_new
+
+            if ( loss_diff .gt. 0d0 ) then
+                x_min = x_new
+                loss_min = loss_new
+            elseif ( loss_diff .lt. 0d0 ) then
+                proba = minval( (/ exp(loss_diff/temperature), 1d0 /) )
+                ! print*, proba, temperature, loss_min, loss_diff, loss_diff/temperature
+                call random_number(random)
+                if (random .le. proba) then
+                    x_min = x_new
+                    loss_min = loss_new
+                end if
+            end if
+
+            temperature = temperature * this % cooling_rate
+            if (this % minimum_temperature .gt. temperature) exit
+        end do
+        ! print*, x_min, loss_min
+        optimize_simulated_annmealing = x_min
+    end function optimize_simulated_annmealing
 
 
     subroutine conjugate_gradient(hess, x0_update, grad, n_variables, max_iteration)
