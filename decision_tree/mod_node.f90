@@ -71,8 +71,14 @@ module mod_node
         type(node_oblq), allocatable :: node_l
         type(node_oblq), allocatable :: node_r
         type(node_oblq), ALLOCATABLE :: node_c(:)
+
+        real(kind=8)                 :: tot_sum
+        integer(kind=8)              :: tot_cnt
+        real(kind=8), allocatable    :: tmp_x(:,:)
+        real(kind=8), allocatable    :: tmp_y(:,:)
     contains
         procedure :: print_node_info_oblq
+        procedure :: loss_mse
     end type node_oblq
 
     !> A type for pointer array of node_axis
@@ -86,6 +92,37 @@ module mod_node
     end type node_oblq_ptr
 
 contains
+
+    function loss_mse(this, coefficients)
+        class(node_oblq)         :: this
+        real(kind=8), intent(in) :: coefficients(:)
+        real(kind=8)             :: loss_mse
+
+        real(kind=8), allocatable :: tmp_r(:)
+        real(kind=8)    :: tmp_avg_l, tmp_avg_r
+        real(kind=8)    :: tmp_sum_l, tmp_sum_r, tot_sum
+        integer(kind=8) :: tmp_cnt_l, tmp_cnt_r, tot_cnt, factor, j
+
+        allocate(tmp_r(this%n_samples))
+        call multi_mat_vec(this%tmp_x, coefficients, tmp_r, this%n_samples, this%n_columns+1)
+        ! print*, this%n_samples, this%n_columns+1
+        ! print*, sum(tmp_r)
+        tmp_sum_l = 0d0
+        tmp_cnt_l = 0_8
+        do j=1, this % n_samples, 1
+            factor = tmp_r(j) .le. 0d0
+            tmp_sum_l = tmp_sum_l + factor * this%tmp_y(j,1)
+            tmp_cnt_l = tmp_cnt_l + factor
+        end do
+        tmp_sum_r = this%tot_sum - tmp_sum_l
+        tmp_cnt_r = this%tot_cnt - tmp_cnt_l
+        ! print*, tmp_sum_l, tmp_cnt_l
+        ! print*, tmp_sum_r, tmp_cnt_r
+        tmp_avg_l = tmp_sum_l / dble(tmp_cnt_l)
+        tmp_avg_r = tmp_sum_r / dble(tmp_cnt_r)
+        loss_mse = - tmp_cnt_l * tmp_cnt_r / dble(this%tot_cnt) * (tmp_avg_l - tmp_avg_r)**2d0
+        ! print*, loss_mse
+    end function loss_mse
 
     !> A subroutine to check stop growinng or not.
     !> 1. Pure Node, only one class or no variance.
