@@ -6,9 +6,10 @@ cd test_script
 make test  
 
 # WIP:
-simulated annealing initial temperature  
+kmeans++
 
 # Update
+2021/09/20: simulated annealing initial temperature  
 2021/09/19: refactering simulated annealing  
 2021/09/17: implement sadt_regressor, simulated-annealing decision tree.  
 2021/09/14: Add Create Dataset Scripts.  
