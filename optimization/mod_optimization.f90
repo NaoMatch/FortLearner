@@ -1,5 +1,6 @@
 module mod_optimization
     use mod_timer
+    use mod_const
     use mod_common, only: identity, vv2mat, vmv
     use mod_random, only: rand_uniform
     use mod_linalg, only: multi_mat_vec, inner_product, inversion
@@ -37,6 +38,7 @@ module mod_optimization
         real(kind=8) :: initial_temperature = .1d0
         real(kind=8) :: minimum_temperature = 0.0000001d0
         real(kind=8) :: cooling_rate = 0.9d0
+        real(kind=8) :: initial_acceptance_ratio = 0.9d0
     contains
         procedure :: optimize => optimize_simulated_annmealing
     end type simulated_annmealing
@@ -420,7 +422,9 @@ contains
         real(kind=8)              :: proba, random
         real(kind=8)              :: loss_min, loss_new, loss_diff
         real(kind=8), allocatable :: x_min(:), x_new(:), x_add(:)
-        real(kind=8) :: min_val, max_val
+        real(kind=8) :: min_val, max_val, reducion
+        integer(kind=8) :: stdout=6
+        character(1), parameter :: esc = achar(27)
 
         interface
             function loss(x)
@@ -429,23 +433,51 @@ contains
             end function loss
         end interface
 
-        ! print*, "annealing", 1
+        min_val = -.5d0
+        max_val = +.5d0
         n_param = size(x_ini)
         allocate(x_min(n_param), x_new(n_param), x_add(n_param))
 
-        ! print*, "annealing", 2
         temperature = this % initial_temperature
-        ! print*, "annealing", 2, 1
         x_min = x_ini
-        ! print*, "annealing", 2, 2
         loss_min = loss(x_min)
 
-        ! print*, "annealing", 3, loss_min
-        min_val = -.5d0
-        max_val = +.5d0
+        ! Compute Initial Temperature
+        call random_number(x_add)
+        x_add = (max_val-min_val) * x_add + min_val
+        x_new = x_min + x_add
+        loss_new = loss(x_new)
 
-        ! print*, "annealing", 4
+        loss_diff = abs(loss_min - loss_new)
+        proba = minval( (/ exp(-loss_diff/temperature), 1d0 /) )
+        ! print*, "START", proba, temperature, loss_diff, loss_min, loss_new
+        ! print*, "x_min: ", x_min
+        ! print*, "x_new: ", x_new
+        if (proba .gt. this%initial_acceptance_ratio) then
+            ! print*, "GT"
+            do while(t_)
+                temperature = temperature * .5d0
+                proba = minval( (/ exp(-loss_diff/temperature), 1d0 /) )
+                ! print*, "1", proba, -loss_diff/temperature, this%initial_acceptance_ratio, temperature
+                if (proba .le. this%initial_acceptance_ratio) exit
+                if (temperature .le. 0.001d0) exit
+            end do
+        else
+            ! print*, "LE"
+            do while(t_)            
+                temperature = temperature * 2d0
+                proba = minval( (/ exp(-loss_diff/temperature), 1d0 /) )
+                ! print*, "2", proba, -loss_diff/temperature, this%initial_acceptance_ratio, temperature
+                if (proba .gt. this%initial_acceptance_ratio) exit
+                if (temperature .gt. 100000d0) exit
+            end do
+        end if
+        ! print*, "START", proba, temperature
+        reducion = (temperature - this%minimum_temperature) / dble(this%max_iter)
+
+        write(stdout,*)
         do iter=1, this%max_iter, 1
+            ! print*, loss_min, temperature
             call random_number(x_add)
             x_add = (max_val-min_val) * x_add + min_val
             x_new = x_min + x_add
@@ -453,12 +485,11 @@ contains
 
             loss_diff = loss_min - loss_new
 
+            proba = minval( (/ exp(loss_diff/temperature), 1d0 /) )
             if ( loss_diff .gt. 0d0 ) then
                 x_min = x_new
                 loss_min = loss_new
             elseif ( loss_diff .lt. 0d0 ) then
-                proba = minval( (/ exp(loss_diff/temperature), 1d0 /) )
-                ! print*, proba, temperature, loss_min, loss_diff, loss_diff/temperature
                 call random_number(random)
                 if (random .le. proba) then
                     x_min = x_new
@@ -466,10 +497,18 @@ contains
                 end if
             end if
 
+            ! temperature = temperature - reducion
             temperature = temperature * this % cooling_rate
+            ! temperature = this%initial_temperature / log(iter+1d0)
             if (this % minimum_temperature .gt. temperature) exit
+            write(stdout,"(a)",advance='no') esc//'M'
+            write(stdout,"(a, f20.10a, f20.10, a, f20.10, a, f20.10, a, f20.10)") & 
+                "progress=", iter/dble(this%max_iter), & 
+                "    temperature=", temperature, & 
+                "    loss_min=", loss_min, &
+                "    loss_diff=", loss_diff, &
+                "    accept=", proba
         end do
-        ! print*, x_min, loss_min
         optimize_simulated_annmealing = x_min
     end function optimize_simulated_annmealing
 
