@@ -116,12 +116,13 @@ contains
         end do
         tmp_sum_r = this%tot_sum - tmp_sum_l
         tmp_cnt_r = this%tot_cnt - tmp_cnt_l
+        ! print*, loss_mse
         ! print*, tmp_sum_l, tmp_cnt_l
         ! print*, tmp_sum_r, tmp_cnt_r
         tmp_avg_l = tmp_sum_l / dble(tmp_cnt_l)
         tmp_avg_r = tmp_sum_r / dble(tmp_cnt_r)
         loss_mse = - tmp_cnt_l * tmp_cnt_r / dble(this%tot_cnt) * (tmp_avg_l - tmp_avg_r)**2d0
-        ! print*, loss_mse
+        if (tmp_cnt_l * tmp_cnt_r .eq. 0_8) loss_mse = 0d0
     end function loss_mse
 
     !> A subroutine to check stop growinng or not.

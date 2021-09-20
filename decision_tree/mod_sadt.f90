@@ -38,7 +38,7 @@ contains
     !! \param max_epoch maximum number of epoch of simulated annealing
     function new_sadt_regressor(&
         max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features, &
-        initial_temperature, max_epoch &
+        initial_temperature, max_epoch, cooling_rate &
         )
         implicit none
         type(sadt_regressor)       :: new_sadt_regressor
@@ -52,6 +52,7 @@ contains
         integer(kind=8),  optional :: max_features
         real(kind=8),     optional :: initial_temperature
         integer(kind=8),  optional :: max_epoch
+        real(kind=8),     optional :: cooling_rate
 
         character(len=256)         :: fashion_list(5)
 
@@ -73,6 +74,7 @@ contains
         if ( present(max_features) ) tmp%hparam%max_features = max_features
         if ( present(initial_temperature) ) tmp%hparam%initial_temperature = initial_temperature
         if ( present(max_epoch) ) tmp%hparam%max_epoch = max_epoch
+        if ( present(cooling_rate) ) tmp%hparam%cooling_rate = cooling_rate
 
         call tmp%hparam%validate_int_range("max_depth",            tmp%hparam%max_depth,        1_8, huge(1_8))
         call tmp%hparam%validate_int_range("max_leaf_nodes",       tmp%hparam%max_leaf_nodes,   2_8, huge(1_8))
@@ -81,6 +83,7 @@ contains
         call tmp%hparam%validate_int_range("max_features",         tmp%hparam%max_features,     1_8, huge(1_8), exception=-1_8)
         call tmp%hparam%validate_real_range("initial_temperature", tmp%hparam%initial_temperature, epsilon_, huge(epsilon_))
         call tmp%hparam%validate_int_range("max_epoch",            tmp%hparam%max_epoch,        1_8, huge(1_8))
+        call tmp%hparam%validate_real_range("cooling_rate",        tmp%hparam%cooling_rate,     epsilon_, 1d0-epsilon_)
 
         tmp%hparam%fashion_int = tmp%hparam%convert_char_to_int(tmp%hparam%fashion, fashion_list)
         tmp%is_hist = f_

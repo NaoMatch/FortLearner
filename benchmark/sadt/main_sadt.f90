@@ -47,7 +47,7 @@ program main_sadt
     n_columns_trains = (/50_8, 50_8, 100_8, 200_8, 400_8/)
     n_iters = 10
     n_iters = 1
-    max_leaf_nodes = 4
+    max_leaf_nodes = 64
 
     ! n_samples_trains = n_samples_trains(size(n_samples_trains):1:-1)
     ! n_columns_trains = n_columns_trains(size(n_columns_trains):1:-1)
@@ -120,6 +120,8 @@ program main_sadt
             print*, "Scaling"
             call mm_scaler%fit(x_train)
             x_train = mm_scaler%transform(x_train)
+            call mm_scaler%fit(y_train)
+            y_train = mm_scaler%transform(y_train)
 
             print*, '============================================================='
             print*, "data_holder"
@@ -132,7 +134,8 @@ program main_sadt
 
             print*, '============================================================='
             print*, "Start Training SADT_Regressor"
-            sadt_reg = sadt_regressor(max_leaf_nodes=max_leaf_nodes, fashion="best", min_samples_leaf=1_8)
+            sadt_reg = sadt_regressor(max_leaf_nodes=max_leaf_nodes, fashion="best", min_samples_leaf=1_8, &
+                cooling_rate=0.999d0, max_epoch=800_8)
             call date_and_time(values=date_value1)
             do iter=1, n_iter
                 call sadt_reg%fit(dholder_ptr, print_node=f_)
