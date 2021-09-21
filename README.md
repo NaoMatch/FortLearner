@@ -6,9 +6,10 @@ cd test_script
 make test  
 
 # WIP:
-kmeans++
+isolation forest (https://cs.nju.edu.cn/zhouzh/zhouzh.files/publication/icdm08b.pdf?q=isolation-forest)
 
 # Update
+2021/09/21: kmeans++  
 2021/09/20: simulated annealing initial temperature  
 2021/09/19: refactering simulated annealing  
 2021/09/17: implement sadt_regressor, simulated-annealing decision tree.  
@@ -122,9 +123,13 @@ LW = lawu_regressor(FL) , There is no counterpart to scikit-learn.
     * residual likelihood forest
     * slow-growing tree
 * Ensemble Trees
+    * Isolation Forest(anomaly detection)
+    * Extended Isolation Forest(anomaly detection)
+    * PIDForest(anomaly detection)
     * WildWood
 * Gradient Boosting Decision Tree
   * Axis-Parallel
+    * AdaBoost
     * Xgboost
     * LightGBM
     * CatBoost
