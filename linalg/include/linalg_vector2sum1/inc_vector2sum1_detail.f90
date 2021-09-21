@@ -9,7 +9,7 @@ do n=1, n_samples, 1
 end do
 
 if (sum_vec .eq. real(0.0, kind=kind(sum_vec))) then
-    print*, "Warning: minimum value of vector is negative."
+    print*, "Warning: all values are equal zero."
 end if
 
 sum_vec = sum_vec
