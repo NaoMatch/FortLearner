@@ -17,6 +17,13 @@ module mod_hyperparameter
         ! procedure :: false_only
     end type
 
+    ! kmeans
+    type, extends(hparam_base) :: hparam_kmeans
+        integer(kind=8) :: n_clusters = 5_8
+        integer(kind=8) :: max_iter = 500_8
+        real(kind=8)    :: tolerance=1d-6
+    end type hparam_kmeans
+
     ! Linear Regression
     type, extends(hparam_base) :: hparam_linear_regression
         logical(kind=4) :: fit_intercept=.true.
