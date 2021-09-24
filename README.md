@@ -6,9 +6,10 @@ cd test_script
 make test  
 
 # WIP:
-isolation forest (https://cs.nju.edu.cn/zhouzh/zhouzh.files/publication/icdm08b.pdf?q=isolation-forest)
+refactoring  
 
 # Update
+2021/09/24: isolation_tree and isolation_forest
 2021/09/21: kmeans++  
 2021/09/20: simulated annealing initial temperature  
 2021/09/19: refactering simulated annealing  
@@ -105,8 +106,16 @@ LW = lawu_regressor(FL) , There is no counterpart to scikit-learn.
   * gradient_boosting_lawu_regressor
 * Dimensionality Reduction:
   * pca
+* Clustering
+  * kmeans++
+* Anomaly Detection
+  * isolation_tree
+  * isolation_forest
  
 # ToDo
+* Matrix Factorization
+  * Matrix Factorization
+  * Non-Negative Matrix Factorization
 * Decision Tree
   * Axis-Parallel
     * sliq
@@ -123,9 +132,9 @@ LW = lawu_regressor(FL) , There is no counterpart to scikit-learn.
     * residual likelihood forest
     * slow-growing tree
 * Ensemble Trees
-    * Isolation Forest(anomaly detection)
     * Extended Isolation Forest(anomaly detection)
     * PIDForest(anomaly detection)
+    * Cross-Cluster Weighted Forests
     * WildWood
 * Gradient Boosting Decision Tree
   * Axis-Parallel
