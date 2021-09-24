@@ -15,25 +15,29 @@ module mod_decision_tree
     implicit none
 
     !> Extended type of regressor of 'classificaton and regression tree'
+    !> https://www.routledge.com/Classification-and-Regression-Trees/Breiman-Friedman-Stone-Olshen/p/book/9780412048418
     type, extends(base_tree) :: decision_tree_regressor
-        logical(kind=4) :: is_classification=f_
+        logical(kind=4) :: is_classification=f_ !< is classification tree or not
     contains
         procedure :: fit => fit_decision_tree_regressor
     end type decision_tree_regressor
 
+    !> An interface to create new 'decision_tree_regressor'
     interface decision_tree_regressor
         procedure :: new_decision_tree_regressor
     end interface decision_tree_regressor
 
 contains
 
-    !> A function to override decision_tree_regressor.
-    !! \param max_depth max depth
-    !! \param boot_strap boot strap sampling
-    !! \param max_leaf_nodes maximum number of leaf node
-    !! \param min_samples_leaf minimum number of samples in node
-    !! \param fashion how to split node
-    !! \param max_features maximum number of features in node split phase
+    !> A function to create new 'decision_tree_regressor'.
+    !! \param max_depth max depth. must be greater equal 1
+    !! \param boot_strap with or without bootstrap sampling. default value is .false.
+    !! \param max_leaf_nodes maximum number of leaf node. must be greater equal 2
+    !! \param min_samples_leaf minimum number of samples in node. must be greater than 1
+    !! \param fashion how to split node. 'best': split the node with largest information gain, 'depth': split the deepest splittable(not leaf) node, 
+    !!        'level': split all specific depth nodes at a time, 'impurity': split the node with largest impurity, 
+    !!        'sample': split the node with largest sample size
+    !! \param max_features maximum number of features in node split phase. must be greater equal 1
     function new_decision_tree_regressor(&
         max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features &
         )
@@ -80,10 +84,10 @@ contains
     end function new_decision_tree_regressor
 
 
-    !> A subtouine to fit regressor of 'decision_tree'. 
-    !! \return returns fitted regressor tree
+    !> A subtouine to fit 'decision_tree_regressor'. 
+    !! \return returns fitted 'decision_tree_regressor'
     !! \param data_holder_ptr pointer of data_holder 
-    !! \param print_node ***OPTIONAL*** if True, print node informations
+    !! \param print_node ***OPTIONAL*** if True, print node informations after training
     !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
     !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
     subroutine fit_decision_tree_regressor(this, data_holder_ptr, print_node, &

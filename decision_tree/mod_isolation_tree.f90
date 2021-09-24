@@ -15,19 +15,23 @@ module mod_isolation_tree
     implicit none
 
 
-    !> Extended type of regressor of 'classificaton and regression tree'
+    !> Extended type of 'isolation_tree'
     type, extends(base_tree) :: isolation_tree
-        logical(kind=4) :: is_classification=f_
+        logical(kind=4) :: is_classification=f_ !< is classification or not
     contains
         procedure :: fit => fit_isolation_tree
     end type isolation_tree
 
+    !> An interface to create new 'isolation_tree'
     interface isolation_tree
         procedure :: new_isolation_tree
     end interface isolation_tree
 
 contains
 
+    !> A function to create new 'isolation_tree'.
+    !! \param max_samples maximum number of samples in tree. must be greater equal 2
+    !! \param contamination contamination ratio
     function new_isolation_tree(max_samples, contamination)
         implicit none
         type(isolation_tree)      :: new_isolation_tree
@@ -54,6 +58,11 @@ contains
         new_isolation_tree = tmp
     end function new_isolation_tree
 
+
+    !> A subtouine to fit 'isolation_tree'. 
+    !! \return returns fitted 'isolation_tree' tree
+    !! \param data_holder_ptr pointer of data_holder 
+    !! \param print_node ***OPTIONAL*** if True, print node informations after training
     subroutine fit_isolation_tree(this, data_holder_ptr, print_node)
         implicit none
 

@@ -14,29 +14,37 @@ module mod_lawu
     use mod_base_tree
     implicit none
 
-    !> Extended type of regressor of 'classificaton and regression tree'
+    !> Extended type of 'lawu_regressor'
     type, extends(base_tree) :: lawu_regressor
-        logical(kind=4) :: is_classification=f_
+        logical(kind=4) :: is_classification=f_ !< is classification or not
     contains
         procedure :: fit => fit_lawu_regressor
     end type lawu_regressor
 
+    !> An interface to create new 'lawu_regressor'
     interface lawu_regressor
         procedure :: new_lawu_regressor
     end interface lawu_regressor
 
 contains
 
-    !> A function to override clouds_regressor.
+    !> A function to create new 'lawu_regressor'.
     !! \param learning_rate_layer learning rate per layer
-    !! \param max_bins maximum number of bins
-    !! \param max_depth max depth
-    !! \param boot_strap boot strap sampling
-    !! \param max_leaf_nodes maximum number of leaf node
-    !! \param min_samples_leaf minimum number of samples in node
-    !! \param fashion how to split node
-    !! \param max_features maximum number of features in node split phase
-    !! \param strategy splitting strategy
+    !! \param max_bins maximum number of bins. must be greater equal 2
+    !! \param max_depth max depth. must be greater equal 1
+    !! \param boot_strap with or without bootstrap sampling. default value is .false.
+    !! \param max_leaf_nodes maximum number of leaf node. must be greater equal 2
+    !! \param min_samples_leaf minimum number of samples in node. must be greater than 1
+    !! \param fashion how to split node. 'best': split the node with largest information gain, 'depth': split the deepest splittable(not leaf) node, 
+    !!        'level': split all specific depth nodes at a time, 'impurity': split the node with largest impurity, 
+    !!        'sample': split the node with largest sample size
+    !! \param max_features maximum number of features in node split phase. must be greater equal 1
+    !! \param strategy binning strategy. 
+    !!      'uniform': divide uniformly between the maximum and minimum values, 
+    !!      'quantile': split according to quantile values, 
+    !!      'kmeans': split by one-dimensional kmeans clustering, 
+    !!      'greedy': see https://arxiv.org/pdf/2005.01653.pdf, 
+    !!      'modified_greedy': see https://arxiv.org/pdf/2005.01653.pdf
     function new_lawu_regressor(&
         learning_rate_layer, &
         max_bins, &
@@ -105,8 +113,8 @@ contains
     end function new_lawu_regressor
 
 
-    !> A subtouine to fit regressor of 'lawu'. 
-    !! \return returns fitted regressor tree
+    !> A subtouine to fit 'lawu_regressor'. 
+    !! \return returns fitted 'lawu_regressor'
     !! \param data_holder_ptr pointer of data_holder 
     !! \param print_node ***OPTIONAL*** if True, print node informations
     !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'

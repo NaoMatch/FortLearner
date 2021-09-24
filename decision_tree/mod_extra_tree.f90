@@ -13,29 +13,34 @@ module mod_extra_tree
     use mod_base_tree
     implicit none
 
-    !> Extended type of regressor of 'classificaton and regression tree'
+    !> Extended type of regressor of 'extremely randomized tree' or 'extra tree'
+    !> https://link.springer.com/article/10.1007/s10994-006-6226-1
     type, extends(base_tree) :: extra_tree_regressor
-        logical(kind=4) :: is_classification=f_
+        logical(kind=4) :: is_classification=f_ !< is classification tree or not
     contains
         ! procedure :: fit => fit_extra_tree_regressor
         procedure :: fit => fit_extra_tree_regressor
         procedure :: fit_faster => fit_extra_tree_regressor_faster
     end type extra_tree_regressor
 
+    !> An interface to create new 'extra_tree_regressor'
     interface extra_tree_regressor
         procedure :: new_extra_tree_regressor
     end interface extra_tree_regressor
 
 contains
 
-    !> A function to override clouds_regressor.
-    !! \param max_depth max depth
-    !! \param boot_strap boot strap sampling
-    !! \param max_leaf_nodes maximum number of leaf node
-    !! \param min_samples_leaf minimum number of samples in node
-    !! \param fashion how to split node
-    !! \param max_features maximum number of features in node split phase
-    !! \param n_repeats number of iterations to find the best split extremely randomly
+    !> A function to override extra_tree_regressor.
+    !! \param max_depth max depth. must be greater equal 1
+    !! \param boot_strap with or without bootstrap sampling. default value is .false.
+    !! \param max_leaf_nodes maximum number of leaf node. must be greater equal 2
+    !! \param min_samples_leaf minimum number of samples in node. must be greater than 1
+    !! \param fashion how to split node. 'best': split the node with largest information gain, 'depth': split the deepest splittable(not leaf) node, 
+    !!        'level': split all specific depth nodes at a time, 'impurity': split the node with largest impurity, 
+    !!        'sample': split the node with largest sample size
+    !! \param max_features maximum number of features in node split phase. must be greater equal 1
+    !! \param n_repeats number of iterations to find the best split extremely randomly at a node
+    !! \param n_threads number of threads
     function new_extra_tree_regressor(&
         max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features, n_repeats, &
         n_threads &
@@ -88,7 +93,12 @@ contains
         new_extra_tree_regressor = tmp
     end function new_extra_tree_regressor
 
-
+    !> A subtouine to fit 'extra_tree_regressor'. 
+    !! \return returns fitted 'extra_tree_regressor' tree
+    !! \param data_holder_ptr pointer of data_holder 
+    !! \param print_node ***OPTIONAL*** if True, print node informations after training
+    !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
+    !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
     subroutine fit_extra_tree_regressor(this, data_holder_ptr, print_node, &
         feature_indices, feature_indices_scanning_range)
         implicit none
@@ -160,6 +170,14 @@ contains
         ! print*, "SplitTime: ", time_splti
     end subroutine fit_extra_tree_regressor
 
+
+    !> A subtouine to fit 'extra_tree_regressor', faster than 'fit_extra_tree_regressor'. 
+    !> input explanatory of data_holder must be transposed and number of output dimension of objective function must be 1.
+    !! \return returns fitted 'extra_tree_regressor' tree
+    !! \param data_holder_ptr pointer of data_holder 
+    !! \param print_node ***OPTIONAL*** if True, print node informations after training
+    !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
+    !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
     subroutine fit_extra_tree_regressor_faster(this, data_holder_ptr, print_node, &
         feature_indices, feature_indices_scanning_range)
         implicit none

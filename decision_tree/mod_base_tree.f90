@@ -9,37 +9,38 @@ module mod_base_tree
     use mod_woodworking_tools
     implicit none
     
+    !> A type of base tree for various decision tree algorithms
     type base_tree
-        character(len=256)               :: algo_name
-        logical(kind=4)                  :: is_trained = f_
-        logical(kind=4)                  :: is_axis_parallel = t_
-        logical(kind=4)                  :: is_hist=f_
-        logical(kind=4)                  :: is_layer_wise_sum=f_
-        type(hparam_decisiontree)        :: hparam
+        character(len=256)               :: algo_name              !< algorithm name
+        logical(kind=4)                  :: is_trained = f_        !< is trained or not. If not, cannot predict and dump.
+        logical(kind=4)                  :: is_axis_parallel = t_  !< is axis paralle split or not.
+        logical(kind=4)                  :: is_hist=f_             !< use binned array or not.
+        logical(kind=4)                  :: is_layer_wise_sum=f_   !< performs response summation for each layer, instead of returning only the response of the terminal node. **'lawu_regressor' only**
+        type(hparam_decisiontree)        :: hparam                 !< hyperparameter of decision tree.
         ! Axis-Parallel
-        type(node_axis), pointer         :: root_node_axis_ptr
-        integer(kind=8), allocatable     :: split_features_(:)
+        type(node_axis), pointer         :: root_node_axis_ptr     !< pointer to root node with axis-parallel split.
+        integer(kind=8), allocatable     :: split_features_(:)     !< indices of split features (#nodes). In internal node, 1-#columns. In terminal node, set to be -2.
         ! Oblique
-        type(node_oblq), pointer         :: root_node_oblq_ptr
-        real(kind=8), allocatable        :: coefs_(:,:)
-        real(kind=8), allocatable        :: intercepts_(:)
+        type(node_oblq), pointer         :: root_node_oblq_ptr     !< pointer to root node with oblique split.
+        real(kind=8), allocatable        :: coefs_(:,:)            !< splitting coefficients (#nodes, #samples)
+        real(kind=8), allocatable        :: intercepts_(:)         !< splitting intercepts (#nodes)
         ! Common
-        real(kind=8), allocatable        :: split_thresholds_(:)
-        logical(kind=4), allocatable     :: is_terminals_(:)
+        real(kind=8), allocatable        :: split_thresholds_(:)   !< splitting thresholds (#nodes)
+        logical(kind=4), allocatable     :: is_terminals_(:)       !< boolean array of terminal or not (#nodes)
         ! Classification and Regression
-        real(kind=8), allocatable        :: responses_(:,:)
+        real(kind=8), allocatable        :: responses_(:,:)        !< output response of all nodes. calculated by sample mean.
         ! Anomaly Detection
-        logical(kind=4)                  :: is_isolation_tree = f_
+        logical(kind=4)                  :: is_isolation_tree = f_ !< is isolation tree or not.
 
         ! 
-        type(train_results) :: results
-        real(kind=8), allocatable        :: mean_y(:)
-        real(kind=8)                     :: lr_layer
+        type(train_results)              :: results                !< training results
+        real(kind=8), allocatable        :: mean_y(:)              !< mean of objective variable during training.
+        real(kind=8)                     :: lr_layer               !< learinng rate per layer
 
-        integer(kind=8) :: n_samples_
-        integer(kind=8) :: n_columns_
-        integer(kind=8) :: n_outputs_
-        integer(kind=8) :: n_leaf_nodes_
+        integer(kind=8) :: n_samples_                              !< number of samples in training
+        integer(kind=8) :: n_columns_                              !< number of columns
+        integer(kind=8) :: n_outputs_                              !< number of output dimension of objective variable
+        integer(kind=8) :: n_leaf_nodes_                           !< number of leaf node
     contains
         procedure :: init => init_base_tree
         procedure :: induction_stop_check
@@ -55,12 +56,34 @@ module mod_base_tree
         procedure :: dump => dump_tree
         procedure :: load => load_tree
 
-        procedure :: print_info
-        procedure :: print_info_oblq
+        procedure, pass :: print_info_axis
+        procedure, pass :: print_info_oblq
+        generic :: print_info => print_info_axis, print_info_oblq
     end type base_tree
 
 contains
 
+    !> A function to calculate average depth of binary search tree.
+    !! \return returns average depth of binary search tree
+    !! \param n_samples number of samples
+    function avg_depth(n_samples)
+        implicit none
+        real(kind=8) :: avg_depth
+        integer(kind=8), intent(in) :: n_samples
+        if (n_samples .eq. 1_8) then
+            avg_depth = 0_8
+            return 
+        elseif ( n_samples .eq. 2_8 ) then
+            avg_depth = 1_8
+            return 
+        end if
+        avg_depth = 2d0*harmonic_number_approx(n_samples-1) - 2d0*(n_samples-1d0)/n_samples
+    end function avg_depth
+
+
+    !> A subroutine to dump fitted 'base_tree' object or its extended objects
+    !> If not fitted, cannot dump training results.
+    !! \param file_name output file name
     subroutine dump_tree(this, file_name)
         implicit none
         class(base_tree) :: this
@@ -160,6 +183,10 @@ contains
         close(10)
     end subroutine dump_tree
 
+
+    !> A subroutine to load 'base_tree' object or its extended objects
+    !> If not fitted, cannot load.
+    !! \param file_name loading file name
     subroutine load_tree(this, file_name)
         implicit none
         class(base_tree) :: this
@@ -264,9 +291,10 @@ contains
         close(10); return
     end subroutine load_tree
 
-    !> A subroutine to print node informations.
-    !! \param root_node_ptr_axis root node pointer of axis-parallel
-    recursive subroutine print_info(this, root_node_ptr_axis)
+
+    !> A recursive subroutine to print node informations with axis-parallel split.
+    !! \param root_node_ptr_axis pointer to root node with axis-parallel split.
+    recursive subroutine print_info_axis(this, root_node_ptr_axis)
         implicit none
         class(base_tree) :: this
         type(node_axis), pointer :: root_node_ptr_axis
@@ -276,12 +304,14 @@ contains
         if ( allocated(root_node_ptr_axis%node_l) ) then
             node_l_ptr_axis => root_node_ptr_axis%node_l
             node_r_ptr_axis => root_node_ptr_axis%node_r
-            call this%print_info(node_l_ptr_axis)
-            call this%print_info(node_r_ptr_axis)
+            call this%print_info_axis(node_l_ptr_axis)
+            call this%print_info_axis(node_r_ptr_axis)
         end if
-    end subroutine print_info
+    end subroutine print_info_axis
 
 
+    !> A recursive subroutine to print node informations with oblique split.
+    !! \param root_node_ptr_oblq pointer to root node with oblique split.
     recursive subroutine print_info_oblq(this, root_node_ptr_oblq)
         implicit none
         class(base_tree) :: this
@@ -298,7 +328,10 @@ contains
     end subroutine print_info_oblq
 
 
-    !> A subtouine to fit regressor of 'classificaton and regression tree'. 
+    !> A subtouine to check if a 'base_tree' object or its extended objects can grow. 
+    !! \return returns tree can grow or not
+    !! \param hparam_ptr pointer to hyperparameter of decision_tree.
+    !! \param is_stop tree can grow or not
     subroutine induction_stop_check(this, hparam_ptr, is_stop)
         implicit none
         class(base_tree) :: this
@@ -338,7 +371,8 @@ contains
     end subroutine induction_stop_check
 
 
-    !> Initialize tree, dellocate all allocated arrays
+    !> A subroutine to initialize tree, nullify pointers dellocate arrays.
+    !! \param data_holder_ptr pointer to 'data_holder'
     subroutine init_base_tree(this, data_holder_ptr)
         implicit none
         class(base_tree)           :: this
@@ -367,9 +401,9 @@ contains
     end subroutine init_base_tree
 
 
-    !> A subroutine to initialize root node pointer.
+    !> A subroutine to initialize root node pointer (axis-parallel and oblique).
     !! \return returns tree with initialized root node
-    !! \param data_holder_ptr pointer of 'data_holder'
+    !! \param data_holder_ptr pointer to 'data_holder'
     !! \param is_classification classification tree or not
     subroutine init_root_node(this, data_holder_ptr, is_classification)
         implicit none
@@ -398,7 +432,7 @@ contains
             end if
 
             if (is_classification) then
-                ! pass
+                stop "Classification Tree Not Implemented!"
             elseif ( this%is_isolation_tree ) then
                 this%root_node_axis_ptr%sum_p    = (/0d0/)
                 this%root_node_axis_ptr%response = (/0d0/)
@@ -431,7 +465,7 @@ contains
             end if
 
             if (is_classification) then
-                ! pass
+                stop "Classification Tree Not Implemented!"
             else
                 this%root_node_oblq_ptr%sum_p = sum(data_holder_ptr%y_ptr%y_r8_ptr, dim=1)
                 this%root_node_oblq_ptr%response = mean(data_holder_ptr%y_ptr%y_r8_ptr, this%n_samples_, this%n_outputs_)
@@ -447,8 +481,8 @@ contains
 
     !> A subroutine to extract 'axis-parallel' node pointer(s) to be split.
     !> Which nodes are extracted is determined by hyperparameter 'fashion'. 
-    !! \return returns axis-parallel' node pointer(s) to be split
-    !! \param selected_node_ptrs selected axis-parallel' node pointer(s)
+    !! \return returns 'axis-parallel' node pointer(s) to be split
+    !! \param selected_node_ptrs selected 'axis-parallel' node pointer(s)
     !! \param depth depth of nodes to be extracted for level-wise fashion.
     subroutine extract_split_node_ptrs_axis(this, selected_node_ptrs, depth)
         implicit none
@@ -472,8 +506,8 @@ contains
 
     !> A subroutine to extract 'axis-parallel' node pointer(s) to be split.
     !> Which nodes are extracted is determined by hyperparameter 'fashion'. 
-    !! \return returns axis-parallel' node pointer(s) to be split
-    !! \param selected_node_ptrs selected axis-parallel' node pointer(s)
+    !! \return returns 'axis-parallel' node pointer(s) to be split
+    !! \param selected_node_ptrs selected 'axis-parallel' node pointer(s)
     !! \param depth depth of nodes to be extracted for level-wise fashion.
     subroutine extract_split_node_ptrs_oblq(this, selected_node_ptrs, depth)
         implicit none
@@ -495,12 +529,14 @@ contains
     end subroutine extract_split_node_ptrs_oblq
 
 
-    !> Which nodes are extracted is determined by hyperparameter 'fashion'. 
+    !> A subroutine to create child nodes for axis-parallel node. 
     !! \return returns adopted 'axis-parallel' node pointer(s)
     !! \param node_ptrs 'axis-parallel' node pointer(s) to be adopted
     !! \param data_holder_ptr pointer of 'data_holder'
     !! \param hparam_ptr pointer of decision tree hyperparameter
     !! \param is_classification classification tree or not
+    !! \param lr_layer learning rate per layer for 'lawu_regressor' only
+    !! \param is_hist use binned array or not.
     subroutine adopt_node_ptrs_axis(this, node_ptrs, data_holder_ptr, hparam_ptr, is_classification, lr_layer, is_hist)
         implicit none
         class(base_tree) :: this
@@ -536,22 +572,14 @@ contains
     end subroutine adopt_node_ptrs_axis
 
 
-    subroutine adopt_node_ptrs_axis_for_isolation_tree(this, node_ptrs, data_holder_ptr, hparam_ptr)
-        implicit none
-        class(base_tree) :: this
-        type(node_axis_ptr), allocatable, intent(inout) :: node_ptrs(:)
-        type(data_holder), pointer                      :: data_holder_ptr
-        type(hparam_decisiontree), pointer              :: hparam_ptr
-
-        type(node_axis), pointer :: selected_node_ptr
-        integer(kind=8)          :: n, n_nodes
-
-        do n=1, size(node_ptrs), 1
-            call adopting_twins_axis_for_isolation_tree(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr)
-        end do
-    end subroutine adopt_node_ptrs_axis_for_isolation_tree
-
-
+    !> A subroutine to create child nodes for oblique node. 
+    !! \return returns adopted 'oblique' node pointer(s)
+    !! \param node_ptrs 'oblique' node pointer(s) to be adopted
+    !! \param data_holder_ptr pointer of 'data_holder'
+    !! \param hparam_ptr pointer of decision tree hyperparameter
+    !! \param is_classification classification tree or not
+    !! \param lr_layer learning rate per layer for 'lawu_regressor' only
+    !! \param is_hist use binned array or not.
     subroutine adopt_node_ptrs_oblq(this, node_ptrs, data_holder_ptr, hparam_ptr, is_classification, lr_layer, is_hist)
         implicit none
         class(base_tree) :: this
@@ -587,10 +615,31 @@ contains
     end subroutine adopt_node_ptrs_oblq
 
 
+    !> A subroutine to create child nodes when 'isolation_tree'. 
+    !! \param node_ptrs 'axis-parallel' node pointer(s) to be adopted
+    !! \param data_holder_ptr pointer of 'data_holder'
+    !! \param hparam_ptr pointer of decision tree hyperparameter
+    subroutine adopt_node_ptrs_axis_for_isolation_tree(this, node_ptrs, data_holder_ptr, hparam_ptr)
+        implicit none
+        class(base_tree) :: this
+        type(node_axis_ptr), allocatable, intent(inout) :: node_ptrs(:)
+        type(data_holder), pointer                      :: data_holder_ptr
+        type(hparam_decisiontree), pointer              :: hparam_ptr
+
+        type(node_axis), pointer :: selected_node_ptr
+        integer(kind=8)          :: n, n_nodes
+
+        do n=1, size(node_ptrs), 1
+            call adopting_twins_axis_for_isolation_tree(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr)
+        end do
+    end subroutine adopt_node_ptrs_axis_for_isolation_tree
+
+
     !> A function to predict responses.
-    !> If classification tree, returns class probabiities.
+    !> If classification tree, returns class probabiities. **NOT IMPLEMENTD**
     !> If regression tree, returns responses.
-    !! \param x feature
+    !! \param x explanatory array
+    !! \param return_depth **optional** return sample depth. If terminal node contains multiple instances, add 'avg_depth(n_samples in node)'. Use isolation_tree and isolation_forest only.
     function predict_response(this, x, return_depth)
         implicit none
         class(base_tree)                  :: this
@@ -648,28 +697,16 @@ contains
     end function predict_response
 
 
-    function avg_depth(n_samples)
-        implicit none
-        real(kind=8) :: avg_depth
-        integer(kind=8), intent(in) :: n_samples
-        if (n_samples .eq. 1_8) then
-            avg_depth = 0_8
-            return 
-        elseif ( n_samples .eq. 2_8 ) then
-            avg_depth = 1_8
-            return 
-        end if
-        avg_depth = 2d0*harmonic_number_approx(n_samples-1) - 2d0*(n_samples-1d0)/n_samples
-    end function avg_depth
-
-
-    !> A function to predict responses for tree with 'axis-parallel' node.
-    !! \param x_ptr pointer of feature 'x'
+    !> A subroutine to predict responses for tree with 'axis-parallel' node.
+    !! \param x_ptr pointer to explanatory variable
     !! \param indices sample indices in current path.
     !! \param responses sample responses
     !! \param n_samples n_samplesber of samples in current path
     !! \param n_outputs n_samplesber of outputs
     !! \param is_root is root node or not
+    !! \param is_layer_wise_sum performs response summation for each layer, instead of returning only the response of the terminal node.
+    !! \param lr_layer learing rate per layer
+    !! \param is_isolation_tree is 'isolation_tree' or not
     recursive subroutine predict_response_axis(result, x_ptr, indices, responses, n_samples, n_outputs, &
         is_root, is_layer_wise_sum, lr_layer, is_isolation_tree)
         implicit none
@@ -767,6 +804,16 @@ contains
     end subroutine predict_response_axis
 
 
+    !> A subroutine to predict responses for tree with 'obluque' node.
+    !! \param x_ptr pointer to explanatory variable
+    !! \param indices sample indices in current path.
+    !! \param responses sample responses
+    !! \param n_samples n_samplesber of samples in current path
+    !! \param n_outputs n_samplesber of outputs
+    !! \param is_root is root node or not
+    !! \param is_layer_wise_sum performs response summation for each layer, instead of returning only the response of the terminal node.
+    !! \param lr_layer learing rate per layer
+    !! \param is_isolation_tree is 'isolation_tree' or not
     recursive subroutine predict_response_oblq(result, x_ptr, indices, responses, n_samples, n_outputs, &
         is_root, is_layer_wise_sum, lr_layer)
         implicit none
@@ -859,8 +906,9 @@ contains
     end subroutine predict_response_oblq
 
 
-    !> Postprocess for Tree.
-    !> Extract training results, and nullify node pointers
+    !> A subroutine to perform postprocess of decision tree algorithms.
+    !> Extract training results, nullify node pointers, and deallocate arrays
+    !! \param is_classification is classification tree or not
     subroutine postprocess(this, is_classification)
         implicit none
         class(base_tree) :: this

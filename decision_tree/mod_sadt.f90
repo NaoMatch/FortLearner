@@ -16,26 +16,29 @@ module mod_sadt
 
     !> Extended type of regressor of 'simulated annealing decision tree'
     type, extends(base_tree) :: sadt_regressor
-        logical(kind=4) :: is_classification=f_
+        logical(kind=4) :: is_classification=f_ !< is classification or not
     contains
         procedure :: fit => fit_sadt_regressor
     end type sadt_regressor
 
+    !> An interface to create new 'sadt_regressor'
     interface sadt_regressor
         procedure :: new_sadt_regressor
     end interface sadt_regressor
 
 contains
 
-    !> A function to override sadt_regressor.
-    !! \param max_depth max depth
-    !! \param boot_strap boot strap sampling
-    !! \param max_leaf_nodes maximum number of leaf node
-    !! \param min_samples_leaf minimum number of samples in node
-    !! \param fashion how to split node
-    !! \param max_features maximum number of features in node split phase
-    !! \param initial_temperature initial temperature of simulated annealing
-    !! \param max_epoch maximum number of epoch of simulated annealing
+    !> A function to create sadt_regressor.
+    !! \param max_depth max depth. must be greater equal 1
+    !! \param boot_strap with or without bootstrap sampling. default value is .false.
+    !! \param max_leaf_nodes maximum number of leaf node. must be greater equal 2
+    !! \param min_samples_leaf minimum number of samples in node. must be greater than 1
+    !! \param fashion how to split node. 'best': split the node with largest information gain, 'depth': split the deepest splittable(not leaf) node, 
+    !!        'level': split all specific depth nodes at a time, 'impurity': split the node with largest impurity, 
+    !!        'sample': split the node with largest sample size
+    !! \param max_features maximum number of features in node split phase. must be greater equal 1
+    !! \param initial_temperature initial temperature of simulated annealing at a node
+    !! \param max_epoch maximum number of epoch of simulated annealing at a node
     function new_sadt_regressor(&
         max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features, &
         initial_temperature, max_epoch, cooling_rate &
@@ -94,21 +97,16 @@ contains
     end function new_sadt_regressor
 
 
-    !> A subtouine to fit regressor of 'sadt'. 
-    !! \return returns fitted regressor tree
+    !> A subtouine to fit 'sadt_regressor'. 
+    !! \return returns fitted 'sadt_regressor'
     !! \param data_holder_ptr pointer of data_holder 
     !! \param print_node ***OPTIONAL*** if True, print node informations
-    !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
-    !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
-    subroutine fit_sadt_regressor(this, data_holder_ptr, print_node, &
-        feature_indices, feature_indices_scanning_range)
+    subroutine fit_sadt_regressor(this, data_holder_ptr, print_node)
         implicit none
 
         class(sadt_regressor) :: this
         type(data_holder), pointer     :: data_holder_ptr
         logical(kind=4), OPTIONAL      :: print_node
-        integer(kind=8), optional      :: feature_indices(:)
-        integer(kind=8), optional      :: feature_indices_scanning_range(2)
 
         type(node_oblq), target            :: root_node
         type(hparam_decisiontree), target  :: hparam
