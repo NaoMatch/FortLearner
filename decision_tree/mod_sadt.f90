@@ -85,6 +85,7 @@ contains
         call tmp%hparam%validate_int_range("max_epoch",            tmp%hparam%max_epoch,        1_8, huge(1_8))
         call tmp%hparam%validate_real_range("cooling_rate",        tmp%hparam%cooling_rate,     epsilon_, 1d0-epsilon_)
 
+        tmp%hparam%max_samples = -1
         tmp%hparam%fashion_int = tmp%hparam%convert_char_to_int(tmp%hparam%fashion, fashion_list)
         tmp%is_hist = f_
         tmp%is_layer_wise_sum = f_
