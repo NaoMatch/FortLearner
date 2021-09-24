@@ -31,6 +31,9 @@ module mod_splitter
         procedure :: split_sadt_regressor
         procedure :: split_sadt_regressor_indivisuals
 
+        procedure :: split_isolation_tree
+        procedure :: split_isolation_tree_indivisuals
+
         ! procedure :: split_random_rotation_tree_regressor
         ! procedure :: split_random_rotation_tree_regressor_indivisuals
 
@@ -54,6 +57,112 @@ module mod_splitter
     type(node_oblq)  :: node_temp
 
 contains
+
+    subroutine split_isolation_tree(this, node_ptrs, data_holder_ptr, hparam_ptr, & 
+        n_columns)
+        implicit none
+        class(node_splitter)               :: this
+        type(node_axis_ptr), intent(inout) :: node_ptrs(:)
+        type(data_holder), pointer         :: data_holder_ptr
+        type(hparam_decisiontree), pointer :: hparam_ptr
+        integer(kind=8), intent(in)        :: n_columns
+        integer(kind=8) :: n
+
+        if ( size(node_ptrs) .eq. 1 ) then
+            call this%split_isolation_tree_indivisuals(node_ptrs(1)%node_ptr, data_holder_ptr, hparam_ptr, &
+                n_columns)
+        else
+            do n=1, size(node_ptrs), 1
+                call this%split_isolation_tree_indivisuals(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr, &
+                    n_columns)
+            end do
+        end if
+    end subroutine split_isolation_tree
+
+    subroutine split_isolation_tree_indivisuals(this, node_ptr, data_holder_ptr, hparam_ptr, &
+        n_columns)
+        implicit none
+        class(node_splitter)         :: this
+        type(node_axis), pointer     :: node_ptr
+        type(data_holder), pointer   :: data_holder_ptr
+        type(hparam_decisiontree), pointer   :: hparam_ptr
+        integer(kind=8), intent(in)  :: n_columns
+
+        real(kind=8)    :: dummy
+        integer(kind=8) :: fid, min_fid_val, max_fid_val
+        real(kind=8) :: min_val, max_val, val, split_val
+        integer(kind=8) :: n, idx, factor
+        integer(kind=8) :: n_samples_l, n_samples_r
+        real(kind=8), allocatable :: tmp_f(:)
+
+        ! print*, "Select Random Feature ID"
+        call random_number(dummy)
+        max_fid_val = data_holder_ptr%n_columns
+        min_fid_val = 0_8
+        fid = (max_fid_val-min_fid_val)*dummy + min_fid_val + 1
+
+        ! print*, "Collect Data & Get Minimum and Maximum Value  ", fid
+        ! allocate(tmp_f(node_ptr%n_samples))
+        call random_number(dummy)
+        min_val = huge(0d0)
+        max_val = -huge(0d0)
+        do n=1, node_ptr%n_samples, 1
+            idx = node_ptr%indices(n)
+            val = data_holder_ptr%x_ptr%x_r8_ptr(idx,fid)
+            min_val = minval( (/val, min_val/) )
+            max_val = maxval( (/val, max_val/) )
+        end do
+        split_val = (max_val-min_val)*dummy + min_val
+
+        ! print*, "Count Left & Right #samples"
+        n_samples_l = 0
+        do n=1, node_ptr%n_samples, 1
+            idx = node_ptr%indices(n)
+            val = data_holder_ptr%x_ptr%x_r8_ptr(idx,fid)
+            factor = val .le. split_val
+            n_samples_l = n_samples_l + factor
+        end do
+        n_samples_r = node_ptr%n_samples - n_samples_l
+
+
+        ! Collect Train Results
+        ! print*, "Collect Train Results", n_samples_l, n_samples_r
+        node_ptr%is_trained = t_
+        node_ptr%eval_counter = 1
+        node_ptr%gain_best   = huge(0d0)
+        node_ptr%gain_best_w = huge(0d0)
+
+        if ( min_val .eq. max_val ) then
+            node_ptr%is_terminal = t_
+            call node_ptr%hparam_check(hparam_ptr)
+            return
+        end if
+
+        node_ptr%feature_id_ = fid
+        node_ptr%threshold_  = split_val
+
+        if (allocated(node_ptr%sum_l))      deallocate(node_ptr%sum_l)
+        if (allocated(node_ptr%sum_r))      deallocate(node_ptr%sum_r)
+        if (allocated(node_ptr%response_l)) deallocate(node_ptr%response_l)
+        if (allocated(node_ptr%response_r)) deallocate(node_ptr%response_r)
+
+        allocate(node_ptr%sum_l(node_ptr%n_outputs))
+        allocate(node_ptr%sum_r(node_ptr%n_outputs))
+        allocate(node_ptr%response_l(node_ptr%n_outputs))
+        allocate(node_ptr%response_r(node_ptr%n_outputs))
+
+        node_ptr%sum_l = 0d0
+        node_ptr%sum_r = 0d0
+        node_ptr%n_samples_l = n_samples_l
+        node_ptr%n_samples_r = n_samples_r
+        node_ptr%response_l = (/node_ptr%depth+1/)
+        node_ptr%response_r = (/node_ptr%depth+1/)
+
+        node_ptr%impurity = huge(0d0)
+        call node_ptr%hparam_check(hparam_ptr)
+    end subroutine split_isolation_tree_indivisuals
+
+
     !------------------------------------------------------------------------------------------------------------------------------------------ 
     !------------------------------------------------------------------------------------------------------------------------------------------ 
     !> A subroutine to split node by extremely randomized way.
