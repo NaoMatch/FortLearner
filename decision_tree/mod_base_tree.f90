@@ -1,6 +1,7 @@
 module mod_base_tree
     use mod_const
     use mod_common
+    use mod_math
     use mod_node
     use mod_hyperparameter
     use mod_random
@@ -27,6 +28,9 @@ module mod_base_tree
         logical(kind=4), allocatable     :: is_terminals_(:)
         ! Classification and Regression
         real(kind=8), allocatable        :: responses_(:,:)
+        ! Anomaly Detection
+        logical(kind=4)                  :: is_isolation_tree = f_
+
         ! 
         type(train_results) :: results
         real(kind=8), allocatable        :: mean_y(:)
@@ -46,6 +50,7 @@ module mod_base_tree
         procedure :: extract_split_node_ptrs_oblq
         procedure :: adopt_node_ptrs_axis
         procedure :: adopt_node_ptrs_oblq
+        procedure :: adopt_node_ptrs_axis_for_isolation_tree
 
         procedure :: dump => dump_tree
         procedure :: load => load_tree
@@ -375,7 +380,7 @@ contains
 
         this%n_outputs_ = data_holder_ptr%n_outputs
         if (associated(this%root_node_axis_ptr)) then
-            allocate(this%root_node_axis_ptr%indices(this%n_samples_))
+            allocate(this%root_node_axis_ptr%indices(this%hparam%max_samples))
             allocate(this%root_node_axis_ptr%is_used(this%n_columns_))
             allocate(this%root_node_axis_ptr%is_useless(this%n_columns_))
             allocate(this%root_node_axis_ptr%sum_p(this%n_outputs_))
@@ -384,8 +389,8 @@ contains
             this%root_node_axis_ptr%is_hist = this%is_hist
 
             if ( this%hparam%boot_strap ) then
-                call rand_integer(1_8, this%n_samples_, this%root_node_axis_ptr%indices, this%n_samples_)
-                call quick_sort(this%root_node_axis_ptr%indices, this%n_samples_)
+                call rand_integer(1_8, this%n_samples_, this%root_node_axis_ptr%indices, this%hparam%max_samples)
+                call quick_sort(this%root_node_axis_ptr%indices, this%hparam%max_samples)
             else
                 do i=1, this%n_samples_, 1
                     this%root_node_axis_ptr%indices(i) = i
@@ -394,7 +399,11 @@ contains
 
             if (is_classification) then
                 ! pass
-            else
+            elseif ( this%is_isolation_tree ) then
+                this%root_node_axis_ptr%sum_p    = (/0d0/)
+                this%root_node_axis_ptr%response = (/0d0/)
+                this%root_node_axis_ptr%impurity = huge(0d0)
+            else ! regression
                 this%root_node_axis_ptr%sum_p = sum(data_holder_ptr%y_ptr%y_r8_ptr, dim=1)
                 this%root_node_axis_ptr%response = mean(data_holder_ptr%y_ptr%y_r8_ptr, this%n_samples_, this%n_outputs_)
                 this%root_node_axis_ptr%impurity = sum(variance(data_holder_ptr%y_ptr%y_r8_ptr, this%n_samples_, this%n_outputs_, &
@@ -402,7 +411,7 @@ contains
             end if
             this%root_node_axis_ptr%depth = 0_8 
             this%root_node_axis_ptr%n_columns = this%n_columns_
-            this%root_node_axis_ptr%n_samples = this%n_samples_
+            this%root_node_axis_ptr%n_samples = this%hparam%max_samples
         else
             allocate(this%root_node_oblq_ptr%indices(this%n_samples_))
             allocate(this%root_node_oblq_ptr%is_used(this%n_columns_))
@@ -527,6 +536,22 @@ contains
     end subroutine adopt_node_ptrs_axis
 
 
+    subroutine adopt_node_ptrs_axis_for_isolation_tree(this, node_ptrs, data_holder_ptr, hparam_ptr)
+        implicit none
+        class(base_tree) :: this
+        type(node_axis_ptr), allocatable, intent(inout) :: node_ptrs(:)
+        type(data_holder), pointer                      :: data_holder_ptr
+        type(hparam_decisiontree), pointer              :: hparam_ptr
+
+        type(node_axis), pointer :: selected_node_ptr
+        integer(kind=8)          :: n, n_nodes
+
+        do n=1, size(node_ptrs), 1
+            call adopting_twins_axis_for_isolation_tree(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr)
+        end do
+    end subroutine adopt_node_ptrs_axis_for_isolation_tree
+
+
     subroutine adopt_node_ptrs_oblq(this, node_ptrs, data_holder_ptr, hparam_ptr, is_classification, lr_layer, is_hist)
         implicit none
         class(base_tree) :: this
@@ -566,15 +591,17 @@ contains
     !> If classification tree, returns class probabiities.
     !> If regression tree, returns responses.
     !! \param x feature
-    function predict_response(this, x)
+    function predict_response(this, x, return_depth)
         implicit none
         class(base_tree)                  :: this
         real(kind=8), target, intent(in)  :: x(:,:)
         real(kind=8), allocatable         :: predict_response(:,:)
+        logical(kind=4), optional         :: return_depth
 
         real(kind=8), pointer        :: x_ptr(:,:)
         integer(kind=8), allocatable :: indices(:)
         integer(kind=8)              :: x_shape(2), n_samples, n_columns, i
+        logical(kind=4)              :: return_depth_opt
 
         x_shape = shape(x)
         n_samples  = x_shape(1)
@@ -599,17 +626,41 @@ contains
             call predict_response_axis(this%results, x_ptr, indices, & 
                 predict_response, n_samples, this%n_outputs_, is_root=t_, & 
                 is_layer_wise_sum=this%is_layer_wise_sum, &
-                lr_layer=this%lr_layer)
+                lr_layer=this%lr_layer, is_isolation_tree=this%is_isolation_tree)
         else
             call predict_response_oblq(this%results, x_ptr, indices, & 
                 predict_response, n_samples, this%n_outputs_, is_root=t_, & 
                 is_layer_wise_sum=this%is_layer_wise_sum, &
                 lr_layer=this%lr_layer)
         end if
+
+        if (this%is_isolation_tree) then
+            return_depth_opt = f_
+            if (present(return_depth)) return_depth_opt = return_depth
+            if (.not. return_depth_opt) then
+                predict_response(:,1) = 2d0**(-predict_response(:,1)/avg_depth(n_samples))
+            end if
+        end if
+
         return
         990 continue
         stop "Number of feature mismatch."
     end function predict_response
+
+
+    function avg_depth(n_samples)
+        implicit none
+        real(kind=8) :: avg_depth
+        integer(kind=8), intent(in) :: n_samples
+        if (n_samples .eq. 1_8) then
+            avg_depth = 0_8
+            return 
+        elseif ( n_samples .eq. 2_8 ) then
+            avg_depth = 1_8
+            return 
+        end if
+        avg_depth = 2d0*harmonic_number_approx(n_samples-1) - 2d0*(n_samples-1d0)/n_samples
+    end function avg_depth
 
 
     !> A function to predict responses for tree with 'axis-parallel' node.
@@ -620,7 +671,7 @@ contains
     !! \param n_outputs n_samplesber of outputs
     !! \param is_root is root node or not
     recursive subroutine predict_response_axis(result, x_ptr, indices, responses, n_samples, n_outputs, &
-        is_root, is_layer_wise_sum, lr_layer)
+        is_root, is_layer_wise_sum, lr_layer, is_isolation_tree)
         implicit none
         type(train_results)   :: result
         real(kind=8), pointer :: x_ptr(:,:)
@@ -630,6 +681,7 @@ contains
         logical(kind=4)       :: is_root
         logical(kind=4)       :: is_layer_wise_sum
         real(kind=8)          :: lr_layer
+        logical(kind=4)       :: is_isolation_tree
 
         integer(kind=8), save        :: node_id
         integer(kind=8)              :: idx, i, fid
@@ -642,6 +694,7 @@ contains
         if (is_root) node_id = 0_8
         node_id = node_id + 1_8
         
+        ! print*, size(result%is_terminals_), node_id
         if (n_samples .eq. 0 .and. result%is_terminals_(node_id)) return
         if (n_samples .eq. 0) goto 999
 
@@ -657,6 +710,7 @@ contains
             if ( result%is_terminals_(node_id) ) then
                 allocate(res(result%n_outputs_))
                 res = result%responses_(node_id,:)
+                if (is_isolation_tree) res = res + avg_depth(n_samples)
                 do i=1, n_samples
                     idx = indices(i)
                     responses(idx,:) = res
@@ -704,9 +758,11 @@ contains
         end if
 
         call predict_response_axis(result, x_ptr, indices_l, responses, count_l-1, n_outputs, & 
-            is_root=f_, is_layer_wise_sum=is_layer_wise_sum, lr_layer=lr_layer)
+            is_root=f_, is_layer_wise_sum=is_layer_wise_sum, lr_layer=lr_layer, & 
+            is_isolation_tree=is_isolation_tree)
         call predict_response_axis(result, x_ptr, indices_r, responses, count_r-1, n_outputs, &
-            is_root=f_, is_layer_wise_sum=is_layer_wise_sum, lr_layer=lr_layer)
+            is_root=f_, is_layer_wise_sum=is_layer_wise_sum, lr_layer=lr_layer, & 
+            is_isolation_tree=is_isolation_tree)
         ! deallocate(indices_l, indices_r, tmp_f, lt_thresholds)
     end subroutine predict_response_axis
 
@@ -818,10 +874,12 @@ contains
         results%n_outputs_  = this%n_outputs_
 
         if ( associated(this%root_node_axis_ptr) ) then
+            ! print*, "Count #Nodes"
             node_axis_ptr => this%root_node_axis_ptr
             call count_all_nodes(node_axis_ptr, n_nodes, is_root=t_)
             allocate(this%split_features_(n_nodes))
         else
+            ! print*, "Count #Nodes"
             node_oblq_ptr => this%root_node_oblq_ptr
             call count_all_nodes(node_oblq_ptr, n_nodes, is_root=t_)
             allocate(this%coefs_(n_nodes, this%n_columns_))
@@ -829,16 +887,20 @@ contains
 
         call results%alloc(n_nodes, this%n_columns_, this%n_outputs_, is_classification)
         if ( associated(this%root_node_axis_ptr) ) then
+            ! print*, "Extract Train Results"
             call extract_train_results_axis(node_axis_ptr, results, node_id, & 
                 is_classification=is_classification, is_root=t_)
         else
+            ! print*, "Extract Train Results"
             call extract_train_results_oblq(node_oblq_ptr, results, node_id, & 
                 is_classification=is_classification, is_root=t_)
         end if
 
         if ( associated(this%root_node_axis_ptr) ) then
+            ! print*, "Split Feature"
             this%split_features_ = results%split_features_
         else
+            ! print*, "Split Feature"
             this%coefs_ = results%coefs_
         end if
 
