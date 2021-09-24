@@ -10,19 +10,19 @@ module mod_kmeans
     use mod_linalg
     implicit none
     
+    !> A type for kmeans. initial centroids are selected by 'kmeans++'.
     type kmeans
         ! base
-        character(len=256) :: algo_name = "kmeans"
+        character(len=256) :: algo_name = "kmeans" !< algorithm name
 
         ! parameters
-        integer(kind=8)     :: n_clusters
-        integer(kind=8)     :: max_iter
-        type(hparam_kmeans) :: hparam
+        type(hparam_kmeans) :: hparam !< type of hyperparameter for 'kmeans'
 
         ! train results
-        integer(kind=8)              :: n_samples=-1, n_columns=-1
-        logical(kind=4)              :: is_trained = f_
-        real(kind=8), allocatable    :: cluster_centers(:,:)
+        integer(kind=8)              :: n_samples=-1               !< training results. #samples
+        integer(kind=8)              :: n_columns=-1               !< training results. #columns
+        logical(kind=4)              :: is_trained = f_            !< training results. already fitted or not
+        real(kind=8), allocatable    :: cluster_centers(:,:)       !< training results. coordinates of cluster centroids. dimension=(#centroids, #columns)
     contains
         procedure :: fit => fit_kmeans
         procedure :: predict => predict_kmeans
@@ -31,12 +31,17 @@ module mod_kmeans
         procedure :: select_initial_clusters
     end type kmeans
 
+    !> An interface to create new 'kmeans' object.
     interface kmeans
         module procedure :: new_kmeans
     end interface kmeans
 
 contains
 
+    !> A function to create new 'kmeans' object
+    !! \param n_cluster number of clusters. must be greater equal 2
+    !! \param max_iter maximum number of iteration. must be greater equal 2
+    !! \param tolerance maximum tolerance
     function new_kmeans(n_clusters, max_iter, tolerance)
         implicit none
         integer(kind=8), optional :: n_clusters
@@ -55,6 +60,9 @@ contains
         new_kmeans = tmp
     end function new_kmeans
 
+    !> A subroutine to dump fitted 'kmeans' object
+    !> If not fitted, cannot dump training results.
+    !! \param file_name output file name
     subroutine dump_kmeans(this, file_name)
         class(kmeans) :: this
         character(len=*) :: file_name
@@ -75,6 +83,9 @@ contains
         close(10)
     end subroutine dump_kmeans
 
+    !> A subroutine to load 'kmeans' object
+    !> If not fitted, cannot load.
+    !! \param file_name loading file name
     subroutine load_kmeans(this, file_name)
         implicit none
         class(kmeans)    :: this
@@ -97,6 +108,8 @@ contains
         close(10)
     end subroutine load_kmeans
 
+    !> A subroutine to fit 'kmeans' object
+    !! \param x data to be fitted
     subroutine fit_kmeans(this, x)
         class(kmeans) :: this
         real(kind=8), intent(in) :: x(:,:)
@@ -151,6 +164,8 @@ contains
         this % cluster_centers(:,:) = old_cluster_centers(:,:)
     end subroutine fit_kmeans
 
+    !> A subroutine to predict cluster index of new data
+    !! \param x data to be predicted
     function predict_kmeans(this, x)
         class(kmeans) :: this
         real(kind=8), intent(in) :: x(:,:)
@@ -177,6 +192,8 @@ contains
         predict_kmeans = minloc(distance, dim=2)
     end function predict_kmeans
 
+    !> A subroutine to select initial cluster centroids by 'kmeans++'
+    !! \param x data to be fitted
     subroutine select_initial_clusters(this, x)
         class(kmeans) :: this
         real(kind=8), intent(in) :: x(:,:)
@@ -218,6 +235,12 @@ contains
         if (minval(dist_mat) .eq. 0d0) stop "Number of unique rows is lower than 'n_clusters'."
     end subroutine select_initial_clusters
 
+    !> A subroutine to calculate the distance of 'x' from the centroid
+    !! \param x data points (#samples, #columns)
+    !! \param center coordinates of centroid (#columns)
+    !! \param distance distance from the centroid (#samples)
+    !! \param n_samples number of samples
+    !! \param n_columns number of columns
     subroutine calculate_distance_from_center(x, center, distance, n_samples, n_columns)
         real(kind=8), intent(in)    :: x(n_samples, n_columns)
         real(kind=8), intent(in)    :: center(n_columns)
@@ -234,6 +257,10 @@ contains
         end do
     end subroutine calculate_distance_from_center
 
+    !> A subroutine to get nearest distance. 
+    !> Compare two distances('nearest_distance', 'distance') and take out the smallest value.
+    !! \param nearest_distance current nearest distance values. It will be replaced if the value is greater than 'distance'.
+    !! \param distance new distance values, might contain values smaller than 'nearest_distance'.
     subroutine get_nearest_distance(nearest_distance, distance, n)
         implicit none
         real(kind=8), intent(inout) :: nearest_distance(n)

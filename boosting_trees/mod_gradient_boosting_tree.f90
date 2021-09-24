@@ -13,46 +13,48 @@ module mod_gradient_boosting_tree
 
     !> A type for gradient boosting tree whose base estimator is 'decision_tree_regressor'
     type gradient_boosting_tree_regressor
-        logical(kind=4) :: is_axis_parallel
-        real(kind=8), allocatable :: y_train_mean(:)
-        integer(kind=8) :: n_estimators_
-        integer(kind=8) :: n_outputs_
-        type(hparam_decisiontree) :: hparam
-        type(decision_tree_regressor), allocatable :: dtrees(:)
+        logical(kind=4) :: is_axis_parallel                     !< axis parallel split decision tree or not. MUST BE .TRUE.
+        real(kind=8), allocatable :: y_train_mean(:)            !< The average value of y during learning, and the initial value during prediction.
+        integer(kind=8) :: n_estimators_                        !< number of 'decision_tree_regressor'
+        integer(kind=8) :: n_outputs_                           !< number of output dimensions
+        type(hparam_decisiontree) :: hparam                     !< type of hyperparameter for 'decision_tree_regressor'
+        type(decision_tree_regressor), allocatable :: dtrees(:) !< array of trained 'decision_tree_regressor'
     contains
         procedure :: fit => fit_gradient_boosting_tree_regressor
         procedure :: predict => predict_gradient_boosting_tree_regressor
     end type gradient_boosting_tree_regressor
     
+    !> An interface to create new 'gradient_boosting_tree_regressor' object.
     interface gradient_boosting_tree_regressor
         procedure :: new_gradient_boosting_tree_regressor
     end interface gradient_boosting_tree_regressor
 
     !> A type for gradient boosting tree whose base estimator is 'extra_tree_regressor'
     type gradient_boosting_extra_tree_regressor
-        logical(kind=4) :: is_axis_parallel
-        real(kind=8), allocatable :: y_train_mean(:)
-        integer(kind=8) :: n_estimators_
-        integer(kind=8) :: n_outputs_
-        type(hparam_decisiontree) :: hparam
-        type(extra_tree_regressor), allocatable :: etrees(:)
+        logical(kind=4) :: is_axis_parallel                  !< axis parallel split decision tree or not. MUST BE .TRUE.
+        real(kind=8), allocatable :: y_train_mean(:)         !< The average value of y during learning, and the initial value during prediction.
+        integer(kind=8) :: n_estimators_                     !< number of 'extra_tree_regressor'
+        integer(kind=8) :: n_outputs_                        !< number of output dimensions
+        type(hparam_decisiontree) :: hparam                  !< type of hyperparameter for 'decision_tree_regressor'
+        type(extra_tree_regressor), allocatable :: etrees(:) !< array of trained 'extra_tree_regressor'
     contains
         procedure :: fit => fit_gradient_boosting_extra_tree_regressor
         procedure :: predict => predict_gradient_boosting_extra_tree_regressor
     end type gradient_boosting_extra_tree_regressor
     
+    !> An interface to create new 'gradient_boosting_extra_tree_regressor' object.
     interface gradient_boosting_extra_tree_regressor
         procedure :: new_gradient_boosting_extra_tree_regressor
     end interface gradient_boosting_extra_tree_regressor
 
     !> A type for gradient boosting tree whose base estimator is 'clouds_regressor'
     type gradient_boosting_clouds_regressor
-        logical(kind=4) :: is_axis_parallel
-        real(kind=8), allocatable :: y_train_mean(:)
-        integer(kind=8) :: n_estimators_
-        integer(kind=8) :: n_outputs_
-        type(hparam_decisiontree) :: hparam
-        type(clouds_regressor), allocatable :: ctrees(:)
+        logical(kind=4) :: is_axis_parallel              !< axis parallel split decision tree or not. MUST BE .TRUE.
+        real(kind=8), allocatable :: y_train_mean(:)     !< The average value of y during learning, and the initial value during prediction.
+        integer(kind=8) :: n_estimators_                 !< number of 'clouds_regressor'
+        integer(kind=8) :: n_outputs_                    !< number of output dimensions
+        type(hparam_decisiontree) :: hparam              !< type of hyperparameter for 'decision_tree_regressor'
+        type(clouds_regressor), allocatable :: ctrees(:) !< array of trained 'clouds_regressor'
     contains
         procedure :: fit => fit_gradient_boosting_clouds_regressor
         procedure :: predict => predict_gradient_boosting_clouds_regressor
@@ -64,12 +66,12 @@ module mod_gradient_boosting_tree
 
     !> A type for gradient boosting tree whose base estimator is 'lawu_regressor'
     type gradient_boosting_lawu_regressor
-        logical(kind=4) :: is_axis_parallel
-        real(kind=8), allocatable :: y_train_mean(:)
-        integer(kind=8) :: n_estimators_
-        integer(kind=8) :: n_outputs_
-        type(hparam_decisiontree) :: hparam
-        type(lawu_regressor), allocatable :: ltrees(:)
+        logical(kind=4) :: is_axis_parallel            !< axis parallel split decision tree or not. MUST BE .TRUE.
+        real(kind=8), allocatable :: y_train_mean(:)   !< The average value of y during learning, and the initial value during prediction.
+        integer(kind=8) :: n_estimators_               !< number of 'lawu_regressor'
+        integer(kind=8) :: n_outputs_                  !< number of output dimensions
+        type(hparam_decisiontree) :: hparam            !< type of hyperparameter for 'decision_tree_regressor'
+        type(lawu_regressor), allocatable :: ltrees(:) !< array of trained 'lawu_regressor'
     contains
         procedure :: fit => fit_gradient_boosting_lawu_regressor
         procedure :: predict => predict_gradient_boosting_lawu_regressor
@@ -82,15 +84,17 @@ module mod_gradient_boosting_tree
 contains
 
 
-    !> A function to override gradient_boosting_tree_regressor.
-    !! \param n_estimator number of estimators
-    !! \param learning_rate learning rate for each tree
-    !! \param max_depth max depth
-    !! \param boot_strap boot strap sampling
-    !! \param max_leaf_nodes maximum number of leaf node
-    !! \param min_samples_leaf minimum number of samples in node
-    !! \param fashion how to split node
-    !! \param max_features maximum number of features in node split phase
+    !> A function to create new 'gradient_boosting_tree_regressor' object
+    !! \param n_estimator number of estimators. [1, huge value)
+    !! \param learning_rate learning rate for each tree. must be greater than 0
+    !! \param max_depth max depth. must be greater equal 1
+    !! \param boot_strap with or without bootstrap sampling. default value is .false.
+    !! \param max_leaf_nodes maximum number of leaf node. must be greater equal 2
+    !! \param min_samples_leaf minimum number of samples in node. must be greater equal 1 for existence of node
+    !! \param fashion how to split node. 'best': split the node with largest information gain, 'depth': split the deepest splittable(not leaf) node, 
+    !!        'level': split all specific depth nodes at a time, 'impurity': split the node with largest impurity, 
+    !!        'sample': split the node with largest sample size
+    !! \param max_features maximum number of features in node split phase. must be greater equal 1
     function new_gradient_boosting_tree_regressor(&
         n_estimators, learning_rate, &
         max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features &
@@ -140,15 +144,17 @@ contains
     end function new_gradient_boosting_tree_regressor
 
 
-    !> A function to override gradient_boosting_extra_tree_regressor.
-    !! \param n_estimator number of estimators
-    !! \param learning_rate learning rate for each tree
-    !! \param max_depth max depth
-    !! \param boot_strap boot strap sampling
-    !! \param max_leaf_nodes maximum number of leaf node
-    !! \param min_samples_leaf minimum number of samples in node
-    !! \param fashion how to split node
-    !! \param max_features maximum number of features in node split phase
+    !> A function to create new 'gradient_boosting_extra_tree_regressor' object
+    !! \param n_estimator number of estimators. [1, huge value)
+    !! \param learning_rate learning rate for each tree. must be greater than 0
+    !! \param max_depth max depth. must be greater equal 1
+    !! \param boot_strap with or without bootstrap sampling. default value is .false.
+    !! \param max_leaf_nodes maximum number of leaf node. must be greater equal 2
+    !! \param min_samples_leaf minimum number of samples in node. must be greater equal 1 for existence of node
+    !! \param fashion how to split node. 'best': split the node with largest information gain, 'depth': split the deepest splittable(not leaf) node, 
+    !!        'level': split all specific depth nodes at a time, 'impurity': split the node with largest impurity, 
+    !!        'sample': split the node with largest sample size
+    !! \param max_features maximum number of features in node split phase. must be greater equal 1
     function new_gradient_boosting_extra_tree_regressor(&
         n_estimators, learning_rate, &
         max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features &
@@ -198,17 +204,24 @@ contains
     end function new_gradient_boosting_extra_tree_regressor
 
 
-    !> A function to override new_gradient_boosting_clouds_regressor.
-    !! \param max_bins maximum number of bins
-    !! \param strategy splitting strategy
-    !! \param n_estimator number of estimators
-    !! \param learning_rate learning rate for each tree
-    !! \param max_depth max depth
-    !! \param boot_strap boot strap sampling
-    !! \param max_leaf_nodes maximum number of leaf node
-    !! \param min_samples_leaf minimum number of samples in node
-    !! \param fashion how to split node
-    !! \param max_features maximum number of features in node split phase
+    !> A function to create new 'gradient_boosting_clouds_regressor' object
+    !! \param max_bins maximum number of bins. must be greater equal 2
+    !! \param strategy binning strategy. 
+    !!      'uniform': divide uniformly between the maximum and minimum values, 
+    !!      'quantile': split according to quantile values, 
+    !!      'kmeans': split by one-dimensional kmeans clustering, 
+    !!      'greedy': see https://arxiv.org/pdf/2005.01653.pdf, 
+    !!      'modified_greedy': see https://arxiv.org/pdf/2005.01653.pdf
+    !! \param n_estimator number of estimators. [1, huge value)
+    !! \param learning_rate learning rate for each tree. must be greater than 0
+    !! \param max_depth max depth. must be greater equal 1
+    !! \param boot_strap with or without bootstrap sampling. default value is .false.
+    !! \param max_leaf_nodes maximum number of leaf node. must be greater equal 2
+    !! \param min_samples_leaf minimum number of samples in node. must be greater equal 1 for existence of node
+    !! \param fashion how to split node. 'best': split the node with largest information gain, 'depth': split the deepest splittable(not leaf) node, 
+    !!        'level': split all specific depth nodes at a time, 'impurity': split the node with largest impurity, 
+    !!        'sample': split the node with largest sample size
+    !! \param max_features maximum number of features in node split phase. must be greater equal 1
     function new_gradient_boosting_clouds_regressor(&
         max_bins, strategy, &
         n_estimators, learning_rate, &
@@ -273,18 +286,25 @@ contains
     end function new_gradient_boosting_clouds_regressor
 
 
-    !> A function to override new_gradient_boosting_clouds_regressor.
-    !! \param max_bins maximum number of bins
-    !! \param strategy splitting strategy
-    !! \param n_estimator number of estimators
-    !! \param learning_rate learning rate for each tree
+    !> A function to create new 'gradient_boosting_lawu_regressor' object
+    !! \param max_bins maximum number of bins. must be greater equal 2
+    !! \param strategy binning strategy. 
+    !!      'uniform': divide uniformly between the maximum and minimum values, 
+    !!      'quantile': split according to quantile values, 
+    !!      'kmeans': split by one-dimensional kmeans clustering, 
+    !!      'greedy': see https://arxiv.org/pdf/2005.01653.pdf, 
+    !!      'modified_greedy': see https://arxiv.org/pdf/2005.01653.pdf
+    !! \param n_estimator number of estimators. [1, huge value)
+    !! \param learning_rate learning rate for each tree. must be greater than 0
     !! \param learning_rate_layer learning rate for each layer in a tree
-    !! \param max_depth max depth
-    !! \param boot_strap boot strap sampling
-    !! \param max_leaf_nodes maximum number of leaf node
-    !! \param min_samples_leaf minimum number of samples in node
-    !! \param fashion how to split node
-    !! \param max_features maximum number of features in node split phase
+    !! \param max_depth max depth. must be greater equal 1
+    !! \param boot_strap with or without bootstrap sampling. default value is .false.
+    !! \param max_leaf_nodes maximum number of leaf node. must be greater equal 2
+    !! \param min_samples_leaf minimum number of samples in node. must be greater equal 1 for existence of node
+    !! \param fashion how to split node. 'best': split the node with largest information gain, 'depth': split the deepest splittable(not leaf) node, 
+    !!        'level': split all specific depth nodes at a time, 'impurity': split the node with largest impurity, 
+    !!        'sample': split the node with largest sample size
+    !! \param max_features maximum number of features in node split phase. must be greater equal 1
     function new_gradient_boosting_lawu_regressor(&
         max_bins, strategy, &
         n_estimators, learning_rate, learning_rate_layer, &
@@ -645,7 +665,7 @@ contains
 
 
     !> A function to predict for gradient_boosting_tree_regressor.
-    !! \param x input data
+    !! \param x data to be predicted
     function predict_gradient_boosting_tree_regressor(this, x)
         implicit none
         class(gradient_boosting_tree_regressor) :: this
@@ -668,7 +688,7 @@ contains
 
 
     !> A function to predict for gradient_boosting_extra_tree_regressor.
-    !! \param x input data
+    !! \param x data to be predicted
     function predict_gradient_boosting_extra_tree_regressor(this, x)
         implicit none
         class(gradient_boosting_extra_tree_regressor) :: this
@@ -691,7 +711,7 @@ contains
 
 
     !> A function to predict for gradient_boosting_clouds_regressor.
-    !! \param x input data
+    !! \param x data to be predicted
     function predict_gradient_boosting_clouds_regressor(this, x)
         implicit none
         class(gradient_boosting_clouds_regressor) :: this
@@ -714,7 +734,7 @@ contains
 
 
     !> A function to predict for gradient_boosting_lawu_regressor.
-    !! \param x input data
+    !! \param x data to be predicted
     function predict_gradient_boosting_lawu_regressor(this, x)
         implicit none
         class(gradient_boosting_lawu_regressor) :: this
