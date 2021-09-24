@@ -7,7 +7,7 @@ module mod_data_holder
     use mod_discretizer
     implicit none
     
-    !> A type for work space
+    !> A type for an additional work space used in 'data_holder'
     type work_space
         real(kind=4), allocatable :: x_r4(:)
         real(kind=8), allocatable :: x_r8(:)
@@ -15,7 +15,7 @@ module mod_data_holder
         integer(kind=8), allocatable :: i_i8(:)
     end type work_space
 
-    !> Explanatory variable pointer
+    !> A type for Explanatory variable pointer
     type x_pointer
         real(kind=4), pointer :: x_r4_ptr(:,:)
         real(kind=8), pointer :: x_r8_ptr(:,:)
@@ -23,7 +23,7 @@ module mod_data_holder
         integer(kind=8), pointer :: x_i8_ptr(:,:)
     end type x_pointer
 
-    !> Objective variable pointer
+    !> A type for objective variable pointer
     type y_pointer
         real(kind=4), pointer    :: y_r4_ptr(:,:)
         real(kind=8), pointer    :: y_r8_ptr(:,:)
@@ -31,32 +31,32 @@ module mod_data_holder
         integer(kind=8), pointer :: y_i8_ptr(:,:)
     end type y_pointer
 
-    !> A type of Data holder in FortLearner
+    !> A type for Data holder in FortLearner
     type data_holder
-        logical(kind=4) :: is_preprocessed = f_
-        logical(kind=4) :: is_random_rotation = f_
-        logical(kind=4) :: is_presort = f_
-        logical(kind=4) :: is_hist = f_
-        logical(kind=4) :: is_trans_x = f_
-        integer(kind=8) :: n_samples
-        integer(kind=8) :: n_columns
-        integer(kind=8) :: n_outputs
+        logical(kind=4) :: is_preprocessed = f_        !< already preprocessed or not. If true, skip proprocessing phase. If not, the appropriate preprocessing will be performed (i.e. binning).
+        logical(kind=4) :: is_random_rotation = f_     !< to random rotation or not. If true, rotated matrix is stored to 'rr_mat_rX'.
+        logical(kind=4) :: is_presort = f_             !< to presort or not. If true, presorted results column by colum is stored to 'works' (not implemented now).
+        logical(kind=4) :: is_hist = f_                !< to binning or not. If true, binning array is stored row by row to 'x_hist_row'
+        logical(kind=4) :: is_trans_x = f_             !< whether the entered explanatory variables have been transposed or not. Must be TRUE, if one want to use extra_tree_regressor%fit_faster().
+        integer(kind=8) :: n_samples                   !< number of samples of input explanatory variable and objective variables.
+        integer(kind=8) :: n_columns                   !< number of columns of input explanatory variable.
+        integer(kind=8) :: n_outputs                   !< number of columns of input objective variable. In extra_tree_regressor%fit_faster(), this must be 1.
 
-        integer(kind=8) :: x_shape(2)
-        integer(kind=8) :: y_shape(2)
+        integer(kind=8) :: x_shape(2)                  !< shape of input explanatory variable
+        integer(kind=8) :: y_shape(2)                  !< shape of input objective variable
 
-        type(x_pointer) :: x_ptr
-        type(y_pointer) :: y_ptr
-        type(x_pointer) :: x_t_ptr
-        integer(kind=4), allocatable :: x_hist(:,:)
+        type(x_pointer) :: x_ptr                       !< pointer to input explanatory variable
+        type(y_pointer) :: y_ptr                       !< pointer to input objective variable
+        type(x_pointer) :: x_t_ptr                     !< pointer to transposed input explanatory variable
+        integer(kind=4), allocatable :: x_hist(:,:)    !< binned array of input explanatory variables
 
-        type(work_space), allocatable :: works(:)
-        real(kind=4), allocatable :: rr_mat_r4(:,:)
-        real(kind=8), allocatable :: rr_mat_r8(:,:)
+        type(work_space), allocatable :: works(:)      !< to be stored presorted results by column
+        real(kind=4), allocatable :: rr_mat_r4(:,:)    !< random rotated explanatory variable kind=4
+        real(kind=8), allocatable :: rr_mat_r8(:,:)    !< random rotated explanatory variable kind=8
 
-        type(discretizer) :: disc
+        type(discretizer) :: disc                      !< discretizer object
         ! 
-        type(work_space), allocatable :: x_hist_row(:)
+        type(work_space), allocatable :: x_hist_row(:) !< to be stored binned array of input explanatory variables by row to speed up by memory sequential access. @todo It could be achieved by storing the transposed and binned array in 'x_hist'. 
         ! real(kind=8), pointer :: x_t_ptr
     contains
         procedure :: preprocess_store_colwise
@@ -64,43 +64,16 @@ module mod_data_holder
         procedure :: preprocess_hist
     end type data_holder
 
-    !> Interface to data_holder.
+    !> An interface to create new 'data_holder'.
     interface data_holder
         module procedure :: new_data_holder_i4_r4
         module procedure :: new_data_holder_r8_r8
-        module procedure :: new_data_holder_r8_r8_new
         module procedure :: new_data_holder_r8_i8
     end interface data_holder
 
 
 contains
-    function new_data_holder_r8_r8_new(x, y, x_t)
-        implicit none
-        type(data_holder)    :: new_data_holder_r8_r8_new
-        real(kind=8), target :: x(:,:)
-        real(kind=8), target :: y(:,:)
-        real(kind=8), target :: x_t(:,:)
-
-        integer(kind=8) :: x_shape(2), y_shape(2)
-        type(error)     :: err
-
-        x_shape = shape(x)
-        y_shape = shape(y)
-        call err % sample_size_mismatch(x_shape, "x", y_shape, "y", "data_holder")
-
-        new_data_holder_r8_r8_new % n_outputs            =  y_shape(2)
-        new_data_holder_r8_r8_new % n_samples            =  x_shape(1)
-        new_data_holder_r8_r8_new % n_columns            =  x_shape(2)
-        new_data_holder_r8_r8_new % x_shape              =  x_shape
-        new_data_holder_r8_r8_new % y_shape              =  y_shape
-        new_data_holder_r8_r8_new % x_ptr % x_r8_ptr     => x
-        new_data_holder_r8_r8_new % y_ptr % y_r8_ptr     => y
-        new_data_holder_r8_r8_new % x_t_ptr % x_r8_ptr   => x_t
-
-        new_data_holder_r8_r8_new % is_preprocessed = f_
-    end function new_data_holder_r8_r8_new
-
-    !> A subroutine to override data_holder.
+    !> A subroutine to create new 'data_holder' object.
     !> 'x' and 'y' are associated to 'x_ptr' and 'y_ptr'.
     !! \param x input features
     !! \param y input responses
@@ -139,6 +112,10 @@ contains
 
 
     !> A subroutine to build histgram, its strategy (how to discretize continuous values) depends on 'preprocessing::discretizer'
+    !! @todo replace ifdealloc
+    !! \return returns binned input explanatory array and stored to 'x_hist' and 'x_hist_row'.
+    !! \param max_bins maximum number of bins.
+    !! \param strategy binning strategy.
     subroutine preprocess_hist(this, max_bins, strategy)
         implicit none
         class(data_holder)           :: this
@@ -147,22 +124,16 @@ contains
         integer(kind=8) :: c, i, j
         integer(kind=8) :: n_samples, n_columns
 
-        ! print*, "is_hist", this%is_hist
         if (this%is_hist) return
-        ! print*, "allocated(this%x_hist)", allocated(this%x_hist)
         if (allocated(this%x_hist)) deallocate(this%x_hist)
 
         n_samples = this % n_samples
         n_columns = this % n_columns
         allocate(this%x_hist(n_samples, n_columns))
-        ! print*, "shape(this%x_hist)", shape(this%x_hist)
 
-        ! print*, "set discretizer"
         this%disc = discretizer(max_bins, strategy)
-        ! print*, "fit discretizer"
         call this%disc%fit(this % x_ptr % x_r8_ptr)
-        ! print*, "  done"
-        ! print*, "transform"
+
         this%x_hist = this%disc%transform(this % x_ptr % x_r8_ptr)
         allocate(this%x_hist_row(this%n_samples))
         do i=1, this%n_samples, 1
@@ -176,7 +147,7 @@ contains
     end subroutine preprocess_hist
 
 
-    !> A subroutine to store 'x' with column wise
+    !> A subroutine to store input explanatory array with column wise
     subroutine preprocess_store_colwise(this)
         implicit none
         class(data_holder) :: this
@@ -202,7 +173,7 @@ contains
     end subroutine preprocess_store_colwise
 
 
-    !> A subroutine to sort 'x' by column and their original indices respect with 'x'.
+    !> A subroutine to sort input explanatory array by column and their original indices respect with input explanatory array.
     subroutine preprocess_presort(this)
         implicit none
         class(data_holder) :: this
@@ -236,7 +207,7 @@ contains
     end subroutine preprocess_presort
 
 
-    !> A subroutine to random rotate input 'x' and store generated random rotation matrix to 'work'.
+    !> A subroutine to random rotate input explanatory array and store generated random rotation matrix to 'rr_mat_rX'.
     subroutine preprocess_random_rotate(this)
         implicit none
         class(data_holder) :: this
