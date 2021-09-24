@@ -80,6 +80,7 @@ contains
         call tmp%hparam%validate_int_range("n_repeats",        tmp%hparam%n_repeats,        1_8, huge(1_8))
         call tmp%hparam%validate_int_range("n_threads",        tmp%hparam%num_threads_in_node,        1_8, huge(1_8))
 
+        tmp%hparam%max_samples = -1
         tmp%hparam%fashion_int = tmp%hparam%convert_char_to_int(tmp%hparam%fashion, fashion_list)
         tmp%is_hist = f_
         tmp%is_layer_wise_sum = f_

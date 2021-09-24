@@ -37,4 +37,6 @@ module mod_const
         /)
     integer(kind=8), parameter :: len_gamma_coefs_ = 8_8
 
+    real(kind=8), parameter    :: euler_gamma = 0.577215664901532860606512090082d0
+
 end module mod_const

@@ -90,6 +90,7 @@ contains
         call tmp%hparam%validate_char_list("fashion",          tmp%hparam%fashion,          fashion_list)
         call tmp%hparam%validate_int_range("max_features",     tmp%hparam%max_features,     1_8, huge(1_8), exception=-1_8)
 
+        tmp%hparam%max_samples = -1
         tmp%hparam%fashion_int = tmp%hparam%convert_char_to_int(tmp%hparam%fashion, fashion_list)
         tmp%hparam%strategy_int = tmp%hparam%convert_char_to_int(tmp%hparam%strategy, strategy_list)
         tmp%is_hist = t_

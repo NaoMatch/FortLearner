@@ -80,6 +80,7 @@ module mod_hyperparameter
         integer(kind=8) :: min_columns_in_grain     = 5
         integer(kind=8) :: n_cascades               = 2
         integer(kind=8) :: n_forest_per_layer       = 2
+        integer(kind=8) :: max_samples              = 256
         real(kind=8), ALLOCATABLE :: feature_fractions(:)
         real(kind=8)    :: learning_rate            = .1
         real(kind=8)    :: learning_rate_layer      = .9d0
@@ -98,6 +99,7 @@ module mod_hyperparameter
         real(kind=8)    :: initial_temperature      = 1000d0
         real(kind=8)    :: minimum_temperature      = 0.0001d0
         real(kind=8)    :: cooling_rate             = 0.99d0
+        real(kind=8)    :: contamination            = 0.1d0
         logical(kind=4) :: skip_used_features       = f_
         logical(kind=4) :: boot_strap               = f_
         logical(kind=4) :: random_splitter          = f_

@@ -33,8 +33,18 @@ module mod_math
         module procedure sigmoid_r8
     end interface sigmoid
 
+    interface harmonic_number_approx
+        module procedure harmonic_number_approx_i8
+    end interface harmonic_number_approx
 
 contains
+
+    function harmonic_number_approx_i8(n)
+        real(kind=8) :: harmonic_number_approx_i8
+        integer(kind=8), intent(in) :: n
+        harmonic_number_approx_i8 = log(n+0d0) + euler_gamma
+    end function harmonic_number_approx_i8
+
 
     !> A function to compute entropy for decision tree classifier.
     !! \return returns entropy
