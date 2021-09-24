@@ -9,7 +9,7 @@ make test
 refactoring  
 
 # Update
-2021/09/24: isolation_tree and isolation_forest
+2021/09/24: isolation_tree and isolation_forest  
 2021/09/21: kmeans++  
 2021/09/20: simulated annealing initial temperature  
 2021/09/19: refactering simulated annealing  
