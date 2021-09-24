@@ -1,6 +1,7 @@
 module mod_woodworking_tools
     use mod_node
     use mod_timer
+    use mod_math
     implicit none
     
     !> A type to store training results.
@@ -59,6 +60,14 @@ module mod_woodworking_tools
 
 contains
 
+    function average_path_length(n)
+        implicit none
+        real(kind=8) :: average_path_length
+        integer(kind=8), intent(in) :: n
+        average_path_length = 2d0 * harmonic_number_approx(n) - 2d0 + 2d0/dble(n)
+    end function average_path_length
+
+
     !> A subroutine to allocate training result arrays.
     !! \return returns allocated arrays
     !! \param n_nodes n_samplesber of nodes
@@ -104,11 +113,18 @@ contains
         if (is_root) node_id=0_8
         node_id = node_id + 1_8
 
+        ! print*, "Extract Current Node Train Results. NodeID: ", node_id, size(results%split_features_)
+        ! print*, "               ", root_node_ptr%feature_id_
+        ! print*, "               ", root_node_ptr%threshold_
+        ! print*, "               ", root_node_ptr%is_terminal
+        ! print*, "               ", allocated(root_node_ptr%response), size(root_node_ptr%response)
         results%split_features_(node_id) = root_node_ptr%feature_id_
         results%split_thresholds_(node_id) = root_node_ptr%threshold_
         results%is_terminals_(node_id) = root_node_ptr%is_terminal
         results%responses_(node_id,:) = root_node_ptr%response
+        ! print*, "   goto Next?"
         if (.not. root_node_ptr%is_terminal) then
+            ! print*, "   --- YES" 
             call extract_train_results_axis(root_node_ptr%node_l, results, node_id, is_classification, is_root=f_)
             call extract_train_results_axis(root_node_ptr%node_r, results, node_id, is_classification, is_root=f_)
         end if
@@ -194,10 +210,12 @@ contains
         implicit none
         type(node_axis), pointer, intent(in) :: root_node_ptr
         logical(kind=4), intent(inout)       :: exist_splittable_leaf
+        ! print*, "allocated(root_node_ptr%node_l)",allocated(root_node_ptr%node_l)
         if ( allocated(root_node_ptr%node_l) ) then
             call check_splittable_leaf_axis(root_node_ptr%node_l, exist_splittable_leaf)
             call check_splittable_leaf_axis(root_node_ptr%node_r, exist_splittable_leaf)
         else
+            ! print*, "root_node_ptr%is_terminal", root_node_ptr%is_terminal
             if ( .not. root_node_ptr%is_terminal ) then
                 exist_splittable_leaf = t_
                 return
@@ -479,6 +497,77 @@ contains
         node_ptr%node_l = node_axis_l
         node_ptr%node_r = node_axis_r
     end subroutine adopting_twins_axis
+
+    subroutine adopting_twins_axis_for_isolation_tree(node_ptr, data_holder_ptr, hparam_ptr)
+        implicit none
+        type(node_axis), pointer :: node_ptr
+        type(data_holder), pointer :: data_holder_ptr
+        type(hparam_decisiontree), pointer :: hparam_ptr
+
+        integer(kind=8) :: date_value1(8), date_value2(8)
+        type(node_axis), target :: node_axis_l, node_axis_r
+        integer(kind=8) :: i, cnt_l, cnt_r, cls, idx, fid
+        real(kind=8), allocatable :: f(:), tmp_y(:,:)
+        real(kind=8) :: avg, imp
+        logical(kind=4) :: is_hist_optional
+        integer(kind=8) :: n_samples_unroll, n_columns_unroll, j, jk, ik, k, row_idx, bin_idx, row_idx_next
+        integer(kind=4) :: counter, factor
+        integer(kind=8), save :: tot_time=0
+        real(kind=8), ALLOCATABLE :: tmp_r(:)
+        integer(kind=4), ALLOCATABLE :: bin_indices(:)
+
+        real(kind=8), pointer :: tmp_x_ptr(:,:)
+
+        if (node_ptr%depth .eq. 0_8) tot_time = 0
+
+        if ( node_ptr%is_terminal ) return
+
+        if (allocated(node_ptr%node_l)) return
+
+        node_axis_l%depth = node_ptr%depth+1
+        node_axis_l%n_samples = node_ptr%n_samples_l
+        node_axis_l%impurity = huge(0d0)
+        node_axis_l%response = node_ptr%response_l
+        call node_axis_l%hparam_check(hparam_ptr)
+        allocate(node_axis_l%indices(node_axis_l%n_samples))
+
+        node_axis_r%depth = node_ptr%depth+1
+        node_axis_r%n_samples = node_ptr%n_samples_r
+        node_axis_r%impurity = huge(0d0)
+        node_axis_r%response = node_ptr%response_r
+        call node_axis_r%hparam_check(hparam_ptr)
+        allocate(node_axis_r%indices(node_axis_r%n_samples))
+
+        cnt_l=1
+        cnt_r=1
+        fid = node_ptr%feature_id_
+        if (data_holder_ptr % is_trans_x) then
+            do i=1, node_ptr%n_samples
+                idx = node_ptr%indices(i)
+                if ( data_holder_ptr%x_t_ptr%x_r8_ptr(fid, idx) .le. node_ptr%threshold_ ) then
+                    node_axis_l%indices(cnt_l) = idx
+                    cnt_l = cnt_l + 1
+                else
+                    node_axis_r%indices(cnt_r) = idx
+                    cnt_r = cnt_r + 1
+                end if
+            end do
+        else
+            do i=1, node_ptr%n_samples
+                idx = node_ptr%indices(i)
+                if ( data_holder_ptr%x_ptr%x_r8_ptr(idx, fid) .le. node_ptr%threshold_ ) then
+                    node_axis_l%indices(cnt_l) = idx
+                    cnt_l = cnt_l + 1
+                else
+                    node_axis_r%indices(cnt_r) = idx
+                    cnt_r = cnt_r + 1
+                end if
+            end do
+        end if
+
+        node_ptr%node_l = node_axis_l
+        node_ptr%node_r = node_axis_r
+    end subroutine adopting_twins_axis_for_isolation_tree
 
 
     subroutine adopting_twins_oblq(node_ptr, data_holder_ptr, hparam_ptr, is_classification, lr_layer, is_hist)
