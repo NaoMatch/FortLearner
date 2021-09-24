@@ -1,7 +1,7 @@
-function is_sorted_r8(vector, num, ascending)
+function is_sorted_r8(vector, n_samples, ascending)
     implicit none
-    real(kind=8), intent(in)    :: vector(num)
-    integer(kind=8), intent(in) :: num
+    real(kind=8), intent(in)    :: vector(n_samples)
+    integer(kind=8), intent(in) :: n_samples
     logical(kind=8), optional   :: ascending
     logical(kind=8)             :: is_sorted_r8
 
@@ -12,10 +12,10 @@ function is_sorted_r8(vector, num, ascending)
     is_sorted_r8 = tmp_result
 end function is_sorted_r8
 
-function is_sorted_i4(vector, num, ascending)
+function is_sorted_i4(vector, n_samples, ascending)
     implicit none
-    integer(kind=4), intent(in) :: vector(num)
-    integer(kind=4), intent(in) :: num
+    integer(kind=4), intent(in) :: vector(n_samples)
+    integer(kind=4), intent(in) :: n_samples
     logical(kind=4), optional   :: ascending
     logical(kind=4)             :: is_sorted_i4
 
@@ -26,10 +26,10 @@ function is_sorted_i4(vector, num, ascending)
     is_sorted_i4 = tmp_result
 end function is_sorted_i4
 
-function is_sorted_i8(vector, num, ascending)
+function is_sorted_i8(vector, n_samples, ascending)
     implicit none
-    integer(kind=8), intent(in) :: vector(num)
-    integer(kind=8), intent(in) :: num
+    integer(kind=8), intent(in) :: vector(n_samples)
+    integer(kind=8), intent(in) :: n_samples
     logical(kind=8), optional   :: ascending
     logical(kind=8)             :: is_sorted_i8
 

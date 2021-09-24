@@ -1,7 +1,7 @@
-function count_unique_r8(vector, num)
+function count_unique_r8(vector, n_samples)
     implicit none
-    real(kind=8), intent(in)    :: vector(num)
-    integer(kind=8), intent(in) :: num
+    real(kind=8), intent(in)    :: vector(n_samples)
+    integer(kind=8), intent(in) :: n_samples
     integer(kind=8)             :: count_unique_r8
 
     integer(kind=8) :: i, factor, tmp_count
@@ -9,10 +9,10 @@ function count_unique_r8(vector, num)
     count_unique_r8 = tmp_count
 end function count_unique_r8
 
-function count_unique_i4(vector, num)
+function count_unique_i4(vector, n_samples)
     implicit none
-    integer(kind=4), intent(in) :: vector(num)
-    integer(kind=4), intent(in) :: num
+    integer(kind=4), intent(in) :: vector(n_samples)
+    integer(kind=4), intent(in) :: n_samples
     integer(kind=4)             :: count_unique_i4
 
     integer(kind=4) :: i, factor, tmp_count
@@ -21,10 +21,10 @@ function count_unique_i4(vector, num)
     count_unique_i4 = tmp_count
 end function count_unique_i4
 
-function count_unique_i8(vector, num)
+function count_unique_i8(vector, n_samples)
     implicit none
-    integer(kind=8), intent(in) :: vector(num)
-    integer(kind=8), intent(in) :: num
+    integer(kind=8), intent(in) :: vector(n_samples)
+    integer(kind=8), intent(in) :: n_samples
     integer(kind=8)             :: count_unique_i8
 
     integer(kind=8) :: i, factor, tmp_count
