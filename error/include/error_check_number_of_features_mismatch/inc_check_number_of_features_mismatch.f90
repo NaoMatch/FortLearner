@@ -9,7 +9,7 @@
             char_train = num2char(n_columns_train)
             char_transform = num2char(n_columns_transform)
             err_msg = "ValueError: The number of columns does not match the number of columns during training."
-            err_msg = trim(err_msg) // " " // trim(char_train) // " in Train, " // trim(char_transform) // " in Transform."
+            err_msg = trim(err_msg) // " " // trim(char_train) // " in Train, " // trim(char_transform) // " in Transform/Predict."
             stop trim(err_msg)
         end if
     end subroutine check_number_of_features_mismatch_i8
