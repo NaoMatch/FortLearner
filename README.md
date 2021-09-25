@@ -6,7 +6,7 @@ cd test_script
 make test  
 
 # WIP:
-refactoring  
+speed up 'kmeans++'  
 
 # Update
 2021/09/24: isolation_tree and isolation_forest  
