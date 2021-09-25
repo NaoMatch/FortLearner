@@ -10,26 +10,30 @@ module mod_deep_forest
     use mod_forest
     implicit none
     
+    !> A type for feature index range during node splitting phase
     type feature_range
-        integer(kind=8) :: frange(2)
+        integer(kind=8) :: frange(2) !< feature index range, from i to j (1<=i<j<=#columns)
     end type feature_range
 
+    !> A type for array of 'feature_range'
     type subsets
-        type(feature_range), allocatable :: feature_ranges(:)
+        type(feature_range), allocatable :: feature_ranges(:) !< array of 'feature_range'
     end type subsets
 
+    !> A type for 'deep_forest_regressor'. Not Implmented Yes
+    !> https://arxiv.org/abs/1702.08835
     type deep_forest_regressor
-        integer(kind=8) :: n_grains
-        integer(kind=8), ALLOCATABLE :: n_columns_in_grains(:)
-        type(subsets), ALLOCATABLE :: feature_subsets(:)
-        type(random_forest_regressor), ALLOCATABLE :: rf_mgs(:) ! random forest regressors for multi-grained scanning
-        type(extra_trees_regressor),   ALLOCATABLE :: et_mgs(:) ! extra trees regressors for multi-grained scanning
+        integer(kind=8) :: n_grains                               !< number of grains
+        integer(kind=8), ALLOCATABLE :: n_columns_in_grains(:)    !< number of columns in grain (n_grains)
+        type(subsets), ALLOCATABLE :: feature_subsets(:)          !< array of 'feature_range' 
+        type(random_forest_regressor), ALLOCATABLE :: rf_mgs(:)   !< array of 'random_forest_regressor' for multi-grained scanning
+        type(extra_trees_regressor),   ALLOCATABLE :: et_mgs(:)   !< array of 'extra_trees_regressor' for multi-grained scanning
 
-        type(random_forest_regressor), ALLOCATABLE :: rf_cas(:,:)
-        type(extra_trees_regressor),   ALLOCATABLE :: et_cas(:,:)
+        type(random_forest_regressor), ALLOCATABLE :: rf_cas(:,:) !< array of 'random_forest_regressor' for cascading phase
+        type(extra_trees_regressor),   ALLOCATABLE :: et_cas(:,:) !< array of 'extra_trees_regressor' for cascading phase
 
-        type(random_forest_regressor), ALLOCATABLE :: rf_out(:)
-        type(extra_trees_regressor), ALLOCATABLE   :: et_out(:)
+        type(random_forest_regressor), ALLOCATABLE :: rf_out(:)   !< array of 'random_forest_regressor' for output phase
+        type(extra_trees_regressor), ALLOCATABLE   :: et_out(:)   !< array of 'extra_trees_regressor' for output phase
 
         type(hparam_decisiontree) :: hparam
     contains
@@ -37,13 +41,21 @@ module mod_deep_forest
         ! procedure :: predict    => predict_df_regressor
     end type deep_forest_regressor
 
-
+    !> An interface to create new 'deep_forest_regressor'
     interface deep_forest_regressor
         procedure new_deep_forest_regressor
     end interface deep_forest_regressor
 
 contains
 
+    !> A function to create new 'deep_forest_regressor'
+    !! \param n_estimators number of estimators, must be greater equal 2
+    !! \param feature_fractions feature fraction per gains, must be greater than 0 and less equal 1
+    !! \param step_size_for_multi_grain ? 
+    !! \param min_columns_in_grain minimum number of columns used in grain
+    !! \param max_leaf_nodes maximum number of leaf node. must be greater equal 2
+    !! \param n_cascades number of cascade layers, must be greater equal 1.
+    !! \param n_forest_per_layer number of forests per cascade layers, must be greater equal 1.
     function new_deep_forest_regressor(n_estimators, feature_fractions, step_size_for_multi_grain, min_columns_in_grain, &
         max_leaf_nodes, n_cascades, n_forest_per_layer)
         implicit none
@@ -69,7 +81,9 @@ contains
         new_deep_forest_regressor = tmp
     end function new_deep_forest_regressor
 
-
+    !> A subtouine to fit 'deep_forest_regressor'. 
+    !! \return returns fitted 'deep_forest_regressor'
+    !! \param data_holder_ptr pointer of data_holder 
     subroutine fit_mgrain_df_regressor(this, data_holder_ptr)
         implicit none
         class(deep_forest_regressor) :: this
@@ -307,7 +321,5 @@ contains
 
     end subroutine fit_mgrain_df_regressor
     
-
-
 
 end module mod_deep_forest

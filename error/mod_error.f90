@@ -41,7 +41,7 @@ contains
     end subroutine check_estimator_is_fitted       
 
 
-    !> A subroutine to make sure that the number of features during training matches the number of features during transforming 
+    !> A subroutine to make sure that the number of features during training matches the number of features during transforming/predicting 
     !! \param n_columns_train number of features during training
     !! \param n_columns_transform number of features during transforming
     !! \param function_name algorithm name
@@ -56,7 +56,7 @@ contains
             char_train = num2char(n_columns_train)
             char_transform = num2char(n_columns_transform)
             err_msg = "ValueError: The number of columns does not match the number of columns during training."
-            err_msg = trim(err_msg) // " " // trim(char_train) // " in Train, " // trim(char_transform) // " in Transform."
+            err_msg = trim(err_msg) // " " // trim(char_train) // " in Train, " // trim(char_transform) // " in Transform/Predict."
             stop trim(err_msg)
         end if
     end subroutine check_number_of_features_mismatch_i4
@@ -68,11 +68,12 @@ contains
     !! \param variable_name_y variable name of matrix
     !! \param function_name algorithm name
     subroutine only_accept_Nx1_matrix(this, shape_y, variable_name_y, function_name)
-        class(error)     :: this
-        integer(kind=8)  :: shape_y(2), one_i=1_8
-        character(len=*) :: variable_name_y
-        character(len=*) :: function_name
-        character(len=512) :: err_msg
+        class(error)                 :: this
+        integer(kind=8), intent(in)  :: shape_y(2)
+        character(len=*), intent(in) :: variable_name_y
+        character(len=*), intent(in) :: function_name
+        integer(kind=8)              :: one_i=1_8
+        character(len=512)           :: err_msg
 
         if (shape_y(2) .ne. one_i) then
             err_msg = "ShapeMismatch: The number of columns for " // trim(variable_name_y)
@@ -127,8 +128,8 @@ contains
 
 
     !> A subroutine to check if the input labels are binary only.
-    !! \param labels labels
-    !! \param n_samples number of samples in labels
+    !! \param labels labels must be 0 and 1 only
+    !! \param n_samples number of samples in 'labels'
     !! \param function_name algorithm name
     subroutine is_binary_labels_i4(this, labels, n_samples, function_name)
         class(error)     :: this

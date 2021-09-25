@@ -9,15 +9,13 @@ module mod_pca
 
     !> Type for Priciple Component Analysis
     type pca
-        logical(kind=4)           :: is_fitted = f_
-        integer(kind=8)           :: max_iter=100000
-        integer(kind=8)           :: n_columns
-        real(kind=8)              :: tol = 1d-12
-        type(eigen_system)        :: eig
-        real(kind=4), allocatable :: means_of_matrix_r4(:)
-        real(kind=8), allocatable :: means_of_matrix_r8(:)
-        real(kind=4), allocatable :: cov_mat_r4(:,:)
-        real(kind=8), allocatable :: cov_mat_r8(:,:)
+        logical(kind=4)           :: is_trained = f_           !< is trained or not. If not, cannot predict and dump.
+        integer(kind=8)           :: n_columns                 !< number of columns
+        type(eigen_system)        :: eig                       !< type for eigen_system to diagonalization covariance matirx
+        real(kind=4), allocatable :: means_of_matrix_r4(:)     !< mean values of input explanatory variable by column (#columns), kind=4
+        real(kind=8), allocatable :: means_of_matrix_r8(:)     !< mean values of input explanatory variable by column (#columns), kind=4
+        real(kind=4), allocatable :: cov_mat_r4(:,:)           !< covariance matrix of input explanatory (#columns, #columns), kind=4
+        real(kind=8), allocatable :: cov_mat_r8(:,:)           !< covariance matrix of input explanatory (#columns, #columns), kind=8
     contains
         procedure       :: dealloc_all
         procedure, pass :: fit_pca_r4
@@ -28,14 +26,14 @@ module mod_pca
         generic         :: transform => transform_pca_r4, transform_pca_r8
     end type pca
 
-    !> Interface to call new_pca
+    !> An interface to create new 'pca' object
     interface pca
         procedure :: new_pca
     end interface pca
 
 contains
 
-    !> A function to override 'pca'.
+    !> A function to create new 'pca' object
     function new_pca()
         implicit none
         type(pca) :: new_pca
@@ -54,7 +52,7 @@ contains
 
 
     !> A subroutine to fit 'pca'
-    !! \returns fitted 'pca'.
+    !! \returns fitted 'pca' object.
     !! \param x input 2-dim array
     subroutine fit_pca_r4(this, x)
         implicit none
@@ -93,7 +91,7 @@ contains
         this%eig%eigen_vectors_r4 = this%eig%eigen_vectors_r4(:,eig_idx)
 
         deallocate(cov_mat_copy)
-        this%is_fitted = t_
+        this%is_trained = t_
         this%n_columns = n_columns
     end subroutine fit_pca_r4
     include "./include/pca_fit_pca/inc_fit_pca.f90"
@@ -114,7 +112,7 @@ contains
         x_shape = shape(x)
         n_samples = x_shape(1)
         n_columns = x_shape(2)
-        call err%check_estimator_is_fitted(this%is_fitted, "pca")
+        call err%check_estimator_is_trained(this%is_trained, "pca")
         call err%check_number_of_features_mismatch(int(this%n_columns, kind=kind(n_columns)), n_columns, "pca")
 
         allocate(transform_pca_r4(n_samples, n_columns))

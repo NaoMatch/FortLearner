@@ -5,33 +5,39 @@ module mod_forest
     use mod_extra_tree
     implicit none
 
+    !> A type for 'random_forest_regressor' whose base estimators is 'decision_tree_regressor'
     type random_forest_regressor
-        logical(kind=4) :: is_axis_parallel
-        integer(kind=8) :: n_estimators_
-        integer(kind=8) :: n_outputs_
-        type(hparam_decisiontree) :: hparam
-        type(decision_tree_regressor), allocatable :: trees(:)
+        character(len=256) :: algo_name                        !< alogorithm name
+        logical(kind=4) :: is_axis_parallel                    !< axis-parallel split or not
+        integer(kind=8) :: n_estimators_                       !< number of base estimators 
+        integer(kind=8) :: n_outputs_                          !< number of dimension of objective variable
+        type(hparam_decisiontree) :: hparam                    !< decision tree hyperparameter
+        type(decision_tree_regressor), allocatable :: trees(:) !< array of 'decision_tree_regressor'
     contains
         procedure :: fit => fit_random_forest_regressor
         procedure :: predict => predict_random_forest_regressor
     end type random_forest_regressor
     
+    !> An interface to create new 'random_forest_regressor'
     interface random_forest_regressor
         procedure :: new_random_forest_regressor
     end interface random_forest_regressor
 
 
+    !> A type for 'extra_trees_regressor' whose base estimators is 'extra_tree_regressor'
     type extra_trees_regressor
-        logical(kind=4) :: is_axis_parallel
-        integer(kind=8) :: n_estimators_
-        integer(kind=8) :: n_outputs_
-        type(hparam_decisiontree) :: hparam
-        type(extra_tree_regressor), allocatable :: trees(:)
+        character(len=256) :: algo_name                        !< alogorithm name
+        logical(kind=4) :: is_axis_parallel                    !< axis-parallel split or not
+        integer(kind=8) :: n_estimators_                       !< number of base estimators 
+        integer(kind=8) :: n_outputs_                          !< number of dimension of objective variable
+        type(hparam_decisiontree) :: hparam                    !< decision tree hyperparameter
+        type(extra_tree_regressor), allocatable :: trees(:)    !< array of 'extra_tree_regressor'
     contains
         procedure :: fit => fit_extra_trees_regressor
         procedure :: predict => predict_extra_trees_regressor
     end type extra_trees_regressor
     
+    !> An interface to create new 'extra_trees_regressor'
     interface extra_trees_regressor
         procedure :: new_extra_trees_regressor
     end interface extra_trees_regressor
@@ -42,6 +48,16 @@ module mod_forest
 
 contains
 
+    !> A function to create new 'random_forest_regressor'
+    !! \param n_estimators number of estimators, must be greater equal 2
+    !! \param max_depth max depth. must be greater equal 1
+    !! \param boot_strap with or without bootstrap sampling. default value is .false.
+    !! \param max_leaf_nodes maximum number of leaf node. must be greater equal 2
+    !! \param min_samples_leaf minimum number of samples in node. must be greater than 1
+    !! \param fashion how to split node. 'best': split the node with largest information gain, 'depth': split the deepest splittable(not leaf) node, 
+    !!        'level': split all specific depth nodes at a time, 'impurity': split the node with largest impurity, 
+    !!        'sample': split the node with largest sample size
+    !! \param max_features maximum number of features in node split phase. must be greater equal 1
     function new_random_forest_regressor(&
         n_estimators, &
         max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features &
@@ -90,6 +106,16 @@ contains
     end function new_random_forest_regressor
 
 
+    !> A function to create new 'extra_trees_regressor'
+    !! \param n_estimators number of estimators, must be greater equal 2
+    !! \param max_depth max depth. must be greater equal 1
+    !! \param boot_strap with or without bootstrap sampling. default value is .false.
+    !! \param max_leaf_nodes maximum number of leaf node. must be greater equal 2
+    !! \param min_samples_leaf minimum number of samples in node. must be greater than 1
+    !! \param fashion how to split node. 'best': split the node with largest information gain, 'depth': split the deepest splittable(not leaf) node, 
+    !!        'level': split all specific depth nodes at a time, 'impurity': split the node with largest impurity, 
+    !!        'sample': split the node with largest sample size
+    !! \param max_features maximum number of features in node split phase. must be greater equal 1
     function new_extra_trees_regressor(&
         n_estimators, &
         max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features &
@@ -134,7 +160,11 @@ contains
         new_extra_trees_regressor = tmp
     end function new_extra_trees_regressor
 
-
+    !> A subtouine to fit 'random_forest_regressor'. 
+    !! \return returns fitted 'random_forest_regressor'
+    !! \param data_holder_ptr pointer of data_holder 
+    !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
+    !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
     subroutine fit_random_forest_regressor(this, data_holder_ptr, &
         feature_indices, feature_indices_scanning_range)
         implicit none
@@ -182,6 +212,11 @@ contains
     end subroutine fit_random_forest_regressor
 
 
+    !> A subtouine to fit 'extra_trees_regressor'. 
+    !! \return returns fitted 'extra_trees_regressor'
+    !! \param data_holder_ptr pointer of data_holder 
+    !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
+    !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
     subroutine fit_extra_trees_regressor(this, data_holder_ptr, &
         feature_indices, feature_indices_scanning_range)
         implicit none
@@ -225,7 +260,9 @@ contains
         !$omp end parallel
     end subroutine fit_extra_trees_regressor
 
-
+    !> A function to predict fitted 'random_forest_regressor'.
+    !! \return returns predict average response per samples (#samples, 1)
+    !! \param x input explanatory array
     function predict_random_forest_regressor(this, x)
         implicit none
         class(random_forest_regressor) :: this
@@ -247,6 +284,9 @@ contains
     end function predict_random_forest_regressor
 
 
+    !> A function to predict fitted 'extra_trees_regressor'.
+    !! \return returns predict average response per samples (#samples, 1)
+    !! \param x input explanatory array
     function predict_extra_trees_regressor(this, x)
         implicit none
         class(extra_trees_regressor) :: this

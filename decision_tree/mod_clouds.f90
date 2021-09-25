@@ -110,7 +110,7 @@ contains
 
 
     !> A subtouine to fit 'clouds_regressor'. 
-    !! \return returns fitted 'clouds_regressor' tree
+    !! \return returns fitted 'clouds_regressor'
     !! \param data_holder_ptr pointer of data_holder 
     !! \param print_node ***OPTIONAL*** if True, print node informations after training
     !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'

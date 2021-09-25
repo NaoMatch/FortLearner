@@ -3,24 +3,29 @@ module mod_isolation_forest
     use mod_isolation_tree
     implicit none
     
+    !> A type for 'isolation_forest'
     type isolation_forest
-        character(len=256) :: algo_name
-        logical(kind=4) :: is_axis_parallel
-        integer(kind=8) :: n_estimators_
-        integer(kind=8) :: n_outputs_
-        type(hparam_decisiontree) :: hparam
-        type(isolation_tree), allocatable :: trees(:)
+        character(len=256) :: algo_name                !< alogorithm name
+        logical(kind=4) :: is_axis_parallel=t_         !< axis-parallel split or not
+        integer(kind=8) :: n_estimators_               !< number of base estimators
+        type(hparam_decisiontree) :: hparam            !< decision tree hyperparameter
+        type(isolation_tree), allocatable :: trees(:)  !< array of 'isolation_tree'
     contains
         procedure :: fit     => fit_isolation_forest
         procedure :: predict => predict_isolation_forest
     end type isolation_forest
     
+    !> An interface to create new 'isolation_forest'
     interface isolation_forest
         procedure :: new_isolation_forest
     end interface isolation_forest
 
 contains
 
+    !> A function to create new 'isolation_forest'
+    !! \param n_estimators number of estimators, must be greater equal 2
+    !! \param max_samples maximum number of samples per tree. samples are randomly selected. must be greater equal 2
+    !! \param contamination contamination ratio
     function new_isolation_forest(n_estimators, max_samples, contamination)
         implicit none
         type(isolation_forest) :: new_isolation_forest
@@ -45,6 +50,9 @@ contains
         new_isolation_forest = tmp
     end function new_isolation_forest
 
+
+    !> A subroutine to fit 'isolation_forest'
+    !! \param data_holder_ptr pointer to 'data_holder'
     subroutine fit_isolation_forest(this, data_holder_ptr)
         implicit none
         class(isolation_forest)    :: this
@@ -66,6 +74,9 @@ contains
         end do
     end subroutine fit_isolation_forest
 
+
+    !> A subroutine to fit 'isolation_forest'
+    !! \param x an input explanatory variable to be predicted
     function predict_isolation_forest(this, x)
         implicit none
         class(isolation_forest)        :: this
