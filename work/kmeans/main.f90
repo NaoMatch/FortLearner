@@ -23,6 +23,7 @@ program main
     real(kind=8), ALLOCATABLE    :: y_train_pred_lw(:,:), y_test_pred_lw(:,:)
     integer(kind=8), ALLOCATABLE :: feature_indices(:), feature_indices_scanning_range(:)
 
+    integer(kind=8) :: n_cluster, min_n_cluster, max_n_cluster
     type(kmeans) :: km, km2
 
     file_name_x_train_csv = "../../../uci_data/05_YearPredictionMSD/YearPredictionMSD_x_train.txt"
@@ -30,27 +31,57 @@ program main
     n_samples_train = 412206
     n_columns_train = 90
 
-    print*, '============================================================='
-    print*, "CSV to Binary"
-    print*, "    x_train"
-    call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
-        n_samples_train, n_columns_train, skip_header, dtype_in, dtype_out)
+    file_name_x_train_csv = "../../../uci_data/97_make_regression/make_regression_x_0001000000x00050.csv"
+    file_name_x_train_bin = "../../../uci_data/97_make_regression/make_regression_x_0001000000x00050.bin"
+    n_samples_train = 1000000
+    n_columns_train = 50
+    skip_header = f_
+    dtype_in  = "r"
+    dtype_out = "r"
+
+    ! print*, '============================================================='
+    ! print*, "CSV to Binary"
+    ! print*, "    x_train"
+    ! call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
+    !     n_samples_train, n_columns_train, skip_header, dtype_in, dtype_out)
 
     print*, '============================================================='
     print*, "Read Binary"
     print*, "    x_train"
     call read_bin_2d(file_name_x_train_bin, x_train)
-    ! x_train_t = transpose(x_train)
-    ! do iii=4, n_samples_train, 1
-    !     x_train(iii, :) = 0d0
-    ! end do
 
     print*, "Start"
-    call date_and_time(values=date_value1)
-    km = kmeans(max_iter=2_8)
-    call km%fit(x_train)
-    call date_and_time(values=date_value2)
-    print*, time_diff(date_value1, date_value2)
+    n_iter = 10
+    min_n_cluster = 2
+    max_n_cluster = 10
+    do n_cluster=min_n_cluster, max_n_cluster, 1
+        km = kmeans(max_iter=n_cluster)
+        print*, '============================================================='
+        print*, '============================================================='
+        print*, '============================================================='
+        call date_and_time(values=date_value1)
+        do iter=1, n_iter, 1
+            call km%fit(x_train, iter, n_iter)
+        end do
+        call date_and_time(values=date_value2)
+        print*, n_cluster, & 
+            time_diff(date_value1, date_value2), & 
+            time_diff(date_value1, date_value2)/dble(n_iter)
+
+        print*, '============================================================='
+        print*, '============================================================='
+        print*, '============================================================='
+        call date_and_time(values=date_value1)
+        do iter=1, n_iter, 1
+            call km%fit_faster(x_train, iter, n_iter)
+        end do
+        call date_and_time(values=date_value2)
+        print*, n_cluster, & 
+            time_diff(date_value1, date_value2), & 
+            time_diff(date_value1, date_value2)/dble(n_iter)
+    end do
+
+    stop "done"
 
     y_train = km%predict(x_train)
 

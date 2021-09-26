@@ -62,15 +62,15 @@ build:
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_random.f90                                                               -o ./mod/mod_random.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_sort.f90                                                                 -o ./mod/mod_sort.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../math/mod_math.f90                                                                   -o ./mod/mod_math.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../math/mod_stats.f90                                                                  -o ./mod/mod_stats.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../math/mod_stats.f90                                                                  -o ./mod/mod_stats.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../metric/mod_metric.f90                                                               -o ./mod/mod_metric.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_linalg.f90                                                               -o ./mod/mod_linalg.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_linalg.f90                                                               -o ./mod/mod_linalg.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../optimization/mod_optimization.f90                                                   -o ./mod/mod_optimization.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../hyperparameter/mod_hyperparameter.f90                                               -o ./mod/mod_hyperparameter.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../preprocessing/mod_discretizer.f90                                                   -o ./mod/mod_discretizer.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../preprocessing/mod_scaler.f90                                                        -o ./mod/mod_scaler.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../data_holder/mod_data_holder.f90                                                     -o ./mod/mod_data_holder.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../clustering/mod_kmeans.f90                                                           -o ./mod/mod_kmeans.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../clustering/mod_kmeans.f90                                                           -o ./mod/mod_kmeans.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../decision_tree/mod_node.f90                                                          -o ./mod/mod_node.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../decision_tree/mod_splitter.f90                                                      -o ./mod/mod_splitter.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../decision_tree/mod_woodworking_tools.f90                                             -o ./mod/mod_woodworking_tools.out
