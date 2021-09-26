@@ -1,5 +1,6 @@
 !> A module for Linear Algebra.
 module mod_linalg
+    !$ use omp_lib
     use iso_c_binding
     use mod_common
     use mod_const
@@ -272,11 +273,20 @@ contains
     !! \param matrix_sqsum_vals calculated square sum values of matrix by row
     !! \param n_samples number of samples
     !! \param n_columns number of columns
-    subroutine matrix_sqsum_row_r8(matrix, matrix_sqsum_vals, n_samples, n_columns)
+    subroutine matrix_sqsum_row_r8(matrix, matrix_sqsum_vals, n_samples, n_columns, parallel)
         implicit none
         real(kind=8), intent(in)    :: matrix(n_samples, n_columns)
         real(kind=8), intent(inout) :: matrix_sqsum_vals(n_samples)
         integer(kind=8), intent(in) :: n_samples, n_columns
+        logical(kind=4), optional   :: parallel
+        logical(kind=4) :: parallel_opt
+        parallel_opt = f_
+        if (present(parallel)) parallel_opt = parallel
+        if (parallel_opt) then
+            call matrix_sqsum_row_01x16_F_P_r8(matrix, matrix_sqsum_vals, n_samples, n_columns)
+        else
+            call matrix_sqsum_row_01x16_F_r8(matrix, matrix_sqsum_vals, n_samples, n_columns)
+        end if
     end subroutine matrix_sqsum_row_r8
     include "./include/linalg_matrix_sqsum_row/inc_matrix_sqsum_row.f90"
 
