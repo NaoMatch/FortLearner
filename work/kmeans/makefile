@@ -62,7 +62,7 @@ build:
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_random.f90                                                               -o ./mod/mod_random.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_sort.f90                                                                 -o ./mod/mod_sort.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../math/mod_math.f90                                                                   -o ./mod/mod_math.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../math/mod_stats.f90                                                                  -o ./mod/mod_stats.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../math/mod_stats.f90                                                                  -o ./mod/mod_stats.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../metric/mod_metric.f90                                                               -o ./mod/mod_metric.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_linalg.f90                                                               -o ./mod/mod_linalg.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../optimization/mod_optimization.f90                                                   -o ./mod/mod_optimization.out
@@ -98,7 +98,7 @@ build:
 	# $(compiler_clang)   $(mod) $(opt) $(option) -c    ../../math/include/stats/sum_up_gt/inc_get_count_and_sum_up_gt_vector2vector.c            -o ./mod/inc_get_count_and_sum_up_gt_vector2vector.out
 	# $(compiler_clang)   $(mod) $(opt) $(option) -c    ../../math/include/stats/sum_up_gt/inc_get_matrix_count_and_sum_up_gt_parallel.c          -o ./mod/inc_get_matrix_count_and_sum_up_gt_parallel.out
 	# $(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/include/linalg_multi_mat_vec/inc_multi_mat_vec.c                             -o ./mod/inc_multi_mat_vec.out
-	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/include/linalg_matrix_sqsum_row/inc_matrix_sqsum_row.c                             -o ./mod/inc_matrix_sqsum_row.out
+	# $(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/include/linalg_matrix_sqsum_row/inc_matrix_sqsum_row.c                             -o ./mod/inc_matrix_sqsum_row.out
 
 main:
 	make build

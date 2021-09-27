@@ -2,8 +2,13 @@ program main
     use mod_timer
     use mod_common
     use mod_kmeans
+    use mod_scaler
+    use mod_sort
+    use mod_stats
     implicit none
+
     integer(kind=8)              :: date_value1(8), date_value2(8), time_sadt
+    integer(kind=8), allocatable :: times(:)
     integer(kind=8), allocatable :: n_samples_trains(:), n_columns_trains(:), n_iters(:)
     integer(kind=8)              :: n_samples_train, n_columns_train 
     integer(kind=8)              :: n_samples_test, n_columns_test
@@ -22,8 +27,11 @@ program main
     real(kind=8), ALLOCATABLE    :: y_train_pred_cl(:,:), y_test_pred_cl(:,:)
     real(kind=8), ALLOCATABLE    :: y_train_pred_lw(:,:), y_test_pred_lw(:,:)
     integer(kind=8), ALLOCATABLE :: feature_indices(:), feature_indices_scanning_range(:)
+    real(kind=8), ALLOCATABLE    :: tmp_r(:)
+    integer(kind=8), ALLOCATABLE :: tmp_i(:)
 
-    integer(kind=8) :: n_cluster, min_n_cluster, max_n_cluster
+    integer(kind=8) :: n_cluster, min_n_cluster, max_n_cluster, c
+    type(minmax_scaler) :: mm_scaler
     type(kmeans) :: km, km2
 
     file_name_x_train_csv = "../../../uci_data/05_YearPredictionMSD/YearPredictionMSD_x_train.txt"
@@ -31,13 +39,13 @@ program main
     n_samples_train = 412206
     n_columns_train = 90
 
-    file_name_x_train_csv = "../../../uci_data/97_make_regression/make_regression_x_0001000000x00050.csv"
-    file_name_x_train_bin = "../../../uci_data/97_make_regression/make_regression_x_0001000000x00050.bin"
-    n_samples_train = 1000000
-    n_columns_train = 50
-    skip_header = f_
-    dtype_in  = "r"
-    dtype_out = "r"
+    ! file_name_x_train_csv = "../../../uci_data/97_make_regression/make_regression_x_0001000000x00050.csv"
+    ! file_name_x_train_bin = "../../../uci_data/97_make_regression/make_regression_x_0001000000x00050.bin"
+    ! n_samples_train = 1000000
+    ! n_columns_train = 50
+    ! skip_header = f_
+    ! dtype_in  = "r"
+    ! dtype_out = "r"
 
     ! print*, '============================================================='
     ! print*, "CSV to Binary"
@@ -49,49 +57,73 @@ program main
     print*, "Read Binary"
     print*, "    x_train"
     call read_bin_2d(file_name_x_train_bin, x_train)
+    mm_scaler = minmax_scaler(min_val=-1d0, max_val=1d0)
+    call mm_scaler%fit(x_train)
+    x_train = mm_scaler%transform(x_train)
 
     print*, "Start"
-    n_iter = 10
+    n_iter = 5
     min_n_cluster = 2
-    max_n_cluster = 10
+    max_n_cluster = 5
+
+    allocate(times(n_iter))
     do n_cluster=min_n_cluster, max_n_cluster, 1
-        km = kmeans(max_iter=n_cluster)
+        km = kmeans(n_clusters=n_cluster)
+        print*, ""
+        print*, ""
+        print*, ""
+        print*, ""
+        print*, ""
+        print*, ""
+        print*, ""
+        print*, ""
+        print*, ""
+        print*, ""
         print*, '============================================================='
         print*, '============================================================='
         print*, '============================================================='
-        call date_and_time(values=date_value1)
+        print*, "OLD"
         do iter=1, n_iter, 1
-            call km%fit(x_train, iter, n_iter)
+            call date_and_time(values=date_value1)
+            call km%fit_slow(x_train)
+            call date_and_time(values=date_value2)
+            times(iter) = time_diff(date_value1, date_value2)
         end do
-        call date_and_time(values=date_value2)
-        print*, n_cluster, & 
-            time_diff(date_value1, date_value2), & 
-            time_diff(date_value1, date_value2)/dble(n_iter)
+        print*, n_cluster, mean(times, n_iter), sqrt(variance(times, n_iter))
 
-        print*, '============================================================='
-        print*, '============================================================='
-        print*, '============================================================='
-        call date_and_time(values=date_value1)
-        do iter=1, n_iter, 1
-            call km%fit_faster(x_train, iter, n_iter)
+        tmp_r = km%cluster_centers(1,:)
+        tmp_i = tmp_r
+        do c=1, n_cluster, 1
+            tmp_i(c) = c
         end do
-        call date_and_time(values=date_value2)
-        print*, n_cluster, & 
-            time_diff(date_value1, date_value2), & 
-            time_diff(date_value1, date_value2)/dble(n_iter)
+        call quick_argsort(tmp_r, tmp_i, n_cluster)
+        km%cluster_centers(:,:) = km%cluster_centers(:,tmp_i)
+        do c=1, n_cluster, 1
+            print*, c, real(km%cluster_centers(1:10,c))
+        end do
+
+        km = kmeans(n_clusters=n_cluster)
+        print*, '============================================================='
+        print*, '============================================================='
+        print*, '============================================================='
+        print*, "Single Threading"
+        do iter=1, n_iter, 1
+            call date_and_time(values=date_value1)
+            call km%fit(x_train)
+            call date_and_time(values=date_value2)
+            times(iter) = time_diff(date_value1, date_value2)
+        end do
+        print*, n_cluster, mean(times, n_iter), sqrt(variance(times, n_iter))
+
+        tmp_r = km%cluster_centers(1,:)
+        tmp_i = tmp_r
+        do c=1, n_cluster, 1
+            tmp_i(c) = c
+        end do
+        call quick_argsort(tmp_r, tmp_i, n_cluster)
+        km%cluster_centers(:,:) = km%cluster_centers(:,tmp_i)
+        do c=1, n_cluster, 1
+            print*, c, real(km%cluster_centers(1:10,c))
+        end do
     end do
-
-    stop "done"
-
-    y_train = km%predict(x_train)
-
-    call km%dump("test.bin")
-
-    ! call km2%load("test.bin")
-
-    y_test = km2%predict(x_train)
-
-    print*, count(y_train .eq. y_test)
-
-
 end program main
