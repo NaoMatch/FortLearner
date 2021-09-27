@@ -41,11 +41,11 @@ program main
 
     ! types(2)   = "matrix_sqsum_row_01x01_F_r8        :"
 
-    ! types(3)   = "matrix_sqsum_row_02x01_F_r8        :"
-    ! types(4)   = "matrix_sqsum_row_04x01_F_r8        :"
-    ! types(5)   = "matrix_sqsum_row_08x01_F_r8        :"
-    ! types(6)   = "matrix_sqsum_row_16x01_F_r8        :"
-    ! types(7)   = "matrix_sqsum_row_32x01_F_r8        :"
+    types(3)   = "matrix_sqsum_row_02x01_F_r8        :"
+    types(4)   = "matrix_sqsum_row_04x01_F_r8        :"
+    types(5)   = "matrix_sqsum_row_08x01_F_r8        :"
+    types(6)   = "matrix_sqsum_row_16x01_F_r8        :"
+    types(7)   = "matrix_sqsum_row_32x01_F_r8        :"
 
     ! types(8)   = "matrix_sqsum_row_01x02_F_r8        :"
     ! types(9)   = "matrix_sqsum_row_01x04_F_r8        :"
@@ -139,9 +139,33 @@ program main
     types(77)  = "matrix_sqsum_row_16x01_F_P_r8        :"
     types(78)  = "matrix_sqsum_row_32x01_F_P_r8        :"
 
+    types(79)  = "matrix_sqsum_row_01x02_F_P_r8        :"
+    types(80)  = "matrix_sqsum_row_01x04_F_P_r8        :"
+    types(81)  = "matrix_sqsum_row_01x08_F_P_r8        :"
+    types(82)  = "matrix_sqsum_row_01x16_F_P_r8        :"
+    types(83)  = "matrix_sqsum_row_01x32_F_P_r8        :"
+
+    types(84)  = "matrix_sqsum_row_02x02_F_P_r8        :"
+    types(85)  = "matrix_sqsum_row_02x04_F_P_r8        :"
+    types(86)  = "matrix_sqsum_row_02x08_F_P_r8        :"
+    types(87)  = "matrix_sqsum_row_02x16_F_P_r8        :"
+    types(88)  = "matrix_sqsum_row_02x32_F_P_r8        :"
+
+    types(89)  = "matrix_sqsum_row_04x02_F_P_r8        :"
+    types(90)  = "matrix_sqsum_row_04x04_F_P_r8        :"
+    types(91)  = "matrix_sqsum_row_04x08_F_P_r8        :"
+    types(92)  = "matrix_sqsum_row_04x16_F_P_r8        :"
+    types(93)  = "matrix_sqsum_row_04x32_F_P_r8        :"
+
+    types(94)  = "matrix_sqsum_row_08x02_F_P_r8        :"
+    types(95)  = "matrix_sqsum_row_08x04_F_P_r8        :"
+    types(96)  = "matrix_sqsum_row_08x08_F_P_r8        :"
+    types(97)  = "matrix_sqsum_row_08x16_F_P_r8        :"
+    types(98)  = "matrix_sqsum_row_08x32_F_P_r8        :"
+
 
     array_n_samples = (/100, 1000, 10000, 100000, 1000000/)+31
-    array_n_columns = (/5,   10,   50,    100,    200/)+27+31
+    array_n_columns = (/5,   10,   50,    100,    200/)
     array_n_samples(:) = array_n_samples(size(array_n_samples):1:-1)
     base_iter = 1000000000_8
     ! base_iter = 1; is_stop_iter = t_
@@ -254,6 +278,36 @@ program main
                         case (71); call matrix_sqsum_row_08x08_A_r8(x_ptr, x_sqsum_row, n_samples, n_columns)
                         case (72); call matrix_sqsum_row_08x16_A_r8(x_ptr, x_sqsum_row, n_samples, n_columns)
                         case (73); call matrix_sqsum_row_08x32_A_r8(x_ptr, x_sqsum_row, n_samples, n_columns)
+
+                        case (74); call matrix_sqsum_row_02x01_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (75); call matrix_sqsum_row_04x01_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (76); call matrix_sqsum_row_08x01_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (77); call matrix_sqsum_row_16x01_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (78); call matrix_sqsum_row_32x01_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+
+                        case (79); call matrix_sqsum_row_01x02_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (80); call matrix_sqsum_row_01x04_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (81); call matrix_sqsum_row_01x08_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (82); call matrix_sqsum_row_01x16_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (83); call matrix_sqsum_row_01x32_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+
+                        case (84); call matrix_sqsum_row_02x02_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (85); call matrix_sqsum_row_02x04_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (86); call matrix_sqsum_row_02x08_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (87); call matrix_sqsum_row_02x16_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (88); call matrix_sqsum_row_02x32_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+
+                        case (89); call matrix_sqsum_row_04x02_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (90); call matrix_sqsum_row_04x04_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (91); call matrix_sqsum_row_04x08_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (92); call matrix_sqsum_row_04x16_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (93); call matrix_sqsum_row_04x32_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+
+                        case (94); call matrix_sqsum_row_08x02_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (95); call matrix_sqsum_row_08x04_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (96); call matrix_sqsum_row_08x08_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (97); call matrix_sqsum_row_08x16_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
+                        case (98); call matrix_sqsum_row_08x32_F_P_r8(x, x_sqsum_row, n_samples, n_columns)
                     end select
                 end do
                 call date_and_time(values=date_value2); times(iter_types) = time_diff(date_value1, date_value2)/dble(n_iter)
