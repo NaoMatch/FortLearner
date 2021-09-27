@@ -299,15 +299,17 @@ contains
     !> \param output_vector output vector
     !> \param n_rows number of rows in the matrix and size of 'output_vector'
     !> \param n_cols number of columns in the matrix and size of 'input_vector'
-    subroutine multi_mat_vec_r4(matrix, input_vector, output_vector, n_rows, n_cols)
+    subroutine multi_mat_vec_r4(matrix, input_vector, output_vector, n_rows, n_cols, parallel)
         implicit none
         real(kind=4), intent(in)      :: matrix(n_rows, n_cols)
         real(kind=4), intent(in)      :: input_vector(n_cols)
         real(kind=4), intent(inout)   :: output_vector(n_rows)
         integer(kind=4), intent(in) :: n_rows, n_cols
+        logical(kind=4), optional :: parallel
 
         integer(kind=4) :: i, j, k, n_cols_unroll
         real(kind=4)      :: tmp_out, tmp_input, buffer_input(cache_size_multi_mat_vec)
+        logical(kind=4)   :: parallel_opt=f_
         output_vector = 0
 
         include "./include/linalg_multi_mat_vec/inc_multi_mat_vec_detail.f90"
