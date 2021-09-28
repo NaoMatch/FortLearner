@@ -6,9 +6,10 @@ cd test_script
 make test  
 
 # WIP:
-speed up 'kmeans++'  
+speed up 'kmeans++' more (using triangle inequality https://www.aaai.org/Papers/ICML/2003/ICML03-022.pdf)  
 
 # Update
+2021/09/28: speed up 'kmeans++'(see benchmark)  
 2021/09/24: isolation_tree and isolation_forest  
 2021/09/21: kmeans++  
 2021/09/20: simulated annealing initial temperature  
