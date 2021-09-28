@@ -80,6 +80,25 @@ LW = lawu_regressor(FL) , There is no counterpart to scikit-learn.
 | sklearn.datasets.make_regression: (1000000, 200) |28              |17.0186  |4.44      |         | 120.486  |26.6|50.76   |5.852   |   8.149   |
 | sklearn.datasets.make_regression: (1000000, 400) |55.4            |26.56    |6.163     |         | 236.898  |47.8|139.545 |14.76   |   21.268  |
 
+## kmeans(second&plusmn;standard deviation)
+KM = Kmeans()  
+KM_naive: Naive Implementation in Fortlearner  
+KM_fast: Fast  Implementation in Fortlearner(Simplified Calculation of Euclid Distance + Fast Matrix-Vector Multiplication + Naive Centroid Update Skip)  
+FL: mean &plusmn; std of 40 runs  
+SK: mean &plusmn; std of 4 runs  
+| Data: shape(#Row, #Col)         | #Cluster | SK: KM | FL: KM_naive | FL: KM_fast |
+| ------------------------------- | -------- | ------ | ------------ | ----------- |
+| YearPredictionMSD: (412206, 90) | 2        |7.57(&plusmn;0.128)        |1.202(&plusmn;0.247)         |0.628(&plusmn;0.105)              |
+| YearPredictionMSD: (412206, 90) | 3        |14.7(&plusmn;0.180)        |3.260(&plusmn;1.865)         |1.880(&plusmn;0.61)              |
+| YearPredictionMSD: (412206, 90) | 4        |25.6(&plusmn;1.28)        |2.867(&plusmn;0.599) |1.725(&plusmn;0.649) |
+| YearPredictionMSD: (412206, 90) | 5        |35.4(&plusmn;0.335)        |6.573(&plusmn;3.428) |3.08(&plusmn;1.523) |
+| YearPredictionMSD: (412206, 90) | 10       |74(&plusmn;0.106)        |20.986(&plusmn;7.226) |11.457(&plusmn;3.693) |
+| YearPredictionMSD: (412206, 90) | 15       |133(&plusmn;12.9)        |38.954(&plusmn;10.945) |21.025(&plusmn;7.5) |
+| YearPredictionMSD: (412206, 90) | 20       |225(&plusmn;19.1)        |55.788(&plusmn;19.302) |34.358(&plusmn;12.222) |
+| YearPredictionMSD: (412206, 90) | 25       |241(&plusmn;31)        |98.84(&plusmn;34.977) |55.001(&plusmn;23.099) |
+| YearPredictionMSD: (412206, 90) | 30       |291(&plusmn;14.2)        |157.163(&plusmn;52.773) |82.906(&plusmn;25.715) |
+| YearPredictionMSD: (412206, 90) | 35       |340(&plusmn;6.46)        |184.827(&plusmn;58.211) |99.948(&plusmn;31.88) |
+
 
 # Implemented
 * Linear Regression:

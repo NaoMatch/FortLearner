@@ -73,127 +73,6 @@ subroutine multi_mat_vec_01x01_N_F_r8(matrix, input_vector, output_vector, n_row
     end do
 end subroutine multi_mat_vec_01x01_N_F_r8
 
-subroutine multi_mat_vec_01x02_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
-    implicit none
-    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
-    real(kind=8), intent(in)    :: input_vector(n_cols)
-    real(kind=8), intent(inout) :: output_vector(n_rows)
-    integer(kind=8), intent(in) :: n_rows, n_cols
-
-    integer(kind=8) :: i, j
-    integer(kind=8) :: r_unroll, n_rows_unroll
-    integer(kind=8) :: c_unroll, n_cols_unroll
-
-    real(kind=8)    :: r00, r01, r02, r03
-    real(kind=8)    :: r04, r05, r06, r07
-    real(kind=8)    :: r08, r09, r10, r11
-    real(kind=8)    :: r12, r13, r14, r15
-
-    output_vector = 0
-
-    c_unroll = 2
-    n_cols_unroll = n_cols - mod(n_cols, c_unroll)
-
-    do j=1, n_cols_unroll, c_unroll
-        r00 = input_vector(j)
-        r01 = input_vector(j+1)
-        do i=1, n_rows, 1
-            r15 = output_vector(i)
-            
-            r02 = matrix(i,j)
-            r03 = matrix(i,j+1)
-            
-            r02 = r02 * r00
-            r03 = r03 * r01
-
-            r15 = r15 + r02
-            r15 = r15 + r03
-
-            output_vector(i) = r15
-        end do
-    end do
-
-    do j=n_cols_unroll+1, n_cols, 1
-        r00 = input_vector(j)
-        do i=1, n_rows, 1
-            r15 = output_vector(i)
-            
-            r02 = matrix(i,j)
-            
-            r02 = r02 * r00
-
-            r15 = r15 + r02
-
-            output_vector(i) = r15
-        end do
-    end do
-end subroutine multi_mat_vec_01x02_N_F_r8
-
-subroutine multi_mat_vec_01x04_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
-    implicit none
-    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
-    real(kind=8), intent(in)    :: input_vector(n_cols)
-    real(kind=8), intent(inout) :: output_vector(n_rows)
-    integer(kind=8), intent(in) :: n_rows, n_cols
-
-    integer(kind=8) :: i, j
-    integer(kind=8) :: r_unroll, n_rows_unroll
-    integer(kind=8) :: c_unroll, n_cols_unroll
-
-    real(kind=8)    :: r00, r01, r02, r03
-    real(kind=8)    :: r04, r05, r06, r07
-    real(kind=8)    :: r08, r09, r10, r11
-    real(kind=8)    :: r12, r13, r14, r15
-
-    output_vector = 0
-
-    c_unroll = 4
-    n_cols_unroll = n_cols - mod(n_cols, c_unroll)
-
-    do j=1, n_cols_unroll, c_unroll
-        r00 = input_vector(j)
-        r01 = input_vector(j+1)
-        r02 = input_vector(j+2)
-        r03 = input_vector(j+3)
-        do i=1, n_rows, 1
-            r15 = output_vector(i)
-            
-            r04 = matrix(i,j)
-            r05 = matrix(i,j+1)
-            r06 = matrix(i,j+2)
-            r07 = matrix(i,j+3)
-            
-            r04 = r04 * r00
-            r05 = r05 * r01
-            r06 = r06 * r02
-            r07 = r07 * r03
-
-            r04 = r04 + r05
-            r06 = r06 + r07
-
-            r04 = r04 + r06
-            r15 = r15 + r04
-
-            output_vector(i) = r15
-        end do
-    end do
-
-    do j=n_cols_unroll+1, n_cols, 1
-        r00 = input_vector(j)
-        do i=1, n_rows, 1
-            r15 = output_vector(i)
-            
-            r02 = matrix(i,j)
-            
-            r02 = r02 * r00
-
-            r15 = r15 + r02
-
-            output_vector(i) = r15
-        end do
-    end do
-end subroutine multi_mat_vec_01x04_N_F_r8
-
 subroutine multi_mat_vec_02x01_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
     implicit none
     real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
@@ -245,6 +124,970 @@ subroutine multi_mat_vec_02x01_N_F_r8(matrix, input_vector, output_vector, n_row
         end do
     end do
 end subroutine multi_mat_vec_02x01_N_F_r8
+
+subroutine multi_mat_vec_04x01_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j
+    integer(kind=8) :: r_unroll, n_rows_unroll
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    output_vector = 0
+    r_unroll = 4
+    n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+
+    do j=1, n_cols, 1
+        r00 = input_vector(j)
+        do i=1, n_rows_unroll, r_unroll
+            r12 = output_vector(i)
+            r13 = output_vector(i+1)
+            r14 = output_vector(i+2)
+            r15 = output_vector(i+3)
+            
+            r01 = matrix(i,  j)
+            r02 = matrix(i+1,j)
+            r03 = matrix(i+2,j)
+            r04 = matrix(i+3,j)
+            
+            r01 = r01 * r00
+            r02 = r02 * r00
+            r03 = r03 * r00
+            r04 = r04 * r00
+
+            r12 = r12 + r01
+            r13 = r13 + r02
+            r14 = r14 + r03
+            r15 = r15 + r04
+
+            output_vector(i  ) = r12
+            output_vector(i+1) = r13
+            output_vector(i+2) = r14
+            output_vector(i+3) = r15
+        end do
+
+        do i=n_rows_unroll+1, n_rows
+            r15 = output_vector(i)
+            
+            r01 = matrix(i,j)
+            
+            r01 = r01 * r00
+
+            r15 = r15 + r01
+
+            output_vector(i) = r15
+        end do
+    end do
+end subroutine multi_mat_vec_04x01_N_F_r8
+
+subroutine multi_mat_vec_08x01_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, l
+    integer(kind=8) :: r_unroll, n_rows_unroll
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    output_vector = 0
+    r_unroll = 8
+    n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+
+    do j=1, n_cols, 1
+        r00 = input_vector(j)
+        do i=1, n_rows_unroll, r_unroll
+            do l=0, 7, 4
+                r12 = output_vector(i+l)
+                r13 = output_vector(i+l+1)
+                r14 = output_vector(i+l+2)
+                r15 = output_vector(i+l+3)
+                
+                r01 = matrix(i+l,  j)
+                r02 = matrix(i+l+1,j)
+                r03 = matrix(i+l+2,j)
+                r04 = matrix(i+l+3,j)
+                
+                r01 = r01 * r00
+                r02 = r02 * r00
+                r03 = r03 * r00
+                r04 = r04 * r00
+
+                r12 = r12 + r01
+                r13 = r13 + r02
+                r14 = r14 + r03
+                r15 = r15 + r04
+
+                output_vector(i+l  ) = r12
+                output_vector(i+l+1) = r13
+                output_vector(i+l+2) = r14
+                output_vector(i+l+3) = r15
+            end do
+        end do
+
+        do i=n_rows_unroll+1, n_rows
+            r15 = output_vector(i)
+            
+            r01 = matrix(i,j)
+            
+            r01 = r01 * r00
+
+            r15 = r15 + r01
+
+            output_vector(i) = r15
+        end do
+    end do
+end subroutine multi_mat_vec_08x01_N_F_r8
+
+subroutine multi_mat_vec_16x01_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, l
+    integer(kind=8) :: r_unroll, n_rows_unroll
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    output_vector = 0
+    r_unroll = 16
+    n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+
+    do j=1, n_cols, 1
+        r00 = input_vector(j)
+        do i=1, n_rows_unroll, r_unroll
+            do l=0, 15, 4
+                r12 = output_vector(i+l)
+                r13 = output_vector(i+l+1)
+                r14 = output_vector(i+l+2)
+                r15 = output_vector(i+l+3)
+                
+                r01 = matrix(i+l,  j)
+                r02 = matrix(i+l+1,j)
+                r03 = matrix(i+l+2,j)
+                r04 = matrix(i+l+3,j)
+                
+                r01 = r01 * r00
+                r02 = r02 * r00
+                r03 = r03 * r00
+                r04 = r04 * r00
+
+                r12 = r12 + r01
+                r13 = r13 + r02
+                r14 = r14 + r03
+                r15 = r15 + r04
+
+                output_vector(i+l  ) = r12
+                output_vector(i+l+1) = r13
+                output_vector(i+l+2) = r14
+                output_vector(i+l+3) = r15
+            end do
+        end do
+
+        do i=n_rows_unroll+1, n_rows
+            r15 = output_vector(i)
+            
+            r01 = matrix(i,j)
+            
+            r01 = r01 * r00
+
+            r15 = r15 + r01
+
+            output_vector(i) = r15
+        end do
+    end do
+end subroutine multi_mat_vec_16x01_N_F_r8
+
+subroutine multi_mat_vec_32x01_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, l
+    integer(kind=8) :: r_unroll, n_rows_unroll
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    output_vector = 0
+    r_unroll = 32
+    n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+
+    do j=1, n_cols, 1
+        r00 = input_vector(j)
+        do i=1, n_rows_unroll, r_unroll
+            do l=0, 31, 4
+                r12 = output_vector(i+l)
+                r13 = output_vector(i+l+1)
+                r14 = output_vector(i+l+2)
+                r15 = output_vector(i+l+3)
+                
+                r01 = matrix(i+l,  j)
+                r02 = matrix(i+l+1,j)
+                r03 = matrix(i+l+2,j)
+                r04 = matrix(i+l+3,j)
+                
+                r01 = r01 * r00
+                r02 = r02 * r00
+                r03 = r03 * r00
+                r04 = r04 * r00
+
+                r12 = r12 + r01
+                r13 = r13 + r02
+                r14 = r14 + r03
+                r15 = r15 + r04
+
+                output_vector(i+l  ) = r12
+                output_vector(i+l+1) = r13
+                output_vector(i+l+2) = r14
+                output_vector(i+l+3) = r15
+            end do
+        end do
+
+        do i=n_rows_unroll+1, n_rows
+            r15 = output_vector(i)
+            
+            r01 = matrix(i,j)
+            
+            r01 = r01 * r00
+
+            r15 = r15 + r01
+
+            output_vector(i) = r15
+        end do
+    end do
+end subroutine multi_mat_vec_32x01_N_F_r8
+
+
+
+
+
+
+
+subroutine multi_mat_vec_01x02_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    output_vector = 0
+
+    c_unroll = 2
+    n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    do j=1, n_cols_unroll, c_unroll
+        r00 = input_vector(j)
+        r01 = input_vector(j+1)
+        do i=1, n_rows, 1
+            r15 = output_vector(i)
+            
+            r02 = matrix(i,j)
+            r03 = matrix(i,j+1)
+            
+            r02 = r02 * r00
+            r03 = r03 * r01
+
+            r15 = r15 + r02
+            r15 = r15 + r03
+
+            output_vector(i) = r15
+        end do
+    end do
+
+    shift = 1
+    n_columns_remain = mod(n_cols, c_unroll)
+    if ( n_columns_remain .ge. 1_8 ) then
+        n_columns_remain = n_columns_remain - 1
+        do j=n_cols_unroll+shift, n_cols, 1
+            r00 = input_vector(j)
+            do i=1, n_rows, 1
+                r15 = output_vector(i)
+                
+                r02 = matrix(i,j)
+                
+                r02 = r02 * r00
+
+                r15 = r15 + r02
+
+                output_vector(i) = r15
+            end do
+        end do
+        shift = shift + 1
+    end if
+
+end subroutine multi_mat_vec_01x02_N_F_r8
+
+subroutine multi_mat_vec_01x04_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    output_vector = 0
+
+    c_unroll = 4
+    n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    do j=1, n_cols_unroll, c_unroll
+        r00 = input_vector(j)
+        r01 = input_vector(j+1)
+        r02 = input_vector(j+2)
+        r03 = input_vector(j+3)
+        do i=1, n_rows, 1
+            r15 = output_vector(i)
+            
+            r04 = matrix(i,j)
+            r05 = matrix(i,j+1)
+            r06 = matrix(i,j+2)
+            r07 = matrix(i,j+3)
+            
+            r04 = r04 * r00
+            r05 = r05 * r01
+            r06 = r06 * r02
+            r07 = r07 * r03
+
+            r04 = r04 + r05
+            r06 = r06 + r07
+
+            r04 = r04 + r06
+            r15 = r15 + r04
+
+            output_vector(i) = r15
+        end do
+    end do
+
+    shift = 1
+    n_columns_remain = mod(n_cols, c_unroll)
+    if ( n_columns_remain .ge. 2_8 ) then
+        n_columns_remain = n_columns_remain - 2
+        do j=n_cols_unroll+shift, n_cols_unroll+shift+1, 2
+            r00 = input_vector(j)
+            r01 = input_vector(j+1)
+            do i=1, n_rows, 1
+                r15 = output_vector(i)
+                
+                r02 = matrix(i,j)
+                r03 = matrix(i,j+1)
+                
+                r02 = r02 * r00
+                r03 = r03 * r01
+
+                r15 = r15 + r02
+                r15 = r15 + r03
+
+                output_vector(i) = r15
+            end do
+        end do
+        shift = shift + 2
+    end if
+
+    if ( n_columns_remain .ge. 1_8 ) then
+        n_columns_remain = n_columns_remain - 1
+        do j=n_cols_unroll+shift, n_cols, 1
+            r00 = input_vector(j)
+            do i=1, n_rows, 1
+                r15 = output_vector(i)
+                
+                r02 = matrix(i,j)
+                
+                r02 = r02 * r00
+
+                r15 = r15 + r02
+
+                output_vector(i) = r15
+            end do
+        end do
+        shift = shift + 1
+    end if
+end subroutine multi_mat_vec_01x04_N_F_r8
+
+subroutine multi_mat_vec_01x08_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    output_vector = 0
+
+    c_unroll = 8
+    n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 7, 4
+            r00 = input_vector(j+k)
+            r01 = input_vector(j+k+1)
+            r02 = input_vector(j+k+2)
+            r03 = input_vector(j+k+3)
+            do i=1, n_rows, 1
+                r15 = output_vector(i)
+                
+                r04 = matrix(i,j+k)
+                r05 = matrix(i,j+k+1)
+                r06 = matrix(i,j+k+2)
+                r07 = matrix(i,j+k+3)
+                
+                r04 = r04 * r00
+                r05 = r05 * r01
+                r06 = r06 * r02
+                r07 = r07 * r03
+
+                r04 = r04 + r05
+                r06 = r06 + r07
+
+                r04 = r04 + r06
+                r15 = r15 + r04
+
+                output_vector(i) = r15
+            end do
+        end do
+    end do
+
+    shift = 1
+    n_columns_remain = mod(n_cols, c_unroll)
+    if ( n_columns_remain .ge. 4_8 ) then
+        n_columns_remain = n_columns_remain - 4
+        do j=n_cols_unroll+shift, n_cols_unroll+shift+3, 4
+            r00 = input_vector(j)
+            r01 = input_vector(j+1)
+            r02 = input_vector(j+2)
+            r03 = input_vector(j+3)
+            do i=1, n_rows, 1
+                r15 = output_vector(i)
+                
+                r04 = matrix(i,j)
+                r05 = matrix(i,j+1)
+                r06 = matrix(i,j+2)
+                r07 = matrix(i,j+3)
+                
+                r04 = r04 * r00
+                r05 = r05 * r01
+                r06 = r06 * r02
+                r07 = r07 * r03
+
+                r04 = r04 + r05
+                r06 = r06 + r07
+
+                r04 = r04 + r06
+                r15 = r15 + r04
+
+                output_vector(i) = r15
+            end do
+        end do
+        shift = shift + 4
+    end if
+
+    if ( n_columns_remain .ge. 2_8 ) then
+        n_columns_remain = n_columns_remain - 2
+        do j=n_cols_unroll+shift, n_cols_unroll+shift+1, 2
+            r00 = input_vector(j)
+            r01 = input_vector(j+1)
+            do i=1, n_rows, 1
+                r15 = output_vector(i)
+                
+                r02 = matrix(i,j)
+                r03 = matrix(i,j+1)
+                
+                r02 = r02 * r00
+                r03 = r03 * r01
+
+                r15 = r15 + r02
+                r15 = r15 + r03
+
+                output_vector(i) = r15
+            end do
+        end do
+        shift = shift + 2
+    end if
+
+    if ( n_columns_remain .ge. 1_8 ) then
+        n_columns_remain = n_columns_remain - 1
+        do j=n_cols_unroll+shift, n_cols, 1
+            r00 = input_vector(j)
+            do i=1, n_rows, 1
+                r15 = output_vector(i)
+                
+                r02 = matrix(i,j)
+                
+                r02 = r02 * r00
+
+                r15 = r15 + r02
+
+                output_vector(i) = r15
+            end do
+        end do
+        shift = shift + 1
+    end if
+end subroutine multi_mat_vec_01x08_N_F_r8
+
+subroutine multi_mat_vec_01x16_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    output_vector = 0
+
+    c_unroll = 16
+    n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 15, 4
+            r00 = input_vector(j+k)
+            r01 = input_vector(j+k+1)
+            r02 = input_vector(j+k+2)
+            r03 = input_vector(j+k+3)
+            do i=1, n_rows, 1
+                r15 = output_vector(i)
+                
+                r04 = matrix(i,j+k)
+                r05 = matrix(i,j+k+1)
+                r06 = matrix(i,j+k+2)
+                r07 = matrix(i,j+k+3)
+                
+                r04 = r04 * r00
+                r05 = r05 * r01
+                r06 = r06 * r02
+                r07 = r07 * r03
+
+                r04 = r04 + r05
+                r06 = r06 + r07
+
+                r04 = r04 + r06
+                r15 = r15 + r04
+
+                output_vector(i) = r15
+            end do
+        end do
+    end do
+
+    shift = 1
+    n_columns_remain = mod(n_cols, c_unroll)
+    if ( n_columns_remain .ge. 8_8 ) then
+        n_columns_remain = n_columns_remain - 8
+        do j=n_cols_unroll+shift, n_cols_unroll+shift+3, 8
+            do k=0, 7, 4
+                r00 = input_vector(j+k)
+                r01 = input_vector(j+k+1)
+                r02 = input_vector(j+k+2)
+                r03 = input_vector(j+k+3)
+                do i=1, n_rows, 1
+                    r15 = output_vector(i)
+                    
+                    r04 = matrix(i,j+k)
+                    r05 = matrix(i,j+k+1)
+                    r06 = matrix(i,j+k+2)
+                    r07 = matrix(i,j+k+3)
+                    
+                    r04 = r04 * r00
+                    r05 = r05 * r01
+                    r06 = r06 * r02
+                    r07 = r07 * r03
+
+                    r04 = r04 + r05
+                    r06 = r06 + r07
+
+                    r04 = r04 + r06
+                    r15 = r15 + r04
+
+                    output_vector(i) = r15
+                end do
+            end do
+        end do
+        shift = shift + 8
+    end if
+
+    if ( n_columns_remain .ge. 4_8 ) then
+        n_columns_remain = n_columns_remain - 4
+        do j=n_cols_unroll+shift, n_cols_unroll+shift+3, 4
+            r00 = input_vector(j)
+            r01 = input_vector(j+1)
+            r02 = input_vector(j+2)
+            r03 = input_vector(j+3)
+            do i=1, n_rows, 1
+                r15 = output_vector(i)
+                
+                r04 = matrix(i,j)
+                r05 = matrix(i,j+1)
+                r06 = matrix(i,j+2)
+                r07 = matrix(i,j+3)
+                
+                r04 = r04 * r00
+                r05 = r05 * r01
+                r06 = r06 * r02
+                r07 = r07 * r03
+
+                r04 = r04 + r05
+                r06 = r06 + r07
+
+                r04 = r04 + r06
+                r15 = r15 + r04
+
+                output_vector(i) = r15
+            end do
+        end do
+        shift = shift + 4
+    end if
+
+    if ( n_columns_remain .ge. 2_8 ) then
+        n_columns_remain = n_columns_remain - 2
+        do j=n_cols_unroll+shift, n_cols_unroll+shift+1, 2
+            r00 = input_vector(j)
+            r01 = input_vector(j+1)
+            do i=1, n_rows, 1
+                r15 = output_vector(i)
+                
+                r02 = matrix(i,j)
+                r03 = matrix(i,j+1)
+                
+                r02 = r02 * r00
+                r03 = r03 * r01
+
+                r15 = r15 + r02
+                r15 = r15 + r03
+
+                output_vector(i) = r15
+            end do
+        end do
+        shift = shift + 2
+    end if
+
+    if ( n_columns_remain .ge. 1_8 ) then
+        n_columns_remain = n_columns_remain - 1
+        do j=n_cols_unroll+shift, n_cols, 1
+            r00 = input_vector(j)
+            do i=1, n_rows, 1
+                r15 = output_vector(i)
+                
+                r02 = matrix(i,j)
+                
+                r02 = r02 * r00
+
+                r15 = r15 + r02
+
+                output_vector(i) = r15
+            end do
+        end do
+        shift = shift + 1
+    end if
+end subroutine multi_mat_vec_01x16_N_F_r8
+
+subroutine multi_mat_vec_01x32_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    output_vector = 0
+
+    c_unroll = 32
+    n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 31, 4
+            r00 = input_vector(j+k)
+            r01 = input_vector(j+k+1)
+            r02 = input_vector(j+k+2)
+            r03 = input_vector(j+k+3)
+            do i=1, n_rows, 1
+                r15 = output_vector(i)
+                
+                r04 = matrix(i,j+k)
+                r05 = matrix(i,j+k+1)
+                r06 = matrix(i,j+k+2)
+                r07 = matrix(i,j+k+3)
+                
+                r04 = r04 * r00
+                r05 = r05 * r01
+                r06 = r06 * r02
+                r07 = r07 * r03
+
+                r04 = r04 + r05
+                r06 = r06 + r07
+
+                r04 = r04 + r06
+                r15 = r15 + r04
+
+                output_vector(i) = r15
+            end do
+        end do
+    end do
+
+    shift = 1
+    n_columns_remain = mod(n_cols, c_unroll)
+    if ( n_columns_remain .ge. 16_8 ) then
+        n_columns_remain = n_columns_remain - 16
+        do j=n_cols_unroll+shift, n_cols_unroll+shift+15, 16
+            do k=0, 15, 4
+                r00 = input_vector(j+k)
+                r01 = input_vector(j+k+1)
+                r02 = input_vector(j+k+2)
+                r03 = input_vector(j+k+3)
+                do i=1, n_rows, 1
+                    r15 = output_vector(i)
+                    
+                    r04 = matrix(i,j+k)
+                    r05 = matrix(i,j+k+1)
+                    r06 = matrix(i,j+k+2)
+                    r07 = matrix(i,j+k+3)
+                    
+                    r04 = r04 * r00
+                    r05 = r05 * r01
+                    r06 = r06 * r02
+                    r07 = r07 * r03
+
+                    r04 = r04 + r05
+                    r06 = r06 + r07
+
+                    r04 = r04 + r06
+                    r15 = r15 + r04
+
+                    output_vector(i) = r15
+                end do
+            end do
+        end do
+        shift = shift + 16
+    end if
+
+    if ( n_columns_remain .ge. 8_8 ) then
+        n_columns_remain = n_columns_remain - 8
+        do j=n_cols_unroll+shift, n_cols_unroll+shift+7, 8
+            do k=0, 7, 4
+                r00 = input_vector(j+k)
+                r01 = input_vector(j+k+1)
+                r02 = input_vector(j+k+2)
+                r03 = input_vector(j+k+3)
+                do i=1, n_rows, 1
+                    r15 = output_vector(i)
+                    
+                    r04 = matrix(i,j+k)
+                    r05 = matrix(i,j+k+1)
+                    r06 = matrix(i,j+k+2)
+                    r07 = matrix(i,j+k+3)
+                    
+                    r04 = r04 * r00
+                    r05 = r05 * r01
+                    r06 = r06 * r02
+                    r07 = r07 * r03
+
+                    r04 = r04 + r05
+                    r06 = r06 + r07
+
+                    r04 = r04 + r06
+                    r15 = r15 + r04
+
+                    output_vector(i) = r15
+                end do
+            end do
+        end do
+        shift = shift + 8
+    end if
+
+    if ( n_columns_remain .ge. 4_8 ) then
+        n_columns_remain = n_columns_remain - 4
+        do j=n_cols_unroll+shift, n_cols_unroll+shift+3, 4
+            r00 = input_vector(j)
+            r01 = input_vector(j+1)
+            r02 = input_vector(j+2)
+            r03 = input_vector(j+3)
+            do i=1, n_rows, 1
+                r15 = output_vector(i)
+                
+                r04 = matrix(i,j)
+                r05 = matrix(i,j+1)
+                r06 = matrix(i,j+2)
+                r07 = matrix(i,j+3)
+                
+                r04 = r04 * r00
+                r05 = r05 * r01
+                r06 = r06 * r02
+                r07 = r07 * r03
+
+                r04 = r04 + r05
+                r06 = r06 + r07
+
+                r04 = r04 + r06
+                r15 = r15 + r04
+
+                output_vector(i) = r15
+            end do
+        end do
+        shift = shift + 4
+    end if
+
+    if ( n_columns_remain .ge. 2_8 ) then
+        n_columns_remain = n_columns_remain - 2
+        do j=n_cols_unroll+shift, n_cols_unroll+shift+1, 2
+            r00 = input_vector(j)
+            r01 = input_vector(j+1)
+            do i=1, n_rows, 1
+                r15 = output_vector(i)
+                
+                r02 = matrix(i,j)
+                r03 = matrix(i,j+1)
+                
+                r02 = r02 * r00
+                r03 = r03 * r01
+
+                r15 = r15 + r02
+                r15 = r15 + r03
+
+                output_vector(i) = r15
+            end do
+        end do
+        shift = shift + 2
+    end if
+
+    if ( n_columns_remain .ge. 1_8 ) then
+        n_columns_remain = n_columns_remain - 1
+        do j=n_cols_unroll+shift, n_cols, 1
+            r00 = input_vector(j)
+            do i=1, n_rows, 1
+                r15 = output_vector(i)
+                
+                r02 = matrix(i,j)
+                
+                r02 = r02 * r00
+
+                r15 = r15 + r02
+
+                output_vector(i) = r15
+            end do
+        end do
+        shift = shift + 1
+    end if
+end subroutine multi_mat_vec_01x32_N_F_r8
+
+
+subroutine multi_mat_vec_01x07_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer(7)
+
+    output_vector = 0
+
+    c_unroll = 7
+    n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 7-1, 1
+            buffer(k+1) = input_vector(j+k)
+        end do
+
+        do i=1, n_rows, 1
+            r15 = 0d0
+            do k=0, 7-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+    do j=n_cols_unroll+1, n_cols, 1
+        r00 = input_vector(j)
+        do i=1, n_rows, 1
+            r15 = output_vector(i)
+            
+            r02 = matrix(i,j)
+            
+            r02 = r02 * r00
+
+            r15 = r15 + r02
+
+            output_vector(i) = r15
+        end do
+    end do
+end subroutine multi_mat_vec_01x07_N_F_r8
+
+
+
+
+
+
+
 
 subroutine multi_mat_vec_02x02_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
     implicit none
@@ -467,68 +1310,6 @@ subroutine multi_mat_vec_02x04_N_F_r8(matrix, input_vector, output_vector, n_row
         end do
     end do
 end subroutine multi_mat_vec_02x04_N_F_r8
-
-subroutine multi_mat_vec_04x01_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
-    implicit none
-    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
-    real(kind=8), intent(in)    :: input_vector(n_cols)
-    real(kind=8), intent(inout) :: output_vector(n_rows)
-    integer(kind=8), intent(in) :: n_rows, n_cols
-
-    integer(kind=8) :: i, j
-    integer(kind=8) :: r_unroll, n_rows_unroll
-
-    real(kind=8)    :: r00, r01, r02, r03
-    real(kind=8)    :: r04, r05, r06, r07
-    real(kind=8)    :: r08, r09, r10, r11
-    real(kind=8)    :: r12, r13, r14, r15
-
-    output_vector = 0
-    r_unroll = 4
-    n_rows_unroll = n_rows - mod(n_rows, r_unroll)
-
-    do j=1, n_cols, 1
-        r00 = input_vector(j)
-        do i=1, n_rows_unroll, r_unroll
-            r12 = output_vector(i)
-            r13 = output_vector(i+1)
-            r14 = output_vector(i+2)
-            r15 = output_vector(i+3)
-            
-            r01 = matrix(i,  j)
-            r02 = matrix(i+1,j)
-            r03 = matrix(i+2,j)
-            r04 = matrix(i+3,j)
-            
-            r01 = r01 * r00
-            r02 = r02 * r00
-            r03 = r03 * r00
-            r04 = r04 * r00
-
-            r12 = r12 + r01
-            r13 = r13 + r02
-            r14 = r14 + r03
-            r15 = r15 + r04
-
-            output_vector(i  ) = r12
-            output_vector(i+1) = r13
-            output_vector(i+2) = r14
-            output_vector(i+3) = r15
-        end do
-
-        do i=n_rows_unroll+1, n_rows
-            r15 = output_vector(i)
-            
-            r01 = matrix(i,j)
-            
-            r01 = r01 * r00
-
-            r15 = r15 + r01
-
-            output_vector(i) = r15
-        end do
-    end do
-end subroutine multi_mat_vec_04x01_N_F_r8
 
 subroutine multi_mat_vec_04x02_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
     implicit none
@@ -989,93 +1770,6 @@ subroutine multi_mat_vec_04x08_N_F_r8(matrix, input_vector, output_vector, n_row
         end do
     end do
 end subroutine multi_mat_vec_04x08_N_F_r8
-
-subroutine multi_mat_vec_08x01_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
-    implicit none
-    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
-    real(kind=8), intent(in)    :: input_vector(n_cols)
-    real(kind=8), intent(inout) :: output_vector(n_rows)
-    integer(kind=8), intent(in) :: n_rows, n_cols
-
-    integer(kind=8) :: i, j
-    integer(kind=8) :: r_unroll, n_rows_unroll
-
-    real(kind=8)    :: r00, r01, r02, r03
-    real(kind=8)    :: r04, r05, r06, r07
-    real(kind=8)    :: r08, r09, r10, r11
-    real(kind=8)    :: r12, r13, r14, r15
-
-    output_vector = 0
-    r_unroll = 8
-    n_rows_unroll = n_rows - mod(n_rows, r_unroll)
-
-    do j=1, n_cols, 1
-        r00 = input_vector(j)
-        do i=1, n_rows_unroll, r_unroll
-            r12 = output_vector(i)
-            r13 = output_vector(i+1)
-            r14 = output_vector(i+2)
-            r15 = output_vector(i+3)
-            
-            r01 = matrix(i,  j)
-            r02 = matrix(i+1,j)
-            r03 = matrix(i+2,j)
-            r04 = matrix(i+3,j)
-            
-            r01 = r01 * r00
-            r02 = r02 * r00
-            r03 = r03 * r00
-            r04 = r04 * r00
-
-            r12 = r12 + r01
-            r13 = r13 + r02
-            r14 = r14 + r03
-            r15 = r15 + r04
-
-            output_vector(i  ) = r12
-            output_vector(i+1) = r13
-            output_vector(i+2) = r14
-            output_vector(i+3) = r15
-
-            r12 = output_vector(i+4)
-            r13 = output_vector(i+5)
-            r14 = output_vector(i+6)
-            r15 = output_vector(i+7)
-            
-            r01 = matrix(i+4,j)
-            r02 = matrix(i+5,j)
-            r03 = matrix(i+6,j)
-            r04 = matrix(i+7,j)
-            
-            r01 = r01 * r00
-            r02 = r02 * r00
-            r03 = r03 * r00
-            r04 = r04 * r00
-
-            r12 = r12 + r01
-            r13 = r13 + r02
-            r14 = r14 + r03
-            r15 = r15 + r04
-
-            output_vector(i+4) = r12
-            output_vector(i+5) = r13
-            output_vector(i+6) = r14
-            output_vector(i+7) = r15
-        end do
-
-        do i=n_rows_unroll+1, n_rows
-            r15 = output_vector(i)
-            
-            r01 = matrix(i,j)
-            
-            r01 = r01 * r00
-
-            r15 = r15 + r01
-
-            output_vector(i) = r15
-        end do
-    end do
-end subroutine multi_mat_vec_08x01_N_F_r8
 
 subroutine multi_mat_vec_08x02_N_F_r8(matrix, input_vector, output_vector, n_rows, n_cols)
     implicit none
@@ -1699,3 +2393,2959 @@ subroutine multi_mat_vec_04x04_T_F_r8(matrix_t, input_vector, output_vector, n_r
     end do
 end subroutine multi_mat_vec_04x04_T_F_r8
 
+
+
+
+! subroutine multi_mat_vec_02x01_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+!     implicit none
+!     real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+!     real(kind=8), intent(in)    :: input_vector(n_cols)
+!     real(kind=8), intent(inout) :: output_vector(n_rows)
+!     integer(kind=8), intent(in) :: n_rows, n_cols
+
+!     integer(kind=8) :: i, j, k, l, shift
+!     integer(kind=8) :: r_unroll, n_rows_unroll
+!     integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+!     real(kind=8)    :: r00, r01, r02, r03
+!     real(kind=8)    :: r04, r05, r06, r07
+!     real(kind=8)    :: r08, r09, r10, r11
+!     real(kind=8)    :: r12, r13, r14, r15
+
+!     real(kind=8)    :: buffer_O(cache_len_R)
+!     real(kind=8)    :: buffer_R(cache_len_R, cache_len_C)
+!     real(kind=8)    :: buffer_C(cache_len_C)
+
+!     output_vector = 0
+
+!     r_unroll = cache_len_R; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+!     c_unroll = cache_len_C; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+!     do j=1, n_cols_unroll, c_unroll
+!         do k=0, cache_len_C-1, 1
+!             buffer_C(k+1) = input_vector(j+k)
+!         end do
+
+!         do i=1, n_rows_unroll, r_unroll
+!             buffer_O(:) = 0d0
+!             do l=0, cache_len_R-1, 1
+!                 do k=0, cache_len_C-1, 1
+!                     buffer_O(k+1) = buffer_O(k+1) + matrix(i+l,j+k)*buffer_C(k+1)
+!                 end do
+!             end do
+
+!             do l=0, cache_len_R-1, 1
+!                 output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+!             end do
+!         end do
+
+!         do i=n_rows_unroll+1, n_rows, 1
+!             r15 = 0d0
+!             do k=0, cache_len_C-1, 1
+!                 r15 = r15 + matrix(i+l,j+k)*buffer_C(k+1)
+!             end do
+!             output_vector(i) = output_vector(i) + r15
+!         end do
+!     end do
+
+! end subroutine multi_mat_vec_02x01_N_F_B_r8
+
+subroutine multi_mat_vec_02x01_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(2)
+    real(kind=8)    :: buffer_R(2, 1)
+    real(kind=8)    :: buffer_C(1)
+
+    output_vector = 0
+
+    r_unroll = 2; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 1; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    do j=1, n_cols_unroll, c_unroll
+        r15 = input_vector(j)
+
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j) * r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+
+end subroutine multi_mat_vec_02x01_N_F_B_r8
+
+subroutine multi_mat_vec_02x02_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(2)
+    real(kind=8)    :: buffer_R(2, 2)
+    real(kind=8)    :: buffer_C(2)
+
+    output_vector = 0
+
+    r_unroll = 2; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 2; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 2-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                do k=0, 2-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 2-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_02x02_N_F_B_r8
+
+subroutine multi_mat_vec_02x04_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(2)
+    real(kind=8)    :: buffer_R(2, 4)
+    real(kind=8)    :: buffer_C(4)
+
+    output_vector = 0
+
+    r_unroll = 2; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 4; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 4-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                do k=0, 4-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 4-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_02x04_N_F_B_r8
+
+subroutine multi_mat_vec_02x08_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(2)
+    real(kind=8)    :: buffer_R(2, 8)
+    real(kind=8)    :: buffer_C(8)
+
+    output_vector = 0
+
+    r_unroll = 2; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 8; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 8-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                do k=0, 8-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 8-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_02x08_N_F_B_r8
+
+subroutine multi_mat_vec_02x16_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(2)
+    real(kind=8)    :: buffer_R(2, 16)
+    real(kind=8)    :: buffer_C(16)
+
+    output_vector = 0
+
+    r_unroll = 2; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 16; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 16-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                do k=0, 16-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 16-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_02x16_N_F_B_r8
+
+subroutine multi_mat_vec_02x32_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(2)
+    real(kind=8)    :: buffer_R(2, 32)
+    real(kind=8)    :: buffer_C(32)
+
+    output_vector = 0
+
+    r_unroll = 2; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 32; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 32-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                do k=0, 32-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 32-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_02x32_N_F_B_r8
+
+
+
+
+
+
+subroutine multi_mat_vec_04x01_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(4)
+    real(kind=8)    :: buffer_R(4, 1)
+    real(kind=8)    :: buffer_C(1)
+
+    output_vector = 0
+
+    r_unroll = 4; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 1; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    do j=1, n_cols_unroll, c_unroll
+        r15 = input_vector(j)
+
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j) * r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+
+end subroutine multi_mat_vec_04x01_N_F_B_r8
+
+subroutine multi_mat_vec_04x02_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(4)
+    real(kind=8)    :: buffer_R(4, 2)
+    real(kind=8)    :: buffer_C(2)
+
+    output_vector = 0
+
+    r_unroll = 4; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 2; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 2-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                do k=0, 2-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 2-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_04x02_N_F_B_r8
+
+subroutine multi_mat_vec_04x04_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(4)
+    real(kind=8)    :: buffer_R(4, 4)
+    real(kind=8)    :: buffer_C(4)
+
+    output_vector = 0
+
+    r_unroll = 4; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 4; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 4-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                do k=0, 4-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 4-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_04x04_N_F_B_r8
+
+subroutine multi_mat_vec_04x08_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(4)
+    real(kind=8)    :: buffer_R(4, 8)
+    real(kind=8)    :: buffer_C(8)
+
+    output_vector = 0
+
+    r_unroll = 4; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 8; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 8-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                do k=0, 8-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 8-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_04x08_N_F_B_r8
+
+subroutine multi_mat_vec_04x16_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(4)
+    real(kind=8)    :: buffer_R(4, 16)
+    real(kind=8)    :: buffer_C(16)
+
+    output_vector = 0
+
+    r_unroll = 4; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 16; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 16-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                do k=0, 16-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 16-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_04x16_N_F_B_r8
+
+subroutine multi_mat_vec_04x32_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(4)
+    real(kind=8)    :: buffer_R(4, 32)
+    real(kind=8)    :: buffer_C(32)
+
+    output_vector = 0
+
+    r_unroll = 4; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 32; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 32-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                do k=0, 32-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 32-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_04x32_N_F_B_r8
+
+
+
+
+
+subroutine multi_mat_vec_08x01_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(8)
+    real(kind=8)    :: buffer_R(8, 1)
+    real(kind=8)    :: buffer_C(1)
+
+    output_vector = 0
+
+    r_unroll = 8; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 1; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    do j=1, n_cols_unroll, c_unroll
+        r15 = input_vector(j)
+
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j) * r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+
+end subroutine multi_mat_vec_08x01_N_F_B_r8
+
+subroutine multi_mat_vec_08x02_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(8)
+    real(kind=8)    :: buffer_R(8, 2)
+    real(kind=8)    :: buffer_C(2)
+
+    output_vector = 0
+
+    r_unroll = 8; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 2; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 2-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                do k=0, 2-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 2-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_08x02_N_F_B_r8
+
+subroutine multi_mat_vec_08x04_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(8)
+    real(kind=8)    :: buffer_R(8, 4)
+    real(kind=8)    :: buffer_C(4)
+
+    output_vector = 0
+
+    r_unroll = 8; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 4; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 4-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                do k=0, 4-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 4-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_08x04_N_F_B_r8
+
+subroutine multi_mat_vec_08x08_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(8)
+    real(kind=8)    :: buffer_R(8, 8)
+    real(kind=8)    :: buffer_C(8)
+
+    output_vector = 0
+
+    r_unroll = 8; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 8; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 8-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                do k=0, 8-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 8-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_08x08_N_F_B_r8
+
+subroutine multi_mat_vec_08x16_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(8)
+    real(kind=8)    :: buffer_R(8, 16)
+    real(kind=8)    :: buffer_C(16)
+
+    output_vector = 0
+
+    r_unroll = 8; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 16; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 16-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                do k=0, 16-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 16-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_08x16_N_F_B_r8
+
+subroutine multi_mat_vec_08x32_N_F_B_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(8)
+    real(kind=8)    :: buffer_R(8, 32)
+    real(kind=8)    :: buffer_C(32)
+
+    output_vector = 0
+
+    r_unroll = 8; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 32; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 32-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                do k=0, 32-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 32-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_08x32_N_F_B_r8
+
+
+
+
+
+
+
+
+
+subroutine multi_mat_vec_02x01_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(2)
+    real(kind=8)    :: buffer_R(2, 1)
+    real(kind=8)    :: buffer_C(1)
+
+    output_vector = 0
+
+    r_unroll = 2; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 1; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        r15 = input_vector(j)
+
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j) * r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+end subroutine multi_mat_vec_02x01_N_F_B_P_r8
+
+subroutine multi_mat_vec_02x02_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(2)
+    real(kind=8)    :: buffer_R(2, 2)
+    real(kind=8)    :: buffer_C(2)
+
+    output_vector = 0
+
+    r_unroll = 2; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 2; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 2-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                do k=0, 2-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 2-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_02x02_N_F_B_P_r8
+
+subroutine multi_mat_vec_02x04_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(2)
+    real(kind=8)    :: buffer_R(2, 4)
+    real(kind=8)    :: buffer_C(4)
+
+    output_vector = 0
+
+    r_unroll = 2; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 4; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 4-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                do k=0, 4-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 4-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_02x04_N_F_B_P_r8
+
+subroutine multi_mat_vec_02x08_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(2)
+    real(kind=8)    :: buffer_R(2, 8)
+    real(kind=8)    :: buffer_C(8)
+
+    output_vector = 0
+
+    r_unroll = 2; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 8; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 8-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                do k=0, 8-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 8-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_02x08_N_F_B_P_r8
+
+subroutine multi_mat_vec_02x16_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(2)
+    real(kind=8)    :: buffer_R(2, 16)
+    real(kind=8)    :: buffer_C(16)
+
+    output_vector = 0
+
+    r_unroll = 2; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 16; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 16-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                do k=0, 16-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 16-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_02x16_N_F_B_P_r8
+
+subroutine multi_mat_vec_02x32_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(2)
+    real(kind=8)    :: buffer_R(2, 32)
+    real(kind=8)    :: buffer_C(32)
+
+    output_vector = 0
+
+    r_unroll = 2; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 32; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 32-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                do k=0, 32-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 32-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 2-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 2-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_02x32_N_F_B_P_r8
+
+
+
+
+
+
+subroutine multi_mat_vec_04x01_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(4)
+    real(kind=8)    :: buffer_R(4, 1)
+    real(kind=8)    :: buffer_C(1)
+
+    output_vector = 0
+
+    r_unroll = 4; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 1; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        r15 = input_vector(j)
+
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j) * r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+end subroutine multi_mat_vec_04x01_N_F_B_P_r8
+
+subroutine multi_mat_vec_04x02_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(4)
+    real(kind=8)    :: buffer_R(4, 2)
+    real(kind=8)    :: buffer_C(2)
+
+    output_vector = 0
+
+    r_unroll = 4; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 2; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 2-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                do k=0, 2-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 2-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_04x02_N_F_B_P_r8
+
+subroutine multi_mat_vec_04x04_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(4)
+    real(kind=8)    :: buffer_R(4, 4)
+    real(kind=8)    :: buffer_C(4)
+
+    output_vector = 0
+
+    r_unroll = 4; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 4; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 4-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                do k=0, 4-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 4-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_04x04_N_F_B_P_r8
+
+subroutine multi_mat_vec_04x08_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(4)
+    real(kind=8)    :: buffer_R(4, 8)
+    real(kind=8)    :: buffer_C(8)
+
+    output_vector = 0
+
+    r_unroll = 4; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 8; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 8-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                do k=0, 8-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 8-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_04x08_N_F_B_P_r8
+
+subroutine multi_mat_vec_04x16_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(4)
+    real(kind=8)    :: buffer_R(4, 16)
+    real(kind=8)    :: buffer_C(16)
+
+    output_vector = 0
+
+    r_unroll = 4; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 16; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 16-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                do k=0, 16-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 16-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_04x16_N_F_B_P_r8
+
+subroutine multi_mat_vec_04x32_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(4)
+    real(kind=8)    :: buffer_R(4, 32)
+    real(kind=8)    :: buffer_C(32)
+
+    output_vector = 0
+
+    r_unroll = 4; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 32; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 32-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                do k=0, 32-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 32-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 4-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 4-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_04x32_N_F_B_P_r8
+
+
+
+
+
+subroutine multi_mat_vec_08x01_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(8)
+    real(kind=8)    :: buffer_R(8, 1)
+    real(kind=8)    :: buffer_C(1)
+
+    output_vector = 0
+
+    r_unroll = 8; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 1; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        r15 = input_vector(j)
+
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j) * r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+end subroutine multi_mat_vec_08x01_N_F_B_P_r8
+
+subroutine multi_mat_vec_08x02_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(8)
+    real(kind=8)    :: buffer_R(8, 2)
+    real(kind=8)    :: buffer_C(2)
+
+    output_vector = 0
+
+    r_unroll = 8; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 2; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 2-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                do k=0, 2-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 2-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_08x02_N_F_B_P_r8
+
+subroutine multi_mat_vec_08x04_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(8)
+    real(kind=8)    :: buffer_R(8, 4)
+    real(kind=8)    :: buffer_C(4)
+
+    output_vector = 0
+
+    r_unroll = 8; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 4; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 4-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                do k=0, 4-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 4-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_08x04_N_F_B_P_r8
+
+subroutine multi_mat_vec_08x08_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(8)
+    real(kind=8)    :: buffer_R(8, 8)
+    real(kind=8)    :: buffer_C(8)
+
+    output_vector = 0
+
+    r_unroll = 8; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 8; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 8-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                do k=0, 8-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 8-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_08x08_N_F_B_P_r8
+
+subroutine multi_mat_vec_08x16_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(8)
+    real(kind=8)    :: buffer_R(8, 16)
+    real(kind=8)    :: buffer_C(16)
+
+    output_vector = 0
+
+    r_unroll = 8; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 16; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 16-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                do k=0, 16-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 16-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_08x16_N_F_B_P_r8
+
+subroutine multi_mat_vec_08x32_N_F_B_P_r8(matrix, input_vector, output_vector, n_rows, n_cols)
+    implicit none
+    real(kind=8), intent(in)    :: matrix(n_rows, n_cols)
+    real(kind=8), intent(in)    :: input_vector(n_cols)
+    real(kind=8), intent(inout) :: output_vector(n_rows)
+    integer(kind=8), intent(in) :: n_rows, n_cols
+
+    integer(kind=8) :: i, j, k, l, shift
+    integer(kind=8) :: r_unroll, n_rows_unroll
+    integer(kind=8) :: c_unroll, n_cols_unroll, n_columns_remain
+
+    real(kind=8)    :: r00, r01, r02, r03
+    real(kind=8)    :: r04, r05, r06, r07
+    real(kind=8)    :: r08, r09, r10, r11
+    real(kind=8)    :: r12, r13, r14, r15
+
+    real(kind=8)    :: buffer_O(8)
+    real(kind=8)    :: buffer_R(8, 32)
+    real(kind=8)    :: buffer_C(32)
+
+    output_vector = 0
+
+    r_unroll = 8; n_rows_unroll = n_rows - mod(n_rows, r_unroll)
+    c_unroll = 32; n_cols_unroll = n_cols - mod(n_cols, c_unroll)
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Main Part -----------------------------------------------------
+    !$omp parallel num_threads(4)
+    !$omp do reduction(+:output_vector) private(buffer_O, buffer_C, i, j, k, l, r14, r15)
+    do j=1, n_cols_unroll, c_unroll
+        do k=0, 32-1, 1
+            buffer_C(k+1) = input_vector(j+k)
+        end do
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                do k=0, 32-1, 1
+                    buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j+k)*buffer_C(k+1)
+                end do
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r15 = 0d0
+            do k=0, 32-1, 1
+                r15 = r15 + matrix(i,j+k)*buffer_C(k+1)
+            end do
+            output_vector(i) = output_vector(i) + r15
+        end do
+    end do
+    !$omp end do
+    !$omp end parallel
+
+
+    ! ----------------------------------------------------------------------
+    ! ----------------------------------------------------------------------
+    ! Column Fraction Part -----------------------------------------------------
+    do j=n_cols_unroll+1, n_cols, 1
+        r15 = input_vector(j)
+
+        ! Sample Main Part -----------------------------------------------------
+        do i=1, n_rows_unroll, r_unroll
+            buffer_O(:) = 0d0
+            do l=0, 8-1, 1
+                buffer_O(l+1) = buffer_O(l+1) + matrix(i+l,j)*r15
+            end do
+
+            do l=0, 8-1, 1
+                output_vector(i+l) = output_vector(i+l) + buffer_O(l+1)
+            end do
+        end do
+
+        ! Sample Fraction Part -----------------------------------------------------
+        do i=n_rows_unroll+1, n_rows, 1
+            r14 = matrix(i,j)*r15
+            output_vector(i) = output_vector(i) + r14
+        end do
+    end do
+end subroutine multi_mat_vec_08x32_N_F_B_P_r8

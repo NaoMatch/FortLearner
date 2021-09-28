@@ -37,7 +37,22 @@ module mod_math
         module procedure harmonic_number_approx_i8
     end interface harmonic_number_approx
 
+    interface relu
+        module procedure relu_r4
+        module procedure relu_r8
+    end interface relu
+
 contains
+
+    elemental subroutine relu_r4(x)
+        real(kind=4), intent(inout) :: x
+        x = maxval( (/0.0, x/) )
+    end subroutine relu_r4
+
+    elemental subroutine relu_r8(x)
+        real(kind=8), intent(inout) :: x
+        x = maxval( (/0d0, x/) )
+    end subroutine relu_r8
 
     function harmonic_number_approx_i8(n)
         real(kind=8) :: harmonic_number_approx_i8

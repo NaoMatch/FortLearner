@@ -8,6 +8,7 @@ module mod_kmeans
     use mod_timer
     use mod_hyperparameter
     use mod_linalg
+    use mod_math
     implicit none
     
     !> A type for kmeans. initial centroids are selected by 'kmeans++'.
@@ -24,11 +25,13 @@ module mod_kmeans
         logical(kind=4)              :: is_trained = f_            !< training results. already fitted or not
         real(kind=8), allocatable    :: cluster_centers(:,:)       !< training results. coordinates of cluster centroids. dimension=(#centroids, #columns)
     contains
-        procedure :: fit => fit_kmeans
-        procedure :: predict => predict_kmeans
-        procedure :: dump => dump_kmeans
-        procedure :: load => load_kmeans
+        procedure :: fit      => fit_kmeans
+        procedure :: fit_slow => fit_slow_kmeans
+        procedure :: predict  => predict_kmeans
+        procedure :: dump     => dump_kmeans
+        procedure :: load     => load_kmeans
         procedure :: select_initial_clusters
+        procedure :: select_initial_clusters_slow
     end type kmeans
 
     !> An interface to create new 'kmeans' object.
@@ -110,7 +113,7 @@ contains
 
     !> A subroutine to fit 'kmeans' object
     !! \param x data to be fitted
-    subroutine fit_kmeans(this, x)
+    subroutine fit_slow_kmeans(this, x)
         class(kmeans) :: this
         real(kind=8), intent(in) :: x(:,:)
 
@@ -120,11 +123,16 @@ contains
         real(kind=8), allocatable    :: diff_update(:,:)
         integer(kind=8), allocatable :: nearest_cluster_index(:), counter(:)
 
+        integer(kind=8) :: date_value1(8), date_value2(8)
+        print*, "Warning: 'kmeans%fit_slow(x)' is very slow for benchmark only, DO NOT USE!!!!"
+
+        call ifdealloc(this%cluster_centers)
+
         x_shape = shape(x)
         this % n_samples = x_shape(1)
         this % n_columns = x_shape(2)
 
-        call this%select_initial_clusters(x)
+        call this%select_initial_clusters_slow(x)
 
         allocate(distance_from_cluster_center(this%n_samples, this%hparam%n_clusters))
         allocate(old_cluster_centers(this%n_columns, this%hparam%n_clusters))
@@ -138,7 +146,7 @@ contains
             ! Calculate Distance From Cluster Centers, and Assign Cluster Index
             distance_from_cluster_center(:,:) = 0d0
             do c=1, this%hparam%n_clusters, 1
-                call calculate_distance_from_center(x, old_cluster_centers(:,c), distance_from_cluster_center(:,c), & 
+                call calculate_distance_from_center_slow(x, old_cluster_centers(:,c), distance_from_cluster_center(:,c), & 
                     this%n_samples, this%n_columns)
             end do
             nearest_cluster_index(:) = minloc(distance_from_cluster_center(:,:), dim=2)
@@ -161,7 +169,84 @@ contains
             if (maxval(sum(diff_update**2d0, dim=1)) .le. this%hparam%tolerance) exit
         end do
         this % is_trained = t_
-        this % cluster_centers(:,:) = old_cluster_centers(:,:)
+        this % cluster_centers(:,:) = new_cluster_centers(:,:)
+    end subroutine fit_slow_kmeans
+
+    subroutine fit_kmeans(this, x)
+        class(kmeans) :: this
+        real(kind=8), intent(in) :: x(:,:)
+
+        integer(kind=8)              :: x_shape(2), iter, c, i, idx, idx_old
+        real(kind=8), allocatable    :: distance_from_cluster_center(:,:)
+        real(kind=8), allocatable    :: new_cluster_centers(:,:), old_cluster_centers(:,:)
+        real(kind=8), allocatable    :: diff_update(:,:)
+        real(kind=8), allocatable    :: x_sq_sum_row(:)
+        integer(kind=8), allocatable :: nearest_cluster_index(:), nearest_cluster_index_old(:), counter(:)
+
+        call ifdealloc(this%cluster_centers)
+
+        x_shape = shape(x)
+        this % n_samples = x_shape(1)
+        this % n_columns = x_shape(2)
+
+        allocate(x_sq_sum_row(this%n_samples))
+        x_sq_sum_row(:) = 0d0
+        call matrix_sqsum_row(x, x_sq_sum_row, this % n_samples, this % n_columns)
+        call this%select_initial_clusters(x, x_sq_sum_row, this%n_samples, this%n_columns)
+
+        allocate(distance_from_cluster_center(this%n_samples, this%hparam%n_clusters))
+        allocate(old_cluster_centers(this%n_columns, this%hparam%n_clusters))
+        allocate(new_cluster_centers(this%n_columns, this%hparam%n_clusters))
+        allocate(diff_update(this%n_columns, this%hparam%n_clusters))
+        allocate(nearest_cluster_index(this%n_samples), nearest_cluster_index_old(this%n_samples))
+        allocate(counter(this%hparam%n_clusters))
+
+        nearest_cluster_index_old(:) = -1
+        old_cluster_centers(:,:) = this%cluster_centers(:,:)
+        do iter=1, this%hparam%max_iter, 1
+            ! Calculate Distance From Cluster Centers, and Assign Cluster Index
+            distance_from_cluster_center(:,:) = 0d0
+            do c=1, this%hparam%n_clusters, 1
+                call calculate_distance_from_center(x, x_sq_sum_row, old_cluster_centers(:,c), & 
+                    distance_from_cluster_center(:,c), this%n_samples, this%n_columns)
+            end do
+            nearest_cluster_index(:) = minloc(distance_from_cluster_center(:,:), dim=2)
+
+            ! Update Cluster Center Coordinates
+            if (iter .eq. 1_8) then
+                counter(:) = 0_8
+                new_cluster_centers(:,:) = 0d0
+                do i=1, this%n_samples, 1
+                    idx = nearest_cluster_index(i)
+                    new_cluster_centers(:,idx) = new_cluster_centers(:,idx) + x(i,:)
+                    counter(idx) = counter(idx) + 1_8
+                end do
+            else
+                do c=1, this%hparam%n_clusters, 1
+                    new_cluster_centers(:,c) = new_cluster_centers(:,c)*dble(counter(c))
+                end do
+                do i=1, this%n_samples, 1
+                    idx     = nearest_cluster_index(i)
+                    idx_old = nearest_cluster_index_old(i)
+                    if (idx .eq. idx_old) cycle
+                    new_cluster_centers(:,idx_old) = new_cluster_centers(:,idx_old) - x(i,:)
+                    new_cluster_centers(:,idx)     = new_cluster_centers(:,idx)     + x(i,:)
+                    counter(idx_old) = counter(idx_old) - 1_8
+                    counter(idx)     = counter(idx)     + 1_8
+                end do
+            end if
+            nearest_cluster_index_old = nearest_cluster_index
+            
+            do c=1, this%hparam%n_clusters, 1
+                new_cluster_centers(:,c) = new_cluster_centers(:,c)/dble(counter(c))
+                diff_update(:,c) = abs(new_cluster_centers(:,c)-old_cluster_centers(:,c))
+            end do
+            old_cluster_centers(:,:) = new_cluster_centers(:,:)
+
+            if (maxval(sum(diff_update**2d0, dim=1)) .le. this%hparam%tolerance) exit
+        end do
+        this % is_trained = t_
+        this % cluster_centers(:,:) = new_cluster_centers(:,:)
     end subroutine fit_kmeans
 
     !> A subroutine to predict cluster index of new data
@@ -173,7 +258,7 @@ contains
 
         type(error)               :: err
         integer(kind=8)           :: x_shape(2), n_samples, n_columns, c
-        real(kind=8), allocatable :: distance(:,:)
+        real(kind=8), allocatable :: distance(:,:), x_sq_sum_row(:)
 
         x_shape = shape(x)
         n_samples = x_shape(1)
@@ -185,16 +270,15 @@ contains
 
         allocate(distance(n_samples, this%hparam%n_clusters))
         do c=1, this%hparam%n_clusters, 1
-            call calculate_distance_from_center(x, this%cluster_centers(:,c), distance(:,c), & 
+            call calculate_distance_from_center_slow(x, this%cluster_centers(:,c), distance(:,c), & 
                 n_samples, n_columns)
         end do
-
         predict_kmeans = minloc(distance, dim=2)
     end function predict_kmeans
 
     !> A subroutine to select initial cluster centroids by 'kmeans++'
     !! \param x data to be fitted
-    subroutine select_initial_clusters(this, x)
+    subroutine select_initial_clusters_slow(this, x)
         class(kmeans) :: this
         real(kind=8), intent(in) :: x(:,:)
 
@@ -207,18 +291,63 @@ contains
         allocate(distance(this%n_samples), nearest_distance(this%n_samples), probas(this%n_samples))
         allocate(this%cluster_centers(this%n_columns, this%hparam%n_clusters))
         allocate(cluster_idx(0))
-        this%cluster_centers = -2d0
 
-        distance(:) = 1d0
-        nearest_distance(:) = 1d0
+        distance(:) = 1d0/dble(this%n_samples)
+        nearest_distance(:) = 1d0/dble(this%n_samples)
         do c=1, this%hparam%n_clusters, 1
             call get_nearest_distance(nearest_distance, distance, this%n_samples)
             probas(:) = nearest_distance(:)
             call vector2sum1(probas, this%n_samples)
+            idx = roulette_selection(probas, this%n_samples, f_)
+            cluster_idx = [cluster_idx, idx]
+            this%cluster_centers(:,c) = x(idx,:)
+            call calculate_distance_from_center_slow(x, this%cluster_centers(:,c), distance, this%n_samples, this%n_columns)
+        end do
+
+        allocate(dist_mat(this%hparam%n_clusters, this%hparam%n_clusters))
+        dist_mat = huge(0d0)
+        do c=1, this%hparam%n_clusters, 1
+            do k=c+1, this%hparam%n_clusters, 1
+                dist_mat(c,k) = sum( (this%cluster_centers(:,c)-this%cluster_centers(:,k))**2d0 )
+            end do
+        end do
+        ! print distance matirx for debug.
+        ! do c=1, this%hparam%n_clusters, 1
+        !     print*, dist_mat(c,:)
+        ! end do
+        if (minval(dist_mat) .eq. 0d0) stop "Number of unique rows is lower than 'n_clusters'."
+    end subroutine select_initial_clusters_slow
+
+    subroutine select_initial_clusters(this, x, x_sq_sum_row, n_samples, n_columns)
+        class(kmeans) :: this
+        real(kind=8), intent(in) :: x(n_samples, n_columns)
+        real(kind=8), intent(in) :: x_sq_sum_row(n_samples)
+        integer(kind=8), intent(in) :: n_samples, n_columns
+
+        integer(kind=8)              :: rand_idx, idx
+        real(kind=8), allocatable    :: distance(:), dist_mat(:,:)
+        real(kind=8), allocatable    :: nearest_distance(:), probas(:)
+        integer(kind=8), allocatable :: cluster_idx(:)
+        integer(kind=8)              :: c, k, uniq_num_idx
+        
+        allocate(distance(this%n_samples), nearest_distance(this%n_samples), probas(this%n_samples))
+        allocate(this%cluster_centers(this%n_columns, this%hparam%n_clusters))
+        allocate(cluster_idx(0))
+
+        distance(:) = 1d0/dble(this%n_samples)
+        nearest_distance(:) = 1d0/dble(this%n_samples)
+        do c=1, this%hparam%n_clusters, 1
+            call get_nearest_distance(nearest_distance, distance, this%n_samples)
+
+            probas(:) = nearest_distance(:)
+            call relu(probas)
+            call vector2sum1(probas, this%n_samples)
+
             cluster_idx = [cluster_idx, idx]
             idx = roulette_selection(probas, this%n_samples, f_)
             this%cluster_centers(:,c) = x(idx,:)
-            call calculate_distance_from_center(x, this%cluster_centers(:,c), distance, this%n_samples, this%n_columns)
+            call calculate_distance_from_center(x, x_sq_sum_row, this%cluster_centers(:,c), distance, &
+                    this%n_samples, this%n_columns)
         end do
 
         allocate(dist_mat(this%hparam%n_clusters, this%hparam%n_clusters))
@@ -241,7 +370,7 @@ contains
     !! \param distance distance from the centroid (#samples)
     !! \param n_samples number of samples
     !! \param n_columns number of columns
-    subroutine calculate_distance_from_center(x, center, distance, n_samples, n_columns)
+    subroutine calculate_distance_from_center_slow(x, center, distance, n_samples, n_columns)
         real(kind=8), intent(in)    :: x(n_samples, n_columns)
         real(kind=8), intent(in)    :: center(n_columns)
         real(kind=8), intent(inout) :: distance(n_samples)
@@ -255,6 +384,22 @@ contains
                 distance(i) = distance(i) + (x(i,j)-center(j))**2d0
             end do
         end do
+    end subroutine calculate_distance_from_center_slow
+
+    subroutine calculate_distance_from_center(x, x_sq_sum_row, center, distance, n_samples, n_columns)
+        real(kind=8), intent(in)    :: x(n_samples, n_columns)
+        real(kind=8), intent(in)    :: x_sq_sum_row(n_samples)
+        real(kind=8), intent(in)    :: center(n_columns)
+        real(kind=8), intent(inout) :: distance(n_samples)
+        integer(kind=8), intent(in) :: n_samples, n_columns
+
+        real(kind=8) :: center_sq_sum
+        integer(kind=8) :: i, j
+
+        center_sq_sum = sum(center**2d0)
+        distance(:) = 0d0
+        call multi_mat_vec_r8(x, center, distance, n_samples, n_columns, parallel=f_)
+        distance = -2d0*distance + x_sq_sum_row + center_sq_sum
     end subroutine calculate_distance_from_center
 
     !> A subroutine to get nearest distance. 

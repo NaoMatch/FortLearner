@@ -2,8 +2,7 @@ compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
 opt              := -O3
-option           := -cpp -D_x86_64 -fopenmp -fbounds-check
-option_blas      := -lopenblas
+option           := -cpp -D_x86_64 -fopenmp
 
 asm              := ./mod/inc_sum_up_vector_c.out \
 					./mod/inc_sum_up_matrix_c.out \
@@ -99,15 +98,12 @@ build:
 	# $(compiler_clang)   $(mod) $(opt) $(option) -c    ../../math/include/stats/sum_up_gt/inc_get_count_and_sum_up_gt_vector2vector.c            -o ./mod/inc_get_count_and_sum_up_gt_vector2vector.out
 	# $(compiler_clang)   $(mod) $(opt) $(option) -c    ../../math/include/stats/sum_up_gt/inc_get_matrix_count_and_sum_up_gt_parallel.c          -o ./mod/inc_get_matrix_count_and_sum_up_gt_parallel.out
 	# $(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/include/linalg_multi_mat_vec/inc_multi_mat_vec.c                             -o ./mod/inc_multi_mat_vec.out
-	# $(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/include/linalg_matrix_sqsum_row/inc_matrix_sqsum_row.c                             -o ./mod/inc_matrix_sqsum_row.out
+	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/include/linalg_matrix_sqsum_row/inc_matrix_sqsum_row.c                             -o ./mod/inc_matrix_sqsum_row.out
 
 main:
 	make build
-	$(compiler_fortran) $(mod) \
-	-w -O3 -unroll \
-	$(asm) $(option) $(common) \
-	\
-	./main_mat_x_vec.f90 \
-	-o main_mat_x_vec.out \
-	$(option_blas)
-	./main_mat_x_vec.out
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main.f90 -o main.out
+	./main.out

@@ -1,5 +1,6 @@
 !> A module for Linear Algebra.
 module mod_linalg
+    !$ use omp_lib
     use iso_c_binding
     use mod_common
     use mod_const
@@ -50,6 +51,12 @@ module mod_linalg
         module procedure mattxmat_i4
         module procedure mattxmat_i8
     end interface mattxmat
+
+    !> An interface to calculate square sum of matrix by row. 
+    interface matrix_sqsum_row
+        module procedure matrix_sqsum_row_r8
+    end interface matrix_sqsum_row
+    include "./include/linalg_matrix_sqsum_row/inc_matrix_sqsum_row_interface_to_C.f90"
 
     !> An interface to call multi_mat_vec_r4, multi_mat_vec_r8, multi_mat_vec_i4, multi_mat_vec_i8
     interface multi_mat_vec
@@ -260,6 +267,30 @@ contains
     end subroutine mattxmat_r4
     include "./include/linalg_mattxmat/inc_linalg_mattxmat.f90"    
 
+    !> A subroutine to calculate square sum of matrix by row.
+    !! \return square sum of matrix by row
+    !! \param matrix input matrix
+    !! \param matrix_sqsum_vals calculated square sum values of matrix by row
+    !! \param n_samples number of samples
+    !! \param n_columns number of columns
+    subroutine matrix_sqsum_row_r8(matrix, matrix_sqsum_vals, n_samples, n_columns, parallel)
+        implicit none
+        real(kind=8), intent(in)    :: matrix(n_samples, n_columns)
+        real(kind=8), intent(inout) :: matrix_sqsum_vals(n_samples)
+        integer(kind=8), intent(in) :: n_samples, n_columns
+        logical(kind=4), optional   :: parallel
+        logical(kind=4) :: parallel_opt
+        parallel_opt = f_
+        if (present(parallel)) parallel_opt = parallel
+        if (parallel_opt) then
+            call matrix_sqsum_row_01x16_F_P_r8(matrix, matrix_sqsum_vals, n_samples, n_columns)
+        else
+            call matrix_sqsum_row_01x16_F_r8(matrix, matrix_sqsum_vals, n_samples, n_columns)
+        end if
+    end subroutine matrix_sqsum_row_r8
+    include "./include/linalg_matrix_sqsum_row/inc_matrix_sqsum_row.f90"
+
+
 
     !> A subroutine to multiply matrix(M,K) and vector(K).
     !> \return returns multiply matrix(M,K) and vector(K).
@@ -268,15 +299,17 @@ contains
     !> \param output_vector output vector
     !> \param n_rows number of rows in the matrix and size of 'output_vector'
     !> \param n_cols number of columns in the matrix and size of 'input_vector'
-    subroutine multi_mat_vec_r4(matrix, input_vector, output_vector, n_rows, n_cols)
+    subroutine multi_mat_vec_r4(matrix, input_vector, output_vector, n_rows, n_cols, parallel)
         implicit none
         real(kind=4), intent(in)      :: matrix(n_rows, n_cols)
         real(kind=4), intent(in)      :: input_vector(n_cols)
         real(kind=4), intent(inout)   :: output_vector(n_rows)
         integer(kind=4), intent(in) :: n_rows, n_cols
+        logical(kind=4), optional :: parallel
 
         integer(kind=4) :: i, j, k, n_cols_unroll
         real(kind=4)      :: tmp_out, tmp_input, buffer_input(cache_size_multi_mat_vec)
+        logical(kind=4)   :: parallel_opt=f_
         output_vector = 0
 
         include "./include/linalg_multi_mat_vec/inc_multi_mat_vec_detail.f90"
