@@ -62,12 +62,13 @@ program main
     x_train = mm_scaler%transform(x_train)
 
     print*, "Start"
-    n_iter = 5
+    n_iter = 40
     min_n_cluster = 2
-    max_n_cluster = 5
+    max_n_cluster = 40
+    open(100, file="check_runnning_time.csv")
 
     allocate(times(n_iter))
-    do n_cluster=min_n_cluster, max_n_cluster, 1
+    do n_cluster=2, 3, 1
         km = kmeans(n_clusters=n_cluster)
         print*, ""
         print*, ""
@@ -89,7 +90,8 @@ program main
             call date_and_time(values=date_value2)
             times(iter) = time_diff(date_value1, date_value2)
         end do
-        print*, n_cluster, mean(times, n_iter), sqrt(variance(times, n_iter))
+        print*, "old", n_cluster, mean(times, n_iter), sqrt(variance(times, n_iter))
+        write(100, *) "old", n_cluster, mean(times, n_iter), sqrt(variance(times, n_iter))
 
         tmp_r = km%cluster_centers(1,:)
         tmp_i = tmp_r
@@ -113,7 +115,8 @@ program main
             call date_and_time(values=date_value2)
             times(iter) = time_diff(date_value1, date_value2)
         end do
-        print*, n_cluster, mean(times, n_iter), sqrt(variance(times, n_iter))
+        print*, "new", n_cluster, mean(times, n_iter), sqrt(variance(times, n_iter))
+        write(100, *) "new", n_cluster, mean(times, n_iter), sqrt(variance(times, n_iter))
 
         tmp_r = km%cluster_centers(1,:)
         tmp_i = tmp_r
@@ -126,4 +129,68 @@ program main
             print*, c, real(km%cluster_centers(1:10,c))
         end do
     end do
+    stop
+
+    do n_cluster=10, 40, 5
+        km = kmeans(n_clusters=n_cluster)
+        print*, ""
+        print*, ""
+        print*, ""
+        print*, ""
+        print*, ""
+        print*, ""
+        print*, ""
+        print*, ""
+        print*, ""
+        print*, ""
+        print*, '============================================================='
+        print*, '============================================================='
+        print*, '============================================================='
+        print*, "OLD"
+        do iter=1, n_iter, 1
+            call date_and_time(values=date_value1)
+            call km%fit_slow(x_train)
+            call date_and_time(values=date_value2)
+            times(iter) = time_diff(date_value1, date_value2)
+        end do
+        print*, "old", n_cluster, mean(times, n_iter), sqrt(variance(times, n_iter))
+        write(100, *) "old", n_cluster, mean(times, n_iter), sqrt(variance(times, n_iter))
+
+        tmp_r = km%cluster_centers(1,:)
+        tmp_i = tmp_r
+        do c=1, n_cluster, 1
+            tmp_i(c) = c
+        end do
+        call quick_argsort(tmp_r, tmp_i, n_cluster)
+        km%cluster_centers(:,:) = km%cluster_centers(:,tmp_i)
+        do c=1, n_cluster, 1
+            print*, c, real(km%cluster_centers(1:10,c))
+        end do
+
+        km = kmeans(n_clusters=n_cluster)
+        print*, '============================================================='
+        print*, '============================================================='
+        print*, '============================================================='
+        print*, "Single Threading"
+        do iter=1, n_iter, 1
+            call date_and_time(values=date_value1)
+            call km%fit(x_train)
+            call date_and_time(values=date_value2)
+            times(iter) = time_diff(date_value1, date_value2)
+        end do
+        print*, "new", n_cluster, mean(times, n_iter), sqrt(variance(times, n_iter))
+        write(100, *) "new", n_cluster, mean(times, n_iter), sqrt(variance(times, n_iter))
+
+        tmp_r = km%cluster_centers(1,:)
+        tmp_i = tmp_r
+        do c=1, n_cluster, 1
+            tmp_i(c) = c
+        end do
+        call quick_argsort(tmp_r, tmp_i, n_cluster)
+        km%cluster_centers(:,:) = km%cluster_centers(:,tmp_i)
+        do c=1, n_cluster, 1
+            print*, c, real(km%cluster_centers(1:10,c))
+        end do
+    end do
+    close(100)
 end program main

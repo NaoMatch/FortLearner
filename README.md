@@ -6,7 +6,7 @@ cd test_script
 make test  
 
 # WIP:
-refactoring  
+speed up 'kmeans++'  
 
 # Update
 2021/09/24: isolation_tree and isolation_forest  
@@ -79,6 +79,23 @@ LW = lawu_regressor(FL) , There is no counterpart to scikit-learn.
 | sklearn.datasets.make_regression: (1000000, 100) |11.6            |5.9278   |2.204     |115      | 59.561   |9.91|24.866  |2.399   |   7.036   |
 | sklearn.datasets.make_regression: (1000000, 200) |28              |17.0186  |4.44      |         | 120.486  |26.6|50.76   |5.852   |   8.149   |
 | sklearn.datasets.make_regression: (1000000, 400) |55.4            |26.56    |6.163     |         | 236.898  |47.8|139.545 |14.76   |   21.268  |
+
+## kmeans(second&plusmn;standard deviation)
+KM = Kmeans()  
+KM_naive: Naive Implementation in Fortlearner  
+KM_fast: Fast  Implementation in Fortlearner(Simplified Calculation of Euclid Distance + Fast Matrix-Vector Multiplication)  
+| Data: shape(#Row, #Col)         | #Cluster | SK: KM | FL: KM_naive | FL: KM_fast |
+| ------------------------------- | -------- | ------ | ------------ | ----------- |
+| YearPredictionMSD: (412206, 90) | 2        |        |1.202(&plusmn;0.247)         |0.628(&plusmn;0.105)              |
+| YearPredictionMSD: (412206, 90) | 3        |        |3.260(&plusmn;1.865)         |1.880(&plusmn;0.61)              |
+| YearPredictionMSD: (412206, 90) | 4        |        |2.867(&plusmn;0.599) |1.725(&plusmn;0.649) |
+| YearPredictionMSD: (412206, 90) | 5        |        |6.573(&plusmn;3.428) |3.08(&plusmn;1.523) |
+| YearPredictionMSD: (412206, 90) | 10       |        |20.986(&plusmn;7.226) |11.457(&plusmn;3.693) |
+| YearPredictionMSD: (412206, 90) | 15       |        |38.954(&plusmn;10.945) |21.025(&plusmn;7.5) |
+| YearPredictionMSD: (412206, 90) | 20       |        |55.788(&plusmn;19.302) |34.358(&plusmn;12.222) |
+| YearPredictionMSD: (412206, 90) | 25       |        |98.84(&plusmn;34.977) |55.001(&plusmn;23.099) |
+| YearPredictionMSD: (412206, 90) | 20       |        |157.163(&plusmn;52.773) |82.906(&plusmn;25.715) |
+| YearPredictionMSD: (412206, 90) | 35       |        |184.827(&plusmn;58.211) |99.948(&plusmn;31.88) |
 
 
 # Implemented
