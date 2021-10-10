@@ -66,47 +66,80 @@ program main
     ! print*, maxval(x_train, dim=1)
 
 
-    n_cluster=2
-    n_iter = 10
+    n_cluster=8
+    n_iter = 100
     allocate(tmp_i(n_cluster))
     allocate(tmp_r(n_cluster))
     
-    km = kmeans(n_clusters=n_cluster)
-    call date_and_time(values=date_value1)
-    call km%fit_slow(x_train)
-    call date_and_time(values=date_value2)
-    print*, time_diff(date_value1, date_value2)
-    score = km%score(x_train)
-    print*, "SCORE: ", score    
-    print*, '============================================================='
-        tmp_r = km%cluster_centers(1,:)
-        do c=1, n_cluster, 1
-            tmp_i(c) = c
-        end do
-        call quick_argsort(tmp_r, tmp_i, n_cluster)
-        km%cluster_centers(:,:) = km%cluster_centers(:,tmp_i)
-        do c=1, n_cluster, 1
-            print*, c, real(km%cluster_centers(1:10,c))
-        end do
 
     do iter=1, n_iter, 1
+        ! km = kmeans(n_clusters=n_cluster)
+        ! call date_and_time(values=date_value1)
+        ! call km%fit(x_train)
+        ! call date_and_time(values=date_value2)
+        ! score = km%score(x_train)
+        ! print*, "Lloyd:           ", time_diff(date_value1, date_value2), score
+        ! print*, '============================================================='
+        !     tmp_r = km%cluster_centers(1,:)
+        !     do c=1, n_cluster, 1
+        !         tmp_i(c) = c
+        !     end do
+        !     call quick_argsort(tmp_r, tmp_i, n_cluster)
+        !     km%cluster_centers(:,:) = km%cluster_centers(:,tmp_i)
+        !     do c=1, n_cluster, 1
+        !         print*, c, real(km%cluster_centers(1:10,c))
+        !     end do
+
+        km = kmeans(n_clusters=n_cluster)
+        call date_and_time(values=date_value1)
+        call km%fit_slow(x_train)
+        call date_and_time(values=date_value2)
+        score = km%score(x_train)
+        print*, "Lloyd_slow:      ", time_diff(date_value1, date_value2), score
+        ! print*, '============================================================='
+        !     tmp_r = km%cluster_centers(1,:)
+        !     do c=1, n_cluster, 1
+        !         tmp_i(c) = c
+        !     end do
+        !     call quick_argsort(tmp_r, tmp_i, n_cluster)
+        !     km%cluster_centers(:,:) = km%cluster_centers(:,tmp_i)
+        !     do c=1, n_cluster, 1
+        !         print*, c, real(km%cluster_centers(1:10,c))
+        !     end do
+
         km = kmeans(n_clusters=n_cluster)
         call date_and_time(values=date_value1)
         call km%fit_faster(x_train)
         call date_and_time(values=date_value2)
         score = km%score(x_train)
-        print*, "SCORE: ", score
-        print*, "Elkan's Method: ", time_diff(date_value1, date_value2)
-        print*, '============================================================='
-            tmp_r = km%cluster_centers(1,:)
-            do c=1, n_cluster, 1
-                tmp_i(c) = c
-            end do
-            call quick_argsort(tmp_r, tmp_i, n_cluster)
-            km%cluster_centers(:,:) = km%cluster_centers(:,tmp_i)
-            do c=1, n_cluster, 1
-                print*, iter, c, real(km%cluster_centers(1:10,c))
-            end do
+        print*, "Elkan's Method : ", time_diff(date_value1, date_value2), score
+        ! print*, '============================================================='
+        !     tmp_r = km%cluster_centers(1,:)
+        !     do c=1, n_cluster, 1
+        !         tmp_i(c) = c
+        !     end do
+        !     call quick_argsort(tmp_r, tmp_i, n_cluster)
+        !     km%cluster_centers(:,:) = km%cluster_centers(:,tmp_i)
+        !     do c=1, n_cluster, 1
+        !         print*, iter, c, real(km%cluster_centers(1:10,c))
+        !     end do
+
+        km = kmeans(n_clusters=n_cluster)
+        call date_and_time(values=date_value1)
+        call km%fit_faster2(x_train)
+        call date_and_time(values=date_value2)
+        score = km%score(x_train)
+        print*, "Elkan's Method2: ", time_diff(date_value1, date_value2), score
+        ! print*, '============================================================='
+        !     tmp_r = km%cluster_centers(1,:)
+        !     do c=1, n_cluster, 1
+        !         tmp_i(c) = c
+        !     end do
+        !     call quick_argsort(tmp_r, tmp_i, n_cluster)
+        !     km%cluster_centers(:,:) = km%cluster_centers(:,tmp_i)
+        !     do c=1, n_cluster, 1
+        !         print*, iter, c, real(km%cluster_centers(1:10,c))
+        !     end do
     end do
     stop
 
