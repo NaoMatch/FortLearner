@@ -26,11 +26,12 @@ program main
     real(kind=8), ALLOCATABLE    :: y_train_pred_et(:,:), y_test_pred_et(:,:)
     real(kind=8), ALLOCATABLE    :: y_train_pred_cl(:,:), y_test_pred_cl(:,:)
     real(kind=8), ALLOCATABLE    :: y_train_pred_lw(:,:), y_test_pred_lw(:,:)
-    integer(kind=8), ALLOCATABLE :: feature_indices(:), feature_indices_scanning_range(:)
+    integer(kind=8), ALLOCATABLE :: cluster_indices(:)
     real(kind=8), ALLOCATABLE    :: tmp_r(:)
     integer(kind=8), ALLOCATABLE :: tmp_i(:)
 
     integer(kind=8) :: n_cluster, min_n_cluster, max_n_cluster, c
+    real(kind=8)    :: score
     type(minmax_scaler) :: mm_scaler
     type(kmeans) :: km, km2
 
@@ -39,10 +40,10 @@ program main
     n_samples_train = 412206
     n_columns_train = 90
 
-    ! file_name_x_train_csv = "../../../uci_data/97_make_regression/make_regression_x_0001000000x00050.csv"
-    ! file_name_x_train_bin = "../../../uci_data/97_make_regression/make_regression_x_0001000000x00050.bin"
-    ! n_samples_train = 1000000
-    ! n_columns_train = 50
+    ! file_name_x_train_csv = "../../../uci_data/97_make_regression/make_regression_x_0000010000x00400.csv"
+    ! file_name_x_train_bin = "../../../uci_data/97_make_regression/make_regression_x_0000010000x00400.bin"
+    ! n_samples_train = 100000
+    ! n_columns_train = 400
     ! skip_header = f_
     ! dtype_in  = "r"
     ! dtype_out = "r"
@@ -60,6 +61,70 @@ program main
     mm_scaler = minmax_scaler(min_val=-1d0, max_val=1d0)
     call mm_scaler%fit(x_train)
     x_train = mm_scaler%transform(x_train)
+
+    ! print*, minval(x_train, dim=1)
+    ! print*, maxval(x_train, dim=1)
+
+
+    n_cluster=4
+    n_iter = 100
+    allocate(tmp_i(n_cluster))
+    allocate(tmp_r(n_cluster))
+    
+
+    do iter=1, n_iter, 1
+        km = kmeans(n_clusters=n_cluster)
+        call date_and_time(values=date_value1)
+        call km%fit(x_train)
+        call date_and_time(values=date_value2)
+        score = km%score(x_train)
+        print*, "Lloyd:           ", time_diff(date_value1, date_value2), score
+
+        km = kmeans(n_clusters=n_cluster)
+        call date_and_time(values=date_value1)
+        call km%fit_slow(x_train)
+        call date_and_time(values=date_value2)
+        score = km%score(x_train)
+        print*, "Lloyd_slow:      ", time_diff(date_value1, date_value2), score
+
+        km = kmeans(n_clusters=n_cluster)
+        call date_and_time(values=date_value1)
+        call km%fit_elkan(x_train)
+        call date_and_time(values=date_value2)
+        score = km%score(x_train)
+        print*, "Elkan's Method2: ", time_diff(date_value1, date_value2), score
+        ! print*, '============================================================='
+        !     tmp_r = km%cluster_centers(1,:)
+        !     do c=1, n_cluster, 1
+        !         tmp_i(c) = c
+        !     end do
+        !     call quick_argsort(tmp_r, tmp_i, n_cluster)
+        !     km%cluster_centers(:,:) = km%cluster_centers(:,tmp_i)
+        !     do c=1, n_cluster, 1
+        !         print*, iter, c, real(km%cluster_centers(1:10,c))
+        !     end do
+    end do
+    stop
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     print*, "Start"
     n_iter = 40
