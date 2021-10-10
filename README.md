@@ -6,9 +6,10 @@ cd test_script
 make test  
 
 # WIP:
-speed up 'kmeans++' more (using triangle inequality https://www.aaai.org/Papers/ICML/2003/ICML03-022.pdf)  
+add benchmark 'isolation_forest', vs sklearn.   
 
 # Update
+2021/10/10: Implemented elkan's method to speed up "kmeans", but it didn't make sense.  
 2021/09/28: speed up 'kmeans++'(see benchmark)  
 2021/09/24: isolation_tree and isolation_forest  
 2021/09/21: kmeans++  
