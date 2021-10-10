@@ -25,8 +25,7 @@ module mod_kmeans
         logical(kind=4)              :: is_trained = f_            !< training results. already fitted or not
         real(kind=8), allocatable    :: cluster_centers(:,:)       !< training results. coordinates of cluster centroids. dimension=(#centroids, #columns)
     contains
-        procedure :: fit_faster  => fit_faster_kmeans
-        procedure :: fit_faster2 => fit_faster2_kmeans
+        procedure :: fit_elkan => fit_elkan_kmeans
         procedure :: fit      => fit_kmeans
         procedure :: fit_slow => fit_slow_kmeans
         procedure :: predict  => predict_kmeans
@@ -131,7 +130,7 @@ contains
         close(10)
     end subroutine load_kmeans
 
-    !> A subroutine to fit 'kmeans' object
+    !> A subroutine to fit 'kmeans' object by very naive method.
     !! \param x data to be fitted
     subroutine fit_slow_kmeans(this, x)
         class(kmeans) :: this
@@ -197,190 +196,91 @@ contains
         this % cluster_centers(:,:) = new_cluster_centers(:,:)
     end subroutine fit_slow_kmeans
 
-    subroutine fit_faster_kmeans(this, x)
-
-        integer(kind=8) :: date_value1(8), date_value2(8)
-        integer(kind=8) :: time_calculate_distance_from_center_slow
-        integer(kind=8) :: time_update_cluster_centers
-        integer(kind=8) :: time_update_lower_upper_bounds
-        integer(kind=8) :: time_calculate_inter_cluster_distance
-        integer(kind=8) :: time_update_cluster_indices
-
+    !> A subroutine to fit 'kmeans' object by optimized(heuristic) method.
+    !! \param x data to be fitted
+    subroutine fit_kmeans(this, x)
         class(kmeans) :: this
         real(kind=8), intent(in) :: x(:,:)
-        integer(kind=8)              :: x_shape(2), iter, c, k, i, idx, idx_old, c_idx, counter, current_c_idx, new_c_idx
-        real(kind=8)                 :: dist, min_dist, upper_dist, lower_dist
-        ! Triangle Inequality
-        real(kind=8), allocatable    :: lower_bounds(:,:)         ! (n_samples, n_clusters)
-        real(kind=8), allocatable    :: upper_bounds(:)           ! (n_samples)
-        real(kind=8), allocatable    :: nearest_inter_cluster_distance(:) ! (n_clusters)
 
-        real(kind=8), allocatable    :: x_sq_sum_row(:)                   ! (n_samples)
-        real(kind=8), allocatable    :: distance_from_cluster_center(:,:) ! (n_samples, n_clusters)
-        real(kind=8), allocatable    :: old_cluster_centers(:,:)          ! (n_columns, n_clusters)
-        real(kind=8), allocatable    :: new_cluster_centers(:,:)          ! (n_columns, n_clusters)
-        real(kind=8), allocatable    :: dsp_cluster_centers(:)            ! (n_clusters)
-        integer(kind=8), allocatable :: old_nearest_cluster_indices(:)          ! (n_samples)
-        integer(kind=8), allocatable :: new_nearest_cluster_indices(:)          ! (n_samples)
-        logical(kind=4), allocatable :: skip_calculation(:)               ! (n_samples)
-        logical(kind=4), allocatable :: r(:)               ! (n_samples)
-        real(kind=8), allocatable    :: inter_cluster_distance(:,:)          ! (n_columns, n_clusters)
+        integer(kind=8)              :: x_shape(2), iter, c, i, idx, idx_old
+        real(kind=8), allocatable    :: distance_from_cluster_center(:,:)
+        real(kind=8), allocatable    :: new_cluster_centers(:,:), old_cluster_centers(:,:)
+        real(kind=8), allocatable    :: diff_update(:,:)
+        real(kind=8), allocatable    :: x_sq_sum_row(:)
+        integer(kind=8), allocatable :: nearest_cluster_indices(:), nearest_cluster_indices_old(:), counter(:)
 
-        time_calculate_distance_from_center_slow = 0_8
-        time_update_cluster_centers = 0_8
-        time_update_lower_upper_bounds = 0_8
-        time_calculate_inter_cluster_distance = 0_8
-        time_update_cluster_indices = 0_8
-
-        ! deallocate cluster center array
         call ifdealloc(this%cluster_centers)
 
-        ! get data shapes
         x_shape = shape(x)
         this % n_samples = x_shape(1)
         this % n_columns = x_shape(2)
 
-        ! calculate square sum of x by row
         allocate(x_sq_sum_row(this%n_samples))
         x_sq_sum_row(:) = 0d0
-        call matrix_sqsum_row(x, x_sq_sum_row, this%n_samples, this%n_columns)
-
-        ! select initial centers
+        call matrix_sqsum_row(x, x_sq_sum_row, this % n_samples, this % n_columns)
         call this%select_initial_clusters(x, x_sq_sum_row, this%n_samples, this%n_columns)
 
-        ! calculate distance matrix
-        allocate(inter_cluster_distance(this%hparam%n_clusters, this%hparam%n_clusters))
-        allocate(nearest_inter_cluster_distance(this%hparam%n_clusters))
-        allocate(skip_calculation(this%n_samples))
-        allocate(r(this%n_samples))
         allocate(distance_from_cluster_center(this%n_samples, this%hparam%n_clusters))
-        allocate(old_nearest_cluster_indices(this%n_samples))
-        allocate(new_nearest_cluster_indices(this%n_samples))
-        allocate(lower_bounds(this%n_samples, this%hparam%n_clusters))
-        allocate(upper_bounds(this%n_samples))
         allocate(old_cluster_centers(this%n_columns, this%hparam%n_clusters))
         allocate(new_cluster_centers(this%n_columns, this%hparam%n_clusters))
-        allocate(dsp_cluster_centers(this%hparam%n_clusters))
+        allocate(diff_update(this%n_columns, this%hparam%n_clusters))
+        allocate(nearest_cluster_indices(this%n_samples), nearest_cluster_indices_old(this%n_samples))
+        allocate(counter(this%hparam%n_clusters))
+
+        nearest_cluster_indices_old(:) = -1
         old_cluster_centers(:,:) = this%cluster_centers(:,:)
-
-        ! Calculate Distance from points and clusters
-        ! print*, '============================================================='
-        ! print*, '============================================================='
-        ! print*, '============================================================='
-        ! print*, '============================================================='
-        call date_and_time(values=date_value1)
-        do c=1, this%hparam%n_clusters, 1
-            call calculate_distance_from_center_slow(x, old_cluster_centers(:,c), & 
-                distance_from_cluster_center(:,c), this%n_samples, this%n_columns)
-        end do
-        call date_and_time(values=date_value2)
-        time_calculate_distance_from_center_slow = time_calculate_distance_from_center_slow + time_diff(date_value1, date_value2)
-        old_nearest_cluster_indices(:) = minloc(sqrt(distance_from_cluster_center(:,:)), dim=2)
-        r(:) = f_
-
-        ! Update Centroids
-        call date_and_time(values=date_value1)
-        call update_cluster_centers(new_cluster_centers, x, old_nearest_cluster_indices, &
-                this%n_samples, this%hparam%n_clusters, this%n_columns)
-        dsp_cluster_centers(:) = sqrt(sum((new_cluster_centers(:,:) - old_cluster_centers(:,:))**2d0, dim=1))
-        old_cluster_centers(:,:) = new_cluster_centers(:,:)
-        call date_and_time(values=date_value2)
-        time_update_cluster_centers = time_update_cluster_centers + time_diff(date_value1, date_value2)
-
-        call date_and_time(values=date_value1)
-        do c_idx=1, this%hparam%n_clusters, 1
-            call calculate_distance_from_center_slow(x, old_cluster_centers(:,c_idx), & 
-                distance_from_cluster_center(:,c_idx), this%n_samples, this%n_columns)
-        end do
-        call date_and_time(values=date_value2)
-        time_calculate_distance_from_center_slow = time_calculate_distance_from_center_slow + time_diff(date_value1, date_value2)
-        lower_bounds(:,:)          = sqrt(distance_from_cluster_center(:,:))
-        upper_bounds(:)            = minval(sqrt(distance_from_cluster_center(:,:)), dim=2)
-        old_nearest_cluster_indices(:) = minloc(distance_from_cluster_center(:,:), dim=2)
-
         do iter=1, this%hparam%max_iter, 1
-
-            ! Update Lower&Upper Bound
-            call date_and_time(values=date_value1)
-            do i=1, this%n_samples, 1
-                do c_idx=1, this%hparam%n_clusters, 1
-                    lower_bounds(i,c_idx) = maxval((/lower_bounds(i,c_idx) - dsp_cluster_centers(c_idx), 0d0/))
-                end do
-                c_idx = old_nearest_cluster_indices(i)
-                upper_bounds(i)       =          upper_bounds(i)       + dsp_cluster_centers(c_idx)
+            ! Calculate Distance From Cluster Centers, and Assign Cluster Index
+            distance_from_cluster_center(:,:) = 0d0
+            do c=1, this%hparam%n_clusters, 1
+                call calculate_distance_from_center(x, x_sq_sum_row, old_cluster_centers(:,c), & 
+                    distance_from_cluster_center(:,c), this%n_samples, this%n_columns)
+                ! call calculate_distance_from_center_slow(x, old_cluster_centers(:,c), & 
+                !     distance_from_cluster_center(:,c), this%n_samples, this%n_columns)
             end do
-            call date_and_time(values=date_value2)
-            time_update_lower_upper_bounds = time_update_lower_upper_bounds + time_diff(date_value1, date_value2)
+            nearest_cluster_indices(:) = minloc(distance_from_cluster_center(:,:), dim=2)
 
-            call date_and_time(values=date_value1)
-            call calculate_inter_cluster_distance(inter_cluster_distance, old_cluster_centers, &
-                    this%hparam%n_clusters, this%n_columns)
-            call date_and_time(values=date_value2)
-            time_calculate_inter_cluster_distance = time_calculate_inter_cluster_distance + time_diff(date_value1, date_value2)
-            inter_cluster_distance(:,:)       = sqrt(inter_cluster_distance(:,:))
-            nearest_inter_cluster_distance(:) = minval(inter_cluster_distance(:,:), dim=1)
-
-            call date_and_time(values=date_value1)
-            r(:) = t_
-            new_nearest_cluster_indices(:) = old_nearest_cluster_indices(:)
-            do i=1, this%n_samples, 1
-                current_c_idx = new_nearest_cluster_indices(i)
-                if (upper_bounds(i) .le. 0.5d0*nearest_inter_cluster_distance(current_c_idx)) cycle
-
-                do c_idx=1, this%hparam%n_clusters, 1
-                    if (c_idx .eq. current_c_idx) cycle
-                    if (r(i)) then
-                        min_dist = sqrt( sum( (x(i,:)-old_cluster_centers(:,current_c_idx))**2d0 ))
-                        upper_bounds(i) = min_dist
-                        r(i) = f_
-                    else
-                        min_dist = upper_bounds(i)
-                    end if
-
-                    if (upper_bounds(i)       .gt. lower_bounds(i,c_idx)) then
-                        if (upper_bounds(i)   .gt. 0.5d0*inter_cluster_distance(current_c_idx, c_idx)) then
-                            if ((min_dist .gt. lower_bounds(i,c_idx)) .or. & 
-                                (min_dist .gt. 0.5d0*inter_cluster_distance(current_c_idx, c_idx))) then
-                                    dist = sqrt( sum( (x(i,:)-old_cluster_centers(:,c_idx))**2d0 ))
-                                    lower_bounds(i,c_idx) = dist
-                                    if (min_dist .gt. dist) then
-                                        min_dist = dist
-                                        upper_bounds(i) = min_dist
-                                        new_nearest_cluster_indices(i) = c_idx
-                                    end if
-                            end if
-                        end if
-                    end if
+            ! Update Cluster Center Coordinates
+            if (iter .eq. 1_8) then
+                counter(:) = 0_8
+                new_cluster_centers(:,:) = 0d0
+                do i=1, this%n_samples, 1
+                    idx = nearest_cluster_indices(i)
+                    new_cluster_centers(:,idx) = new_cluster_centers(:,idx) + x(i,:)
+                    counter(idx) = counter(idx) + 1_8
                 end do
+            else
+                do c=1, this%hparam%n_clusters, 1
+                    new_cluster_centers(:,c) = new_cluster_centers(:,c)*dble(counter(c))
+                end do
+                do i=1, this%n_samples, 1
+                    idx     = nearest_cluster_indices(i)
+                    idx_old = nearest_cluster_indices_old(i)
+                    if (idx .eq. idx_old) cycle
+                    new_cluster_centers(:,idx_old) = new_cluster_centers(:,idx_old) - x(i,:)
+                    new_cluster_centers(:,idx)     = new_cluster_centers(:,idx)     + x(i,:)
+                    counter(idx_old) = counter(idx_old) - 1_8
+                    counter(idx)     = counter(idx)     + 1_8
+                end do
+            end if
+            nearest_cluster_indices_old = nearest_cluster_indices
+            
+            do c=1, this%hparam%n_clusters, 1
+                new_cluster_centers(:,c) = new_cluster_centers(:,c)/dble(counter(c))
+                diff_update(:,c) = abs(new_cluster_centers(:,c)-old_cluster_centers(:,c))
             end do
-            call date_and_time(values=date_value2)
-            time_update_cluster_indices = time_update_cluster_indices + time_diff(date_value1, date_value2)
+            old_cluster_centers(:,:) = new_cluster_centers(:,:)
 
-
-            call date_and_time(values=date_value1)
-            call update_cluster_centers(new_cluster_centers, x, new_nearest_cluster_indices, &
-                    this%n_samples, this%hparam%n_clusters, this%n_columns)
-            call date_and_time(values=date_value2)
-            time_update_cluster_centers = time_update_cluster_centers + time_diff(date_value1, date_value2)
-            dsp_cluster_centers(:) = sqrt(sum( (new_cluster_centers(:,:) - old_cluster_centers(:,:))**2d0, dim=1))
-            ! print*, "Iteration: ", iter, dsp_cluster_centers, count(new_nearest_cluster_indices .ne. old_nearest_cluster_indices)
-            ! print*, "Iteration: ", iter, maxval(dsp_cluster_centers)
-            if (maxval(dsp_cluster_centers) .le. this%hparam%tolerance) exit
-            old_cluster_centers(:,:)       = new_cluster_centers(:,:)
-            old_nearest_cluster_indices(:) = new_nearest_cluster_indices(:)
-
-            ! stop
+            ! print*, "Iteration: ", iter, counter(:)
+            if (maxval(sum(diff_update**2d0, dim=1)) .le. this%hparam%tolerance) exit
         end do
-        ! print*, "time_calculate_distance_from_center_slow: ", time_calculate_distance_from_center_slow
-        ! print*, "time_update_cluster_centers             : ", time_update_cluster_centers
-        ! print*, "time_update_lower_upper_bounds          : ", time_update_lower_upper_bounds
-        ! print*, "time_calculate_inter_cluster_distance   : ", time_calculate_inter_cluster_distance
-        ! print*, "time_update_cluster_indices             : ", time_update_cluster_indices
-        this%is_trained = t_
-        this%cluster_centers(:,:) = new_cluster_centers(:,:)
-    end subroutine fit_faster_kmeans
+        this % is_trained = t_
+        this % cluster_centers(:,:) = new_cluster_centers(:,:)
+    end subroutine fit_kmeans
 
-    subroutine fit_faster2_kmeans(this, x)
+    !> A subroutine to fit 'kmeans' object by elkan's method.
+    !! \param x data to be fitted
+    subroutine fit_elkan_kmeans(this, x)
 
         integer(kind=8) :: date_value1(8), date_value2(8)
         integer(kind=8) :: time_calculate_distance_from_center_slow
@@ -464,7 +364,9 @@ contains
         ! Update Centroids
         call date_and_time(values=date_value1)
         new_counters(:) = 0_8
-        call update_cluster_centers2(new_cluster_centers, new_counters, x, old_nearest_cluster_indices, &
+        new_nearest_cluster_indices(:) = -1_8
+        call update_cluster_centers_diff_only(new_cluster_centers, old_cluster_centers, new_counters, x, & 
+                new_nearest_cluster_indices, old_nearest_cluster_indices, & 
                 this%n_samples, this%hparam%n_clusters, this%n_columns)
         dsp_cluster_centers(:) = sqrt(sum((new_cluster_centers(:,:) - old_cluster_centers(:,:))**2d0, dim=1))
         old_cluster_centers(:,:) = new_cluster_centers(:,:)
@@ -544,7 +446,7 @@ contains
 
 
             call date_and_time(values=date_value1)
-            call update_cluster_centers3(new_cluster_centers, old_cluster_centers, new_counters, x, & 
+            call update_cluster_centers_diff_only(new_cluster_centers, old_cluster_centers, new_counters, x, & 
                     new_nearest_cluster_indices, old_nearest_cluster_indices, & 
                     this%n_samples, this%hparam%n_clusters, this%n_columns)
             call date_and_time(values=date_value2)
@@ -567,8 +469,15 @@ contains
         ! print*, "time_update_cluster_indices             : ", time_update_cluster_indices
         this%is_trained = t_
         this%cluster_centers(:,:) = new_cluster_centers(:,:)
-    end subroutine fit_faster2_kmeans
+    end subroutine fit_elkan_kmeans
 
+    !> A subroutine to update cluster centers.
+    !! \param new_cluster_centers new cluster center coordinates
+    !! \param x explanatory data
+    !! \param cluster_indices cluster center indices for each points of 'x'
+    !! \param n_samples number of samples of 'x'
+    !! \param n_samples number of clusters to be assigned
+    !! \param n_samples number of columns of 'x'
     subroutine update_cluster_centers(new_cluster_centers, x, cluster_indices, n_samples, n_clusters, n_columns)
         real(kind=8), intent(inout) :: new_cluster_centers(n_columns, n_clusters)
         real(kind=8), intent(in)    :: x(n_samples, n_columns)
@@ -593,30 +502,17 @@ contains
         end do
     end subroutine update_cluster_centers
 
-    subroutine update_cluster_centers2(new_cluster_centers, new_counters, x, cluster_indices, n_samples, n_clusters, n_columns)
-        real(kind=8), intent(inout) :: new_cluster_centers(n_columns, n_clusters)
-        integer(kind=8), intent(inout) :: new_counters(n_clusters)
-        real(kind=8), intent(in)    :: x(n_samples, n_columns)
-        integer(kind=8), intent(in) :: cluster_indices(n_samples)
-        integer(kind=8), intent(in) :: n_samples, n_clusters, n_columns
-
-        integer(kind=8) :: i, c, c_idx
-
-        new_cluster_centers(:,:) = 0d0
-        new_counters(:) = 0_8
-
-        do i=1, n_samples, 1
-            c_idx = cluster_indices(i)
-            new_cluster_centers(:,c_idx) = new_cluster_centers(:,c_idx) + x(i,:)
-            new_counters(c_idx) = new_counters(c_idx) + 1_8
-        end do
-
-        do c_idx=1, n_clusters, 1
-            new_cluster_centers(:,c_idx) = new_cluster_centers(:,c_idx) / dble(new_counters(c_idx))
-        end do
-    end subroutine update_cluster_centers2
-
-    subroutine update_cluster_centers3(new_cluster_centers, old_cluster_centers, new_counters, x, & 
+    !> A subroutine to update cluster centers.
+    !! \param new_cluster_centers new cluster center coordinates
+    !! \param old_cluster_centers old cluster center coordinates
+    !! \param new_counters number of samples in each clusters
+    !! \param x explanatory data
+    !! \param new_cluster_indices new cluster center indices for each points of 'x'
+    !! \param old_cluster_indices old cluster center indices for each points of 'x'
+    !! \param n_samples number of samples of 'x'
+    !! \param n_samples number of clusters to be assigned
+    !! \param n_samples number of columns of 'x'
+    subroutine update_cluster_centers_diff_only(new_cluster_centers, old_cluster_centers, new_counters, x, & 
         new_cluster_indices, old_cluster_indices, n_samples, n_clusters, n_columns)
         real(kind=8), intent(inout) :: new_cluster_centers(n_columns, n_clusters)
         real(kind=8), intent(inout) :: old_cluster_centers(n_columns, n_clusters)
@@ -628,134 +524,39 @@ contains
 
         integer(kind=8) :: i, c, c_idx, old_c_idx, new_c_idx
 
-        new_cluster_centers(:,:) = old_cluster_centers(:,:)
-
-        do c_idx=1, n_clusters, 1
-            new_cluster_centers(:,c_idx) = new_cluster_centers(:,c_idx) * dble(new_counters(c_idx))
-        end do
-
-        do i=1, n_samples, 1
-            old_c_idx = old_cluster_indices(i)
-            new_c_idx = new_cluster_indices(i)
-            if (old_c_idx .eq. new_c_idx) cycle
-            new_counters(old_c_idx) = new_counters(old_c_idx) - 1_8
-            new_counters(new_c_idx) = new_counters(new_c_idx) + 1_8
-            new_cluster_centers(:,old_c_idx) = new_cluster_centers(:,old_c_idx) - x(i,:)
-            new_cluster_centers(:,new_c_idx) = new_cluster_centers(:,new_c_idx) + x(i,:)
-        end do
-
-        do c_idx=1, n_clusters, 1
-            new_cluster_centers(:,c_idx) = new_cluster_centers(:,c_idx) / dble(new_counters(c_idx))
-        end do
-    end subroutine update_cluster_centers3
-
-    ! subroutine update_cluster_centers_diff_only(new_cluster_centers, old_cluster_centers, x, new_counters, old_counters, new_cluster_indices, old_cluster_indices, n_samples, n_clusters, n_columns)
-    !     real(kind=8), intent(inout) :: new_cluster_centers(n_columns, n_clusters)
-    !     real(kind=8), intent(inout) :: old_cluster_centers(n_columns, n_clusters)
-    !     real(kind=8), intent(in)    :: x(n_samples, n_columns)
-    !     integer(kind=8), intent(in) :: counters(n_clusters)
-    !     integer(kind=8), intent(in) :: cluster_indices(n_samples)
-    !     integer(kind=8), intent(in) :: n_samples, n_clusters, n_columns
-
-    !     integer(kind=8) :: i, c, c_idx, new_c_idx, old_c_idx
-    !     integer(kind=8), allocatable :: counter(:)
-
-    !     allocate(counter(n_clusters))
-    !     new_cluster_centers(:,:) = old_cluster_centers(:,:)
-    !     do c_idx=1, n_clusters, 1
-    !         new_cluster_centers(:,c_idx) = new_cluster_centers(:,c_idx) * dble(counters(c_idx))
-    !     end do
-
-    !     do i=1, n_samples, 1
-    !         new_c_idx = new_cluster_indices(i)
-    !         old_c_idx = new_cluster_indices(i)
-    !         if (new_c_idx .eq. old_c_idx) continue
-    !         new_cluster_centers(:,old_c_idx) = new_cluster_centers(:,old_c_idx) - x(i,:)
-    !         new_cluster_centers(:,new_c_idx) = new_cluster_centers(:,new_c_idx) + x(i,:)
-    !         counter(c_idx) = counter(c_idx) + 1_8
-    !     end do
-
-    !     do c_idx=1, n_clusters, 1
-    !         new_cluster_centers(:,c_idx) = new_cluster_centers(:,c_idx) / dble(counter(c_idx))
-    !     end do
-    ! end subroutine update_cluster_centers_diff_only
-
-    subroutine fit_kmeans(this, x)
-        class(kmeans) :: this
-        real(kind=8), intent(in) :: x(:,:)
-
-        integer(kind=8)              :: x_shape(2), iter, c, i, idx, idx_old
-        real(kind=8), allocatable    :: distance_from_cluster_center(:,:)
-        real(kind=8), allocatable    :: new_cluster_centers(:,:), old_cluster_centers(:,:)
-        real(kind=8), allocatable    :: diff_update(:,:)
-        real(kind=8), allocatable    :: x_sq_sum_row(:)
-        integer(kind=8), allocatable :: nearest_cluster_indices(:), nearest_cluster_indices_old(:), counter(:)
-
-        call ifdealloc(this%cluster_centers)
-
-        x_shape = shape(x)
-        this % n_samples = x_shape(1)
-        this % n_columns = x_shape(2)
-
-        allocate(x_sq_sum_row(this%n_samples))
-        x_sq_sum_row(:) = 0d0
-        call matrix_sqsum_row(x, x_sq_sum_row, this % n_samples, this % n_columns)
-        call this%select_initial_clusters(x, x_sq_sum_row, this%n_samples, this%n_columns)
-
-        allocate(distance_from_cluster_center(this%n_samples, this%hparam%n_clusters))
-        allocate(old_cluster_centers(this%n_columns, this%hparam%n_clusters))
-        allocate(new_cluster_centers(this%n_columns, this%hparam%n_clusters))
-        allocate(diff_update(this%n_columns, this%hparam%n_clusters))
-        allocate(nearest_cluster_indices(this%n_samples), nearest_cluster_indices_old(this%n_samples))
-        allocate(counter(this%hparam%n_clusters))
-
-        nearest_cluster_indices_old(:) = -1
-        old_cluster_centers(:,:) = this%cluster_centers(:,:)
-        do iter=1, this%hparam%max_iter, 1
-            ! Calculate Distance From Cluster Centers, and Assign Cluster Index
-            distance_from_cluster_center(:,:) = 0d0
-            do c=1, this%hparam%n_clusters, 1
-                call calculate_distance_from_center(x, x_sq_sum_row, old_cluster_centers(:,c), & 
-                    distance_from_cluster_center(:,c), this%n_samples, this%n_columns)
+        if (sum(new_counters) .eq. 0_8) then
+            do i=1, n_samples, 1
+                c_idx = old_cluster_indices(i)
+                new_cluster_centers(:,c_idx) = new_cluster_centers(:,c_idx) + x(i,:)
+                new_counters(c_idx) = new_counters(c_idx) + 1_8
             end do
-            nearest_cluster_indices(:) = minloc(distance_from_cluster_center(:,:), dim=2)
 
-            ! Update Cluster Center Coordinates
-            if (iter .eq. 1_8) then
-                counter(:) = 0_8
-                new_cluster_centers(:,:) = 0d0
-                do i=1, this%n_samples, 1
-                    idx = nearest_cluster_indices(i)
-                    new_cluster_centers(:,idx) = new_cluster_centers(:,idx) + x(i,:)
-                    counter(idx) = counter(idx) + 1_8
-                end do
-            else
-                do c=1, this%hparam%n_clusters, 1
-                    new_cluster_centers(:,c) = new_cluster_centers(:,c)*dble(counter(c))
-                end do
-                do i=1, this%n_samples, 1
-                    idx     = nearest_cluster_indices(i)
-                    idx_old = nearest_cluster_indices_old(i)
-                    if (idx .eq. idx_old) cycle
-                    new_cluster_centers(:,idx_old) = new_cluster_centers(:,idx_old) - x(i,:)
-                    new_cluster_centers(:,idx)     = new_cluster_centers(:,idx)     + x(i,:)
-                    counter(idx_old) = counter(idx_old) - 1_8
-                    counter(idx)     = counter(idx)     + 1_8
-                end do
-            end if
-            nearest_cluster_indices_old = nearest_cluster_indices
-            
-            do c=1, this%hparam%n_clusters, 1
-                new_cluster_centers(:,c) = new_cluster_centers(:,c)/dble(counter(c))
-                diff_update(:,c) = abs(new_cluster_centers(:,c)-old_cluster_centers(:,c))
+            do c_idx=1, n_clusters, 1
+                new_cluster_centers(:,c_idx) = new_cluster_centers(:,c_idx) / dble(new_counters(c_idx))
             end do
-            old_cluster_centers(:,:) = new_cluster_centers(:,:)
+        else
+            new_cluster_centers(:,:) = old_cluster_centers(:,:)
 
-            if (maxval(sum(diff_update**2d0, dim=1)) .le. this%hparam%tolerance) exit
-        end do
-        this % is_trained = t_
-        this % cluster_centers(:,:) = new_cluster_centers(:,:)
-    end subroutine fit_kmeans
+            do c_idx=1, n_clusters, 1
+                new_cluster_centers(:,c_idx) = new_cluster_centers(:,c_idx) * dble(new_counters(c_idx))
+            end do
+
+            do i=1, n_samples, 1
+                old_c_idx = old_cluster_indices(i)
+                new_c_idx = new_cluster_indices(i)
+                if (old_c_idx .eq. new_c_idx) cycle
+                new_counters(old_c_idx) = new_counters(old_c_idx) - 1_8
+                new_counters(new_c_idx) = new_counters(new_c_idx) + 1_8
+                new_cluster_centers(:,old_c_idx) = new_cluster_centers(:,old_c_idx) - x(i,:)
+                new_cluster_centers(:,new_c_idx) = new_cluster_centers(:,new_c_idx) + x(i,:)
+            end do
+
+            do c_idx=1, n_clusters, 1
+                new_cluster_centers(:,c_idx) = new_cluster_centers(:,c_idx) / dble(new_counters(c_idx))
+            end do
+        end if
+    end subroutine update_cluster_centers_diff_only
+
 
     !> A subroutine to predict cluster index of new data
     !! \param x data to be predicted
@@ -826,6 +627,8 @@ contains
         if (minval(dist_mat) .eq. 0d0) stop "Number of unique rows is lower than 'n_clusters'."
     end subroutine select_initial_clusters_slow
 
+    !> A subroutine to select initial cluster centroids by 'kmeans++', a little bit fast.
+    !! \param x data to be fitted
     subroutine select_initial_clusters(this, x, x_sq_sum_row, n_samples, n_columns)
         class(kmeans) :: this
         real(kind=8), intent(in) :: x(n_samples, n_columns)
@@ -894,6 +697,16 @@ contains
         end do
     end subroutine calculate_distance_from_center_slow
 
+    !> A subroutine to calculate the distance of 'x' from the centroid.
+    !> Expanding (x-y)^2 and calculating only x x y will speed up the process. 
+    !> (Since x is a data point, x^2 only needs to be computed once, 
+    !> and y is a cluster and is very few in number compared to the data points and the number of features, 
+    !> the amount of computation is negligible.)
+    !! \param x data points (#samples, #columns)
+    !! \param center coordinates of centroid (#columns)
+    !! \param distance distance from the centroid (#samples)
+    !! \param n_samples number of samples
+    !! \param n_columns number of columns
     subroutine calculate_distance_from_center(x, x_sq_sum_row, center, distance, n_samples, n_columns)
         real(kind=8), intent(in)    :: x(n_samples, n_columns)
         real(kind=8), intent(in)    :: x_sq_sum_row(n_samples)
@@ -906,8 +719,11 @@ contains
 
         center_sq_sum = sum(center**2d0)
         distance(:) = 0d0
-        call multi_mat_vec_r8(x, center, distance, n_samples, n_columns, parallel=f_)
-        distance = sqrt(maxval((/-2d0*distance + x_sq_sum_row + center_sq_sum, 0d0/)))
+        call multi_mat_vec_r8(x, center, distance, n_samples, n_columns)
+        ! call multi_mat_vec_parallel_r8(x, center, distance, n_samples, n_columns)
+        do i=1, n_samples, 1
+            distance(i) = maxval((/-2d0*distance(i) + x_sq_sum_row(i) + center_sq_sum, 0d0/))
+        end do
     end subroutine calculate_distance_from_center
 
     !> A subroutine to get nearest distance. 
@@ -925,6 +741,11 @@ contains
         end do
     end subroutine get_nearest_distance
 
+    !> A subroutine to calculate inter cluster distance for elkan's method. 
+    !! \param inter_cluster_distance inter cluster distance.
+    !! \param centers cluster center coordinates.
+    !! \param n_clusters number of clusters
+    !! \param n_columns number of columns
     subroutine calculate_inter_cluster_distance(inter_cluster_distance, centers, n_clusters, n_columns)
         real(kind=8), intent(inout) :: inter_cluster_distance(n_clusters, n_clusters)
         real(kind=8), intent(in)    :: centers(n_columns, n_clusters)
