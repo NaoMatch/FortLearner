@@ -101,6 +101,19 @@ SK: mean &plusmn; std of 4 runs
 | YearPredictionMSD: (412206, 90) | 30       |291(&plusmn;14.2)        |157.163(&plusmn;52.773) |82.906(&plusmn;25.715) |
 | YearPredictionMSD: (412206, 90) | 35       |340(&plusmn;6.46)        |184.827(&plusmn;58.211) |99.948(&plusmn;31.88) |
 
+## isolation_forest
+IF = IsolationForest(n_estimators=1000, max_samples=256)  
+http://odds.cs.stonybrook.edu/forestcovercovertype-dataset/
+|dataset|Train/Test|#Samples|#Columns|FL_train[sec]|SK_train[sec]|FL_predict[sec]|SK_predict[sec]|FL_AUC|SK_AUC|
+|:----|:----|:----|:----|:----|:----|:----|:----|:----|:----|
+|kdd|Train|240000|40|0.06|32.6|2.5|64|0.884|0.793|
+|kdd|Test|28517|40|-|-|0.55|17|0.885|0.790|
+|forest_cover|Train|120000|10|0.2|22.5|15|94|0.894|0.887|
+|forest_cover|Test|46048|10|-|-|2.7|17|0.890|0.881|
+
+
+
+
 
 # Implemented
 * Linear Regression:
