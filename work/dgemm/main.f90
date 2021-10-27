@@ -10,10 +10,10 @@ program main
     real(kind=8), allocatable    :: a(:,:), b(:,:), c(:,:)
 
     ! mat_sizes = (/16_8, 32_8, 64_8, 128_8, 256_8, 512_8, 1024_8, 2048_8, 4096_8/)
-    mat_sizes = (/16_8, 32_8, 64_8, 128_8, 256_8, 512_8, 1024_8/)
-    ! mat_sizes = 300
+    mat_sizes = (/16_8, 32_8, 64_8, 128_8, 256_8, 512_8, 1024_8, 2048_8/)
+    ! mat_sizes = 16
     max_iter = 500000000_8
-    max_iter = 1_8
+    ! max_iter = 1_8
 
 
     do n=1, size(mat_sizes), 1
@@ -29,18 +29,19 @@ program main
 
         n_iter = maxval((/max_iter/mat_size/mat_size/mat_size, 1_8/))
 
-        n_cases = 7
+        n_cases = 8
         do t=1, n_cases, 1
             call date_and_time(values=date_value1)
             do iter=1, n_iter, 1
                     select case (t)
                     case  (1); c = matmul(a,b)
                     case  (2); call dgemm('N','N',mat_size,mat_size,mat_size,1.0d0,A,mat_size,B,mat_size,0.d0,C,mat_size)
-                    case  (3); call my_dgemm_naive00_00(a,b,c,mat_size,mat_size,mat_size)
-                    case  (4); call my_dgemm_naive00_01(a,b,c,mat_size,mat_size,mat_size)
-                    case  (5); call my_dgemm_naive00_02(a,b,c,mat_size,mat_size,mat_size)
+                    ! case  (3); call my_dgemm_naive00_00(a,b,c,mat_size,mat_size,mat_size)
+                    ! case  (4); call my_dgemm_naive00_01(a,b,c,mat_size,mat_size,mat_size)
+                    ! case  (5); call my_dgemm_naive00_02(a,b,c,mat_size,mat_size,mat_size)
                     case  (6); call my_dgemm_naive00_03(a,b,c,mat_size,mat_size,mat_size)
                     case  (7); call my_dgemm_naive00_04(a,b,c,mat_size,mat_size,mat_size)
+                    case  (8); call my_dgemm_naive00_05(a,b,c,mat_size,mat_size,mat_size)
                     end select
             end do
             call date_and_time(values=date_value2)

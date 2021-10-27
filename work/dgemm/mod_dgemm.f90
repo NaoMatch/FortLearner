@@ -198,7 +198,7 @@ contains
         ! integer(kind=8) :: tile_m=2,   tile_n=2,   tile_l=2
         integer(kind=8) :: panel_m=256, panel_n=256, panel_l=256
         integer(kind=8) :: block_m=128, block_n=128, block_l=64
-        integer(kind=8) :: tile_m=32,   tile_n=32,   tile_l=40
+        integer(kind=8) :: tile_m=32,   tile_n=32,   tile_l=32
         real(kind=8)    :: tmp
 
         integer(kind=8) :: j3, j3_start, j3_stop, j3_max, j3_step, l_panel, l_block, l_tile
@@ -218,21 +218,21 @@ contains
 
         c(:,:) = 0d0
         j3_start=1;  do j3=j3_start, l, min(panel_l, l-j3_start+1)                          ! j3_max = l; j3_step = min(panel_l, l-j3_start+1); print*, "j3:             ", j3, j3_max, j3_step
-        j2_start=j3; do j2=j2_start, min(l, j3_start+panel_l-1), min(block_l, l-j2_start+1) ! j2_max = min(l, j3_start+panel_l-1); j2_step = min(block_l, l-j2_start+1); print*, "    j2:         ", j2, j2_max, j2_step
-        j1_start=j2; do j1=j1_start, min(l, j2_start+block_l-1), min(tile_l, l-j1_start+1)  ! j1_max = min(l, j2_start+block_l-1); j1_step = min(tile_l, l-j1_start+1); print*, "        j1:     ", j1, j1_max, j1_step
+        i3_start=1;  do i3=i3_start, m, min(panel_m, m-i3_start+1)                          ! i3_max = m; i3_step = min(panel_m, m-i3_start+1); print*, "i3:             ", i3, i3_max, i3_step
+        k3_start=1;  do k3=k3_start, n, min(panel_n, n-k3_start+1)                          ! k3_max = n; k3_step = min(panel_n, n-k3_start+1); print*, "k3:             ", k3, k3_max, k3_step
 
-            i3_start=1;  do i3=i3_start, m, min(panel_m, m-i3_start+1)                          ! i3_max = m; i3_step = min(panel_m, m-i3_start+1); print*, "i3:             ", i3, i3_max, i3_step
+            j2_start=j3; do j2=j2_start, min(l, j3_start+panel_l-1), min(block_l, l-j2_start+1) ! j2_max = min(l, j3_start+panel_l-1); j2_step = min(block_l, l-j2_start+1); print*, "    j2:         ", j2, j2_max, j2_step
             i2_start=i3; do i2=i2_start, min(m, i3_start+panel_m-1), min(block_m, m-i2_start+1) ! i2_max = min(m, i3_start+panel_m-1); i2_step = min(block_m, m-i2_start+1); print*, "    i2:         ", i2, i2_max, i2_step
-            i1_start=i2; do i1=i1_start, min(m, i2_start+block_m-1), min(tile_m, m-i1_start+1)  ! i1_max = min(m, i2_start+block_m-1); i1_step = min(tile_m, m-i1_start+1); print*, "        i1:     ", i1, i1_max, i1_step
+            k2_start=k3; do k2=k2_start, min(n, k3_start+panel_n-1), min(block_n, n-k2_start+1) ! k2_max = min(n, k3_start+panel_n-1); k2_step = min(block_n, n-k2_start+1); print*, "    k2:         ", k2, k2_max, k2_step
 
-                k3_start=1;  do k3=k3_start, n, min(panel_n, n-k3_start+1)                          ! k3_max = n; k3_step = min(panel_n, n-k3_start+1); print*, "k3:             ", k3, k3_max, k3_step
-                k2_start=k3; do k2=k2_start, min(n, k3_start+panel_n-1), min(block_n, n-k2_start+1) ! k2_max = min(n, k3_start+panel_n-1); k2_step = min(block_n, n-k2_start+1); print*, "    k2:         ", k2, k2_max, k2_step
+                j1_start=j2; do j1=j1_start, min(l, j2_start+block_l-1), min(tile_l, l-j1_start+1)  ! j1_max = min(l, j2_start+block_l-1); j1_step = min(tile_l, l-j1_start+1); print*, "        j1:     ", j1, j1_max, j1_step
+                i1_start=i2; do i1=i1_start, min(m, i2_start+block_m-1), min(tile_m, m-i1_start+1)  ! i1_max = min(m, i2_start+block_m-1); i1_step = min(tile_m, m-i1_start+1); print*, "        i1:     ", i1, i1_max, i1_step
                 k1_start=k2; do k1=k1_start, min(n, k2_start+block_n-1), min(tile_n, n-k1_start+1)  ! k1_max = min(n, k2_start+block_n-1); k1_step = min(tile_n, n-k1_start+1); print*, "        k1:     ", k1, k1_max, k1_step
 
-                    j0_start=j1; j0_max = j0_start+min(tile_l-1, l-j0_start); do j0=j0_start, j0_max, 1                           ! print*, "            j0: ", j0, j0_max, 1_8
-                    i0_start=i1; i0_max = i0_start+min(tile_m-1, m-i0_start); do i0=i0_start, i0_max, 1                           ! print*, "            i0: ", i0, i0_max, 1_8
+                    j0_start=j1; j0_max = j0_start+min(tile_l-1, l-j0_start); do j0=j0_start, j0_max, 1 ! print*, "            j0: ", j0, j0_max, 1_8
+                    i0_start=i1; i0_max = i0_start+min(tile_m-1, m-i0_start); do i0=i0_start, i0_max, 1 ! print*, "            i0: ", i0, i0_max, 1_8
                     tmp = 0d0
-                    k0_start=k1; k0_max = k0_start+min(tile_n-1, n-k0_start); do k0=k0_start, k0_max, 1                           ! print*, "            k0: ", k0, k0_max, 1_8
+                    k0_start=k1; k0_max = k0_start+min(tile_n-1, n-k0_start); do k0=k0_start, k0_max, 1 ! print*, "            k0: ", k0, k0_max, 1_8
                         tmp = tmp + a(i0,k0) * b(k0,j0)
                     end do
                     c(i0,j0) = c(i0,j0) + tmp
@@ -240,17 +240,111 @@ contains
                     end do
 
                 k1_start = k1_start + min(tile_n,  n-k1_start+1); end do
-                k2_start = k2_start + min(block_n, n-k2_start+1); end do
-                k3_start = k3_start + min(panel_n, n-k3_start+1); end do
+                i1_start = i1_start + min(tile_m,  m-i1_start+1); end do
+                j1_start = j1_start + min(tile_l,  l-j1_start+1); end do
 
-            i1_start = i1_start + min(tile_m,  m-i1_start+1); end do
+            k2_start = k2_start + min(block_n, n-k2_start+1); end do
             i2_start = i2_start + min(block_m, m-i2_start+1); end do
-            i3_start = i3_start + min(panel_m, m-i3_start+1); end do
+            j2_start = j2_start + min(block_l, l-j2_start+1); end do
 
-        j1_start = j1_start + min(tile_l,  l-j1_start+1); end do
-        j2_start = j2_start + min(block_l, l-j2_start+1); end do
+        k3_start = k3_start + min(panel_n, n-k3_start+1); end do
+        i3_start = i3_start + min(panel_m, m-i3_start+1); end do
         j3_start = j3_start + min(panel_l, l-j3_start+1); end do
     end subroutine my_dgemm_naive00_04
+
+    subroutine my_dgemm_naive00_05(a, b, c, m, n, l)
+        implicit none
+        real(kind=8), intent(in)    :: a(m,n)
+        real(kind=8), intent(in)    :: b(n,l)
+        real(kind=8), intent(inout) :: c(m,l)
+        integer(kind=8), intent(in) :: m, n, l
+
+
+        real(kind=8), allocatable :: a_cache(:,:), b_cache(:,:)
+        real(kind=8), allocatable :: a_v_cache(:), b_v_cache(:)
+        integer(kind=8) :: panel_m=256, panel_n=256, panel_l=256
+        integer(kind=8) :: block_m=128, block_n=128, block_l=64
+        integer(kind=8) :: tile_m=32,   tile_n=32,   tile_l=32
+        ! integer(kind=8) :: panel_m=8, panel_n=8, panel_l=8
+        ! integer(kind=8) :: block_m=4, block_n=4, block_l=4
+        ! integer(kind=8) :: tile_m=2,   tile_n=2,   tile_l=2
+        real(kind=8)    :: tmp, tmp2
+
+        integer(kind=8) :: j3, j3_start, j3_stop, j3_max, j3_step, l_panel, l_block, l_tile
+        integer(kind=8) :: j2, j2_start, j2_stop, j2_max, j2_step
+        integer(kind=8) :: j1, j1_start, j1_stop, j1_max, j1_step, jj1, jj0
+        integer(kind=8) :: j0, j0_start, j0_stop, j0_max, j0_step, j0_base
+
+        integer(kind=8) :: i3, i3_start, i3_stop, i3_max, i3_step, m_panel, m_block, m_tile
+        integer(kind=8) :: i2, i2_start, i2_stop, i2_max, i2_step
+        integer(kind=8) :: i1, i1_start, i1_stop, i1_max, i1_step, ii1, ii0
+        integer(kind=8) :: i0, i0_start, i0_stop, i0_max, i0_step, i0_base
+
+        integer(kind=8) :: k3, k3_start, k3_stop, k3_max, k3_step, n_panel, n_block, n_tile
+        integer(kind=8) :: k2, k2_start, k2_stop, k2_max, k2_step
+        integer(kind=8) :: k1, k1_start, k1_stop, k1_max, k1_step, kk1, kk0
+        integer(kind=8) :: k0, k0_start, k0_stop, k0_max, k0_step, k0_base
+
+        integer(kind=8) :: cnt
+
+        ! allocate(a_cache(block_m, block_n))
+        allocate(a_v_cache(block_m * block_n))
+        ! allocate(b_cache(block_n, block_l))
+
+        c(:,:) = 0d0
+        ! L3-Loop
+        do j3=1, l, min(panel_l, l-1+1) !! j3_max = l; j3_step = min(panel_l, l-j3_start+1); print*, "j3:             ", j3, j3_max, j3_step
+        do i3=1, m, min(panel_m, m-1+1) !! i3_max = m; i3_step = min(panel_m, m-i3_start+1); print*, "i3:             ", i3, i3_max, i3_step
+        do k3=1, n, min(panel_n, n-1+1) !! k3_max = n; k3_step = min(panel_n, n-k3_start+1); print*, "k3:             ", k3, k3_max, k3_step
+
+            j3_max = min(panel_l, l-j3)-1
+            i3_max = min(panel_m, m-i3)-1
+            k3_max = min(panel_n, n-k3)-1
+
+            ! L2-Loop
+            do j2=j3, j3+j3_max, min(block_l, l-j3+1) !! j2_max = min(l, j3_start+panel_l-1); j2_step = min(block_l, l-j2_start+1); print*, "    j2:         ", j2, j2_max, j2_step
+            do i2=i3, i3+i3_max, min(block_m, m-i3+1) !! i2_max = min(m, i3_start+panel_m-1); i2_step = min(block_m, m-i2_start+1); print*, "    i2:         ", i2, i2_max, i2_step
+            do k2=k3, k3+k3_max, min(block_n, n-k3+1) !! k2_max = min(n, k3_start+panel_n-1); k2_step = min(block_n, n-k2_start+1); print*, "    k2:         ", k2, k2_max, k2_step
+
+                j2_max = min(block_l, l-j2)-1
+                i2_max = min(block_m, m-i2)-1
+                k2_max = min(block_n, n-k2)-1
+
+                ! L1-Loop
+                cnt = 1
+                do j1=j2, j2+j2_max, min(tile_l, l-j2+1)  !! j1_max = min(l, j2_start+block_l-1); j1_step = min(tile_l, l-j1_start+1); print*, "        j1:     ", j1, j1_max, j1_step
+                do i1=i2, i2+i2_max, min(tile_m, m-i2+1)  !! i1_max = min(m, i2_start+block_m-1); i1_step = min(tile_m, m-i1_start+1); print*, "        i1:     ", i1, i1_max, i1_step
+                do k1=k2, k2+k2_max, min(tile_n, n-k2+1)  !! k1_max = min(n, k2_start+block_n-1); k1_step = min(tile_n, n-k1_start+1); print*, "        k1:     ", k1, k1_max, k1_step
+
+                    j1_max = min(tile_l-1, l-j1)
+                    i1_max = min(tile_m-1, m-i1)
+                    k1_max = min(tile_n-1, n-k1)
+
+                    do k0=k1, k1+k1_max, 1 !! print*, "            k0: ", k0, k0_max, 1_8
+                    do j0=j1, j1+j1_max, 1 !! print*, "            j0: ", j0, j0_max, 1_8
+                    tmp = b(k0,j0)
+                    do i0=i1, i1+i1_max, 1 !! print*, "            i0: ", i0, i0_max, 1_8
+                        c(i0,j0) = c(i0,j0) + a(i0,k0) * tmp
+                    end do
+                    ! c(i0,j0) = c(i0,j0) + tmp
+                    end do
+                    end do
+
+                end do
+                end do
+                end do
+
+            end do
+            end do
+            end do
+
+        end do
+        end do
+        end do
+
+
+        ! stop
+    end subroutine my_dgemm_naive00_05
 
 
 
