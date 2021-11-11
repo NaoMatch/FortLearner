@@ -66,7 +66,6 @@ program main
                     case (16); call my_dgemm_005(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! kernelize
                     case (17); call my_dgemm_006(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! loop interchange2
                     end select
-                    
             end do
             if (t .ge. 11_8) c=c/dble(iter-1)
             if (sum(c) .eq. 0d0) cycle
