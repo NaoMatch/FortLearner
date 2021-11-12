@@ -43,28 +43,30 @@ program main
             do iter=1, n_iter, 1
                     select case (t)
 
-                    ! Intrinsic
-                    case  (1); c = matmul(a,b)
-                    case  (2); call dgemm('N','N',mat_size,mat_size,mat_size,1.0d0,A,mat_size,B,mat_size,0.d0,C,mat_size)
+                        ! Intrinsic
+                        case  (1); c = matmul(a,b)
 
-                    ! Fortran
-                    ! case  (3); call my_dgemm_naive00_00(a,b,c,mat_size,mat_size,mat_size)
-                    ! case  (4); call my_dgemm_naive00_01(a,b,c,mat_size,mat_size,mat_size)
-                    ! case  (5); call my_dgemm_naive00_02(a,b,c,mat_size,mat_size,mat_size)
-                    ! case  (6); call my_dgemm_naive00_03(a,b,c,mat_size,mat_size,mat_size)
-                    ! case  (7); call my_dgemm_naive00_04(a,b,c,mat_size,mat_size,mat_size)
-                    ! case  (8); call my_dgemm_naive00_05(a,b,c,mat_size,mat_size,mat_size)
-                    case  (9); call my_dgemm_naive00_06(a,b,c,mat_size,mat_size,mat_size)
-                    ! case (10); call my_dgemm_naive00_07(a,b,c,mat_size,mat_size,mat_size)
+                        ! Openblas
+                        case  (2); call dgemm('N','N',mat_size,mat_size,mat_size,1.0d0,A,mat_size,B,mat_size,0.d0,C,mat_size)
 
-                    ! C
-                    ! case (11); call my_dgemm_000(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! naive
-                    ! case (12); call my_dgemm_001(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! cache blocking
-                    case (13); call my_dgemm_002(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! cache copy
-                    case (14); call my_dgemm_003(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! loop interchange
-                    case (15); call my_dgemm_004(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! serialize
-                    case (16); call my_dgemm_005(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! kernelize
-                    case (17); call my_dgemm_006(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! loop interchange2
+                        ! Fortran
+                        ! case  (3); call my_dgemm_naive00_00(a,b,c,mat_size,mat_size,mat_size)
+                        ! case  (4); call my_dgemm_naive00_01(a,b,c,mat_size,mat_size,mat_size)
+                        ! case  (5); call my_dgemm_naive00_02(a,b,c,mat_size,mat_size,mat_size)
+                        ! case  (6); call my_dgemm_naive00_03(a,b,c,mat_size,mat_size,mat_size)
+                        ! case  (7); call my_dgemm_naive00_04(a,b,c,mat_size,mat_size,mat_size)
+                        ! case  (8); call my_dgemm_naive00_05(a,b,c,mat_size,mat_size,mat_size)
+                        case  (9); call my_dgemm_naive00_06(a,b,c,mat_size,mat_size,mat_size)
+                        ! case (10); call my_dgemm_naive00_07(a,b,c,mat_size,mat_size,mat_size)
+
+                        ! C
+                        ! case (11); call my_dgemm_000(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! naive
+                        ! case (12); call my_dgemm_001(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! cache blocking
+                        case (13); call my_dgemm_002(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! cache copy
+                        case (14); call my_dgemm_003(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! loop interchange
+                        case (15); call my_dgemm_004(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! serialize
+                        case (16); call my_dgemm_005(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! kernelize
+                        case (17); call my_dgemm_006(a_ptr,b_ptr,c0_ptr,mat_size,mat_size,mat_size) ! loop interchange2
                     end select
 
             end do

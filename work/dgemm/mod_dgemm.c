@@ -857,17 +857,17 @@ void my_dgemm_007(double* A, double* B, double* C, int64_t M, int64_t N, int64_t
     // a: m x k
     // b: k x n
     // c: m x n
-    // size_t M3R = M3%MYBLAS_BLOCK_M; // size of the final block 
-    // size_t N3R = N3%MYBLAS_BLOCK_N; // size of the final block 
-    // size_t K3R = K3%MYBLAS_BLOCK_K; // size of the final block 
+    size_t M3R = M3%MYBLAS_BLOCK_M; // size of the final block 
+    size_t N3R = N3%MYBLAS_BLOCK_N; // size of the final block 
+    size_t K3R = K3%MYBLAS_BLOCK_K; // size of the final block 
 
-    // size_t M3B = M3/MYBLAS_BLOCK_M+(M3R>0?1:0); // number of full blocks 
-    // size_t N3B = N3/MYBLAS_BLOCK_N+(N3R>0?1:0); // number of full blocks 
-    // size_t K3B = K3/MYBLAS_BLOCK_K+(K3R>0?1:0); // number of full blocks 
+    size_t M3B = M3/MYBLAS_BLOCK_M+(M3R>0?1:0); // number of full blocks 
+    size_t N3B = N3/MYBLAS_BLOCK_N+(N3R>0?1:0); // number of full blocks 
+    size_t K3B = K3/MYBLAS_BLOCK_K+(K3R>0?1:0); // number of full blocks 
 
-    // if( M3R==0 ) M3R = MYBLAS_BLOCK_M;
-    // if( N3R==0 ) N3R = MYBLAS_BLOCK_N;
-    // if( K3R==0 ) K3R = MYBLAS_BLOCK_K;
+    if( M3R==0 ) M3R = MYBLAS_BLOCK_M;
+    if( N3R==0 ) N3R = MYBLAS_BLOCK_N;
+    if( K3R==0 ) K3R = MYBLAS_BLOCK_K;
 
     int64_t i1, i2, i3; 
     int64_t j1, j2, j3; 
