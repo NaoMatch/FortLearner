@@ -58,6 +58,13 @@ module mod_dgemm
             type(c_ptr), value        :: a, b, c
             integer(c_int64_t), value :: m, n, k
         end subroutine my_dgemm_007
+
+        subroutine my_dgemm_008(a, b, c, m, n, k) & 
+            Bind(C,Name='my_dgemm_008')
+            Import
+            type(c_ptr), value        :: a, b, c
+            integer(c_int64_t), value :: m, n, k
+        end subroutine my_dgemm_008
     end Interface
 
 contains
