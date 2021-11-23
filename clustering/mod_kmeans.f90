@@ -28,6 +28,8 @@ module mod_kmeans
         procedure :: fit_elkan => fit_elkan_kmeans
         procedure :: fit      => fit_kmeans
         procedure :: fit_slow => fit_slow_kmeans
+        procedure :: fit_dgemm => fit_dgemm_kmeans
+        procedure :: fit_dgemv => fit_dgemv_kmeans
         procedure :: predict  => predict_kmeans
         procedure :: dump     => dump_kmeans
         procedure :: load     => load_kmeans
@@ -277,6 +279,170 @@ contains
         this % is_trained = t_
         this % cluster_centers(:,:) = new_cluster_centers(:,:)
     end subroutine fit_kmeans
+
+    subroutine fit_dgemv_kmeans(this, x)
+        class(kmeans) :: this
+        real(kind=8), intent(in) :: x(:,:)
+
+        integer(kind=8)              :: x_shape(2), iter, c, i, idx, idx_old
+        real(kind=8), allocatable    :: distance_from_cluster_center(:,:)
+        real(kind=8), allocatable    :: new_cluster_centers(:,:), old_cluster_centers(:,:)
+        real(kind=8), allocatable    :: diff_update(:,:)
+        real(kind=8), allocatable    :: x_sq_sum_row(:)
+        integer(kind=8), allocatable :: nearest_cluster_indices(:), nearest_cluster_indices_old(:), counter(:)
+
+        call ifdealloc(this%cluster_centers)
+
+        x_shape = shape(x)
+        this % n_samples = x_shape(1)
+        this % n_columns = x_shape(2)
+
+        allocate(x_sq_sum_row(this%n_samples))
+        x_sq_sum_row(:) = 0d0
+        call matrix_sqsum_row(x, x_sq_sum_row, this % n_samples, this % n_columns)
+        call this%select_initial_clusters(x, x_sq_sum_row, this%n_samples, this%n_columns)
+
+        allocate(distance_from_cluster_center(this%n_samples, this%hparam%n_clusters))
+        allocate(old_cluster_centers(this%n_columns, this%hparam%n_clusters))
+        allocate(new_cluster_centers(this%n_columns, this%hparam%n_clusters))
+        allocate(diff_update(this%n_columns, this%hparam%n_clusters))
+        allocate(nearest_cluster_indices(this%n_samples), nearest_cluster_indices_old(this%n_samples))
+        allocate(counter(this%hparam%n_clusters))
+
+        nearest_cluster_indices_old(:) = -1
+        old_cluster_centers(:,:) = this%cluster_centers(:,:)
+        do iter=1, this%hparam%max_iter, 1
+            ! Calculate Distance From Cluster Centers, and Assign Cluster Index
+            distance_from_cluster_center(:,:) = 0d0
+            do c=1, this%hparam%n_clusters, 1
+                call calculate_distance_from_center_dgemv(x, x_sq_sum_row, old_cluster_centers(:,c), & 
+                    distance_from_cluster_center(:,c), this%n_samples, this%n_columns)
+                ! call calculate_distance_from_center_slow(x, old_cluster_centers(:,c), & 
+                !     distance_from_cluster_center(:,c), this%n_samples, this%n_columns)
+            end do
+            nearest_cluster_indices(:) = minloc(distance_from_cluster_center(:,:), dim=2)
+
+            ! Update Cluster Center Coordinates
+            if (iter .eq. 1_8) then
+                counter(:) = 0_8
+                new_cluster_centers(:,:) = 0d0
+                do i=1, this%n_samples, 1
+                    idx = nearest_cluster_indices(i)
+                    new_cluster_centers(:,idx) = new_cluster_centers(:,idx) + x(i,:)
+                    counter(idx) = counter(idx) + 1_8
+                end do
+            else
+                do c=1, this%hparam%n_clusters, 1
+                    new_cluster_centers(:,c) = new_cluster_centers(:,c)*dble(counter(c))
+                end do
+                do i=1, this%n_samples, 1
+                    idx     = nearest_cluster_indices(i)
+                    idx_old = nearest_cluster_indices_old(i)
+                    if (idx .eq. idx_old) cycle
+                    new_cluster_centers(:,idx_old) = new_cluster_centers(:,idx_old) - x(i,:)
+                    new_cluster_centers(:,idx)     = new_cluster_centers(:,idx)     + x(i,:)
+                    counter(idx_old) = counter(idx_old) - 1_8
+                    counter(idx)     = counter(idx)     + 1_8
+                end do
+            end if
+            nearest_cluster_indices_old = nearest_cluster_indices
+            
+            do c=1, this%hparam%n_clusters, 1
+                new_cluster_centers(:,c) = new_cluster_centers(:,c)/dble(counter(c))
+                diff_update(:,c) = abs(new_cluster_centers(:,c)-old_cluster_centers(:,c))
+            end do
+            old_cluster_centers(:,:) = new_cluster_centers(:,:)
+
+            ! print*, "Iteration: ", iter, counter(:)
+            if (maxval(sum(diff_update**2d0, dim=1)) .le. this%hparam%tolerance) exit
+        end do
+        this % is_trained = t_
+        this % cluster_centers(:,:) = new_cluster_centers(:,:)
+    end subroutine fit_dgemv_kmeans
+
+    !> A subroutine to fit 'kmeans' object by optimized(heuristic) method.
+    !! \param x data to be fitted
+    subroutine fit_dgemm_kmeans(this, x)
+        class(kmeans) :: this
+        real(kind=8), intent(in) :: x(:,:)
+
+        integer(kind=8)              :: x_shape(2), iter, c, i, idx, idx_old
+        real(kind=8), allocatable    :: distance_from_cluster_center(:,:)
+        real(kind=8), allocatable    :: new_cluster_centers(:,:), old_cluster_centers(:,:)
+        real(kind=8), allocatable    :: diff_update(:,:)
+        real(kind=8), allocatable    :: x_sq_sum_row(:)
+        integer(kind=8), allocatable :: nearest_cluster_indices(:), nearest_cluster_indices_old(:), counter(:)
+
+        call ifdealloc(this%cluster_centers)
+
+        x_shape = shape(x)
+        this % n_samples = x_shape(1)
+        this % n_columns = x_shape(2)
+
+        allocate(x_sq_sum_row(this%n_samples))
+        x_sq_sum_row(:) = 0d0
+        call matrix_sqsum_row(x, x_sq_sum_row, this % n_samples, this % n_columns)
+        call this%select_initial_clusters(x, x_sq_sum_row, this%n_samples, this%n_columns)
+
+        allocate(distance_from_cluster_center(this%n_samples, this%hparam%n_clusters))
+        allocate(old_cluster_centers(this%n_columns, this%hparam%n_clusters))
+        allocate(new_cluster_centers(this%n_columns, this%hparam%n_clusters))
+        allocate(diff_update(this%n_columns, this%hparam%n_clusters))
+        allocate(nearest_cluster_indices(this%n_samples), nearest_cluster_indices_old(this%n_samples))
+        allocate(counter(this%hparam%n_clusters))
+
+        nearest_cluster_indices_old(:) = -1
+        old_cluster_centers(:,:) = this%cluster_centers(:,:)
+        do iter=1, this%hparam%max_iter, 1
+            ! Calculate Distance From Cluster Centers, and Assign Cluster Index
+            distance_from_cluster_center(:,:) = spread(x_sq_sum_row, dim=2, ncopies=this%hparam%n_clusters) & 
+                                            +   spread(sum(old_cluster_centers**2, dim=1), dim=1, ncopies=this % n_samples)
+            call dgemm("N", "N", & 
+                this % n_samples, this%hparam%n_clusters, this % n_columns, &
+                -2d0, & 
+                x, this % n_samples, &
+                old_cluster_centers, this % n_columns, &
+                1d0, &
+                distance_from_cluster_center, this % n_samples)
+            nearest_cluster_indices(:) = minloc(distance_from_cluster_center(:,:), dim=2)
+
+            ! Update Cluster Center Coordinates
+            if (iter .eq. 1_8) then
+                counter(:) = 0_8
+                new_cluster_centers(:,:) = 0d0
+                do i=1, this%n_samples, 1
+                    idx = nearest_cluster_indices(i)
+                    new_cluster_centers(:,idx) = new_cluster_centers(:,idx) + x(i,:)
+                    counter(idx) = counter(idx) + 1_8
+                end do
+            else
+                do c=1, this%hparam%n_clusters, 1
+                    new_cluster_centers(:,c) = new_cluster_centers(:,c)*dble(counter(c))
+                end do
+                do i=1, this%n_samples, 1
+                    idx     = nearest_cluster_indices(i)
+                    idx_old = nearest_cluster_indices_old(i)
+                    if (idx .eq. idx_old) cycle
+                    new_cluster_centers(:,idx_old) = new_cluster_centers(:,idx_old) - x(i,:)
+                    new_cluster_centers(:,idx)     = new_cluster_centers(:,idx)     + x(i,:)
+                    counter(idx_old) = counter(idx_old) - 1_8
+                    counter(idx)     = counter(idx)     + 1_8
+                end do
+            end if
+            nearest_cluster_indices_old = nearest_cluster_indices
+            
+            do c=1, this%hparam%n_clusters, 1
+                new_cluster_centers(:,c) = new_cluster_centers(:,c)/dble(counter(c))
+                diff_update(:,c) = abs(new_cluster_centers(:,c)-old_cluster_centers(:,c))
+            end do
+            old_cluster_centers(:,:) = new_cluster_centers(:,:)
+
+            ! print*, "Iteration: ", iter, counter(:)
+            if (maxval(sum(diff_update**2d0, dim=1)) .le. this%hparam%tolerance) exit
+        end do
+        this % is_trained = t_
+        this % cluster_centers(:,:) = new_cluster_centers(:,:)
+    end subroutine fit_dgemm_kmeans
 
     !> A subroutine to fit 'kmeans' object by elkan's method.
     !! \param x data to be fitted
@@ -725,6 +891,26 @@ contains
             distance(i) = maxval((/-2d0*distance(i) + x_sq_sum_row(i) + center_sq_sum, 0d0/))
         end do
     end subroutine calculate_distance_from_center
+
+    subroutine calculate_distance_from_center_dgemv(x, x_sq_sum_row, center, distance, n_samples, n_columns)
+        real(kind=8), intent(in)    :: x(n_samples, n_columns)
+        real(kind=8), intent(in)    :: x_sq_sum_row(n_samples)
+        real(kind=8), intent(in)    :: center(n_columns)
+        real(kind=8), intent(inout) :: distance(n_samples)
+        integer(kind=8), intent(in) :: n_samples, n_columns
+
+        real(kind=8) :: center_sq_sum
+        integer(kind=8) :: i, j
+
+        center_sq_sum = sum(center**2d0)
+        ! distance(:) = 0d0
+        ! call multi_mat_vec_r8(x, center, distance, n_samples, n_columns)
+        call dgemv("N", n_samples, n_columns, 1d0, x, n_samples, center, 1_8, 0d0, distance, 1_8)
+        ! call multi_mat_vec_parallel_r8(x, center, distance, n_samples, n_columns)
+        do i=1, n_samples, 1
+            distance(i) = maxval((/-2d0*distance(i) + x_sq_sum_row(i) + center_sq_sum, 0d0/))
+        end do
+    end subroutine calculate_distance_from_center_dgemv
 
     !> A subroutine to get nearest distance. 
     !> Compare two distances('nearest_distance', 'distance') and take out the smallest value.

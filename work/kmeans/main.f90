@@ -66,13 +66,16 @@ program main
     ! print*, maxval(x_train, dim=1)
 
 
-    n_cluster=4
+    n_cluster=35
     n_iter = 100
     allocate(tmp_i(n_cluster))
     allocate(tmp_r(n_cluster))
     
 
     do iter=1, n_iter, 1
+        print*, '============================================================='
+        print*, '============================================================='
+        print*, '============================================================='
         km = kmeans(n_clusters=n_cluster)
         call date_and_time(values=date_value1)
         call km%fit(x_train)
@@ -80,12 +83,12 @@ program main
         score = km%score(x_train)
         print*, "Lloyd:           ", time_diff(date_value1, date_value2), score
 
-        km = kmeans(n_clusters=n_cluster)
-        call date_and_time(values=date_value1)
-        call km%fit_slow(x_train)
-        call date_and_time(values=date_value2)
-        score = km%score(x_train)
-        print*, "Lloyd_slow:      ", time_diff(date_value1, date_value2), score
+        ! km = kmeans(n_clusters=n_cluster)
+        ! call date_and_time(values=date_value1)
+        ! call km%fit_slow(x_train)
+        ! call date_and_time(values=date_value2)
+        ! score = km%score(x_train)
+        ! print*, "Lloyd_slow:      ", time_diff(date_value1, date_value2), score
 
         km = kmeans(n_clusters=n_cluster)
         call date_and_time(values=date_value1)
@@ -93,6 +96,20 @@ program main
         call date_and_time(values=date_value2)
         score = km%score(x_train)
         print*, "Elkan's Method2: ", time_diff(date_value1, date_value2), score
+
+        km = kmeans(n_clusters=n_cluster)
+        call date_and_time(values=date_value1)
+        call km%fit_dgemm(x_train)
+        call date_and_time(values=date_value2)
+        score = km%score(x_train)
+        print*, "Lloyd with dgemm: ", time_diff(date_value1, date_value2), score
+
+        km = kmeans(n_clusters=n_cluster)
+        call date_and_time(values=date_value1)
+        call km%fit_dgemv(x_train)
+        call date_and_time(values=date_value2)
+        score = km%score(x_train)
+        print*, "Lloyd with dgemv: ", time_diff(date_value1, date_value2), score
         ! print*, '============================================================='
         !     tmp_r = km%cluster_centers(1,:)
         !     do c=1, n_cluster, 1
