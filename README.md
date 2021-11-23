@@ -6,9 +6,10 @@ cd test_script
 make test  
 
 # WIP:
-re-implement matrix-vector multiplication for accelerating kmeans     
+kdtree for dbscan  
 
 # Update
+2021/11/23: (postponed) re-implement matrix-vector multiplication for accelerating kmeans  
 2021/10/12: add 'isolation_forest' benchmark  
 2021/10/10: Implemented elkan's method to speed up "kmeans", but it didn't make sense.  
 2021/09/28: speed up 'kmeans++'(see benchmark)  
