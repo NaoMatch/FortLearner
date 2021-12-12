@@ -70,7 +70,7 @@ rm:
 	rm ./main.out
 
 main:
-	$(compiler_fortran) $(mod) $(opt) -cpp -D_x86_64 -fopenmp -fbounds-check -w -c ./mod_nearest_neighbour.f90 -o ./mod/mod_nearest_neighbour.out
+	$(compiler_fortran) $(mod) $(opt)  $(option) -w -c ./mod_nearest_neighbour.f90 -o ./mod/mod_nearest_neighbour.out
 	$(compiler_fortran) -w -unroll \
 	$(common) \
 	./mod/mod_nearest_neighbour.out \
