@@ -45,7 +45,9 @@ module mod_nearest_neighbour
 
         integer(kind=8) :: n_samples, n_columns
         real(kind=8), ALLOCATABLE :: x(:,:)
+        real(kind=8), ALLOCATABLE :: x_t(:,:)
         real(kind=8), ALLOCATABLE :: x_sq_sum_row(:)
+        real(kind=8), ALLOCATABLE :: q_sq_sum_row(:)
     contains
         procedure :: build
         procedure :: build_rec
@@ -56,14 +58,31 @@ module mod_nearest_neighbour
         procedure :: query_nearest
         procedure :: query_nearest_rec_get_leaf_ptr
         procedure :: query_nearest_rec_get_leaf_ptrs ! return all samples's leaf node pointer
-        procedure :: query_nearest_get_nearest_in_same_leaf_node
         procedure :: query_nearest_search_subtree
+
+        procedure :: query_nearest_use_sq_sum
+        procedure :: query_nearest_rec_get_leaf_ptr_use_sq_sum
+        procedure :: query_nearest_search_subtree_use_sq_sum
+        
         ! procedure :: query_rec
     end type kdtree
 
     interface kdtree
         module procedure :: new_kdtree
     end interface kdtree
+
+    type index
+        integer(kind=8), allocatable :: idx(:)
+    end type index
+
+    type distance
+        integer(kind=8), allocatable :: dst(:)
+    end type distance
+
+    type kdtree_results
+        type(index), ALLOCATABLE :: indices(:)
+        type(distance), ALLOCATABLE :: distances(:)
+    end type kdtree_results
 
 contains
 
@@ -241,8 +260,10 @@ contains
         this%n_columns = n_columns
         allocate(this%x(this%n_samples, this%n_columns))
         this%x(:,:) = x(:,:)
-        ! allocate(this%x_sq_sum_row(this%n_samples))
-        ! call matrix_sqsum_row(x, this%x_sq_sum_row, n_samples, n_columns, parallel=f_)
+        allocate(this%x_t(this%n_columns, this%n_samples))
+        this%x_t(:,:) = transpose(x(:,:))
+        allocate(this%x_sq_sum_row(this%n_samples))
+        call matrix_sqsum_row(x, this%x_sq_sum_row, n_samples, n_columns, parallel=f_)
     end subroutine build
 
     recursive subroutine build_rec(this, node, x_ptr, node_idx)
@@ -283,6 +304,7 @@ contains
 
         ! argsort
         call quick_argselect(f_tmp, node%indices, node%n_samples, med_idx)
+        ! call quick_argsort(f_tmp, node%indices, node%n_samples)
         node%split_val = f_tmp(med_idx)
 
         n_samples_l = med_idx-1
@@ -330,6 +352,7 @@ contains
         n_samples = size(x(:,1))
         n_columns = size(x(1,:))
 
+        if (ASSOCIATED(this%root_node_ptr_)) nullify(this%root_node_ptr_)
         allocate(this%root_node_ptr_)
         call this%root_node_ptr_%init(t_, f_, f_, 0_8, n_samples, n_columns, this%min_samples_in_leaf)
         this%root_node_ptr_%idx = 0
@@ -347,6 +370,10 @@ contains
         call ifdealloc(this%x)
         allocate(this%x(this%n_samples, this%n_columns))
         this%x(:,:) = x(:,:)
+
+        call ifdealloc(this%x_t)
+        allocate(this%x_t(this%n_columns, this%n_samples))
+        this%x_t(:,:) = transpose(x(:,:))
 
         call ifdealloc(this%x_sq_sum_row)
         allocate(this%x_sq_sum_row(this%n_samples))
@@ -402,11 +429,12 @@ contains
         call this%build_ver02_rec(node%node_r_ptr, x_ptr, node_idx)
     end subroutine build_ver02_rec
 
-    function query_nearest(this, q)
+    function query_nearest(this, q, iii, iii_max)
         implicit none
         integer(kind=8), allocatable     :: query_nearest(:,:)
         class(kdtree)                    :: this
         real(kind=8), target, intent(in) :: q(:,:)
+        integer(kind=8), intent(in) :: iii, iii_max
 
         integer(kind=8)       :: n_samples, n_columns, q_shape(2)
         real(kind=8), pointer :: q_ptr(:,:)
@@ -414,10 +442,20 @@ contains
         real(kind=8)                 :: val, nearest_dist
         integer(kind=8)              :: i, nearest_idx, fid
         integer(kind=8), allocatable :: indices(:), nearest_idxs(:)
-        real(kind=8), allocatable :: nearest_dists(:)
+        real(kind=8), allocatable :: nearest_dists(:), q_vals(:), q_sq_sum_row(:)
         type(node_type_ptr), ALLOCATABLE :: leaf_ptrs(:)
         type(node_type), target :: root_node
         type(node_type), pointer :: root_node_ptr, node_ptr, leaf_node_ptr
+
+        integer(kind=8) :: date_value1(8), date_value2(8)
+        integer(kind=8), save :: t_init, t_get_leaf, t_get_first_near, t_search_best
+
+        if (iii .eq. 1_8) then
+            t_init = 0_8
+            t_get_leaf = 0_8
+            t_get_first_near = 0_8
+            t_search_best = 0_8
+        end if
 
         ! print*, 1
         q_shape = shape(q)
@@ -430,35 +468,25 @@ contains
         allocate(query_nearest(n_samples, 1_8))
         query_nearest(:,:) = -1_8
 
-        ! print*, 3
-        allocate(leaf_ptrs(n_samples))
-        allocate(indices(n_samples))
-        allocate(nearest_dists(n_samples))
-        allocate(nearest_idxs(n_samples))
-        do i=1, n_samples, 1
-            indices(i) = i
-            nearest_dists(i) = huge(0d0)
-            nearest_idxs(i) = -2
-            nullify(leaf_ptrs(i)%ptr)
-        end do
-
-        ! print*, 4
-        root_node = this%root_node_
-        root_node_ptr => root_node
+        allocate(q_vals(n_columns))
 
         ! print*, 5
-
-        !$omp parallel num_threads(4)
-        !$omp do private(i, node_ptr, leaf_node_ptr, nearest_dist, nearest_idx, fid, val)
+        !$omp parallel num_threads(8) shared(this, query_nearest)
+        !$omp do private(leaf_node_ptr, node_ptr, nearest_dist, nearest_idx, i, fid, val, q_vals) &
+        !$omp reduction(+:t_get_leaf) reduction(+:t_search_best)
         do i=1, n_samples, 1
-            call this%query_nearest_rec_get_leaf_ptr(this%root_node_ptr_, q_ptr(i,:), & 
+            q_vals = q_ptr(i,:)
+            nearest_dist = huge(nearest_dist)
+            nearest_idx = -2
+            call date_and_time(values=date_value1)
+            call this%query_nearest_rec_get_leaf_ptr(this%root_node_ptr_, q_vals, & 
                 leaf_node_ptr, nearest_dist, nearest_idx, n_columns)
-
-            call this%query_nearest_get_nearest_in_same_leaf_node(i, nearest_idx, nearest_dist, &
-                q_ptr, leaf_node_ptr, n_columns)
+            call date_and_time(values=date_value2)
+            t_get_leaf = t_get_leaf + time_diff(date_value1, date_value2)
 
             node_ptr => leaf_node_ptr
 
+            call date_and_time(values=date_value1)
             do while (t_)
                 ! call node_ptr%node_p_ptr%info()
                 if (.not. ASSOCIATED(node_ptr%node_p_ptr)) exit
@@ -467,23 +495,141 @@ contains
                 val = node_ptr%node_p_ptr%split_val
 
                 ! print*, fid, val, nearest_idx, nearest_dist
-                if ( (q_ptr(i,fid)-val)**2d0 < nearest_dist ) then
+                if ( (q_vals(fid)-val)**2d0 < nearest_dist ) then
                     if (node_ptr%is_left) then
-                        call this%query_nearest_search_subtree(node_ptr%node_p_ptr%node_r_ptr, q_ptr(i,:), & 
+                        call this%query_nearest_search_subtree(node_ptr%node_p_ptr%node_r_ptr, q_vals, & 
                             nearest_idx, nearest_dist, n_columns)
                     else
-                        call this%query_nearest_search_subtree(node_ptr%node_p_ptr%node_l_ptr, q_ptr(i,:), & 
+                        call this%query_nearest_search_subtree(node_ptr%node_p_ptr%node_l_ptr, q_vals, & 
+                            nearest_idx, nearest_dist, n_columns)
+                    end if
+                else
+                    exit
+                end if
+                node_ptr => node_ptr%node_p_ptr
+            end do
+            call date_and_time(values=date_value2)
+            t_search_best = t_search_best + time_diff(date_value1, date_value2)
+            query_nearest(i,1) = nearest_idx
+        end do
+        !$omp end do
+        !$omp end parallel 
+
+        if (iii .eq. iii_max) then
+            print*, "t_init:           ", t_init / dble(iii_max)
+            print*, "t_get_leaf:       ", t_get_leaf / dble(iii_max)
+            print*, "t_get_first_near: ", t_get_first_near / dble(iii_max)
+            print*, "t_search_best:    ", t_search_best / dble(iii_max)
+        end if
+
+    end function query_nearest
+
+    function query_nearest_use_sq_sum(this, q, iii, iii_max)
+        implicit none
+        integer(kind=8), allocatable     :: query_nearest_use_sq_sum(:,:)
+        class(kdtree)                    :: this
+        real(kind=8), target, intent(in) :: q(:,:)
+        integer(kind=8), intent(in) :: iii, iii_max
+
+        integer(kind=8)       :: n_samples, n_columns, q_shape(2)
+        real(kind=8), pointer :: q_ptr(:,:)
+
+        real(kind=8)                 :: val, nearest_dist, q_sq
+        integer(kind=8)              :: i, nearest_idx, fid, q_idx
+        integer(kind=8), allocatable :: indices(:), nearest_idxs(:)
+        real(kind=8), allocatable :: nearest_dists(:), q_vals(:), q_sq_sum_row(:)
+        type(node_type_ptr), ALLOCATABLE :: leaf_ptrs(:)
+        type(node_type), target :: root_node
+        type(node_type), pointer :: root_node_ptr, node_ptr, leaf_node_ptr
+
+        integer(kind=8) :: date_value1(8), date_value2(8)
+        integer(kind=8), save :: t_init, t_get_leaf, t_get_first_near, t_search_best
+
+        if (iii .eq. 1_8) then
+            t_init = 0_8
+            t_get_leaf = 0_8
+            t_get_first_near = 0_8
+            t_search_best = 0_8
+        end if
+
+        ! print*, 1
+        q_shape = shape(q)
+        n_samples = q_shape(1)
+        n_columns = q_shape(2)
+        q_ptr => q
+        call ifdealloc(this%q_sq_sum_row)
+        allocate(this%q_sq_sum_row(n_samples))
+        call matrix_sqsum_row(q, this%q_sq_sum_row, n_samples, n_columns, parallel=f_)
+
+        ! print*, 2
+        call ifdealloc(query_nearest_use_sq_sum)
+        allocate(query_nearest_use_sq_sum(n_samples, 1_8))
+        query_nearest_use_sq_sum(:,:) = -1_8
+
+        ! print*, 4
+        root_node = this%root_node_
+        root_node_ptr => root_node
+
+        allocate(q_vals(n_columns))
+
+        ! print*, 5
+        !$omp parallel num_threads(4)
+        !$omp do private(leaf_node_ptr, nearest_dist, nearest_idx, i, node_ptr, fid, val, q_vals, q_idx, q_sq) &
+        !$omp reduction(+:t_get_leaf) reduction(+:t_search_best)
+        do i=1, n_samples, 1
+            q_idx = i
+            q_vals = q_ptr(q_idx,:)
+            q_sq = this%q_sq_sum_row(q_idx)
+            nearest_dist = huge(nearest_dist)
+            nearest_idx = -2
+            call date_and_time(values=date_value1)
+            call this%query_nearest_rec_get_leaf_ptr_use_sq_sum(this%root_node_ptr_, q_vals, q_sq, & 
+                leaf_node_ptr, nearest_dist, nearest_idx, n_columns)
+            if (i .eq. 77_8) then
+                call leaf_node_ptr%node_p_ptr%info()
+                call quick_sort(leaf_node_ptr%indices(:), leaf_node_ptr%n_samples)
+                print*, leaf_node_ptr%indices(:)
+            end if
+            call date_and_time(values=date_value2)
+            t_get_leaf = t_get_leaf + time_diff(date_value1, date_value2)
+
+            node_ptr => leaf_node_ptr
+
+            call date_and_time(values=date_value1)
+            do while (t_)
+                ! call node_ptr%node_p_ptr%info()
+                if (.not. ASSOCIATED(node_ptr%node_p_ptr)) exit
+
+                fid = node_ptr%node_p_ptr%split_fid
+                val = node_ptr%node_p_ptr%split_val
+
+                ! print*, fid, val, nearest_idx, nearest_dist
+                if ( (q_vals(fid)-val)**2d0 < nearest_dist ) then
+                    if (node_ptr%is_left) then
+                        call this%query_nearest_search_subtree_use_sq_sum(node_ptr%node_p_ptr%node_r_ptr, q_vals, q_sq, & 
+                            nearest_idx, nearest_dist, n_columns)
+                    else
+                        call this%query_nearest_search_subtree_use_sq_sum(node_ptr%node_p_ptr%node_l_ptr, q_vals, q_sq, & 
                             nearest_idx, nearest_dist, n_columns)
                     end if
                 end if
                 node_ptr => node_ptr%node_p_ptr
             end do
-            query_nearest(i,1) = nearest_idx
+            call date_and_time(values=date_value2)
+            t_search_best = t_search_best + time_diff(date_value1, date_value2)
+            query_nearest_use_sq_sum(i,1) = nearest_idx
         end do
         !$omp end do
-        !$omp end parallel
+        !$omp end parallel 
 
-    end function query_nearest
+        if (iii .eq. iii_max) then
+            print*, "t_init:           ", t_init / dble(iii_max)
+            print*, "t_get_leaf:       ", t_get_leaf / dble(iii_max)
+            print*, "t_get_first_near: ", t_get_first_near / dble(iii_max)
+            print*, "t_search_best:    ", t_search_best / dble(iii_max)
+        end if
+
+    end function query_nearest_use_sq_sum
 
     recursive subroutine query_nearest_rec_get_leaf_ptrs(this, root_node_ptr, q_ptr, leaf_ptrs, indices, &
         nearest_dists, nearest_idxs, n_samples)
@@ -597,14 +743,6 @@ contains
             nearest_dist = dist_old
             nearest_idx = idx_old
             return
-        else
-            ! Compute Distance From Split Point
-            x_idx = root_node_ptr%idx
-            dist = sum( (q(:)-this%x(x_idx,:))**2d0 )
-            if (nearest_dist > dist) then
-                nearest_dist = dist
-                nearest_idx  = x_idx
-            end if
         end if
 
         f_idx = root_node_ptr%split_fid
@@ -621,31 +759,55 @@ contains
         end if
     end subroutine query_nearest_rec_get_leaf_ptr
 
-    subroutine query_nearest_get_nearest_in_same_leaf_node(this, sample_idx, nearest_idx, nearest_dist, q_ptr, leaf_ptr, n_columns)
+    recursive subroutine query_nearest_rec_get_leaf_ptr_use_sq_sum(this, root_node_ptr, q, q_sq, leaf_ptr, &
+        nearest_dist, nearest_idx, n_columns)
         implicit none
-        class(kdtree)                   :: this
-        integer(kind=8), intent(in)     :: sample_idx
-        integer(kind=8), intent(inout)  :: nearest_idx
-        real(kind=8), intent(inout)     :: nearest_dist
-        real(kind=8), intent(in)        :: q_ptr(:,:)
-        type(node_type), pointer, intent(in) :: leaf_ptr
-        integer(kind=8), intent(in)     :: n_columns
-        type(node_type), pointer        :: node_ptr
+        class(kdtree)            :: this
+        type(node_type), pointer :: root_node_ptr
+        real(kind=8), intent(in) :: q(n_columns)
+        real(kind=8), intent(in) :: q_sq
+        type(node_type), pointer :: leaf_ptr
+        real(kind=8), intent(inout) :: nearest_dist
+        integer(kind=8), intent(inout) :: nearest_idx
+        integer(kind=8)          :: n_columns
 
-        integer(kind=8) :: i, idx
-        real(kind=8) :: q_sq_sum
-        real(kind=8), allocatable :: dists(:)
+        real(kind=8) :: f_val, dist, dist_new, dist_old, idx_new, idx_old, dist_q
+        integer(kind=8) :: i, j, idx, x_idx, f_idx, n_samples_l, n_samples_r, idx_l, idx_r
+        integer(kind=8), allocatable :: indices_l(:), indices_r(:)
+        logical(kind=4), allocatable :: tmp_l(:)
+        logical(kind=4) :: goto_left
 
-        q_sq_sum = sum(q_ptr(sample_idx,:)*q_ptr(sample_idx,:))
-        allocate(dists(leaf_ptr%n_samples))
-        dists(:) = q_sq_sum
-        do i=1, leaf_ptr%n_samples, 1
-            idx = leaf_ptr%indices(i)
-            dists(i) = sum( (this%x(idx,:)-q_ptr(sample_idx,:))**2d0 )
-        end do
-        nearest_dist = minval(dists)
-        nearest_idx = leaf_ptr%indices(minloc(dists, dim=1))
-    end subroutine query_nearest_get_nearest_in_same_leaf_node
+        if (root_node_ptr%is_leaf) then
+            ! Search Closest Point from Leaf Node
+            dist_old = nearest_dist
+            idx_old  = nearest_idx
+            leaf_ptr => root_node_ptr
+            do j=1, leaf_ptr%n_samples, 1
+                x_idx = leaf_ptr%indices(j)
+                dist_new = q_sq + this%x_sq_sum_row(x_idx) - 2d0*dot_product( q(:),this%x(x_idx,:) )
+                if ( dist_new < dist_old ) then
+                    idx_old = x_idx
+                    dist_old = dist_new
+                end if
+            end do
+            nearest_dist = dist_old
+            nearest_idx = idx_old
+            return
+        end if
+
+        f_idx = root_node_ptr%split_fid
+        f_val = root_node_ptr%split_val
+
+        goto_left = q(f_idx) <= f_val
+
+        if (goto_left) then
+            call query_nearest_rec_get_leaf_ptr_use_sq_sum(this, root_node_ptr%node_l_ptr, q, q_sq, leaf_ptr, &
+                nearest_dist, nearest_idx, n_columns)
+        else
+            call query_nearest_rec_get_leaf_ptr_use_sq_sum(this, root_node_ptr%node_r_ptr, q, q_sq, leaf_ptr, &
+                nearest_dist, nearest_idx, n_columns)
+        end if
+    end subroutine query_nearest_rec_get_leaf_ptr_use_sq_sum
 
     recursive subroutine query_nearest_search_subtree(this, subtree_root_node_ptr, q, nearest_idx, nearest_dst, n_columns)
         implicit none
@@ -656,8 +818,9 @@ contains
         real(kind=8), intent(inout)    :: nearest_dst
         integer(kind=8), intent(in)    :: n_columns
 
-        integer(kind=8) :: i, j, idx_old, idx_new, x_idx
-        real(kind=8) :: dist_old, dist_new, dist
+
+        integer(kind=8) :: i, j, idx_old, idx_new, x_idx, fid
+        real(kind=8) :: dist_old, dist_new, dist, dist_from_q_to_plane, val_x, val_q, dist_from_q_to_x
 
         if (subtree_root_node_ptr%is_leaf) then
             ! Search Closest Point from Leaf Node
@@ -675,17 +838,95 @@ contains
             nearest_idx = idx_old
             return
         else
-            ! Compute Distance From Split Point
-            x_idx = subtree_root_node_ptr%idx
-            dist_new = sum( (q(:)-this%x(x_idx,:))**2d0 )
-            if (nearest_dst > dist_new) then
-                nearest_dst = dist_new
-                nearest_idx = x_idx
+            ! Compute Distance From Q to Split Plane
+            fid = subtree_root_node_ptr%split_fid
+            val_x = subtree_root_node_ptr%split_val
+            val_q = q(fid)
+            dist_from_q_to_plane = (val_q-val_x)**2d0
+
+            if (nearest_dst < dist_from_q_to_plane) then
+                if (val_q <= val_x) then
+                    call this%query_nearest_search_subtree(subtree_root_node_ptr%node_l_ptr, &
+                        q, nearest_idx, nearest_dst, n_columns)
+                else
+                    call this%query_nearest_search_subtree(subtree_root_node_ptr%node_r_ptr, &
+                        q, nearest_idx, nearest_dst, n_columns)
+                end if
+            else
+
+                x_idx = subtree_root_node_ptr%data_index
+                dist_from_q_to_x = sum( (q(:)-this%x(x_idx,:))**2d0 )
+                if (nearest_dst > dist_from_q_to_x) then
+                    nearest_dst = dist_from_q_to_x 
+                    nearest_idx = x_idx
+                end if
+
+                call this%query_nearest_search_subtree(subtree_root_node_ptr%node_l_ptr, &
+                    q, nearest_idx, nearest_dst, n_columns)
+                call this%query_nearest_search_subtree(subtree_root_node_ptr%node_r_ptr, &
+                    q, nearest_idx, nearest_dst, n_columns)
             end if
         end if
-        call this%query_nearest_search_subtree(subtree_root_node_ptr%node_l_ptr, q, nearest_idx, nearest_dst, n_columns)
-        call this%query_nearest_search_subtree(subtree_root_node_ptr%node_r_ptr, q, nearest_idx, nearest_dst, n_columns)
     end subroutine query_nearest_search_subtree
+
+    recursive subroutine query_nearest_search_subtree_use_sq_sum(this, subtree_root_node_ptr, q, q_sq, &
+        nearest_idx, nearest_dst, n_columns)
+        implicit none
+        class(kdtree) :: this
+        type(node_type), pointer       :: subtree_root_node_ptr
+        real(kind=8), intent(in)       :: q(n_columns), q_sq
+        integer(kind=8), intent(inout) :: nearest_idx
+        real(kind=8), intent(inout)    :: nearest_dst
+        integer(kind=8), intent(in)    :: n_columns
+
+        integer(kind=8) :: i, j, idx_old, idx_new, x_idx, fid
+        real(kind=8) :: dist_old, dist_new, dist, dist_from_q_to_plane, val_x, val_q, dist_from_q_to_x
+
+        if (subtree_root_node_ptr%is_leaf) then
+            ! Search Closest Point from Leaf Node
+            dist_old = nearest_dst
+            idx_old = nearest_idx
+            do j=1, subtree_root_node_ptr%n_samples, 1
+                x_idx = subtree_root_node_ptr%indices(j)
+                dist_new = q_sq + this%x_sq_sum_row(x_idx) - 2d0*sum( q(:)*this%x_t(:,x_idx) )
+                if ( dist_new < dist_old ) then
+                    idx_old = x_idx
+                    dist_old = dist_new
+                end if
+            end do
+            nearest_dst = dist_old
+            nearest_idx = idx_old
+            return
+        else
+            ! Compute Distance From Q to Split Plane
+            fid = subtree_root_node_ptr%split_fid
+            val_x = subtree_root_node_ptr%split_val
+            val_q = q(fid)
+            dist_from_q_to_plane = (val_q-val_x)**2d0
+
+            if (nearest_dst < dist_from_q_to_plane) then
+                if (val_q <= val_x) then
+                    call this%query_nearest_search_subtree_use_sq_sum(subtree_root_node_ptr%node_l_ptr, &
+                        q, q_sq, nearest_idx, nearest_dst, n_columns)
+                else
+                    call this%query_nearest_search_subtree_use_sq_sum(subtree_root_node_ptr%node_r_ptr, &
+                        q, q_sq, nearest_idx, nearest_dst, n_columns)
+                end if
+            else
+                x_idx = subtree_root_node_ptr%data_index
+                dist_from_q_to_x = q_sq + this%x_sq_sum_row(x_idx) - 2d0*dot_product( q(:),this%x(x_idx,:) )
+                if (nearest_dst > dist_from_q_to_x) then
+                    nearest_dst = dist_from_q_to_x 
+                    nearest_idx = x_idx
+                end if
+
+                call this%query_nearest_search_subtree_use_sq_sum(subtree_root_node_ptr%node_l_ptr, &
+                    q, q_sq, nearest_idx, nearest_dst, n_columns)
+                call this%query_nearest_search_subtree_use_sq_sum(subtree_root_node_ptr%node_r_ptr, &
+                    q, q_sq, nearest_idx, nearest_dst, n_columns)
+            end if
+        end if
+    end subroutine query_nearest_search_subtree_use_sq_sum
 
     recursive subroutine bottom_to_top(node_ptr)
         implicit none
