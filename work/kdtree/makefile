@@ -1,7 +1,7 @@
 compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
-opt              := -O3
+opt              := -O3 -funroll-loops -ffast-math -fprefetch-loop-arrays
 option           := -cpp -D_x86_64 -fopenmp
 option_blas      := -lopenblas
 

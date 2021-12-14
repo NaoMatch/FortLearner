@@ -5,6 +5,7 @@ program main
     use mod_nearest_neighbour
     implicit none
     integer(kind=8) :: date_value1(8), date_value2(8)
+    integer(kind=8), allocatable :: time1(:), time2(:)
     type(kdtree) :: tree, tree_pointer
     type(kdtree_results) :: results
     
@@ -37,7 +38,8 @@ program main
     n_rows_x = 100000
     n_rows_y = 200
     n_cols = 10
-    n_iter = 100
+    n_iter = 500
+    n_iter = 1
 
     ! call date_and_time(values=date_value1)
     ! allocate(x(n_rows_x, n_cols), x_sq_sum(n_rows_x))
@@ -99,7 +101,7 @@ program main
     print*, "Data Shape: x: ", shape(x)
     print*, "Data Shape: y: ", shape(y)
 
-    tree_pointer = kdtree(min_samples_in_leaf=64_8)
+    tree_pointer = kdtree(min_samples_in_leaf=128_8)
     call date_and_time(values=date_value1)
     call tree_pointer%build(x)
     call date_and_time(values=date_value2)
@@ -107,10 +109,63 @@ program main
 
     call date_and_time(values=date_value1)
     do iter=1, n_iter
+        results = tree_pointer%query(y, iter, n_iter, n_neighbors=2_8)
+    end do
+    call date_and_time(values=date_value2)
+    print*, "NearestNeighborSearch, n_neighbors=2: ", time_diff(date_value1, date_value2)/dble(n_iter)
+
+    call date_and_time(values=date_value1)
+    do iter=1, n_iter
+        results = tree_pointer%query(y, iter, n_iter, n_neighbors=4_8)
+    end do
+    call date_and_time(values=date_value2)
+    print*, "NearestNeighborSearch, n_neighbors=4: ", time_diff(date_value1, date_value2)/dble(n_iter)
+
+    call date_and_time(values=date_value1)
+    do iter=1, n_iter
+        results = tree_pointer%query(y, iter, n_iter, n_neighbors=8_8)
+    end do
+    call date_and_time(values=date_value2)
+    print*, "NearestNeighborSearch, n_neighbors=8: ", time_diff(date_value1, date_value2)/dble(n_iter)
+
+    call date_and_time(values=date_value1)
+    do iter=1, n_iter
+        results = tree_pointer%query(y, iter, n_iter, n_neighbors=16_8)
+    end do
+    call date_and_time(values=date_value2)
+    print*, "NearestNeighborSearch, n_neighbors=16: ", time_diff(date_value1, date_value2)/dble(n_iter)
+
+    call date_and_time(values=date_value1)
+    do iter=1, n_iter
+        results = tree_pointer%query(y, iter, n_iter, n_neighbors=32_8)
+    end do
+    call date_and_time(values=date_value2)
+    print*, "NearestNeighborSearch, n_neighbors=32: ", time_diff(date_value1, date_value2)/dble(n_iter)
+
+    call date_and_time(values=date_value1)
+    do iter=1, n_iter
         results = tree_pointer%query(y, iter, n_iter, n_neighbors=1_8)
     end do
     call date_and_time(values=date_value2)
-    print*, "NearestNeighborSearch: ", time_diff(date_value1, date_value2)/dble(n_iter)
+    print*, "NearestNeighborSearch, n_neighbors=1: ", time_diff(date_value1, date_value2)/dble(n_iter)
+    print*, "NearestNeighborSearch, n_neighbors=32: ", time_diff(date_value1, date_value2)/dble(n_iter)
+
+    call date_and_time(values=date_value1)
+    do iter=1, n_iter
+        results = tree_pointer%query(y, iter, n_iter, n_neighbors=128_8)
+    end do
+    call date_and_time(values=date_value2)
+    print*, "NearestNeighborSearch, n_neighbors=128: ", time_diff(date_value1, date_value2)/dble(n_iter)
+
+    call date_and_time(values=date_value1)
+    do iter=1, n_iter
+        results = tree_pointer%query(y, iter, n_iter, n_neighbors=10000_8)
+    end do
+    call date_and_time(values=date_value2)
+    print*, "NearestNeighborSearch, n_neighbors=10000: ", time_diff(date_value1, date_value2)/dble(n_iter)
+
+    print*, size(results%distances(1)%dst)
+
 
     ! call date_and_time(values=date_value1)
     ! do iter=1, n_iter
@@ -130,21 +185,6 @@ program main
         y_t, n_cols, &
         1d0, &
         dist_fully, n_rows_x)
-
-    !$omp parallel num_threads(4)
-    !$omp do private(i,j)
-    do j=1, n_rows_y, 1
-        do i=1, n_rows_x, 1
-            ! dist_fully(i,j) = sum( (x(i,:)-y(j,:))**2d0 )
-            ! dist_fully(i,j) = x_sq_sum(i) + y_sq_sum(j) - 2d0*sum( (x(i,:)*y(j,:)) )
-            ! dist_fully(i,j) = dist_fully(i,j) - 2d0*sum( (x(i,:)*y(j,:)) )
-        end do
-    end do
-    !$omp end do
-    !$omp end parallel
-
-    allocate(indices_2(n_rows_y,1))
-    indices_2(:,1) = minloc(dist_fully, dim=1)
     call date_and_time(values=date_value2)
     print*, "BruteForce: ",  time_diff(date_value1, date_value2)
 
@@ -153,7 +193,7 @@ program main
     count_eq = 0
     do i=1, n_rows_y, 1
         diff = abs(results%distances(i)%dst(1) - dist(i,1))
-        ! print*, results%distances(i)%dst(1), dist(i,1), diff / dist(i,1) * 100d0
+        ! print*, results%distances(i)%dst(1:5), dist(i,1), diff / dist(i,1) * 100d0
         flg = diff / dist(i,1) * 100d0 .le. 10d-8
         count_eq = count_eq + flg
     end do
