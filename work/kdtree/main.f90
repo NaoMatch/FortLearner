@@ -18,162 +18,42 @@ program main
     integer(kind=8) :: n_rows_x, n_rows_y, n_cols, i, j, iter, n_iter, count_eq, flg, n_neighbors, pow_
 
     integer(kind=8) :: idx, fid
-    real(kind=8) :: val, diff, radius
-    real(kind=8), pointer :: q_ptr(:,:)
+    real(kind=8) :: val, diff
 
-    CHARACTER(len=256) :: file_name_x_train_csv, file_name_x_train_bin
-    CHARACTER(len=256) :: file_name_y_train_csv, file_name_y_train_bin
-    CHARACTER(len=256) :: file_name_d_train_csv, file_name_d_train_bin
-    CHARACTER(len=256) :: file_name_i_train_csv, file_name_i_train_bin
-
-
-    ! --------------------------------------------------------------------------------
-    ! --------------------------------------------------------------------------------
-        ! file_name_x_train_csv = "../../../uci_data/dummy_data_for_kdtree_X_100000x10.csv"
-        ! file_name_x_train_bin = "../../../uci_data/dummy_data_for_kdtree_X_100000x10.bin"
-        ! file_name_y_train_csv = "../../../uci_data/dummy_data_for_kdtree_Y_200x10.csv"
-        ! file_name_y_train_bin = "../../../uci_data/dummy_data_for_kdtree_Y_200x10.bin"
-
-        ! file_name_d_train_csv = "../../../uci_data/dummy_data_for_kdtree_D.csv"
-        ! file_name_d_train_bin = "../../../uci_data/dummy_data_for_kdtree_D.bin"
-        ! file_name_i_train_csv = "../../../uci_data/dummy_data_for_kdtree_I.csv"
-        ! file_name_i_train_bin = "../../../uci_data/dummy_data_for_kdtree_I.bin"
-
-        ! n_rows_x = 100000
-        ! n_rows_y = 200
-        ! n_cols = 10
-        ! n_iter = 100
-
-        ! allocate(y_t(n_cols, n_rows_y))
-        ! allocate(dist_fully(n_rows_x, n_rows_y))
-
-        ! print*, '============================================================='
-        ! print*, "CSV to Binary"
-        ! call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
-        !     n_rows_x, n_cols, f_, "r", "r")
-        ! call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
-        !     n_rows_y, n_cols, f_, "r", "r")
-        ! call read2bin_2d(file_name_d_train_csv, file_name_d_train_bin, &
-        !     n_rows_y, 1_8, f_, "r", "r")
-        ! call read2bin_2d(file_name_i_train_csv, file_name_i_train_bin, &
-        !     n_rows_y, 1_8, f_, "i", "i")
-
-        ! print*, '============================================================='
-        ! print*, "Read Binary"
-        ! print*, "    x_train"
-        ! call read_bin_2d(file_name_x_train_bin, x)
-        ! call read_bin_2d(file_name_y_train_bin, y)
-        ! call read_bin_2d(file_name_d_train_bin, dist)
-        ! call read_bin_2d(file_name_i_train_bin, indices_true)
-        ! call ifdealloc(x_sq_sum)
-        ! call ifdealloc(y_sq_sum)
-        ! allocate(x_sq_sum(n_rows_x), y_sq_sum(n_rows_y))
-        ! call matrix_sqsum_row(x, x_sq_sum, n_rows_x, n_cols, parallel=f_)
-        ! call matrix_sqsum_row(y, y_sq_sum, n_rows_y, n_cols, parallel=f_)
-
-        ! y_t = transpose(y)
-    ! --------------------------------------------------------------------------------
-    ! --------------------------------------------------------------------------------
+    do n_cols=5, 100, 5
         n_rows_x = 100000
         n_rows_y = 200
-        n_cols = 100
-        n_iter = 50
+        n_iter = 500 / n_cols
 
-        call date_and_time(values=date_value1)
-        allocate(x(n_rows_x, n_cols), x_sq_sum(n_rows_x))
-        allocate(y(n_rows_y, n_cols), y_sq_sum(n_rows_y))
-        allocate(y_t(n_cols, n_rows_y))
-        allocate(dist_fully(n_rows_x, n_rows_y), nearest_dist(n_rows_y))
-        call date_and_time(values=date_value2)
-        print*, "allocate", time_diff(date_value1, date_value2)
+        allocate(x(n_rows_x, n_cols))
+        allocate(y(n_rows_y, n_cols))
 
-        call date_and_time(values=date_value1)
         call RANDOM_NUMBER(x)
         call RANDOM_NUMBER(y)
-        call date_and_time(values=date_value2)
-        print*, "RANDOM_NUMBER", time_diff(date_value1, date_value2)
-
-        call date_and_time(values=date_value1)
-        call matrix_sqsum_row(x, x_sq_sum, n_rows_x, n_cols, parallel=f_)
-        call matrix_sqsum_row(y, y_sq_sum, n_rows_y, n_cols, parallel=f_)
-        call date_and_time(values=date_value2)
-        print*, "SQ_SUM", time_diff(date_value1, date_value2)
 
         x = 200d0*x-200d0*.5d0
         y = 200d0*y-200d0*.5d0
-        y_t = transpose(y)
 
-    print*, "Data Shape: x: ", shape(x)
-    print*, "Data Shape: y: ", shape(y)
-
-    tree_pointer = kdtree(min_samples_in_leaf=256_8)
-    call date_and_time(values=date_value1)
-    call tree_pointer%build(x)
-    call date_and_time(values=date_value2)
-    print*, "BuildTree:                  ", time_diff(date_value1, date_value2)
-
-    n_neighbors = 1
-    call date_and_time(values=date_value1)
-    do iter=1, n_iter
-        results = tree_pointer%query(y, iter, n_iter, n_neighbors=n_neighbors)
-    end do
-    call date_and_time(values=date_value2)
-    print*, "NearestNeighborSearch, n_neighbors=: ", n_neighbors, time_diff(date_value1, date_value2)/dble(n_iter)
-
-    ! n_neighbors = 32
-    ! call date_and_time(values=date_value1)
-    ! do iter=1, n_iter
-    !     results = tree_pointer%query(y, iter, n_iter, n_neighbors=n_neighbors)
-    ! end do
-    ! call date_and_time(values=date_value2)
-    ! print*, "NearestNeighborSearch, n_neighbors=: ", n_neighbors, time_diff(date_value1, date_value2)/dble(n_iter)
-
-    q_ptr => y
-    call date_and_time(values=date_value1)
-    do iter=1, n_iter
-        results = tree_pointer%query_nearest(q_ptr, iter, n_iter)
-    end do
-    call date_and_time(values=date_value2)
-    print*, "NearestNeighborSearch, n_neighbors=: ", 1_8, time_diff(date_value1, date_value2)/dble(n_iter)
-
-    ! do pow_=30, 80, 10
-    !     call date_and_time(values=date_value1)
-    !     radius = pow_
-    !     do iter=1, n_iter
-    !         results = tree_pointer%query(y, iter, n_iter, radius=radius)
-    !     end do
-    !     call date_and_time(values=date_value2)
-    !     print*, "NearestNeighborSearch, radius=: ", radius, time_diff(date_value1, date_value2)/dble(n_iter)
-    ! end do
-
-    call date_and_time(values=date_value1)
-    ! dist_fully(:,:) = spread(x_sq_sum, dim=2, ncopies=n_rows_y) & 
-    !                 + spread(y_sq_sum, dim=1, ncopies=n_rows_x)
-    ! call dgemm("N", "N", & 
-    !     n_rows_x, n_rows_y, n_cols, &
-    !     -2d0, & 
-    !     x, n_rows_x, &
-    !     y_t, n_cols, &
-    !     1d0, &
-    !     dist_fully, n_rows_x)
-    do j=1, n_rows_y, 1
-        do i=1, n_rows_x, 1
-            dist_fully(i,j) = sum( ( x(i,:)-y(j,:) )**2d0 )
+        tree_pointer = kdtree(min_samples_in_leaf=128_8)
+        call date_and_time(values=date_value1)
+        do iter=1, n_iter
+            call tree_pointer%build(x)
         end do
-    end do
-    dist_fully = sqrt(dist_fully)
-    nearest_dist = minval(dist_fully, dim=1)
-    call date_and_time(values=date_value2)
-    print*, "BruteForce: ",  time_diff(date_value1, date_value2)
+        call date_and_time(values=date_value2)
+        print*, "BuildTree:                  ", time_diff(date_value1, date_value2) / dble(n_iter)
 
-    count_eq = 0
-    do i=1, n_rows_y, 1
-        ! if (size(results%distances(i)%dst) .eq. 0) cycle
-        diff = abs(results%distances(i)%dst(1) - nearest_dist(i))
-        ! print*, results%distances(i)%dst(1), nearest_dist(i), diff / nearest_dist(i) * 100d0
-        flg = diff / dist_fully(i,1) * 100d0 .le. 10d-8
-        count_eq = count_eq + flg
+        do pow_=0, 5, 1
+            n_neighbors = 2**pow_
+            call date_and_time(values=date_value1)
+            do iter=1, n_iter
+                results = tree_pointer%query(y, n_neighbors=n_neighbors)
+            end do
+            call date_and_time(values=date_value2)
+            print*, "NearestNeighborSearch", n_cols, n_neighbors, time_diff(date_value1, date_value2)/dble(n_iter)
+        end do
+
+        deallocate(x)
+        deallocate(y)
     end do
-    print*, "COUNT_EQ", count_eq, count(dist_fully(:,1) <= radius)
 
 end program main
