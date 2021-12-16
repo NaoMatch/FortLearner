@@ -6,9 +6,10 @@ cd test_script
 make test  
 
 # WIP:
-kdtree for dbscan  
+multi layer perceptron    
 
 # Update
+2021/12/16: kdtree(n_neighbors, radius)  
 2021/11/23: (postponed) re-implement matrix-vector multiplication for accelerating kmeans  
 2021/10/12: add 'isolation_forest' benchmark  
 2021/10/10: Implemented elkan's method to speed up "kmeans", but it didn't make sense.  
@@ -147,6 +148,8 @@ http://odds.cs.stonybrook.edu/forestcovercovertype-dataset/
 * Anomaly Detection
   * isolation_tree
   * isolation_forest
+* Nearest Neighbours Search
+  * kdtree
  
 # ToDo
 * Matrix Factorization
@@ -181,4 +184,6 @@ http://odds.cs.stonybrook.edu/forestcovercovertype-dataset/
     * SCORE: Selective Cascade of Residual ExtraTrees
     * NGBoost
 * Multi-Layer Perceptron
+* Clustering
+  * DBSCAN
 
