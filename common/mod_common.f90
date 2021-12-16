@@ -98,6 +98,12 @@ module mod_common
         module procedure ifdealloc_mat_i8
     end interface ifdealloc
 
+    !> An interface to deallocate already allocated 1-dim, 2-dim array
+    interface ifnullify
+        module procedure ifnullify_i8
+        module procedure ifnullify_r8
+    end interface ifnullify
+
     !> An interface to check if the input array is already sorted.
     interface is_sorted
         module procedure is_sorted_r4
@@ -175,6 +181,18 @@ module mod_common
     end interface vmv
 
 contains
+
+    subroutine ifnullify_i8(ptr)
+        implicit none
+        integer(kind=8), pointer :: ptr
+        if (ASSOCIATED(ptr)) nullify(ptr)
+    end subroutine ifnullify_i8
+
+    subroutine ifnullify_r8(ptr)
+        implicit none
+        real(kind=8), pointer :: ptr
+        if (ASSOCIATED(ptr)) nullify(ptr)
+    end subroutine ifnullify_r8
 
     !> A function to binary search from left.
     !> 'vector' must be sorted by ascending order.
