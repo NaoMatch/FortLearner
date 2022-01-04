@@ -314,99 +314,99 @@ contains
 
 
 
-    ! Re-arrange elements of POINTS into a binary ball tree.
-    RECURSIVE SUBROUTINE BUILD_TREE(POINTS, SQ_SUMS, RADII, ORDER,&
-        ROOT, LEAF_SIZE, COMPUTED_SQ_SUMS)
-        REAL(KIND=REAL64),   INTENT(INOUT), DIMENSION(:,:) :: POINTS
-        REAL(KIND=REAL64),   INTENT(OUT),   DIMENSION(:) :: SQ_SUMS
-        REAL(KIND=REAL64),   INTENT(OUT),   DIMENSION(:) :: RADII
-        INTEGER(KIND=INT64), INTENT(INOUT), DIMENSION(:) :: ORDER
-        INTEGER(KIND=INT64), INTENT(IN), OPTIONAL :: ROOT, LEAF_SIZE
-        LOGICAL,             INTENT(IN), OPTIONAL :: COMPUTED_SQ_SUMS
-        ! Local variables
-        INTEGER(KIND=INT64) :: CENTER_IDX, MID, I, J, LS
-        REAL(KIND=REAL64), DIMENSION(SIZE(POINTS,1)) :: PT
-        REAL(KIND=REAL64), DIMENSION(SIZE(ORDER)) :: SQ_DISTS
-        REAL(KIND=REAL64) :: MAX_SQ_DIST, SQ_DIST, SHIFT
-        EXTERNAL :: DGEMM
+    ! ! Re-arrange elements of POINTS into a binary ball tree.
+    ! RECURSIVE SUBROUTINE BUILD_TREE(POINTS, SQ_SUMS, RADII, ORDER,&
+    !     ROOT, LEAF_SIZE, COMPUTED_SQ_SUMS)
+    !     REAL(KIND=REAL64),   INTENT(INOUT), DIMENSION(:,:) :: POINTS
+    !     REAL(KIND=REAL64),   INTENT(OUT),   DIMENSION(:) :: SQ_SUMS
+    !     REAL(KIND=REAL64),   INTENT(OUT),   DIMENSION(:) :: RADII
+    !     INTEGER(KIND=INT64), INTENT(INOUT), DIMENSION(:) :: ORDER
+    !     INTEGER(KIND=INT64), INTENT(IN), OPTIONAL :: ROOT, LEAF_SIZE
+    !     LOGICAL,             INTENT(IN), OPTIONAL :: COMPUTED_SQ_SUMS
+    !     ! Local variables
+    !     INTEGER(KIND=INT64) :: CENTER_IDX, MID, I, J, LS
+    !     REAL(KIND=REAL64), DIMENSION(SIZE(POINTS,1)) :: PT
+    !     REAL(KIND=REAL64), DIMENSION(SIZE(ORDER)) :: SQ_DISTS
+    !     REAL(KIND=REAL64) :: MAX_SQ_DIST, SQ_DIST, SHIFT
+    !     EXTERNAL :: DGEMM
 
-        ! Set the index of the 'root' of the tree.
-            IF (PRESENT(ROOT)) THEN ; CENTER_IDX = ROOT
-            ELSE
-                ! 1) Compute distances between first point (random) and all others.
-                ! 2) Pick the furthest point (on conv hull) from first as the center node.
-                J = ORDER(1)
-                PT(:) = POINTS(:,J)
-                SQ_DISTS(1) = 0.0_REAL64
-                !$OMP PARALLEL DO
-                DO I = 2, SIZE(ORDER)
-                    SQ_DISTS(I) = SQ_SUMS(J) + SQ_SUMS(ORDER(I)) - &
-                        2 * DOT_PRODUCT(POINTS(:,ORDER(I)), PT(:))
-                END DO 
-                !$OMP END PARALLEL DO
-                CENTER_IDX = MAXLOC(SQ_DISTS(:),1)
-                ! Now CENTER_IDX is the selected center for this node in tree.
-            END IF
+    !     ! Set the index of the 'root' of the tree.
+    !         IF (PRESENT(ROOT)) THEN ; CENTER_IDX = ROOT
+    !         ELSE
+    !             ! 1) Compute distances between first point (random) and all others.
+    !             ! 2) Pick the furthest point (on conv hull) from first as the center node.
+    !             J = ORDER(1)
+    !             PT(:) = POINTS(:,J)
+    !             SQ_DISTS(1) = 0.0_REAL64
+    !             !$OMP PARALLEL DO
+    !             DO I = 2, SIZE(ORDER)
+    !                 SQ_DISTS(I) = SQ_SUMS(J) + SQ_SUMS(ORDER(I)) - &
+    !                     2 * DOT_PRODUCT(POINTS(:,ORDER(I)), PT(:))
+    !             END DO 
+    !             !$OMP END PARALLEL DO
+    !             CENTER_IDX = MAXLOC(SQ_DISTS(:),1)
+    !             ! Now CENTER_IDX is the selected center for this node in tree.
+    !         END IF
 
-        ! Move the "center" to the first position.
-            CALL SWAP_I64(ORDER(1), ORDER(CENTER_IDX))
+    !     ! Move the "center" to the first position.
+    !         CALL SWAP_I64(ORDER(1), ORDER(CENTER_IDX))
 
-        ! Measure squared distance beween "center" node and all other points.
-            J = ORDER(1)
-            PT(:) = POINTS(:,J) ! center
-            SQ_DISTS(1) = 0.0_REAL64
-            !$OMP PARALLEL DO
-            DO I = 2, SIZE(ORDER)
-                SQ_DISTS(I) = SQ_SUMS(J) + SQ_SUMS(ORDER(I)) - &
-                    2 * DOT_PRODUCT(POINTS(:,ORDER(I)), PT(:))
-            END DO
-            !$OMP END PARALLEL DO
+    !     ! Measure squared distance beween "center" node and all other points.
+    !         J = ORDER(1)
+    !         PT(:) = POINTS(:,J) ! center
+    !         SQ_DISTS(1) = 0.0_REAL64
+    !         !$OMP PARALLEL DO
+    !         DO I = 2, SIZE(ORDER)
+    !             SQ_DISTS(I) = SQ_SUMS(J) + SQ_SUMS(ORDER(I)) - &
+    !                 2 * DOT_PRODUCT(POINTS(:,ORDER(I)), PT(:))
+    !         END DO
+    !         !$OMP END PARALLEL DO
 
-        ! Base case for recursion, once we have few enough points, exit.
-            IF (SIZE(ORDER) .LE. LS) THEN
-                RADII(ORDER(1)) = SQRT(MAXVAL(SQ_DISTS))
-                IF (SIZE(ORDER) .GT. 1) RADII(ORDER(2:)) = 0.0_REAL64
-                RETURN
-            ELSE IF (SIZE(ORDER) .EQ. 2) THEN
-                ! If the leaf size is 1 and there are only 2 elements, store
-                ! the radius and exit (since there are no further steps.
-                RADII(ORDER(1)) = SQRT(SQ_DISTS(2))
-                RADII(ORDER(2)) = 0.0_REAL64
-                RETURN
-            END IF
+    !     ! Base case for recursion, once we have few enough points, exit.
+    !         IF (SIZE(ORDER) .LE. LS) THEN
+    !             RADII(ORDER(1)) = SQRT(MAXVAL(SQ_DISTS))
+    !             IF (SIZE(ORDER) .GT. 1) RADII(ORDER(2:)) = 0.0_REAL64
+    !             RETURN
+    !         ELSE IF (SIZE(ORDER) .EQ. 2) THEN
+    !             ! If the leaf size is 1 and there are only 2 elements, store
+    !             ! the radius and exit (since there are no further steps.
+    !             RADII(ORDER(1)) = SQRT(SQ_DISTS(2))
+    !             RADII(ORDER(2)) = 0.0_REAL64
+    !             RETURN
+    !         END IF
 
-        ! Rearrange "SQ_DISTS" about the median value.
-            ! Compute the last index that will belong "inside" this node.
-            MID = (SIZE(ORDER) + 2) / 2
-            CALL ARGSELECT_R64(SQ_DISTS(2:), ORDER(2:), MID - 1)
-            ! Now ORDER has been rearranged such that the median distance
-            ! element of POINTS is at the median location.
-            ! Identify the furthest point (must be in second half of list).
-            I = MID + MAXLOC(SQ_DISTS(MID+1:),1)
-            ! Store the "radius" of this ball, the furthest point.
-            RADII(ORDER(1)) = SQRT(SQ_DISTS(I))
-            ! Move the median point (furthest "interior") to the front (inner root).
-            CALL SWAP_I64(ORDER(2), ORDER(MID))
-            ! Move the furthest point into the spot after the median (outer root).
-            CALL SWAP_I64(ORDER(MID+1), ORDER(I))
+    !     ! Rearrange "SQ_DISTS" about the median value.
+    !         ! Compute the last index that will belong "inside" this node.
+    !         MID = (SIZE(ORDER) + 2) / 2
+    !         CALL ARGSELECT_R64(SQ_DISTS(2:), ORDER(2:), MID - 1)
+    !         ! Now ORDER has been rearranged such that the median distance
+    !         ! element of POINTS is at the median location.
+    !         ! Identify the furthest point (must be in second half of list).
+    !         I = MID + MAXLOC(SQ_DISTS(MID+1:),1)
+    !         ! Store the "radius" of this ball, the furthest point.
+    !         RADII(ORDER(1)) = SQRT(SQ_DISTS(I))
+    !         ! Move the median point (furthest "interior") to the front (inner root).
+    !         CALL SWAP_I64(ORDER(2), ORDER(MID))
+    !         ! Move the furthest point into the spot after the median (outer root).
+    !         CALL SWAP_I64(ORDER(MID+1), ORDER(I))
 
-            !$OMP PARALLEL NUM_THREADS(2)
-            !$OMP SECTIONS
-            !$OMP SECTION
-            ! Recurisively create this tree.
-            !   build a tree with the root being the furthest from this center
-            !   for the remaining "interior" points of this center node.
-            CALL BUILD_TREE(POINTS, SQ_SUMS, RADII, ORDER(2:MID), 1_INT64, LS, .TRUE.)
-            !$OMP SECTION
-            !   build a tree with the root being the furthest from this center
-            !   for the remaining "exterior" points of this center node.
-            !   Only perform this operation if there are >0 points available.
-            IF (MID < SIZE(ORDER)) &
-                    CALL BUILD_TREE(POINTS, SQ_SUMS, RADII, &
-                    ORDER(MID+1:), 1_INT64, LS, .TRUE.)
-            !$OMP END SECTIONS
-            !$OMP END PARALLEL
-    END SUBROUTINE BUILD_TREE
+    !         !$OMP PARALLEL NUM_THREADS(2)
+    !         !$OMP SECTIONS
+    !         !$OMP SECTION
+    !         ! Recurisively create this tree.
+    !         !   build a tree with the root being the furthest from this center
+    !         !   for the remaining "interior" points of this center node.
+    !         CALL BUILD_TREE(POINTS, SQ_SUMS, RADII, ORDER(2:MID), 1_INT64, LS, .TRUE.)
+    !         !$OMP SECTION
+    !         !   build a tree with the root being the furthest from this center
+    !         !   for the remaining "exterior" points of this center node.
+    !         !   Only perform this operation if there are >0 points available.
+    !         IF (MID < SIZE(ORDER)) &
+    !                 CALL BUILD_TREE(POINTS, SQ_SUMS, RADII, &
+    !                 ORDER(MID+1:), 1_INT64, LS, .TRUE.)
+    !         !$OMP END SECTIONS
+    !         !$OMP END PARALLEL
+    ! END SUBROUTINE BUILD_TREE
 
 
 end module mod_balltree
