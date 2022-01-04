@@ -22,10 +22,13 @@ module mod_nearest_neighbour
         real(kind=8)    :: split_val = huge(0d0) !< split threshold
         integer(kind=8) :: split_fid = -1_8 !< split feature index
 
+        integer(kind=8) :: split_val_i8 = huge(0_8) !< split threshold, for 'exact_dup_search'
+
         integer(kind=8)              :: data_index !< split data point index
         integer(kind=8), ALLOCATABLE :: indices(:) !< sample point indices
         integer(kind=8), ALLOCATABLE :: indices_(:) !< include split point indices
-        real(kind=8), allocatable    :: x_(:,:), x_sq_(:) !< explanatory and its sum squared sum by row with split points
+        real(kind=8), allocatable    :: x_(:,:),   x_sq_(:) !< explanatory and its sum squared sum by row with split points
+        integer(kind=8), allocatable :: x_i8(:,:), x_sq_i8(:) !< explanatory and its sum squared sum by row with split points, for 'exact_dup_search'
 
         type(node_type), pointer :: node_p_ptr => null() !< pointer to parent node
         type(node_type), pointer :: node_l_ptr => null() !< pointer to child left node

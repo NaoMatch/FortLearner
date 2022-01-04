@@ -70,6 +70,7 @@ module mod_sort
 
     interface quick_argselect
         module procedure :: quick_argselect_r8
+        module procedure :: quick_argselect_i8
     end interface quick_argselect
 
     interface quick_select_lower
@@ -449,6 +450,55 @@ contains
             call quick_argselect_r8(vector(i:), indices(i:), n_samples-i+1, n_th-i+1)
         end if
     end subroutine quick_argselect_r8
+
+    !> Get the N-th Value
+    !! \param vector input vector to extract n_th element.
+    !! \param n_samples size of vector
+    !! \param n_th n-th index
+    recursive subroutine quick_argselect_i8(vector, indices, n_samples, n_th)
+        implicit none
+        integer(kind=8), intent(inout) :: vector(n_samples)
+        integer(kind=8), intent(inout) :: indices(n_samples)
+        integer(kind=8), intent(in) :: n_samples
+        integer(kind=8), intent(in) :: n_th
+
+        real(kind=8) :: pivot, tmp_r, pivots(3)
+        integer(kind=8) :: i, j, idx, tmp_i 
+
+        if (n_samples .le. 32_8) then
+            call insertion_argsort(vector, indices, n_samples)
+            return
+        end if
+
+
+        pivots(1) = vector(1)
+        pivots(2) = vector((1_8+n_samples)/2_8)
+        pivots(3) = vector(n_samples)
+        call insertion_sort(pivots, 3_8)
+        pivot = pivots(2)
+        i = 1
+        j = n_samples
+
+        do
+            do while (vector(i) < pivot)
+                i=i+1
+            end do
+            do while (pivot < vector(j))
+                j=j-1
+            end do
+            if (i >= j) exit
+            tmp_r = vector(i);  vector(i)  = vector(j);  vector(j)  = tmp_r
+            tmp_i = indices(i); indices(i) = indices(j); indices(j) = tmp_i
+            i=i+1
+            j=j-1
+        end do
+
+        if (n_th .le. j) then
+            call quick_argselect_i8(vector(1:j), indices(1:j), j, n_th)
+        else
+            call quick_argselect_i8(vector(i:), indices(i:), n_samples-i+1, n_th-i+1)
+        end if
+    end subroutine quick_argselect_i8
 
 
 

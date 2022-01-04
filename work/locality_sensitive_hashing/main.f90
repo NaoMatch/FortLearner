@@ -7,34 +7,45 @@ program main
 
     integer(kind=8) :: date_value1(8), date_value2(8)
     type(kdtree)         :: tree
-    type(kdtree_results) :: results_kdtree, results_lsh
+    type(kdtree_results) :: results_kdtree, results_lshrp, results_lshrpp
 
     real(kind=8), allocatable :: mat(:,:)
 
-    type(lsh) :: lshnns
+    type(lsh) :: lshrp, lshrpp
     real(kind=8), ALLOCATABLE, target :: x(:,:), q(:,:)
     integer(kind=8) :: i, n_hash_functions
 
-    allocate(x(100000,127))
-    allocate(q(10,127))
+    allocate(x(100000,50))
+    allocate(q(100, 50))
 
     call random_number(x)
-    x = 10d0 * x - 5d0
+    x = 100d0 * x - 50d0
 
     call random_number(q)
-    q = 10d0 * q - 5d0
+    q = 100d0 * q - 50d0
 
-    lshnns = lsh(n_hash_functions=16_8, n_hash_tables=32_8)
-
+    lshrp = lsh(n_hash_functions=12_8, n_hash_tables=31_8, algorithm="random_projection")
     call date_and_time(values=date_value1)
-    call lshnns%fit_lsh_matmul(x)
+    call lshrp%fit(x)
     call date_and_time(values=date_value2)
     print*, "LSH, Build: ", time_diff(date_value1, date_value2)
 
     call date_and_time(values=date_value1)
-    results_lsh = lshnns%query_lsh_nearest_neighbor_random_projection_matmul(q)
+    results_lshrp = lshrp%query_lsh_nearest_neighbor_random_projection(q)
     call date_and_time(values=date_value2)
     print*, "LSH, Query: ", time_diff(date_value1, date_value2)
+
+    lshrpp = lsh(n_hash_functions=12_8, n_hash_tables=31_8, bit_length=256_8, algorithm="random_projection_pstable")
+    call date_and_time(values=date_value1)
+    call lshrpp%fit(x)
+    call date_and_time(values=date_value2)
+    print*, "LSH, Build: ", time_diff(date_value1, date_value2)
+    stop
+
+    ! call date_and_time(values=date_value1)
+    ! results_lshrpp = lshrpp%query_lsh_nearest_neighbor_random_projection_pstable(q)
+    ! call date_and_time(values=date_value2)
+    ! print*, "LSH, Query: ", time_diff(date_value1, date_value2)
 
 
     tree = kdtree(min_samples_in_leaf=128_8)
@@ -50,10 +61,10 @@ program main
 
     mat = matmul(x, transpose(q))
     do i=1, 10, 1
-        print*, results_kdtree%indices(i)%idx, results_kdtree%distances(i)%dst, " :: ", &
-            results_lsh%indices(i)%idx, results_lsh%distances(i)%dst, &
-            abs(results_lsh%distances(i)%dst - results_kdtree%distances(i)%dst) / &
-                results_kdtree%distances(i)%dst * 100
+        print*, &
+            results_kdtree%indices(i)%idx, results_kdtree%distances(i)%dst, " :: ", &
+            results_lshrp%indices(i)%idx,  results_lshrp%distances(i)%dst, " :: ", &
+            results_lshrpp%indices(i)%idx,  results_lshrpp%distances(i)%dst
     end do
 
 end program main
