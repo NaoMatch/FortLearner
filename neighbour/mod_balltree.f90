@@ -1,7 +1,9 @@
 module mod_balltree
+    !$ use omp_lib
     use mod_const
     use mod_common
     use mod_linalg
+    use mod_timer
     implicit none
 
     type ball
@@ -14,8 +16,7 @@ module mod_balltree
         integer(kind=8) :: min_samples_in_leaf !< minimum number of samples in leaf node
 
         integer(kind=8), ALLOCATABLE :: indices(:) !< sample point indices
-        integer(kind=8) :: pivot_l, pivot_r
-
+        integer(kind=8) :: pivot
 
         ! Ball Info
         real(kind=8) :: radius !< ball radius
@@ -74,6 +75,10 @@ contains
         real(kind=8), pointer :: x_ptr(:,:)
         integer(kind=8) :: x_shape(2), ball_idx
         type(ball), target :: root_ball
+        integer(kind=8), allocatable :: times(:)
+
+        allocate(times(6))
+        times(:) = 0
 
         x_ptr => x
         x_shape(:) = shape(x)
@@ -84,46 +89,41 @@ contains
         this%root_ball_ptr =>  root_ball
 
         ball_idx = 0_8
-        call this%build_ball_tree_rec(this%root_ball_ptr, x_ptr, ball_idx)
-        
+        call this%build_ball_tree_rec(this%root_ball_ptr, x_ptr, ball_idx, times)
+
+        ! print*, '============================================================='
+        ! print*, "Calculate Centroid    : ", times(1)
+        ! print*, "Calculate Radius      : ", times(2)
+        ! print*, "Get Most Spread Dim   : ", times(3)
+        ! print*, "Get Pivot Position    : ", times(4)
+        ! print*, "Initialize Child Balls: ", times(5)
+        ! print*, "Allocate Indices      : ", times(6)
     end subroutine build_ball_tree
 
 
-    subroutine build_ball_tree_rec(this, ball_ptr, x_ptr, ball_idx)
+    subroutine build_ball_tree_rec(this, ball_ptr, x_ptr, ball_idx, times)
         implicit none
         class(balltree) :: this
         type(ball), pointer, intent(inout) :: ball_ptr
         real(kind=8), pointer, intent(in)  :: x_ptr(:,:)
-        integer(kind=8)                    :: ball_idx
-
+        integer(kind=8), intent(inout)     :: ball_idx
+        integer(kind=8), intent(inout)     :: times(:)
 
         ball_ptr%idx = ball_idx
 
-        call ball_ptr%split(x_ptr)
+        call ball_ptr%split(x_ptr, times)
 
-        ! if ( ball_ptr%depth .eq. 5_8 ) return
-
-        if (this%min_samples_in_leaf > ball_ptr%n_samples .or. ball_ptr%radius .eq. 0d0 &
-            .or. ball_ptr%ball_l_ptr%n_samples * ball_ptr%ball_r_ptr%n_samples .eq. 0_8 ) then
-
+        if (this%min_samples_in_leaf > ball_ptr%n_samples .or. ball_ptr%radius .eq. 0d0) then
             ball_ptr%is_leaf = t_
-
-            print*, "this%min_samples_in_leaf > ball_ptr%n_samples: ", this%min_samples_in_leaf > ball_ptr%n_samples
-            print*, "ball_ptr%radius .eq. 0d0                     : ", this%min_samples_in_leaf > ball_ptr%n_samples
-            print*, "ball_ptr%ball_l_ptr%n_samples * ball_ptr%ball_l_ptr%n_samples .eq. 0_8: ", &
-                ball_ptr%ball_l_ptr%n_samples * ball_ptr%ball_r_ptr%n_samples .eq. 0_8
-            call ball_ptr%info()
             return
         end if
 
         ball_idx = ball_idx + 1
-        call this%build_ball_tree_rec(ball_ptr%ball_l_ptr, x_ptr, ball_idx)
+        call this%build_ball_tree_rec(ball_ptr%ball_l_ptr, x_ptr, ball_idx, times)
 
         ball_idx = ball_idx + 1
-        call this%build_ball_tree_rec(ball_ptr%ball_r_ptr, x_ptr, ball_idx)
+        call this%build_ball_tree_rec(ball_ptr%ball_r_ptr, x_ptr, ball_idx, times)
     end subroutine build_ball_tree_rec
-
-
 
 
     ! ----------------------------------------------------------------------------------
@@ -205,34 +205,49 @@ contains
     end subroutine info_ball
 
 
-    subroutine split_ball(this, x_ptr)
+    subroutine split_ball(this, x_ptr, times)
         implicit none
         class(ball) :: this
         real(kind=8), pointer, intent(in) :: x_ptr(:,:)
+        integer(kind=8), intent(inout) :: times(:)
 
-        integer(kind=8) :: n, idx, p_idx_1st, p_idx_2nd
+        integer(kind=8) :: n, f, idx, p_idx_1st, p_idx_2nd
         real(kind=8), allocatable :: distance_from_center(:), tmp_vec(:), tmp_X(:,:), distance_from_center_base(:)
         real(kind=8), allocatable :: distance_from_1st(:), distance_from_2nd(:)
         real(kind=8) :: center_sq_sum, p_1st_sq_sum, p_2nd_sq_sum
 
-        integer(kind=8) :: flg, cnt_l, cnt_r
+        integer(kind=8) :: flg, cnt_l, cnt_r, max_spread_dim 
         integer(kind=8), ALLOCATABLE :: which_side(:)
+        real(kind=8), ALLOCATABLE    :: min_vals(:), max_vals(:), center(:)
+        real(kind=8) :: tmp_min, tmp_max, val
 
-        this%center(:) = 0d0
+        integer(kind=8) :: date_value1(8), date_value2(8)
+
         allocate(distance_from_center(this%n_samples), tmp_vec(this%n_samples), tmp_X(this%n_samples, this%n_columns))
         allocate(distance_from_center_base(this%n_samples))
-        distance_from_center(:) = 0d0
+        distance_from_center_base(:) = 0d0
 
         ! Calculate Centroid and Square Sum of Points ----------------------------------
+        ! call date_and_time(values=date_value1)
+        allocate( center(this%n_columns) )
+        center(:) = 0d0
+        !$omp parallel num_threads(2)
+        !$omp do private(n, idx) reduction(+:center)
         do n=1, this%n_samples, 1
             idx = this%indices(n)
-            this%center(:) = this%center(:) + x_ptr(n,:)
-            distance_from_center_base(n) = distance_from_center_base(n) + sum(x_ptr(n,:)**2d0)
+            center(:) = center(:) + x_ptr(idx,:)
+            distance_from_center_base(n) = distance_from_center_base(n) + sum(x_ptr(idx,:)**2d0)
         end do
+        !$omp end do
+        !$omp end parallel
+        this%center(:) = center(:)
         distance_from_center(:) = distance_from_center_base(:)
         this%center(:) = this%center(:) / dble(this%n_samples)
+        ! call date_and_time(values=date_value2)
+        ! ! times(1) = times(1) + time_diff(date_value1, date_value2)
 
         ! Choose Farthest Point From Centroid and Set Ball Radius
+        ! call date_and_time(values=date_value1)        
         center_sq_sum = sum( this%center(:)**2d0 )
         call multi_mat_vec(x_ptr(this%indices(:),:), this%center, &
             tmp_vec, this%n_samples, this%n_columns, f_)
@@ -240,51 +255,52 @@ contains
             -2d0 * tmp_vec(:)
         this%radius_sq = maxval(distance_from_center)
         this%radius = sqrt(this%radius_sq)
+        ! call date_and_time(values=date_value2)
+        ! ! times(2) = times(2) + time_diff(date_value1, date_value2)
 
         ! Fast Return - All points are dullicated.
         if ( this%radius_sq .eq. 0d0 ) return
 
-        ! Farthest point index from centroid (left ball pivot)
-        p_idx_1st = maxloc(distance_from_center, dim=1)
-        p_idx_1st = this%indices(p_idx_1st)
-
-        ! Farthest point index from above point  (right ball pivot)
-        p_1st_sq_sum = sum( x_ptr(p_idx_1st,:)**2d0 )
-        tmp_vec(:) = 0d0
-        distance_from_center(:) = distance_from_center_base(:)
-        call multi_mat_vec(x_ptr(this%indices(:),:), x_ptr(p_idx_1st,:), &
-            tmp_vec, this%n_samples, this%n_columns, f_)
-        distance_from_center(:) = distance_from_center(:) + p_1st_sq_sum &
-            -2d0 * tmp_vec(:)
-        p_idx_2nd = maxloc(distance_from_center, dim=1)
-        p_idx_2nd = this%indices(p_idx_2nd)
-
-        ! Distance between Points and Pivots
-        ! distance_from_1st: Points and Pivot_l (p_idx_1st) 
-        ! distance_from_2nd: Points and Pivot_r (p_idx_2nd) 
-        allocate( distance_from_1st(this%n_samples) )
-        p_1st_sq_sum = sum( x_ptr(p_idx_1st,:)**2d0 )
-        distance_from_1st(:) = distance_from_center_base(:) + p_1st_sq_sum
-        call multi_mat_vec(x_ptr(this%indices(:),:), x_ptr(p_idx_1st,:), &
-            tmp_vec, this%n_samples, this%n_columns, f_)
-        distance_from_1st(:) = distance_from_1st(:) - 2d0 * tmp_vec
-
-        allocate( distance_from_2nd(this%n_samples) )
-        p_2nd_sq_sum = sum( x_ptr(p_idx_2nd,:)**2d0 )
-        distance_from_2nd(:) = distance_from_center_base(:) + p_2nd_sq_sum
-        call multi_mat_vec(x_ptr(this%indices(:),:), x_ptr(p_idx_2nd,:), &
-            tmp_vec, this%n_samples, this%n_columns, f_)
-        distance_from_2nd(:) = distance_from_2nd(:) - 2d0 * tmp_vec
-
-        allocate( which_side(this%n_samples) ) ! 0=left, 1=right
-        which_side(:) = 0_8
-        do n=1, this%n_samples, 1
-            flg = distance_from_1st(n) > distance_from_2nd(n) 
-            which_side(n) = flg
+        ! call date_and_time(values=date_value1)        
+        ! Get Most Spread Dimension
+        allocate( min_vals(this%n_columns) )
+        allocate( max_vals(this%n_columns) )
+        ! call get_matrix_minmax(min_vals, max_vals, transpose(x_ptr), this%indices, this%n_samples, &
+        !     size(x_ptr, dim=1)+0_8, this%n_columns)
+        !$omp parallel num_threads(2)
+        !$omp do private(f, n, tmp_min, tmp_max, idx, val)
+        do f=1, this%n_columns, 1
+            tmp_min =   huge(0d0)
+            tmp_max = - huge(0d0)
+            do n=1, this%n_samples, 1
+                idx = this%indices(n)
+                val = x_ptr(idx,f)
+                tmp_min = minval((/tmp_min, val/))
+                tmp_max = maxval((/tmp_max, val/))
+            end do
+            min_vals(f) = tmp_min
+            max_vals(f) = tmp_max
         end do
-        cnt_l = sum(which_side)
-        cnt_r = this%n_samples - cnt_l
+        !$omp end do
+        !$omp end parallel
+        max_spread_dim = maxloc( abs( max_vals - min_vals ), dim=1)
+        ! call date_and_time(values=date_value2)
+        ! ! times(3) = times(3) + time_diff(date_value1, date_value2)
 
+        ! Get Pivot
+        ! call date_and_time(values=date_value1)        
+        this%pivot = this%n_samples / 2_8
+        do n=1, this%n_samples, 1
+            idx = this%indices(n)
+            tmp_vec(n) = x_ptr(idx, max_spread_dim)
+        end do
+        call quick_argselect(tmp_vec, this%indices, this%n_samples, this%pivot)
+        cnt_l = this%pivot
+        cnt_r = this%n_samples - cnt_l
+        ! call date_and_time(values=date_value2)
+        ! ! times(4) = times(4) + time_diff(date_value1, date_value2)
+
+        ! call date_and_time(values=date_value1)        
         allocate(this%ball_l_ptr)
         call this%ball_l_ptr%init(f_, f_, this%depth+1, &
             cnt_l, this%n_columns, this%min_samples_in_leaf, this)
@@ -292,24 +308,25 @@ contains
         allocate(this%ball_r_ptr)
         call this%ball_r_ptr%init(f_, f_, this%depth+1, &
             cnt_r, this%n_columns, this%min_samples_in_leaf, this)
+        ! call date_and_time(values=date_value2)
+        ! ! times(5) = times(5) + time_diff(date_value1, date_value2)
 
-        if (cnt_r * cnt_l .eq. 0_8) return
-
+        ! call date_and_time(values=date_value1)        
         cnt_l = 1
-        cnt_r = 1
-        do n=1, this%n_samples, 1
+        do n=1, this%pivot, 1
             idx = this%indices(n)
-            if ( distance_from_1st(n) > distance_from_2nd(n)  ) then
-                this%ball_l_ptr%indices(cnt_l) = idx
-                cnt_l = cnt_l + 1
-            else
-                this%ball_r_ptr%indices(cnt_r) = idx
-                cnt_r = cnt_r + 1
-            end if
+            this%ball_l_ptr%indices(cnt_l) = idx
+            cnt_l = cnt_l + 1
         end do
 
-        this%pivot_l = p_idx_1st
-        this%pivot_r = p_idx_2nd
+        cnt_r = 1
+        do n=this%pivot+1, this%n_samples, 1
+            idx = this%indices(n)
+            this%ball_r_ptr%indices(cnt_r) = idx
+            cnt_r = cnt_r + 1
+        end do
+        ! call date_and_time(values=date_value2)
+        ! ! times(6) = times(6) + time_diff(date_value1, date_value2)
     end subroutine split_ball
 
 
