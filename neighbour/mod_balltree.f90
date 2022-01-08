@@ -4,6 +4,7 @@ module mod_balltree
     use mod_common
     use mod_linalg
     use mod_timer
+    use mod_nearest_neighbour, only: kdtree_results
     implicit none
 
     type ball
@@ -16,7 +17,8 @@ module mod_balltree
         integer(kind=8) :: min_samples_in_leaf !< minimum number of samples in leaf node
 
         integer(kind=8), ALLOCATABLE :: indices(:) !< sample point indices
-        integer(kind=8) :: pivot
+        real(kind=8), ALLOCATABLE :: pivot(:)
+        real(kind=8) :: pivot_sq_sum
 
         ! Ball Info
         real(kind=8) :: radius !< ball radius
@@ -24,6 +26,7 @@ module mod_balltree
         real(kind=8), allocatable :: center(:) !< ball center coordinate
 
         ! Additional Info
+        real(kind=8), allocatable :: x(:,:)
         real(kind=8), allocatable :: x_sq_sum(:)
 
         ! Parent and children node pointers
@@ -44,8 +47,12 @@ module mod_balltree
 
         integer(kind=8), allocatable :: x_sq_sum(:)
     contains
-        procedure :: build => build_ball_tree
-        procedure :: build_ball_tree_rec
+        procedure :: build => build_balltree
+        procedure :: build_balltree_rec
+
+        procedure :: query => query_balltree
+        procedure :: query_balltree_n_neighbors_rec
+        procedure :: query_balltree_radius_rec
     end type balltree
 
     interface balltree
@@ -67,7 +74,7 @@ contains
     end function new_balltree
 
 
-    subroutine build_ball_tree(this, x)
+    subroutine build_balltree(this, x)
         implicit none
         class(balltree) :: this
         real(kind=8), target, intent(in) :: x(:,:)
@@ -85,11 +92,12 @@ contains
         this%n_samples = x_shape(1)
         this%n_columns = x_shape(2)
 
-        call root_ball%init(t_, f_, 0_8, this%n_samples, this%n_columns, this%min_samples_in_leaf)
-        this%root_ball_ptr =>  root_ball
+        if ( ASSOCIATED(this%root_ball_ptr) ) nullify( this%root_ball_ptr )
+        allocate( this%root_ball_ptr )
+        call this%root_ball_ptr%init(t_, f_, 0_8, this%n_samples, this%n_columns, this%min_samples_in_leaf)
 
         ball_idx = 0_8
-        call this%build_ball_tree_rec(this%root_ball_ptr, x_ptr, ball_idx, times)
+        call this%build_balltree_rec(this%root_ball_ptr, x_ptr, ball_idx, times)
 
         ! print*, '============================================================='
         ! print*, "Calculate Centroid    : ", times(1)
@@ -98,10 +106,10 @@ contains
         ! print*, "Get Pivot Position    : ", times(4)
         ! print*, "Initialize Child Balls: ", times(5)
         ! print*, "Allocate Indices      : ", times(6)
-    end subroutine build_ball_tree
+    end subroutine build_balltree
 
 
-    subroutine build_ball_tree_rec(this, ball_ptr, x_ptr, ball_idx, times)
+    subroutine build_balltree_rec(this, ball_ptr, x_ptr, ball_idx, times)
         implicit none
         class(balltree) :: this
         type(ball), pointer, intent(inout) :: ball_ptr
@@ -115,15 +123,231 @@ contains
 
         if (this%min_samples_in_leaf > ball_ptr%n_samples .or. ball_ptr%radius .eq. 0d0) then
             ball_ptr%is_leaf = t_
+            nullify(ball_ptr%ball_l_ptr)
+            nullify(ball_ptr%ball_r_ptr)
+
+            allocate( ball_ptr%x(ball_ptr%n_samples, ball_ptr%n_columns) )
+            ball_ptr%x(:,:) = x_ptr(ball_ptr%indices,:)
+
+            allocate( ball_ptr%x_sq_sum(ball_ptr%n_samples) )
+            call matrix_sqsum_row(ball_ptr%x, ball_ptr%x_sq_sum, ball_ptr%n_samples, ball_ptr%n_columns, parallel=f_)
+            ! call ball_ptr%info()
             return
         end if
 
         ball_idx = ball_idx + 1
-        call this%build_ball_tree_rec(ball_ptr%ball_l_ptr, x_ptr, ball_idx, times)
+        call this%build_balltree_rec(ball_ptr%ball_l_ptr, x_ptr, ball_idx, times)
 
         ball_idx = ball_idx + 1
-        call this%build_ball_tree_rec(ball_ptr%ball_r_ptr, x_ptr, ball_idx, times)
-    end subroutine build_ball_tree_rec
+        call this%build_balltree_rec(ball_ptr%ball_r_ptr, x_ptr, ball_idx, times)
+    end subroutine build_balltree_rec
+
+
+    function query_balltree(this, q, n_neighbors, radius)
+        implicit none
+        class(balltree)                  :: this
+        real(kind=8), target, intent(in) :: q(:,:)
+        integer(kind=8), optional        :: n_neighbors
+        real(kind=8), optional           :: radius
+        type(kdtree_results), target     :: query_balltree
+
+        integer(kind=8) :: q_shape(2), n_samples, n_columns, n
+        real(kind=8) :: radius_sq, q_sq_sum
+        real(kind=8), pointer :: q_ptr(:,:)
+        type(kdtree_results), pointer :: res_ptr
+        real(kind=8), allocatable :: distances(:), q_i(:)
+        integer(kind=8), allocatable :: indices(:)
+
+        q_ptr => q
+        q_shape(:) = shape(q)
+        n_samples = q_shape(1)
+        n_columns = q_shape(2)
+
+        res_ptr => query_balltree
+        allocate( query_balltree%indices(n_samples) )
+        allocate( query_balltree%distances(n_samples) )
+
+        if (present(n_neighbors)) then
+            do n=1, n_samples, 1
+                allocate( query_balltree%indices(n)%idx(n_neighbors) )
+                allocate( query_balltree%distances(n)%dst(n_neighbors) )
+            end do
+
+            allocate(q_i(n_columns))
+            !$omp parallel num_threads(4)
+            !$omp do private(n, distances, indices, q_i, q_sq_sum)
+            do n=1, n_samples, 1
+                allocate( distances(n_neighbors), indices(n_neighbors) )
+                distances(:) = huge(0d0)
+                q_i(:) = q_ptr(n,:)
+                q_sq_sum = sum( q_i(:)**2d0 )
+                call this%query_balltree_n_neighbors_rec(distances, indices, &
+                    this%root_ball_ptr, q_i, q_sq_sum, n_samples, n_columns, n_neighbors)
+                query_balltree%distances(n)%dst = sqrt(distances(:))
+                query_balltree%indices(n)%idx = indices(:)
+                deallocate( distances, indices )
+            end do
+            !$omp end do
+            !$omp end parallel
+        elseif (present(radius)) then
+            radius_sq = radius**2d0
+
+            do n=1, n_samples, 1
+                allocate( query_balltree%indices(n)%idx(0) )
+                allocate( query_balltree%distances(n)%dst(0) )
+            end do
+
+            allocate(q_i(n_columns))
+            !$omp parallel num_threads(4)
+            !$omp do private(n, distances, indices, q_i, q_sq_sum)
+            do n=1, n_samples, 1
+                allocate( distances(0), indices(0) )
+                q_i(:) = q_ptr(n,:)
+                q_sq_sum = sum( q_i(:)**2d0 )
+                call this%query_balltree_radius_rec(distances, indices, &
+                    this%root_ball_ptr, q_i, q_sq_sum, n_samples, n_columns, radius_sq)
+                query_balltree%distances(n)%dst = sqrt(distances(:))
+                query_balltree%indices(n)%idx = indices(:)
+                deallocate( distances, indices )
+            end do
+            !$omp end do
+            !$omp end parallel
+        end if
+    end function query_balltree
+
+
+    recursive subroutine query_balltree_n_neighbors_rec(this, distances, indices, root_ball_ptr, &
+        q_i, q_sq_sum, n_samples, n_columns, n_neighbors)
+        implicit none
+        class(balltree)                   :: this
+        real(kind=8), intent(inout)       :: distances(n_neighbors)
+        integer(kind=8), intent(inout)    :: indices(n_neighbors)
+        type(ball), pointer               :: root_ball_ptr
+        real(kind=8), intent(in)          :: q_i(n_columns), q_sq_sum
+        integer(kind=8), intent(in)       :: n_samples, n_columns
+        integer(kind=8), intent(in)       :: n_neighbors
+
+        type(ball), pointer :: ball_near, ball_far
+
+        real(kind=8) :: distance_q_and_c !< distance between query and ball center
+        real(kind=8) :: distance_q_and_c_l, distance_q_and_c_r !< distance between query and ball center left and right
+        real(kind=8), allocatable :: distance_q_and_s(:) !< distance between query and leaf ball samples
+        real(kind=8), allocatable :: tmp_d(:)
+        integer(kind=8), allocatable :: tmp_i(:)
+        integer(kind=8) :: i, n
+
+
+        distance_q_and_c = sum( (q_i(:) - root_ball_ptr%center(:))**2d0 )
+
+        if ( distance_q_and_c - root_ball_ptr%radius .gt. maxval(distances(:)) ) then
+            return
+        elseif ( root_ball_ptr%is_leaf ) then
+            allocate( distance_q_and_s(root_ball_ptr%n_samples) )
+            distance_q_and_s(:) = 0d0
+            call multi_mat_vec(root_ball_ptr%x, q_i, distance_q_and_s, &
+                root_ball_ptr%n_samples, root_ball_ptr%n_columns)
+            distance_q_and_s(:) = -2d0*distance_q_and_s(:) &
+                + root_ball_ptr%x_sq_sum(:) + q_sq_sum
+            if ( maxval(distances(:)) < minval(distance_q_and_s(:)) ) then
+                ! skip
+            else
+                allocate(tmp_i(root_ball_ptr%n_samples))
+                do i=1, root_ball_ptr%n_samples
+                    tmp_i(i) = i
+                end do
+                tmp_d = distances(:)
+
+                tmp_d = [distance_q_and_s, distances]
+                tmp_i = [tmp_i, indices]
+                n = minval((/size(tmp_d)+0_8, n_neighbors/))
+                call quick_argselect(tmp_d, tmp_i, size(tmp_d)+0_8, n)
+                distances(1:n) = tmp_d(1:n)
+                indices(1:n) = tmp_i(1:n)
+            end if
+        else
+            distance_q_and_c_l = sum( (q_i(:) - root_ball_ptr%ball_l_ptr%center(:))**2d0 )
+            distance_q_and_c_r = sum( (q_i(:) - root_ball_ptr%ball_r_ptr%center(:))**2d0 )
+            if ( distance_q_and_c_l < distance_q_and_c_r ) then
+                ball_near => root_ball_ptr%ball_l_ptr
+                ball_far  => root_ball_ptr%ball_r_ptr
+            else
+                ball_near => root_ball_ptr%ball_r_ptr
+                ball_far  => root_ball_ptr%ball_l_ptr
+            end if
+
+            call this%query_balltree_n_neighbors_rec(distances, indices, ball_near, &
+                    q_i, q_sq_sum, n_samples, n_columns, n_neighbors)
+            call this%query_balltree_n_neighbors_rec(distances, indices, ball_far, &
+                    q_i, q_sq_sum, n_samples, n_columns, n_neighbors)
+        end if
+    end subroutine query_balltree_n_neighbors_rec
+
+
+    recursive subroutine query_balltree_radius_rec(this, distances, indices, root_ball_ptr, &
+        q_i, q_sq_sum, n_samples, n_columns, radius_sq)
+        implicit none
+        class(balltree)                   :: this
+        real(kind=8), allocatable, intent(inout)       :: distances(:)
+        integer(kind=8), allocatable, intent(inout)    :: indices(:)
+        type(ball), pointer               :: root_ball_ptr
+        real(kind=8), intent(in)          :: q_i(n_columns), q_sq_sum
+        integer(kind=8), intent(in)       :: n_samples, n_columns
+        real(kind=8), intent(in)          :: radius_sq
+
+        type(ball), pointer :: ball_near, ball_far
+
+        real(kind=8) :: distance_q_and_c !< distance between query and ball center
+        real(kind=8) :: distance_q_and_c_l, distance_q_and_c_r !< distance between query and ball center left and right
+        real(kind=8), allocatable :: distance_q_and_s(:) !< distance between query and leaf ball samples
+        real(kind=8), allocatable :: tmp_d(:)
+        integer(kind=8), allocatable :: tmp_i(:)
+        integer(kind=8) :: i, n, count_in_ball
+
+
+        distance_q_and_c = sum( (q_i(:) - root_ball_ptr%center(:))**2d0 )
+
+        if ( distance_q_and_c - root_ball_ptr%radius .gt. radius_sq ) then
+            return
+        elseif ( root_ball_ptr%is_leaf ) then
+            allocate( distance_q_and_s(root_ball_ptr%n_samples) )
+            distance_q_and_s(:) = 0d0
+            call multi_mat_vec(root_ball_ptr%x, q_i, distance_q_and_s, &
+                root_ball_ptr%n_samples, root_ball_ptr%n_columns)
+            distance_q_and_s(:) = -2d0*distance_q_and_s(:) &
+                + root_ball_ptr%x_sq_sum(:) + q_sq_sum
+            if ( radius_sq < minval(distance_q_and_s(:)) ) then
+                ! skip
+            else
+                allocate(tmp_i(root_ball_ptr%n_samples))
+                do i=1, root_ball_ptr%n_samples
+                    tmp_i(i) = i
+                end do
+                count_in_ball = count(distance_q_and_s <= radius_sq)
+
+                if ( count_in_ball > 0 ) then
+                    call quick_argselect(distance_q_and_s, tmp_i, size(distance_q_and_s)+0_8, count_in_ball)
+                    distances = [distances, distance_q_and_s(1:n)]
+                    indices = [indices, tmp_i(1:n)]
+                end if
+            end if
+        else
+            distance_q_and_c_l = sum( (q_i(:) - root_ball_ptr%ball_l_ptr%center(:))**2d0 )
+            distance_q_and_c_r = sum( (q_i(:) - root_ball_ptr%ball_r_ptr%center(:))**2d0 )
+            if ( distance_q_and_c_l < distance_q_and_c_r ) then
+                ball_near => root_ball_ptr%ball_l_ptr
+                ball_far  => root_ball_ptr%ball_r_ptr
+            else
+                ball_near => root_ball_ptr%ball_r_ptr
+                ball_far  => root_ball_ptr%ball_l_ptr
+            end if
+
+            call this%query_balltree_radius_rec(distances, indices, ball_near, &
+                    q_i, q_sq_sum, n_samples, n_columns, radius_sq)
+            call this%query_balltree_radius_rec(distances, indices, ball_far, &
+                    q_i, q_sq_sum, n_samples, n_columns, radius_sq)
+        end if
+    end subroutine query_balltree_radius_rec
+
 
 
     ! ----------------------------------------------------------------------------------
@@ -216,7 +440,7 @@ contains
         real(kind=8), allocatable :: distance_from_1st(:), distance_from_2nd(:)
         real(kind=8) :: center_sq_sum, p_1st_sq_sum, p_2nd_sq_sum
 
-        integer(kind=8) :: flg, cnt_l, cnt_r, max_spread_dim 
+        integer(kind=8) :: flg, cnt_l, cnt_r, max_spread_dim, med_idx
         integer(kind=8), ALLOCATABLE :: which_side(:)
         real(kind=8), ALLOCATABLE    :: min_vals(:), max_vals(:), center(:)
         real(kind=8) :: tmp_min, tmp_max, val
@@ -289,14 +513,17 @@ contains
 
         ! Get Pivot
         ! call date_and_time(values=date_value1)        
-        this%pivot = this%n_samples / 2_8
+        allocate(this%pivot(this%n_columns))
+        med_idx = this%n_samples / 2_8
         do n=1, this%n_samples, 1
             idx = this%indices(n)
             tmp_vec(n) = x_ptr(idx, max_spread_dim)
         end do
-        call quick_argselect(tmp_vec, this%indices, this%n_samples, this%pivot)
-        cnt_l = this%pivot
+        call quick_argselect(tmp_vec, this%indices, this%n_samples, med_idx)
+        cnt_l = med_idx
         cnt_r = this%n_samples - cnt_l
+        med_idx = this%indices(med_idx)
+        this%pivot(:) = x_ptr(med_idx,:)
         ! call date_and_time(values=date_value2)
         ! ! times(4) = times(4) + time_diff(date_value1, date_value2)
 
@@ -311,16 +538,16 @@ contains
         ! call date_and_time(values=date_value2)
         ! ! times(5) = times(5) + time_diff(date_value1, date_value2)
 
-        ! call date_and_time(values=date_value1)        
+        ! call date_and_time(values=date_value1) 
         cnt_l = 1
-        do n=1, this%pivot, 1
+        do n=1, this%ball_l_ptr%n_samples, 1
             idx = this%indices(n)
             this%ball_l_ptr%indices(cnt_l) = idx
             cnt_l = cnt_l + 1
         end do
 
         cnt_r = 1
-        do n=this%pivot+1, this%n_samples, 1
+        do n=this%ball_l_ptr%n_samples+1, this%n_samples, 1
             idx = this%indices(n)
             this%ball_r_ptr%indices(cnt_r) = idx
             cnt_r = cnt_r + 1
@@ -329,101 +556,6 @@ contains
         ! ! times(6) = times(6) + time_diff(date_value1, date_value2)
     end subroutine split_ball
 
-
-
-    ! ! Re-arrange elements of POINTS into a binary ball tree.
-    ! RECURSIVE SUBROUTINE BUILD_TREE(POINTS, SQ_SUMS, RADII, ORDER,&
-    !     ROOT, LEAF_SIZE, COMPUTED_SQ_SUMS)
-    !     REAL(KIND=REAL64),   INTENT(INOUT), DIMENSION(:,:) :: POINTS
-    !     REAL(KIND=REAL64),   INTENT(OUT),   DIMENSION(:) :: SQ_SUMS
-    !     REAL(KIND=REAL64),   INTENT(OUT),   DIMENSION(:) :: RADII
-    !     INTEGER(KIND=INT64), INTENT(INOUT), DIMENSION(:) :: ORDER
-    !     INTEGER(KIND=INT64), INTENT(IN), OPTIONAL :: ROOT, LEAF_SIZE
-    !     LOGICAL,             INTENT(IN), OPTIONAL :: COMPUTED_SQ_SUMS
-    !     ! Local variables
-    !     INTEGER(KIND=INT64) :: CENTER_IDX, MID, I, J, LS
-    !     REAL(KIND=REAL64), DIMENSION(SIZE(POINTS,1)) :: PT
-    !     REAL(KIND=REAL64), DIMENSION(SIZE(ORDER)) :: SQ_DISTS
-    !     REAL(KIND=REAL64) :: MAX_SQ_DIST, SQ_DIST, SHIFT
-    !     EXTERNAL :: DGEMM
-
-    !     ! Set the index of the 'root' of the tree.
-    !         IF (PRESENT(ROOT)) THEN ; CENTER_IDX = ROOT
-    !         ELSE
-    !             ! 1) Compute distances between first point (random) and all others.
-    !             ! 2) Pick the furthest point (on conv hull) from first as the center node.
-    !             J = ORDER(1)
-    !             PT(:) = POINTS(:,J)
-    !             SQ_DISTS(1) = 0.0_REAL64
-    !             !$OMP PARALLEL DO
-    !             DO I = 2, SIZE(ORDER)
-    !                 SQ_DISTS(I) = SQ_SUMS(J) + SQ_SUMS(ORDER(I)) - &
-    !                     2 * DOT_PRODUCT(POINTS(:,ORDER(I)), PT(:))
-    !             END DO 
-    !             !$OMP END PARALLEL DO
-    !             CENTER_IDX = MAXLOC(SQ_DISTS(:),1)
-    !             ! Now CENTER_IDX is the selected center for this node in tree.
-    !         END IF
-
-    !     ! Move the "center" to the first position.
-    !         CALL SWAP_I64(ORDER(1), ORDER(CENTER_IDX))
-
-    !     ! Measure squared distance beween "center" node and all other points.
-    !         J = ORDER(1)
-    !         PT(:) = POINTS(:,J) ! center
-    !         SQ_DISTS(1) = 0.0_REAL64
-    !         !$OMP PARALLEL DO
-    !         DO I = 2, SIZE(ORDER)
-    !             SQ_DISTS(I) = SQ_SUMS(J) + SQ_SUMS(ORDER(I)) - &
-    !                 2 * DOT_PRODUCT(POINTS(:,ORDER(I)), PT(:))
-    !         END DO
-    !         !$OMP END PARALLEL DO
-
-    !     ! Base case for recursion, once we have few enough points, exit.
-    !         IF (SIZE(ORDER) .LE. LS) THEN
-    !             RADII(ORDER(1)) = SQRT(MAXVAL(SQ_DISTS))
-    !             IF (SIZE(ORDER) .GT. 1) RADII(ORDER(2:)) = 0.0_REAL64
-    !             RETURN
-    !         ELSE IF (SIZE(ORDER) .EQ. 2) THEN
-    !             ! If the leaf size is 1 and there are only 2 elements, store
-    !             ! the radius and exit (since there are no further steps.
-    !             RADII(ORDER(1)) = SQRT(SQ_DISTS(2))
-    !             RADII(ORDER(2)) = 0.0_REAL64
-    !             RETURN
-    !         END IF
-
-    !     ! Rearrange "SQ_DISTS" about the median value.
-    !         ! Compute the last index that will belong "inside" this node.
-    !         MID = (SIZE(ORDER) + 2) / 2
-    !         CALL ARGSELECT_R64(SQ_DISTS(2:), ORDER(2:), MID - 1)
-    !         ! Now ORDER has been rearranged such that the median distance
-    !         ! element of POINTS is at the median location.
-    !         ! Identify the furthest point (must be in second half of list).
-    !         I = MID + MAXLOC(SQ_DISTS(MID+1:),1)
-    !         ! Store the "radius" of this ball, the furthest point.
-    !         RADII(ORDER(1)) = SQRT(SQ_DISTS(I))
-    !         ! Move the median point (furthest "interior") to the front (inner root).
-    !         CALL SWAP_I64(ORDER(2), ORDER(MID))
-    !         ! Move the furthest point into the spot after the median (outer root).
-    !         CALL SWAP_I64(ORDER(MID+1), ORDER(I))
-
-    !         !$OMP PARALLEL NUM_THREADS(2)
-    !         !$OMP SECTIONS
-    !         !$OMP SECTION
-    !         ! Recurisively create this tree.
-    !         !   build a tree with the root being the furthest from this center
-    !         !   for the remaining "interior" points of this center node.
-    !         CALL BUILD_TREE(POINTS, SQ_SUMS, RADII, ORDER(2:MID), 1_INT64, LS, .TRUE.)
-    !         !$OMP SECTION
-    !         !   build a tree with the root being the furthest from this center
-    !         !   for the remaining "exterior" points of this center node.
-    !         !   Only perform this operation if there are >0 points available.
-    !         IF (MID < SIZE(ORDER)) &
-    !                 CALL BUILD_TREE(POINTS, SQ_SUMS, RADII, &
-    !                 ORDER(MID+1:), 1_INT64, LS, .TRUE.)
-    !         !$OMP END SECTIONS
-    !         !$OMP END PARALLEL
-    ! END SUBROUTINE BUILD_TREE
 
 
 end module mod_balltree

@@ -1,6 +1,8 @@
 module mod_exact_duplicate_search
+    !$ use omp_lib
     use mod_nearest_neighbour
     use mod_random
+    use mod_hash
     use mod_common
     use mod_common_type
     use mod_linalg, only: multi_mat_vec
@@ -53,7 +55,69 @@ module mod_exact_duplicate_search
         module procedure :: new_exact_duplicate_search
     end interface exact_duplicate_search
 
+    type hash_exact_duplicate_search
+    contains
+        procedure :: search => search_hash_exact_duplicate_search_matrix
+    end type hash_exact_duplicate_search
+
+    interface hash_exact_duplicate_search
+        module procedure :: new_hash_exact_duplicate_search
+    end interface hash_exact_duplicate_search
+
 contains
+
+    !> Create new 'hash_exact_duplicate_search' object
+    function new_hash_exact_duplicate_search()
+        implicit none
+        type(hash_exact_duplicate_search) :: new_hash_exact_duplicate_search
+    end function new_hash_exact_duplicate_search
+
+    function search_hash_exact_duplicate_search_matrix(this, x)
+        implicit none
+        class(hash_exact_duplicate_search) :: this
+        integer(kind=8), intent(in) :: x(:,:)
+        type(duplicate_index), ALLOCATABLE, target  :: search_hash_exact_duplicate_search_matrix(:)
+        type(duplicate_index), pointer :: res_ptr(:)
+        integer(kind=8) :: n_samples, n_columns, x_shape(2), n_uniq
+        integer(kind=8) :: i, l, ini, fin
+        integer(kind=8), allocatable :: hashes(:), indices(:)
+
+        x_shape = shape(x)
+        n_samples = x_shape(1)
+        n_columns = x_shape(2)
+
+        allocate( hashes(n_samples) )
+        allocate( indices(n_samples) )
+        do i=1, n_samples, 1
+            indices(i) = i
+        end do
+        hashes = one_at_a_time_hash(x, n_samples, n_columns)
+        call quick_argsort(hashes, indices, n_samples)
+
+        n_uniq = count_unique(hashes, n_samples)
+        allocate( search_hash_exact_duplicate_search_matrix(n_uniq) )
+        res_ptr => search_hash_exact_duplicate_search_matrix
+        if ( n_uniq .eq. n_samples ) then
+            do l=1, n_uniq, 1
+                res_ptr(l)%vector = (/l/)
+            end do
+        else
+            ini = 1
+            do l=1, n_uniq-1, 1
+                fin = ini
+                do while (t_)
+                    if (hashes(fin) .ne. hashes(fin+1)) exit
+                    fin = fin+1
+                end do
+                ! call quick_sort(indices(ini:fin), fin-ini+1)
+                res_ptr(l)%vector = indices(ini:fin)
+                ini = fin + 1
+            end do
+            ! call quick_sort(indices(ini:n_samples), n_samples-ini+1)
+            res_ptr(n_uniq)%vector = indices(ini:n_samples)
+        end if
+        ! print*, hashes(:10)
+    end function search_hash_exact_duplicate_search_matrix
 
     ! -------------------------------------------------------------
     ! Exaxt Duplicate Search---------------------------------------
@@ -108,6 +172,7 @@ contains
         allocate( search_exact_duplicate(size(leaf_node_ptrs)) )
 
         do l=1, size(leaf_node_ptrs), 1
+            ! call quick_sort(leaf_node_ptrs(l)%ptr%indices(:), leaf_node_ptrs(l)%ptr%n_samples)
             search_exact_duplicate(l)%vector = leaf_node_ptrs(l)%ptr%indices(:)
         end do
     end function search_exact_duplicate
