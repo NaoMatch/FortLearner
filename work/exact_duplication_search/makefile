@@ -11,6 +11,7 @@ common           := ./mod/mod_const.out \
 					./mod/mod_timer.out \
 					./mod/mod_error.out \
 					./mod/mod_random.out \
+					./mod/mod_hash.out \
 					./mod/mod_sort.out \
 					./mod/mod_math.out \
 					./mod/mod_stats.out \
@@ -38,10 +39,11 @@ asm              := ./mod/inc_sum_up_vector_c.out \
 build:
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_const.f90                                                                -o ./mod/mod_const.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_common.f90                                                               -o ./mod/mod_common.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_common_type.f90                                                          -o ./mod/mod_common_type.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_common_type.f90                                                          -o ./mod/mod_common_type.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_timer.f90                                                                -o ./mod/mod_timer.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../error/mod_error.f90                                                                 -o ./mod/mod_error.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_random.f90                                                               -o ./mod/mod_random.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_hash.f90                                                                 -o ./mod/mod_hash.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_sort.f90                                                                 -o ./mod/mod_sort.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../math/mod_math.f90                                                                   -o ./mod/mod_math.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../math/mod_stats.f90                                                                  -o ./mod/mod_stats.out
@@ -66,6 +68,7 @@ build:
 	# $(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/include/linalg_matrix_sqsum_row/inc_matrix_sqsum_row.c                             -o ./mod/inc_matrix_sqsum_row.out
 
 main:
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_hash.f90                                                                 -o ./mod/mod_hash.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neighbour/mod_exact_duplication_search.f90                                                 -o ./mod/mod_exact_duplication_search.out
 	$(compiler_fortran) -w -unroll \
 	$(common) \
