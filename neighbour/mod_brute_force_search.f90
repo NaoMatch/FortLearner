@@ -4,7 +4,7 @@ module mod_brute_force_search
     use mod_const
     use mod_common
     use mod_linalg
-    use mod_nearest_neighbour, only: kdtree_results
+    use mod_nearest_neighbour, only: neighbor_results
     implicit none
 
     !< Brute Force Nearest Neighbor Search
@@ -69,7 +69,7 @@ contains
         real(kind=8), intent(in) :: q(:,:)
         integer(kind=8), OPTIONAL :: n_neighbors
         real(kind=8), OPTIONAL :: radius
-        type(kdtree_results) :: query_brute_force_search
+        type(neighbor_results) :: query_brute_force_search
 
         integer(kind=8) :: n_samples, n_columns, q_shape(2)
         real(kind=8), allocatable :: q_sq_sum(:)
@@ -101,7 +101,7 @@ contains
     subroutine query_brute_force_search_n_neighbors(this, res, q, q_sq_sum, n_neighbors, n_samples, n_columns)
         implicit none
         class(brute_force_search)   :: this
-        type(kdtree_results)        :: res
+        type(neighbor_results)        :: res
         real(kind=8), intent(in)    :: q(n_samples, n_columns)
         real(kind=8), intent(in)    :: q_sq_sum(n_samples)
         integer(kind=8), intent(in) :: n_neighbors, n_samples, n_columns
@@ -184,7 +184,7 @@ contains
     subroutine query_brute_force_search_radius(this, res, q, q_sq_sum, radius, n_samples, n_columns)
         implicit none
         class(brute_force_search)   :: this
-        type(kdtree_results)        :: res
+        type(neighbor_results)        :: res
         real(kind=8), intent(in)    :: q(n_samples, n_columns)
         real(kind=8), intent(in)    :: q_sq_sum(n_samples)
         real(kind=8), intent(in)    :: radius

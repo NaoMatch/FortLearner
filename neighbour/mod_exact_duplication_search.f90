@@ -1,6 +1,7 @@
 module mod_exact_duplicate_search
     !$ use omp_lib
-    use mod_nearest_neighbour
+    use mod_nearest_neighbour, only: neighbor_results
+    use mod_sort
     use mod_random
     use mod_hash
     use mod_common
