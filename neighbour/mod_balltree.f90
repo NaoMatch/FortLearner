@@ -4,6 +4,7 @@ module mod_balltree
     use mod_common
     use mod_linalg
     use mod_timer
+    use mod_hyperparameter
     use mod_nearest_neighbour, only: neighbor_results, base_node_for_nearest_neighbor
     implicit none
 
@@ -12,6 +13,7 @@ module mod_balltree
         real(kind=8) :: pivot_sq_sum
 
         ! Ball Info
+        integer(kind=8) :: split_algo_int
         real(kind=8) :: radius !< ball radius
         real(kind=8) :: radius_sq !< ball radius square
         real(kind=8), allocatable :: center(:) !< ball center coordinate
@@ -19,6 +21,10 @@ module mod_balltree
         ! Additional Info
         real(kind=8), allocatable :: x(:,:)
         real(kind=8), allocatable :: x_sq_sum(:)
+        real(kind=8), allocatable :: point_a(:)
+        real(kind=8), allocatable :: point_b(:)
+        real(kind=8), allocatable :: b_minus_a(:)
+        real(kind=8) :: a_sq_sum, ab_dot, dist_ab
 
         ! Parent and children node pointers
         type(ball), pointer :: ball_p_ptr => null() !< pointer to parent ball
@@ -28,10 +34,14 @@ module mod_balltree
         procedure :: init => init_ball
         procedure :: info => info_ball
         procedure :: split => split_ball
+
+        procedure :: choose_farthest_two_points
     end type ball
 
     type balltree
         integer(kind=8) :: n_samples, n_columns
+        character(len=256) :: split_algo = "most_spread" !< most_spread, farthest_two, 1st_pc_axis
+        integer(kind=8)    :: split_algo_int = 1 !< most_spread, farthest_two, 1st_pc_axis
     
         type(ball), pointer :: root_ball_ptr
         integer(kind=8)  :: min_samples_in_leaf=32_8
@@ -44,6 +54,7 @@ module mod_balltree
         procedure :: query => query_balltree
         procedure :: query_balltree_n_neighbors_rec
         procedure :: query_balltree_radius_rec
+
     end type balltree
 
     interface balltree
@@ -57,11 +68,23 @@ contains
     ! For Ball Tree
     ! ----------------------------------------------------------------------------------
 
-    function new_balltree(min_samples_in_leaf)
+    function new_balltree(min_samples_in_leaf, split_algo)
         implicit none
         type(balltree) :: new_balltree
         integer(kind=8), optional :: min_samples_in_leaf
+        character(len=*), optional :: split_algo
+
+        character(len=256) :: algo_list(3)
+        type(hparam_base)  :: tmp
+
+        algo_list(1) = "most_spread"
+        algo_list(2) = "farthest_two"
+        algo_list(3) = "1st_pc_axis"
+
         if ( present(min_samples_in_leaf) ) new_balltree%min_samples_in_leaf = min_samples_in_leaf
+        if ( present(split_algo) ) new_balltree%split_algo = split_algo
+
+        new_balltree%split_algo_int = tmp%convert_char_to_int(new_balltree%split_algo, algo_list)
     end function new_balltree
 
 
@@ -85,7 +108,8 @@ contains
 
         if ( ASSOCIATED(this%root_ball_ptr) ) nullify( this%root_ball_ptr )
         allocate( this%root_ball_ptr )
-        call this%root_ball_ptr%init(t_, f_, 0_8, this%n_samples, this%n_columns, this%min_samples_in_leaf)
+        call this%root_ball_ptr%init(t_, f_, 0_8, this%n_samples, this%n_columns, this%min_samples_in_leaf, &
+            this%split_algo_int)
 
         ball_idx = 0_8
         call this%build_balltree_rec(this%root_ball_ptr, x_ptr, ball_idx, times)
@@ -345,11 +369,12 @@ contains
     ! For Ball
     ! ----------------------------------------------------------------------------------
 
-    subroutine init_ball(this, is_root, is_leaf, depth, n_samples, n_columns, min_samples_in_leaf, parent_ball)
+    subroutine init_ball(this, is_root, is_leaf, depth, n_samples, n_columns, min_samples_in_leaf, &
+        split_algo_int, parent_ball)
         implicit none
         class(ball) :: this
         logical(kind=4), intent(in) :: is_root, is_leaf
-        integer(kind=8), intent(in) :: depth, n_samples, n_columns, min_samples_in_leaf
+        integer(kind=8), intent(in) :: depth, n_samples, n_columns, min_samples_in_leaf, split_algo_int
         type(ball), intent(in), optional, target :: parent_ball
 
         integer(kind=8) :: n
@@ -360,6 +385,7 @@ contains
         this%n_samples = n_samples
         this%n_columns = n_columns
         this%min_samples_in_leaf = min_samples_in_leaf
+        this%split_algo_int = split_algo_int
 
         this%radius = 0d0
         call ifdealloc(this%center)
@@ -402,6 +428,7 @@ contains
         print*, "ball%n_samples               : ", this%n_samples
         print*, "ball%n_columns               : ", this%n_columns
         print*, "ball%min_samples_in_leaf     : ", this%min_samples_in_leaf
+        print*, "ball%split_algo_int          : ", this%split_algo_int
 
         print*, "ball%radius                  : ", this%radius
         if (allocated(this%center)) then
@@ -426,7 +453,7 @@ contains
         real(kind=8), pointer, intent(in) :: x_ptr(:,:)
         integer(kind=8), intent(inout) :: times(:)
 
-        integer(kind=8) :: n, f, idx, p_idx_1st, p_idx_2nd
+        integer(kind=8) :: n, f, idx, p_idx_1st, p_idx_2nd, idx_a, idx_b
         real(kind=8), allocatable :: distance_from_center(:), tmp_vec(:), tmp_X(:,:), distance_from_center_base(:)
         real(kind=8), allocatable :: distance_from_1st(:), distance_from_2nd(:)
         real(kind=8) :: center_sq_sum, p_1st_sq_sum, p_2nd_sq_sum
@@ -435,6 +462,7 @@ contains
         integer(kind=8), ALLOCATABLE :: which_side(:)
         real(kind=8), ALLOCATABLE    :: min_vals(:), max_vals(:), center(:)
         real(kind=8) :: tmp_min, tmp_max, val
+        real(kind=8), ALLOCATABLE :: project_dist(:)
 
         integer(kind=8) :: date_value1(8), date_value2(8)
 
@@ -480,25 +508,47 @@ contains
         ! Get Most Spread Dimension
         allocate( min_vals(this%n_columns) )
         allocate( max_vals(this%n_columns) )
-        ! call get_matrix_minmax(min_vals, max_vals, transpose(x_ptr), this%indices, this%n_samples, &
-        !     size(x_ptr, dim=1)+0_8, this%n_columns)
-        !$omp parallel num_threads(2)
-        !$omp do private(f, n, tmp_min, tmp_max, idx, val)
-        do f=1, this%n_columns, 1
-            tmp_min =   huge(0d0)
-            tmp_max = - huge(0d0)
+        if ( this%split_algo_int .eq. 1_8 ) then
+            !$omp parallel num_threads(2)
+            !$omp do private(f, n, tmp_min, tmp_max, idx, val)
+            do f=1, this%n_columns, 1
+                tmp_min =   huge(0d0)
+                tmp_max = - huge(0d0)
+                do n=1, this%n_samples, 1
+                    idx = this%indices(n)
+                    val = x_ptr(idx,f)
+                    tmp_min = minval((/tmp_min, val/))
+                    tmp_max = maxval((/tmp_max, val/))
+                end do
+                min_vals(f) = tmp_min
+                max_vals(f) = tmp_max
+            end do
+            !$omp end do
+            !$omp end parallel
+            max_spread_dim = maxloc( abs( max_vals - min_vals ), dim=1)
             do n=1, this%n_samples, 1
                 idx = this%indices(n)
-                val = x_ptr(idx,f)
-                tmp_min = minval((/tmp_min, val/))
-                tmp_max = maxval((/tmp_max, val/))
+                tmp_vec(n) = x_ptr(idx, max_spread_dim)
             end do
-            min_vals(f) = tmp_min
-            max_vals(f) = tmp_max
-        end do
-        !$omp end do
-        !$omp end parallel
-        max_spread_dim = maxloc( abs( max_vals - min_vals ), dim=1)
+        else if ( this%split_algo_int .eq. 2_8 ) then
+            call this%choose_farthest_two_points(idx_a, idx_b, x_ptr)
+            allocate( this%point_a(this%n_columns) )
+            allocate( this%point_b(this%n_columns) )
+            allocate( this%b_minus_a(this%n_columns) )
+            this%point_a(:) = x_ptr(idx_a,:)
+            this%point_b(:) = x_ptr(idx_b,:)
+            this%b_minus_a(:) = this%point_b(:) - this%point_a(:)
+            this%a_sq_sum = sum( this%point_a(:)**2d0 )
+            this%ab_dot = sum( this%point_a(:) * this%point_b(:) )
+            this%dist_ab = sqrt( sum( (this%point_a(:)-this%point_b(:))**2d0 ) )
+
+            call multi_mat_vec(x_ptr(this%indices,:), this%b_minus_a, tmp_vec, &
+                this%n_samples, this%n_columns)
+            tmp_vec(:) = tmp_vec(:) + this%a_sq_sum - this%ab_dot
+            tmp_vec(:) = tmp_vec(:) / this%dist_ab
+        else
+            stop "NotImplementedError"
+        end if
         ! call date_and_time(values=date_value2)
         ! ! times(3) = times(3) + time_diff(date_value1, date_value2)
 
@@ -506,10 +556,6 @@ contains
         ! call date_and_time(values=date_value1)        
         allocate(this%pivot(this%n_columns))
         med_idx = this%n_samples / 2_8
-        do n=1, this%n_samples, 1
-            idx = this%indices(n)
-            tmp_vec(n) = x_ptr(idx, max_spread_dim)
-        end do
         call quick_argselect(tmp_vec, this%indices, this%n_samples, med_idx)
         cnt_l = med_idx
         cnt_r = this%n_samples - cnt_l
@@ -521,11 +567,11 @@ contains
         ! call date_and_time(values=date_value1)        
         allocate(this%ball_l_ptr)
         call this%ball_l_ptr%init(f_, f_, this%depth+1, &
-            cnt_l, this%n_columns, this%min_samples_in_leaf, this)
+            cnt_l, this%n_columns, this%min_samples_in_leaf, this%split_algo_int, this)
 
         allocate(this%ball_r_ptr)
         call this%ball_r_ptr%init(f_, f_, this%depth+1, &
-            cnt_r, this%n_columns, this%min_samples_in_leaf, this)
+            cnt_r, this%n_columns, this%min_samples_in_leaf, this%split_algo_int, this)
         ! call date_and_time(values=date_value2)
         ! ! times(5) = times(5) + time_diff(date_value1, date_value2)
 
@@ -547,6 +593,40 @@ contains
         ! ! times(6) = times(6) + time_diff(date_value1, date_value2)
     end subroutine split_ball
 
+    subroutine choose_farthest_two_points(this, idx_a, idx_b, x_ptr)
+        implicit none
+        class(ball)                       :: this
+        integer(kind=8), intent(inout)    :: idx_a, idx_b
+        real(kind=8), pointer, intent(in) :: x_ptr(:,:)
+
+        integer(kind=8) :: max_loc
+        real(kind=8) :: center_sq_sum, first_sq_sum
+        real(kind=8), ALLOCATABLE :: distances(:), x(:,:), x_sq_sum(:)
+
+        center_sq_sum = sum( this%center(:)**2d0 )
+
+        allocate( distances(this%n_samples) )
+        allocate( x(this%n_samples, this%n_columns) )
+        allocate( x_sq_sum(this%n_samples) )
+
+        x(:,:) = x_ptr(this%indices,:)
+        call matrix_sqsum_row(x, x_sq_sum, this%n_samples, this%n_columns, parallel=f_)
+
+        ! Choose Farthest Point From Center
+        distances(:) = 0d0
+        call multi_mat_vec(x, this%center, distances, this%n_samples, this%n_columns)
+        distances(:) = -2d0 * distances(:) + x_sq_sum(:) + center_sq_sum
+        max_loc = maxloc(distances, dim=1)
+        idx_a = this%indices(max_loc)
+        first_sq_sum = sum( x_ptr(idx_a,:)**2d0 )
+
+        ! Chooese Farthest Pointe From idx_a
+        distances(:) = 0d0
+        call multi_mat_vec(x, x_ptr(idx_a,:), distances, this%n_samples, this%n_columns)
+        distances(:) = -2d0 * distances(:) + x_sq_sum(:) + first_sq_sum
+        max_loc = maxloc(distances, dim=1)
+        idx_b = this%indices(max_loc)
+    end subroutine choose_farthest_two_points
 
 
 end module mod_balltree
