@@ -13,31 +13,32 @@ module mod_lsh
     use mod_math
     implicit none
 
+    !> Locality-Sensitive-Hashing.
     type lsh
-        integer(kind=8)                             :: n_hash_functions = 16_8
-        integer(kind=8)                             :: n_hash_tables    =  8_8
-        integer(kind=8)                             :: bit_length       =  8_8
-        character(len=256)                          :: algorithm        =  "random_projection"
-        integer(kind=8)                             :: n_samples, n_columns
-        real(kind=8)                                :: div_val
-        type(jagged_array_of_array_i8), allocatable :: array_per_table(:)
+        integer(kind=8)                             :: n_hash_functions = 16_8 !< number of hash functions in each hash tables
+        integer(kind=8)                             :: n_hash_tables    =  8_8 !< number of hash tables
+        integer(kind=8)                             :: bit_length       =  8_8 !< lenght of bit for 'random_projection_pstable'.
+        character(len=256)                          :: algorithm        =  "random_projection" !< hashing algorithm, 'random_projection' or 'random_projection_pstable'
+        integer(kind=8)                             :: n_samples, n_columns !< input data shape
+        real(kind=8)                                :: div_val !< 1/bit_length
+        type(jagged_array_of_array_i8), allocatable :: array_per_table(:) !< 
 
-        type(jagged_matrix_r8), allocatable         :: hash_functoin_sets(:)
+        type(jagged_matrix_r8), allocatable         :: hash_functoin_sets(:) !< hash function set.
 
-        type(hash_table), allocatable :: hash_tables(:)
+        type(hash_table), allocatable               :: hash_tables(:) !< 'hash_table' object to store encoded data and search.
 
         real(kind=8), allocatable :: x(:,:)
         real(kind=8), allocatable :: x_sq_sum(:)
     contains
-        procedure :: fit => fit_lsh
+        procedure :: build => build_lsh
         procedure :: query => query_lsh
 
-        procedure :: fit_lsh_random_projection
+        procedure :: build_lsh_random_projection
         procedure :: query_lsh_nearest_neighbor_random_projection
         procedure :: key2hash_rp
         procedure :: key2hash_fast_rp
 
-        procedure :: fit_lsh_random_projection_pstable
+        procedure :: build_lsh_random_projection_pstable
         procedure :: query_lsh_nearest_neighbor_random_projection_pstable
         procedure :: key2hash_rpp
         procedure :: key2hash_rpp_fast
@@ -116,7 +117,9 @@ contains
     end function new_lsh
 
 
-    subroutine fit_lsh(this, x)
+    !> Build LSH.
+    !! \param x input data
+    subroutine build_lsh(this, x)
         implicit none
         class(lsh) :: this
         real(kind=8), target, intent(in) :: x(:,:)
@@ -140,9 +143,9 @@ contains
         call this%init_hash_tables()
 
         if (this%algorithm .eq. "random_projection") then
-            call this%fit_lsh_random_projection(x_ptr)
+            call this%build_lsh_random_projection(x_ptr)
         elseif ( this%algorithm .eq. "random_projection_pstable" ) then
-            call this%fit_lsh_random_projection_pstable(x_ptr)
+            call this%build_lsh_random_projection_pstable(x_ptr)
         else
             stop "NotImplementedError"
         end if
@@ -151,8 +154,12 @@ contains
         allocate(this%x_sq_sum(this%n_samples))
         this%x = x
         call matrix_sqsum_row(this%x, this%x_sq_sum, this%n_samples, this%n_columns, parallel=t_)
-    end subroutine fit_lsh
+    end subroutine build_lsh
 
+
+    !> Query function for lsh.
+    !! \param q query samples
+    !! \param n_neighbors number of neighbors
     function query_lsh(this, q, n_neighbors)
         implicit none
         class(lsh)                       :: this
@@ -186,8 +193,9 @@ contains
 
 
 
-
-    subroutine fit_lsh_random_projection(this, x_ptr)
+    !> Build LSH by random projection algorithm.
+    !! \param x_ptr pointer to input data
+    subroutine build_lsh_random_projection(this, x_ptr)
         implicit none
         class(lsh) :: this
         real(kind=8), pointer, intent(in) :: x_ptr(:,:)
@@ -234,9 +242,14 @@ contains
         end do
         !$omp end do
         !$omp end parallel
-    end subroutine fit_lsh_random_projection
+    end subroutine build_lsh_random_projection
 
-
+    !> Query function for lsh by random projection algorithm.
+    !! \param res neighbor results.
+    !! \param q_ptr pointer to query samples
+    !! \param n_neighbors number of neighbors
+    !! \param n_samples number of query samples
+    !! \param n_columns number of columns
     subroutine query_lsh_nearest_neighbor_random_projection(this, res, q_ptr, n_neighbors, n_samples, n_columns)
         implicit none
         class(lsh)                       :: this
@@ -307,6 +320,9 @@ contains
         !$omp end parallel
     end subroutine query_lsh_nearest_neighbor_random_projection
 
+    !> Convert one query sample to encoded value.
+    !! \param q_i query sample
+    !! \param table_idx index of hash talbes
     function key2hash_rp(this, q_i, table_idx)
         implicit none
         class(lsh) :: this
@@ -327,6 +343,13 @@ contains
         end do
     end function key2hash_rp
 
+
+    !> Convert query samples to encoded values.
+    !> Faster than 'key2hash_rp'.
+    !! \param q_i query sample
+    !! \param table_idx index of hash talbes
+    !! \param n_samples number of query samples
+    !! \param n_columns number of columns
     function key2hash_fast_rp(this, q_ptr, table_idx, n_samples, n_columns)
         implicit none
         class(lsh) :: this
@@ -371,7 +394,10 @@ contains
 
 
 
-    subroutine fit_lsh_random_projection_pstable(this, x_ptr)
+
+    !> Build LSH by random projection with p-stable distribution algorithm.
+    !! \param x_ptr pointer to input data
+    subroutine build_lsh_random_projection_pstable(this, x_ptr)
         implicit none
         class(lsh) :: this
         real(kind=8), pointer, intent(in) :: x_ptr(:,:)
@@ -414,9 +440,14 @@ contains
         end do
         !$omp end do
         !$omp end parallel
-    end subroutine fit_lsh_random_projection_pstable
+    end subroutine build_lsh_random_projection_pstable
 
-
+    !> Query function for lsh by random projection with p-stable distribution algorithm.
+    !! \param res neighbor results.
+    !! \param q_ptr pointer to query samples
+    !! \param n_neighbors number of neighbors
+    !! \param n_samples number of query samples
+    !! \param n_columns number of columns
     subroutine query_lsh_nearest_neighbor_random_projection_pstable(this, res, q_ptr, n_neighbors, n_samples, n_columns)
         implicit none
         class(lsh)                       :: this
@@ -486,7 +517,9 @@ contains
         !$omp end parallel
     end subroutine query_lsh_nearest_neighbor_random_projection_pstable
 
-
+    !> Convert one query sample to encoded value.
+    !! \param q_i query sample
+    !! \param table_idx index of hash talbes
     function key2hash_rpp(this, q_i, table_idx)
         implicit none
         class(lsh) :: this
@@ -507,7 +540,12 @@ contains
         key2hash_rpp(:) = FLOOR( tmp(:) * this%div_val )
     end function key2hash_rpp
 
-
+    !> Convert query samples to encoded values.
+    !> Faster than 'key2hash_rpp'.
+    !! \param q_i query sample
+    !! \param table_idx index of hash talbes
+    !! \param n_samples number of query samples
+    !! \param n_columns number of columns
     function key2hash_rpp_fast(this, q_ptr, table_idx, n_samples, n_columns)
         implicit none
         class(lsh) :: this

@@ -10,11 +10,15 @@ module mod_nearest_neighbour
         real(kind=8), allocatable :: dst(:) !< distances from query to N-th nearest points
     end type distance
 
+    !> Neghbor Informations.
+    !> indices: sample indices of domain
+    !> distaneces: distances between each query from domain
     type neighbor_results
         type(index),    ALLOCATABLE :: indices(:)
         type(distance), ALLOCATABLE :: distances(:)
     end type neighbor_results
 
+    !> Common members of 'node' for 'kdtree', 'ball' for 'balltree'.
     type base_node_for_nearest_neighbor
         integer(kind=8) :: idx !< node index
         logical(kind=4) :: is_root=f_ !< is root node or not
@@ -28,7 +32,6 @@ module mod_nearest_neighbour
 
         integer(kind=8), ALLOCATABLE :: indices(:) !< sample point indices
         integer(kind=8), ALLOCATABLE :: indices_(:) !< include split point indices
-
     end type base_node_for_nearest_neighbor
 
 

@@ -8,23 +8,21 @@ module mod_balltree
     use mod_nearest_neighbour, only: neighbor_results, base_node_for_nearest_neighbor
     implicit none
 
+    !> Type of Ball for BallTree.
     type, extends(base_node_for_nearest_neighbor) :: ball
-        real(kind=8), ALLOCATABLE :: pivot(:)
-        real(kind=8) :: pivot_sq_sum
-
         ! Ball Info
-        integer(kind=8) :: split_algo_int
+        integer(kind=8) :: split_algo_int !< ball splitting algorithm. 1='most_spread', 2='farthest_two', 3='1st_pc_axis'(not implemented)
         real(kind=8) :: radius !< ball radius
         real(kind=8) :: radius_sq !< ball radius square
         real(kind=8), allocatable :: center(:) !< ball center coordinate
 
         ! Additional Info
-        real(kind=8), allocatable :: x(:,:)
-        real(kind=8), allocatable :: x_sq_sum(:)
-        real(kind=8), allocatable :: point_a(:)
-        real(kind=8), allocatable :: point_b(:)
-        real(kind=8), allocatable :: b_minus_a(:)
-        real(kind=8) :: a_sq_sum, ab_dot, dist_ab
+        real(kind=8), allocatable :: x(:,:) !< leaf node sample data
+        real(kind=8), allocatable :: x_sq_sum(:) !< squared sum of x
+        real(kind=8), allocatable :: point_a(:) !< farthes point
+        real(kind=8), allocatable :: point_b(:) !< farthes point
+        real(kind=8), allocatable :: b_minus_a(:) !< difference between a and b
+        real(kind=8) :: a_sq_sum, ab_dot, dist_ab !< squared sum of a, dot product of a and b, distance between a and b.
 
         ! Parent and children node pointers
         type(ball), pointer :: ball_p_ptr => null() !< pointer to parent ball
@@ -39,14 +37,14 @@ module mod_balltree
     end type ball
 
     type balltree
-        integer(kind=8) :: n_samples, n_columns
+        integer(kind=8) :: n_samples, n_columns !< input data shape
         character(len=256) :: split_algo = "most_spread" !< most_spread, farthest_two, 1st_pc_axis
         integer(kind=8)    :: split_algo_int = 1 !< most_spread, farthest_two, 1st_pc_axis
     
-        type(ball), pointer :: root_ball_ptr
-        integer(kind=8)  :: min_samples_in_leaf=32_8
+        type(ball), pointer :: root_ball_ptr !< pointer to root ball
+        integer(kind=8)  :: min_samples_in_leaf=32_8 !< minimum number of samples in leaf ball
 
-        integer(kind=8), allocatable :: x_sq_sum(:)
+        integer(kind=8), allocatable :: x_sq_sum(:) !< squared sum of x by row
     contains
         procedure :: build => build_balltree
         procedure :: build_balltree_rec
@@ -54,9 +52,9 @@ module mod_balltree
         procedure :: query => query_balltree
         procedure :: query_balltree_n_neighbors_rec
         procedure :: query_balltree_radius_rec
-
     end type balltree
 
+    !> New 'balltree' constructor.
     interface balltree
         module procedure :: new_balltree
     end interface balltree
@@ -68,6 +66,9 @@ contains
     ! For Ball Tree
     ! ----------------------------------------------------------------------------------
 
+    !> New 'balltree' constructor.
+    !! \param min_samples_in_leaf minimum number of samples in leaf ball. Must be greater than 1 and smaller than number of input data. 
+    !! \param split_algo ball splitting algorithm. 'most_spread', 'farthest_two', '1st_pc_axis'(not implemented).
     function new_balltree(min_samples_in_leaf, split_algo)
         implicit none
         type(balltree) :: new_balltree
@@ -88,6 +89,8 @@ contains
     end function new_balltree
 
 
+    !> Building 'balltree'.
+    !! \param x input data.
     subroutine build_balltree(this, x)
         implicit none
         class(balltree) :: this
@@ -123,7 +126,10 @@ contains
         ! print*, "Allocate Indices      : ", times(6)
     end subroutine build_balltree
 
-
+    !> Building 'balltree' recursively using in 'build_balltree'.
+    !! \param ball_ptr pointer to current 'ball'
+    !! \param x_ptr pointer to 'x'
+    !! \param ball_idx 
     subroutine build_balltree_rec(this, ball_ptr, x_ptr, ball_idx, times)
         implicit none
         class(balltree) :: this
@@ -554,13 +560,11 @@ contains
 
         ! Get Pivot
         ! call date_and_time(values=date_value1)        
-        allocate(this%pivot(this%n_columns))
         med_idx = this%n_samples / 2_8
         call quick_argselect(tmp_vec, this%indices, this%n_samples, med_idx)
         cnt_l = med_idx
         cnt_r = this%n_samples - cnt_l
         med_idx = this%indices(med_idx)
-        this%pivot(:) = x_ptr(med_idx,:)
         ! call date_and_time(values=date_value2)
         ! ! times(4) = times(4) + time_diff(date_value1, date_value2)
 
@@ -592,6 +596,7 @@ contains
         ! call date_and_time(values=date_value2)
         ! ! times(6) = times(6) + time_diff(date_value1, date_value2)
     end subroutine split_ball
+
 
     subroutine choose_farthest_two_points(this, idx_a, idx_b, x_ptr)
         implicit none

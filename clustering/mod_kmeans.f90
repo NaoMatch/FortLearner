@@ -45,6 +45,9 @@ module mod_kmeans
 
 contains
 
+    !> Calculate Kmeans Score
+    !> sum of squared distance from nearest centroid.
+    !! \param x input data, 2-dim.
     function score_kmeans(this, x)
         implicit none
         class(kmeans)            :: this
@@ -280,6 +283,8 @@ contains
         this % cluster_centers(:,:) = new_cluster_centers(:,:)
     end subroutine fit_kmeans
 
+    !> A subroutine to fit 'kmeans' object by optimized(heuristic) method and dgemv.
+    !! \param x data to be fitted
     subroutine fit_dgemv_kmeans(this, x)
         class(kmeans) :: this
         real(kind=8), intent(in) :: x(:,:)
@@ -360,7 +365,7 @@ contains
         this % cluster_centers(:,:) = new_cluster_centers(:,:)
     end subroutine fit_dgemv_kmeans
 
-    !> A subroutine to fit 'kmeans' object by optimized(heuristic) method.
+    !> A subroutine to fit 'kmeans' object by optimized(heuristic) method and dgemm.
     !! \param x data to be fitted
     subroutine fit_dgemm_kmeans(this, x)
         class(kmeans) :: this
@@ -892,6 +897,16 @@ contains
         end do
     end subroutine calculate_distance_from_center
 
+    !> A subroutine to calculate the distance of 'x' from the centroid with dgemv.
+    !> Expanding (x-y)^2 and calculating only x x y will speed up the process. 
+    !> (Since x is a data point, x^2 only needs to be computed once, 
+    !> and y is a cluster and is very few in number compared to the data points and the number of features, 
+    !> the amount of computation is negligible.)
+    !! \param x data points (#samples, #columns)
+    !! \param center coordinates of centroid (#columns)
+    !! \param distance distance from the centroid (#samples)
+    !! \param n_samples number of samples
+    !! \param n_columns number of columns
     subroutine calculate_distance_from_center_dgemv(x, x_sq_sum_row, center, distance, n_samples, n_columns)
         real(kind=8), intent(in)    :: x(n_samples, n_columns)
         real(kind=8), intent(in)    :: x_sq_sum_row(n_samples)

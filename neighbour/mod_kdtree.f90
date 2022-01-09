@@ -10,6 +10,7 @@ module mod_kdtree
     use mod_nearest_neighbour, only: neighbor_results, base_node_for_nearest_neighbor
     implicit none
     
+    !> KDtree node.
     type, extends(base_node_for_nearest_neighbor) :: node_type
         real(kind=8)    :: split_val = huge(0d0) !< split threshold
         integer(kind=8) :: split_fid = -1_8 !< split feature index
@@ -28,6 +29,7 @@ module mod_kdtree
         procedure :: adopting_twins_in_kdtree
     end type node_type
 
+    !> Type of kdtree
     type kdtree
         type(node_type), pointer :: root_node_ptr_ !< pointer ot root node
         integer(kind=8) :: min_samples_in_leaf = 128_8 !< minimum number of samples in leaf node
@@ -51,6 +53,7 @@ module mod_kdtree
         procedure :: query_nearest_radius_search_subtree
     end type kdtree
 
+    !> Construct New 'kdtree' object.
     interface kdtree
         module procedure :: new_kdtree
     end interface kdtree
