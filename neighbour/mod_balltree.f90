@@ -4,19 +4,10 @@ module mod_balltree
     use mod_common
     use mod_linalg
     use mod_timer
-    use mod_nearest_neighbour, only: neighbor_results
+    use mod_nearest_neighbour, only: neighbor_results, base_node_for_nearest_neighbor
     implicit none
 
-    type ball
-        integer(kind=8) :: idx !< node index
-        logical(kind=4) :: is_root=f_ !< is root node or not
-        logical(kind=4) :: is_leaf=f_ !< is leaf node or not
-        integer(kind=8) :: depth !< node depth
-        integer(kind=8) :: n_samples !< number of samples
-        integer(kind=8) :: n_columns !< number of columns
-        integer(kind=8) :: min_samples_in_leaf !< minimum number of samples in leaf node
-
-        integer(kind=8), ALLOCATABLE :: indices(:) !< sample point indices
+    type, extends(base_node_for_nearest_neighbor) :: ball
         real(kind=8), ALLOCATABLE :: pivot(:)
         real(kind=8) :: pivot_sq_sum
 

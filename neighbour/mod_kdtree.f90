@@ -7,28 +7,15 @@ module mod_kdtree
     use mod_sort
     use mod_linalg
     use mod_math, only: relu
-    use mod_nearest_neighbour, only: neighbor_results
+    use mod_nearest_neighbour, only: neighbor_results, base_node_for_nearest_neighbor
     implicit none
     
-    type node_type
-        integer(kind=8) :: idx !< node index
-        logical(kind=4) :: is_root=f_ !< is root node or not
-        logical(kind=4) :: is_leaf=f_ !< is leaf node or not
-        logical(kind=4) :: is_left=f_ !< is left child node or not
-        integer(kind=8) :: depth !< node depth
-        integer(kind=8) :: n_samples !< number of samples
-        integer(kind=8) :: n_samples_ !< number of samples including split point indices
-        integer(kind=8) :: n_columns !< number of samples
-        integer(kind=8) :: min_samples_in_leaf !< minimum number of samples in leaf node
-
+    type, extends(base_node_for_nearest_neighbor) :: node_type
         real(kind=8)    :: split_val = huge(0d0) !< split threshold
         integer(kind=8) :: split_fid = -1_8 !< split feature index
-
         integer(kind=8) :: split_val_i8 = huge(0_8) !< split threshold, for 'exact_dup_search'
 
         integer(kind=8)              :: data_index !< split data point index
-        integer(kind=8), ALLOCATABLE :: indices(:) !< sample point indices
-        integer(kind=8), ALLOCATABLE :: indices_(:) !< include split point indices
         real(kind=8), allocatable    :: x_(:,:),   x_sq_(:) !< explanatory and its sum squared sum by row with split points
         integer(kind=8), allocatable :: x_i8(:,:), x_sq_i8(:) !< explanatory and its sum squared sum by row with split points, for 'exact_dup_search'
 
