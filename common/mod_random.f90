@@ -7,7 +7,9 @@ module mod_random
     !> Interface to call rand_normal_1d_r4, rand_normal_1d_r8
     interface rand_normal
         module procedure rand_normal_1d_r4
+        module procedure rand_normal_r8
         module procedure rand_normal_1d_r8
+        module procedure rand_normal_2d_r8
     end interface ! rand_normal
 
     interface rand_uniform
@@ -35,6 +37,8 @@ module mod_random
 
     !> Interface to call rand_integer_i4, rand_integer_i8
     interface rand_integer
+        module procedure rand_integer_scl_i4
+        module procedure rand_integer_scl_i8
         module procedure rand_integer_i4
         module procedure rand_integer_i8
     end interface ! rand_integer
@@ -69,11 +73,11 @@ contains
 
     !> A subroutine to generate normally distributed random number of 1-dim.
     !> Subroutines of other data types (rand_normal_1d_real64) are stored in './common/include/rand_normal/'. \n
-    !! \return vector input 1-dim vector
+    !! \return array input 1-dim vector
     !! \param num size of input 1-dim vector
-    subroutine rand_normal_1d_r4(vector, num)
+    subroutine rand_normal_1d_r4(array, num)
         implicit none
-        real(kind=4), intent(inout) :: vector(num)
+        real(kind=4), intent(inout) :: array(num)
         integer(kind=4), intent(in) :: num
         real(kind=4), allocatable :: tmp(:)
         real(kind=4) :: two
@@ -147,5 +151,25 @@ contains
         include "./include/random/rand_integer/inc_rand_integer_detail.f90"
     end subroutine rand_integer_i4
     include "./include/random/rand_integer/inc_rand_integer.f90"
+
+    subroutine rand_integer_scl_i8(lo, hi, val)
+        implicit none
+        integer(kind=8), intent(in)    :: lo, hi
+        integer(kind=8) :: val
+        real(kind=8) :: tmp
+        call RANDOM_NUMBER(tmp)
+        val = (hi-lo)*tmp + lo + 1_8
+    end subroutine rand_integer_scl_i8
+
+    subroutine rand_integer_scl_i4(lo, hi, val)
+        implicit none
+        integer(kind=4), intent(in)    :: lo, hi
+        integer(kind=4) :: val
+        real(kind=4) :: tmp
+        call RANDOM_NUMBER(tmp)
+        val = (hi-lo)*tmp + lo + 1
+    end subroutine rand_integer_scl_i4
+
+
 
 end module mod_random

@@ -44,15 +44,17 @@ module mod_math
 
 contains
 
-    elemental subroutine relu_r4(x)
-        real(kind=4), intent(inout) :: x
-        x = maxval( (/0.0, x/) )
-    end subroutine relu_r4
+    elemental function relu_r4(x)
+        real(kind=4), intent(in) :: x
+        real(kind=4) :: relu_r4
+        relu_r4 = maxval( (/0.0, x/) )
+    end function relu_r4
 
-    elemental subroutine relu_r8(x)
-        real(kind=8), intent(inout) :: x
-        x = maxval( (/0d0, x/) )
-    end subroutine relu_r8
+    elemental function relu_r8(x)
+        real(kind=8), intent(in) :: x
+        real(kind=8) :: relu_r8
+        relu_r8 = maxval( (/0d0, x/) )
+    end function relu_r8
 
     function harmonic_number_approx_i8(n)
         real(kind=8) :: harmonic_number_approx_i8
