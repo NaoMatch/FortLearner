@@ -4,7 +4,7 @@ module mod_balltree
     use mod_common
     use mod_linalg
     use mod_timer
-    use mod_nearest_neighbour, only: kdtree_results
+    use mod_nearest_neighbour, only: neighbor_results
     implicit none
 
     type ball
@@ -149,12 +149,12 @@ contains
         real(kind=8), target, intent(in) :: q(:,:)
         integer(kind=8), optional        :: n_neighbors
         real(kind=8), optional           :: radius
-        type(kdtree_results), target     :: query_balltree
+        type(neighbor_results), target     :: query_balltree
 
         integer(kind=8) :: q_shape(2), n_samples, n_columns, n
         real(kind=8) :: radius_sq, q_sq_sum
         real(kind=8), pointer :: q_ptr(:,:)
-        type(kdtree_results), pointer :: res_ptr
+        type(neighbor_results), pointer :: res_ptr
         real(kind=8), allocatable :: distances(:), q_i(:)
         integer(kind=8), allocatable :: indices(:)
 
@@ -253,7 +253,7 @@ contains
             else
                 allocate(tmp_i(root_ball_ptr%n_samples))
                 do i=1, root_ball_ptr%n_samples
-                    tmp_i(i) = i
+                    tmp_i(i) = root_ball_ptr%indices(i)
                 end do
                 tmp_d = distances(:)
 
@@ -320,7 +320,7 @@ contains
             else
                 allocate(tmp_i(root_ball_ptr%n_samples))
                 do i=1, root_ball_ptr%n_samples
-                    tmp_i(i) = i
+                    tmp_i(i) = root_ball_ptr%indices(i)
                 end do
                 count_in_ball = count(distance_q_and_s <= radius_sq)
 
