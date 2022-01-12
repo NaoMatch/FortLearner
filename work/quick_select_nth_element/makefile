@@ -2,7 +2,7 @@ compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
 opt              := -O3
-option           := -cpp -D_x86_64 -fopenmp -fbounds-check
+option           := -cpp -D_x86_64 -fopenmp
 option_blas      := -lopenblas
 
 common           := 	./mod/mod_const.out \

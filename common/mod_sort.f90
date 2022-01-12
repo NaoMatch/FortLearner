@@ -4,6 +4,18 @@ module mod_sort
     use mod_random
     implicit none
 
+    interface align_left
+        module procedure :: align_left_r8
+        module procedure :: align_left_i8
+    end interface align_left
+
+    interface align_left_arg
+        module procedure :: align_left_arg_r8_r8
+        module procedure :: align_left_arg_i8_r8
+        module procedure :: align_left_arg_r8_i8
+        module procedure :: align_left_arg_i8_i8
+    end interface align_left_arg
+
     !> An interface to call insertion_sort_r4, insertion_sort_r8, insertion_sort_i4, and insertion_sort_i8
     interface insertion_sort
         module procedure :: insertion_sort_r4
@@ -66,11 +78,26 @@ module mod_sort
 
     interface quick_select
         module procedure :: quick_select_r8
+        module procedure :: quick_select_i8
     end interface quick_select
 
+    interface quick_argselect_rec
+        module procedure :: quick_argselect_rec_r8_r8
+        module procedure :: quick_argselect_rec_i8_r8
+        module procedure :: quick_argselect_rec_r8_i8
+        module procedure :: quick_argselect_rec_i8_i8
+    end interface quick_argselect_rec
+
+    interface quick_select_rec
+        module procedure :: quick_select_rec_r8
+        module procedure :: quick_select_rec_i8
+    end interface quick_select_rec
+
     interface quick_argselect
-        module procedure :: quick_argselect_r8
-        module procedure :: quick_argselect_i8
+        module procedure :: quick_argselect_r8_r8
+        module procedure :: quick_argselect_i8_r8
+        module procedure :: quick_argselect_r8_i8
+        module procedure :: quick_argselect_i8_i8
     end interface quick_argselect
 
     interface quick_select_lower
@@ -171,6 +198,31 @@ module mod_sort
 
 contains
 
+    subroutine align_left_i8(vector, is_same, n_samples)
+        implicit none
+        integer(kind=8), intent(inout) :: vector(n_samples)
+        logical(kind=4), intent(inout) :: is_same(n_samples)
+        integer(kind=8), intent(in) :: n_samples
+
+        integer(kind=8) :: pivot, tmp
+        integer(kind=8) :: i, j, idx, n_th_new
+        include "./include/sort/align_left/inc_align_left_detail.f90"
+    end subroutine align_left_i8
+    include "./include/sort/align_left/inc_align_left.f90"
+
+    subroutine align_left_arg_r8_r8(vector1, vector2, is_same, n_samples)
+        implicit none
+        real(kind=8), intent(inout) :: vector1(n_samples)
+        real(kind=8), intent(inout) :: vector2(n_samples)
+        logical(kind=4), intent(inout) :: is_same(n_samples)
+        integer(kind=8), intent(in) :: n_samples
+
+        real(kind=8) :: pivot, tmp1
+        real(kind=8) :: tmp2
+        integer(kind=8) :: i, j, idx, n_th_new
+        include "./include/sort/align_left_arg/inc_align_left_arg_detail.f90"
+    end subroutine align_left_arg_r8_r8
+    include "./include/sort/align_left_arg/inc_align_left_arg.f90"
 
     !> A subroutine to sort the input vectors using insert sort
     !! \param vector a vector to be sorted
@@ -363,7 +415,22 @@ contains
     !! \param vector input vector to extract n_th element.
     !! \param n_samples size of vector
     !! \param n_th n-th index
-    recursive subroutine quick_select_r8(vector, n_samples, n_th)
+    subroutine quick_select_i8(vector, n_samples, n_th, left_align)
+        implicit none
+        integer(kind=8), intent(inout)        :: vector(n_samples)
+        integer(kind=8), intent(in)           :: n_samples
+        integer(kind=8), intent(in)           :: n_th
+        logical(kind=4), intent(in) :: left_align
+        logical(kind=4), allocatable :: is_same(:)
+        include "./include/sort/quick_select/inc_quick_select_detail.f90"
+    end subroutine quick_select_i8
+    include "./include/sort/quick_select/inc_quick_select.f90"
+
+    !> Get the N-th Value
+    !! \param vector input vector to extract n_th element.
+    !! \param n_samples size of vector
+    !! \param n_th n-th index
+    recursive subroutine quick_select_rec_r8(vector, n_samples, n_th)
         implicit none
         real(kind=8), intent(inout) :: vector(n_samples)
         integer(kind=8), intent(in) :: n_samples
@@ -371,135 +438,47 @@ contains
 
         real(kind=8) :: pivot, tmp
         integer(kind=8) :: i, j, idx, n_th_new
-
-        if (n_samples .le. 32_8) then
-            call insertion_sort(vector, n_samples)
-            return
-        end if
-
-        idx = (1_8+n_samples) / 2_8
-        pivot = vector(idx)
-        i = 1
-        j = n_samples
-
-        do
-            do while (vector(i) < pivot)
-                i=i+1
-            end do
-            do while (pivot < vector(j))
-                j=j-1
-            end do
-            if (i >= j) exit
-            tmp = vector(i);  vector(i) = vector(j);  vector(j) = tmp
-            i=i+1
-            j=j-1
-        end do
-
-        if (n_th .le. j) then
-            call quick_select_r8(vector(1:j), j, n_th)
-        else
-            call quick_select_r8(vector(i:), n_samples-i+1, n_th-i+1)
-        end if
-    end subroutine quick_select_r8
+        include "./include/sort/quick_select/inc_quick_select_rec_detail.f90"
+    end subroutine quick_select_rec_r8
+    include "./include/sort/quick_select/inc_quick_select_rec.f90"
 
     !> Get the N-th Value
     !! \param vector input vector to extract n_th element.
     !! \param n_samples size of vector
     !! \param n_th n-th index
-    recursive subroutine quick_argselect_r8(vector, indices, n_samples, n_th)
+    recursive subroutine quick_argselect_rec_r8_r8(vector1, vector2, n_samples, n_th)
         implicit none
-        real(kind=8), intent(inout) :: vector(n_samples)
-        integer(kind=8), intent(inout) :: indices(n_samples)
+        real(kind=8), intent(inout) :: vector1(n_samples)
+        real(kind=8), intent(inout) :: vector2(n_samples)
         integer(kind=8), intent(in) :: n_samples
         integer(kind=8), intent(in) :: n_th
 
-        real(kind=8) :: pivot, tmp_r, pivots(3)
-        integer(kind=8) :: i, j, idx, tmp_i 
-
-        if (n_samples .le. 32_8) then
-            call insertion_argsort(vector, indices, n_samples)
-            return
-        end if
-
-
-        pivots(1) = vector(1)
-        pivots(2) = vector((1_8+n_samples)/2_8)
-        pivots(3) = vector(n_samples)
-        call insertion_sort(pivots, 3_8)
-        pivot = pivots(2)
-        i = 1
-        j = n_samples
-
-        do
-            do while (vector(i) < pivot)
-                i=i+1
-            end do
-            do while (pivot < vector(j))
-                j=j-1
-            end do
-            if (i >= j) exit
-            tmp_r = vector(i);  vector(i)  = vector(j);  vector(j)  = tmp_r
-            tmp_i = indices(i); indices(i) = indices(j); indices(j) = tmp_i
-            i=i+1
-            j=j-1
-        end do
-
-        if (n_th .le. j) then
-            call quick_argselect_r8(vector(1:j), indices(1:j), j, n_th)
-        else
-            call quick_argselect_r8(vector(i:), indices(i:), n_samples-i+1, n_th-i+1)
-        end if
-    end subroutine quick_argselect_r8
+        real(kind=8) :: pivot, tmp1
+        real(kind=8) :: tmp2
+        integer(kind=8) :: i, j, idx
+        include "./include/sort/quick_argselect/inc_quick_argselect_rec_detail.f90"
+    end subroutine quick_argselect_rec_r8_r8
+    include "./include/sort/quick_argselect/inc_quick_argselect_rec.f90"
 
     !> Get the N-th Value
     !! \param vector input vector to extract n_th element.
     !! \param n_samples size of vector
     !! \param n_th n-th index
-    recursive subroutine quick_argselect_i8(vector, indices, n_samples, n_th)
+    recursive subroutine quick_argselect_r8_r8(vector1, vector2, n_samples, n_th, left_align)
         implicit none
-        integer(kind=8), intent(inout) :: vector(n_samples)
-        integer(kind=8), intent(inout) :: indices(n_samples)
+        real(kind=8), intent(inout) :: vector1(n_samples)
+        real(kind=8), intent(inout) :: vector2(n_samples)
         integer(kind=8), intent(in) :: n_samples
         integer(kind=8), intent(in) :: n_th
+        logical(kind=4), intent(in) :: left_align
 
-        real(kind=8) :: pivot, tmp_r, pivots(3)
-        integer(kind=8) :: i, j, idx, tmp_i 
-
-        if (n_samples .le. 32_8) then
-            call insertion_argsort(vector, indices, n_samples)
-            return
-        end if
-
-
-        pivots(1) = vector(1)
-        pivots(2) = vector((1_8+n_samples)/2_8)
-        pivots(3) = vector(n_samples)
-        call insertion_sort(pivots, 3_8)
-        pivot = pivots(2)
-        i = 1
-        j = n_samples
-
-        do
-            do while (vector(i) < pivot)
-                i=i+1
-            end do
-            do while (pivot < vector(j))
-                j=j-1
-            end do
-            if (i >= j) exit
-            tmp_r = vector(i);  vector(i)  = vector(j);  vector(j)  = tmp_r
-            tmp_i = indices(i); indices(i) = indices(j); indices(j) = tmp_i
-            i=i+1
-            j=j-1
-        end do
-
-        if (n_th .le. j) then
-            call quick_argselect_i8(vector(1:j), indices(1:j), j, n_th)
-        else
-            call quick_argselect_i8(vector(i:), indices(i:), n_samples-i+1, n_th-i+1)
-        end if
-    end subroutine quick_argselect_i8
-
+        real(kind=8) :: pivot, tmp1
+        real(kind=8) :: tmp2
+        integer(kind=8) :: i, j, idx
+        logical(kind=4), allocatable :: is_same(:)
+        include "./include/sort/quick_argselect/inc_quick_argselect_detail.f90"
+    end subroutine quick_argselect_r8_r8
+    include "./include/sort/quick_argselect/inc_quick_argselect.f90"
 
 
 
