@@ -203,18 +203,18 @@ contains
 
     !> A subroutine to fit 'kmeans' object by optimized(heuristic) method.
     !! \param x data to be fitted
-    subroutine fit_kmeans(this, x)
+    subroutine fit_kmeans(this, x, centers)
         class(kmeans) :: this
         real(kind=8), intent(in) :: x(:,:)
+        real(kind=8), optional, intent(in) :: centers(:,:)
 
         integer(kind=8)              :: x_shape(2), iter, c, i, idx, idx_old
+        integer(kind=8)              :: input_shape(2)
         real(kind=8), allocatable    :: distance_from_cluster_center(:,:)
         real(kind=8), allocatable    :: new_cluster_centers(:,:), old_cluster_centers(:,:)
         real(kind=8), allocatable    :: diff_update(:,:)
         real(kind=8), allocatable    :: x_sq_sum_row(:)
         integer(kind=8), allocatable :: nearest_cluster_indices(:), nearest_cluster_indices_old(:), counter(:)
-
-        call ifdealloc(this%cluster_centers)
 
         x_shape = shape(x)
         this % n_samples = x_shape(1)
@@ -223,7 +223,17 @@ contains
         allocate(x_sq_sum_row(this%n_samples))
         x_sq_sum_row(:) = 0d0
         call matrix_sqsum_row(x, x_sq_sum_row, this % n_samples, this % n_columns)
-        call this%select_initial_clusters(x, x_sq_sum_row, this%n_samples, this%n_columns)
+        call ifdealloc(this%cluster_centers)
+        if (present(centers)) then
+            input_shape(:) = shape(centers)
+            if (input_shape(2) .ne. this % n_columns) then
+                stop "Shape Mismatch, x and centers."
+            end if
+            this%cluster_centers = transpose(centers(:,:))
+            this%hparam%n_clusters = input_shape(1)
+        else
+            call this%select_initial_clusters(x, x_sq_sum_row, this%n_samples, this%n_columns)
+        end if
 
         allocate(distance_from_cluster_center(this%n_samples, this%hparam%n_clusters))
         allocate(old_cluster_centers(this%n_columns, this%hparam%n_clusters))
@@ -822,7 +832,7 @@ contains
             call get_nearest_distance(nearest_distance, distance, this%n_samples)
 
             probas(:) = nearest_distance(:)
-            call relu(probas)
+            probas = relu(probas)
             call vector2sum1(probas, this%n_samples)
 
             cluster_idx = [cluster_idx, idx]
