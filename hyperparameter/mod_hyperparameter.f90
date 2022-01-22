@@ -24,6 +24,11 @@ module mod_hyperparameter
         real(kind=8)    :: tolerance=1d-6
     end type hparam_kmeans
 
+    ! kmeans
+    type, extends(hparam_kmeans) :: hparam_breathing_kmeans
+        integer(kind=8) :: n_clusters_breathing_in = 5_8
+    end type hparam_breathing_kmeans
+
     ! Linear Regression
     type, extends(hparam_base) :: hparam_linear_regression
         logical(kind=4) :: fit_intercept=.true.
