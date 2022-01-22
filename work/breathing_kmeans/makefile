@@ -103,6 +103,7 @@ build:
 	# $(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/include/linalg_matrix_sqsum_row/inc_matrix_sqsum_row.c                             -o ./mod/inc_matrix_sqsum_row.out
 
 main:
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../clustering/mod_kmeans.f90 -o ./mod/mod_kmeans.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../clustering/mod_breathing_kmeans.f90 -o ./mod/mod_breathing_kmeans.out
 	$(compiler_fortran) -w -unroll \
 	$(common) \

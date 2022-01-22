@@ -229,6 +229,7 @@ contains
             if (input_shape(2) .ne. this % n_columns) then
                 stop "Shape Mismatch, x and centers."
             end if
+            allocate(this%cluster_centers(input_shape(2), input_shape(1)))
             this%cluster_centers = transpose(centers(:,:))
             this%hparam%n_clusters = input_shape(1)
         else
