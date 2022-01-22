@@ -9,6 +9,7 @@ make test
 multi layer perceptron    
 
 # Update
+2022/01/22: breathing_kmeans  
 2022/01/09: locality_sensitive_hashing(random projection, p-stable random projection), balltree(n_neighbors, radius), exact_duplicate_search, one_at_a_time_hash, hash_table(no collision check)  
 2021/12/16: kdtree(n_neighbors, radius)  
 2021/11/23: (postponed) re-implement matrix-vector multiplication for accelerating kmeans  
