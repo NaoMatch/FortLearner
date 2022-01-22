@@ -6,7 +6,7 @@ cd test_script
 make test  
 
 # WIP:
-multi layer perceptron    
+multi layer perceptron, product quantization    
 
 # Update
 2022/01/22: breathing_kmeans  
