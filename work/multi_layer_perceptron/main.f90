@@ -3,35 +3,25 @@ program main
     implicit none
 
     type(model_builder) :: model
-    type(variable), pointer :: var0_ptr, var1_ptr, var2_ptr, var3_ptr
-    type(variable), pointer :: var4_ptr, var5_ptr, var6_ptr, var7_ptr
+    type(variable_ptr), ALLOCATABLE :: input_ptrs(:)
+    type(variable_ptr), ALLOCATABLE :: output_ptrs(:)
+    type(layer_ptr), ALLOCATABLE :: layer_ptrs(:)
+
     type(variable), target  :: var0, var1, var2, var3
     type(variable), target  :: var4, var5, var6, var7
 
-    type(layer), pointer :: lyr0_ptr, lyr1_ptr, lyr2_ptr, lyr3_ptr
-    type(layer), pointer :: lyr4_ptr, lyr5_ptr, lyr6_ptr, lyr7_ptr
-    type(layer), target  :: lyr0, lyr1, lyr2, lyr3
-    type(layer), target  :: lyr4, lyr5, lyr6, lyr7
+    type(layer), target :: layer_dense0
 
-    var0 = variable(); var0_ptr => var0
-    var1 = variable(); var1_ptr => var1
-    var2 = variable(); var2_ptr => var2
-    var3 = variable(); var3_ptr => var3
-    var4 = variable(); var4_ptr => var4
-    var5 = variable(); var5_ptr => var5
-    var6 = variable(); var6_ptr => var6
+    var0 = variable()
+    var1 = variable()
+    var2 = variable()
 
-    lyr0 = layer(); lyr0_ptr => lyr0
-    lyr1 = layer(); lyr1_ptr => lyr1
-    lyr2 = layer(); lyr2_ptr => lyr2
-    lyr3 = layer(); lyr3_ptr => lyr3
-    lyr4 = layer(); lyr4_ptr => lyr4
-    lyr5 = layer(); lyr5_ptr => lyr5
-    lyr6 = layer(); lyr6_ptr => lyr6
 
-    model = model_builder(model_name="test")
+    layer_dense0 = layer(layer_type="dense", input_dim=784, output_dim=392)
 
-    var1 = model%dense_func(var0, input_dim=784, output_dim=392)
+
+    model = new_model_builder(model_name="test")
+    var1 = model%add_layer(input_var0=var0, layer_type=layer_dense0)
 
 
     print*, "================================================================="
@@ -39,11 +29,14 @@ program main
     print*, "================================================================="
     print*, "================================================================="
     print*, "================================================================="
+    ! call model%input_array(1)%info()
+    ! call model%output_array(1)%info()
+    call var1%info()
+    call var1%creator%info()
+    call var1%creator%input_var0%info()
+    ! call model%output_array(1)%creator%info()
+    ! call model%layer_array(1)%info()
     ! call var1%info()
-    ! call var1%creator%info()
-    call model%input_ptrs(1)%ptr%info()
-    call model%output_ptrs(1)%ptr%info()
-    call model%layer_ptrs(1)%ptr%info()
 
 
     ! Input -> Dense
