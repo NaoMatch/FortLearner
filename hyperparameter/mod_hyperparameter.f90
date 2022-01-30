@@ -111,6 +111,7 @@ module mod_hyperparameter
         character(len=256) :: criterion             = "mse" !> mse, mae
         character(len=256) :: strategy              = "quantile" !> uniform, quantile, k-means
         character(len=256) :: fashion               = "best" !> best, depth, level, impurity, sample
+        integer(kind=8) :: n_clusters               = 10_8
     end type hparam_decisiontree
 
     type, extends(hparam_base) :: hparam_sgd_estimator
