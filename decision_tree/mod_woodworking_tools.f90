@@ -13,7 +13,9 @@ module mod_woodworking_tools
         real(kind=8), allocatable :: split_thresholds_(:)
         real(kind=8), allocatable :: intercepts_(:)
         logical(kind=4), allocatable :: is_terminals_(:)
+
         real(kind=8), allocatable :: responses_(:,:)
+        integer(kind=8), allocatable :: labels_(:)
     contains
         procedure :: alloc
     end type train_results
@@ -86,13 +88,19 @@ contains
         if (allocated(this%intercepts_)) deallocate(this%intercepts_)
         if (allocated(this%is_terminals_)) deallocate(this%is_terminals_)
         if (allocated(this%responses_)) deallocate(this%responses_)
+        if (allocated(this%labels_)) deallocate(this%labels_)
 
         allocate(this%split_features_(n_nodes))
         allocate(this%coefs_(n_nodes, n_features))
         allocate(this%split_thresholds_(n_nodes))
         allocate(this%intercepts_(n_nodes))
         allocate(this%is_terminals_(n_nodes))
-        allocate(this%responses_(n_nodes,n_outputs))
+
+        if (is_classification) then
+            allocate(this%labels_(n_nodes))
+        else
+            allocate(this%responses_(n_nodes,n_outputs))
+        end if
     end subroutine alloc
 
 
@@ -121,10 +129,14 @@ contains
         results%split_features_(node_id) = root_node_ptr%feature_id_
         results%split_thresholds_(node_id) = root_node_ptr%threshold_
         results%is_terminals_(node_id) = root_node_ptr%is_terminal
-        results%responses_(node_id,:) = root_node_ptr%response
+        if (is_classification) then
+            results%labels_(node_id) = root_node_ptr%label_
+        else
+            results%responses_(node_id,:) = root_node_ptr%response
+        end if
         ! print*, "   goto Next?"
         if (.not. root_node_ptr%is_terminal) then
-            ! print*, "   --- YES" 
+            ! print*, "   --- YES"
             call extract_train_results_axis(root_node_ptr%node_l, results, node_id, is_classification, is_root=f_)
             call extract_train_results_axis(root_node_ptr%node_r, results, node_id, is_classification, is_root=f_)
         end if
@@ -317,6 +329,9 @@ contains
 
         node_ptr%is_used(node_ptr%feature_id_) = t_
 
+
+        ! ---------------------------------------------------------------------
+        ! Basic Information
         allocate(node_axis_l%is_used(data_holder_ptr%n_columns))
         allocate(node_axis_l%is_useless(data_holder_ptr%n_columns))
         node_axis_l%is_used = node_ptr%is_used
@@ -324,13 +339,21 @@ contains
         node_axis_l%is_hist = node_ptr%is_hist
         node_axis_l%depth = node_ptr%depth+1
         node_axis_l%n_columns = node_ptr%n_columns
-        ! node_axis_l%n_classes = node_ptr%n_classes
-        node_axis_l%impurity = node_ptr%impurity_l
-        node_axis_l%n_samples = node_ptr%n_samples_l
-        node_axis_l%sum_p = node_ptr%sum_l
+        if (is_classification) then
+            node_axis_l%n_labels = node_ptr%n_labels
+            node_axis_l%label_counter = node_ptr%label_counter_l
+            node_axis_l%label_proba = node_ptr%label_proba_l
+            node_axis_l%label_ = maxloc(node_ptr%label_counter_l, dim=1)
+        else
+            node_axis_l%impurity = node_ptr%impurity_l
+            node_axis_l%sum_p = node_ptr%sum_l
+        end if
+            node_axis_l%n_samples = node_ptr%n_samples_l
         call node_axis_l%hparam_check(hparam_ptr)
         allocate(node_axis_l%indices(node_axis_l%n_samples))
 
+        ! ---------------------------------------------------------------------
+        ! Basic Information
         allocate(node_axis_r%is_used(data_holder_ptr%n_columns))
         allocate(node_axis_r%is_useless(data_holder_ptr%n_columns))
         node_axis_r%is_used = node_ptr%is_used
@@ -338,13 +361,21 @@ contains
         node_axis_r%is_hist = node_ptr%is_hist
         node_axis_r%depth = node_ptr%depth+1
         node_axis_r%n_columns = node_ptr%n_columns
-        ! node_axis_r%n_classes = node_ptr%n_classes
-        node_axis_r%impurity = node_ptr%impurity_r
+        if (is_classification) then
+            node_axis_r%n_labels = node_ptr%n_labels
+            node_axis_r%label_counter = node_ptr%label_counter_r
+            node_axis_r%label_proba = node_ptr%label_proba_r
+            node_axis_r%label_ = maxloc(node_ptr%label_counter_r, dim=1)
+        else
+            node_axis_r%impurity = node_ptr%impurity_r
+            node_axis_r%sum_p = node_ptr%sum_r
+        end if
         node_axis_r%n_samples = node_ptr%n_samples_r
-        node_axis_r%sum_p = node_ptr%sum_r
         call node_axis_r%hparam_check(hparam_ptr)
         allocate(node_axis_r%indices(node_axis_r%n_samples))
 
+        ! ---------------------------------------------------------------------
+        ! Child Node Index
         cnt_l=1
         cnt_r=1
         fid = node_ptr%feature_id_
@@ -385,21 +416,29 @@ contains
             end if
         end if
 
-        node_axis_l%response = node_ptr%response_l
-        imp = 0d0
-        do i=1, node_axis_l%n_samples
-            idx = node_axis_l%indices(i)
-            imp = imp + sum((data_holder_ptr%y_ptr%y_r8_ptr(idx,:) - node_axis_l%response) ** 2d0)
-        end do
-        node_axis_l%impurity = imp / dble(node_axis_l%n_samples) / dble(node_ptr%n_outputs)
 
-        node_axis_r%response = node_ptr%response_r
-        imp = 0d0
-        do i=1, node_axis_r%n_samples
-            idx = node_axis_r%indices(i)
-            imp = imp + sum((data_holder_ptr%y_ptr%y_r8_ptr(idx,:) - node_axis_r%response) ** 2d0)
-        end do
-        node_axis_r%impurity = imp / dble(node_axis_r%n_samples) / dble(node_ptr%n_outputs)
+        ! ---------------------------------------------------------------------
+        ! Gain
+        if (is_classification) then
+            node_axis_l%label_ = node_ptr%label_l
+            node_axis_r%label_ = node_ptr%label_r
+        else
+            node_axis_l%response = node_ptr%response_l
+            imp = 0d0
+            do i=1, node_axis_l%n_samples
+                idx = node_axis_l%indices(i)
+                imp = imp + sum((data_holder_ptr%y_ptr%y_r8_ptr(idx,:) - node_axis_l%response) ** 2d0)
+            end do
+            node_axis_l%impurity = imp / dble(node_axis_l%n_samples) / dble(node_ptr%n_outputs)
+
+            node_axis_r%response = node_ptr%response_r
+            imp = 0d0
+            do i=1, node_axis_r%n_samples
+                idx = node_axis_r%indices(i)
+                imp = imp + sum((data_holder_ptr%y_ptr%y_r8_ptr(idx,:) - node_axis_r%response) ** 2d0)
+            end do
+            node_axis_r%impurity = imp / dble(node_axis_r%n_samples) / dble(node_ptr%n_outputs)
+        end if
 
         if (allocated(data_holder_ptr%x_hist) .and. node_ptr%is_hist ) then
             ! --------------------------------------------------------------------------------------
