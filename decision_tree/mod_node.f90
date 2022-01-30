@@ -39,6 +39,11 @@ module mod_node
         real(kind=8), allocatable :: sum_p(:), sum_l(:), sum_r(:)
         ! average of y's
         ! Classification: class probability
+        integer(kind=8) :: n_labels
+        integer(kind=8), allocatable :: uniq_label(:)
+        integer(kind=8) :: label, label_l, label_r
+        integer(kind=8), allocatable :: label_counter(:), label_counter_l(:), label_counter_r(:)
+        real(kind=8), allocatable :: label_proba(:), label_proba_l(:), label_proba_r(:)
         ! Regression: node responses
         real(kind=8), allocatable :: response(:)   ! Self
         real(kind=8), allocatable :: response_l(:) ! Left child
