@@ -34,6 +34,9 @@ module mod_splitter
         procedure :: split_isolation_tree
         procedure :: split_isolation_tree_indivisuals
 
+        procedure :: split_threshold_tree
+        procedure :: split_threshold_tree_indivisuals
+
         ! procedure :: split_random_rotation_tree_regressor
         ! procedure :: split_random_rotation_tree_regressor_indivisuals
 
@@ -57,6 +60,149 @@ module mod_splitter
     type(node_oblq)  :: node_temp
 
 contains
+
+    subroutine split_threshold_tree(this, node_ptrs, data_holder_ptr, hparam_ptr, & 
+        n_columns, n_clusters)
+        implicit none
+        class(node_splitter)               :: this
+        type(node_axis_ptr), intent(inout) :: node_ptrs(:)
+        type(data_holder), pointer         :: data_holder_ptr
+        type(hparam_decisiontree), pointer :: hparam_ptr
+        integer(kind=8), intent(in)        :: n_columns
+        integer(kind=8), intent(in)        :: n_clusters
+        integer(kind=8) :: n
+
+        if ( size(node_ptrs) .eq. 1 ) then
+            call this%split_threshold_tree_indivisuals(node_ptrs(1)%node_ptr, data_holder_ptr, hparam_ptr, &
+                n_columns, n_clusters)
+        else
+            do n=1, size(node_ptrs), 1
+                call this%split_threshold_tree_indivisuals(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr, &
+                    n_columns, n_clusters)
+            end do
+        end if
+    end subroutine split_threshold_tree
+
+    subroutine split_threshold_tree_indivisuals(this, node_ptr, data_holder_ptr, hparam_ptr, &
+        n_columns, n_clusters)
+        implicit none
+        class(node_splitter)         :: this
+        type(node_axis), pointer     :: node_ptr
+        type(data_holder), pointer   :: data_holder_ptr
+        type(hparam_decisiontree), pointer   :: hparam_ptr
+        integer(kind=8), intent(in)  :: n_columns
+        integer(kind=8), intent(in)  :: n_clusters
+
+        real(kind=8)    :: dummy, cost, u, best_cost
+        integer(kind=8) :: fid, min_fid_val, max_fid_val
+        integer(kind=8) :: best_fid, lbl, fct
+        real(kind=8) :: best_threshold
+        real(kind=8) :: min_val, max_val, val, split_val
+        integer(kind=8) :: n, idx, factor, count_eval
+        integer(kind=8) :: n_samples_l, n_samples_r
+        real(kind=8), allocatable :: tmp_f(:), s(:), r(:) 
+        integer(kind=8), allocatable :: tmp_i(:)
+
+
+        allocate(tmp_f(node_ptr%n_samples))
+        allocate(tmp_i(node_ptr%n_samples))
+        allocate(s(node_ptr%n_columns))
+        allocate(r(node_ptr%n_columns))
+
+        count_eval = 0_8
+
+        if (n_clusters .eq. 2_8) then
+            u = 0d0
+            do fid=1, n_columns, 1
+                do n=1, node_ptr%n_samples, 1
+                    idx = node_ptr%indices(n)
+                    u = u + data_holder_ptr%x_ptr%x_r8_ptr(idx, fid)**2d0
+                end do
+            end do
+
+            best_fid = -1
+            best_threshold = huge(0d0)
+            best_cost = huge(0d0)
+            do fid=1, n_columns, 1
+
+                do n=1, node_ptr%n_samples, 1
+                    idx = node_ptr%indices(n)
+                    tmp_f(n) = data_holder_ptr%x_ptr%x_r8_ptr(idx, fid)
+                    tmp_i(n) = idx
+                end do
+                call pbucket_argsort(tmp_f, tmp_i, node_ptr%n_samples)
+                if ( tmp_f(1) .eq. tmp_f(node_ptr%n_samples) ) cycle
+
+                s(:) = 0d0
+                r(:) = 0d0
+                do n=1, node_ptr%n_samples, 1
+                    idx = tmp_i(n)
+                    r(:) = r(:) + data_holder_ptr%x_ptr%x_r8_ptr(idx, fid)
+                end do
+
+                do n=1, node_ptr%n_samples-1, 1
+                    idx = tmp_i(n)
+                    s = s + data_holder_ptr%x_ptr%x_r8_ptr(idx, fid)
+                    r = r - data_holder_ptr%x_ptr%x_r8_ptr(idx, fid)
+
+                    cost = u - sum(s**2d0)/dble(n) - sum(r**2d0)/dble(node_ptr%n_samples-n)
+                    if ( tmp_f(n) .ne. tmp_f(n+1) ) then
+                        if ( cost .lt. best_cost ) then
+                            best_cost = cost
+                            best_fid = fid
+                            ! best_threshold = (tmp_f(n) + tmp_f(n+1)) * 0.5d0
+                            best_threshold = tmp_f(n)
+                            count_eval = count_eval + 1
+                        end if
+                    end if
+                end do
+            end do
+        else
+        end if
+
+        node_ptr%is_trained = t_
+        node_ptr%eval_counter = count_eval
+        node_ptr%gain_best   = best_cost
+        node_ptr%gain_best_w = best_cost * dble(node_ptr%n_samples) / dble(data_holder_ptr%n_samples)
+
+        if ( count_eval .eq. 0 ) then
+            node_ptr%is_terminal = t_
+            call node_ptr%hparam_check(hparam_ptr)
+            return
+        end if
+
+        node_ptr%feature_id_ = best_fid
+        node_ptr%threshold_ = best_threshold
+
+        if (allocated(node_ptr%label_counter_l)) deallocate(node_ptr%label_counter_l)
+        if (allocated(node_ptr%label_counter_r)) deallocate(node_ptr%label_counter_r)
+        if (allocated(node_ptr%label_proba_l))   deallocate(node_ptr%label_proba_l)
+        if (allocated(node_ptr%label_proba_r))   deallocate(node_ptr%label_proba_r)
+
+        allocate(node_ptr%label_counter_l(node_ptr%n_labels))
+        allocate(node_ptr%label_counter_r(node_ptr%n_labels))
+        allocate(node_ptr%label_proba_l(node_ptr%n_labels))
+        allocate(node_ptr%label_proba_r(node_ptr%n_labels))
+
+        node_ptr%label_counter_l(:) = 0_8
+        node_ptr%label_counter_r(:) = 0_8
+
+        do n=1, node_ptr%n_samples, 1
+            idx = tmp_i(n)
+            lbl = data_holder_ptr%y_ptr%y_i8_ptr(idx, 1)
+            val = data_holder_ptr%x_ptr%x_r8_ptr(idx, best_fid)
+            fct = val <= best_threshold
+            node_ptr%label_counter_l(lbl) = node_ptr%label_counter_l(lbl) + 1_8*fct
+        end do
+        node_ptr%label_counter_r(:) = node_ptr%label_counter(:) - node_ptr%label_counter_l(:)
+
+        node_ptr%n_samples_l = sum(node_ptr%label_counter_l(:))
+        node_ptr%n_samples_r = sum(node_ptr%label_counter_r(:))
+        node_ptr%label_l = maxloc(node_ptr%label_counter_l(:), dim=1)
+        node_ptr%label_r = maxloc(node_ptr%label_counter_r(:), dim=1)
+        call node_ptr%hparam_check(hparam_ptr)
+    end subroutine split_threshold_tree_indivisuals
+
 
     subroutine split_isolation_tree(this, node_ptrs, data_holder_ptr, hparam_ptr, & 
         n_columns)
