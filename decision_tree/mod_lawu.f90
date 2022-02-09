@@ -16,7 +16,6 @@ module mod_lawu
 
     !> Extended type of 'lawu_regressor'
     type, extends(base_tree) :: lawu_regressor
-        logical(kind=4) :: is_classification=f_ !< is classification or not
     contains
         procedure :: fit => fit_lawu_regressor
     end type lawu_regressor
@@ -109,6 +108,7 @@ contains
         tmp%is_hist = t_
         tmp%lr_layer = tmp%hparam%learning_rate_layer
         tmp%is_layer_wise_sum = t_
+        tmp%is_classification = f_
         new_lawu_regressor = tmp
     end function new_lawu_regressor
 

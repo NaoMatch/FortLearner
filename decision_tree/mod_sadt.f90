@@ -16,7 +16,6 @@ module mod_sadt
 
     !> Extended type of regressor of 'simulated annealing decision tree'
     type, extends(base_tree) :: sadt_regressor
-        logical(kind=4) :: is_classification=f_ !< is classification or not
     contains
         procedure :: fit => fit_sadt_regressor
     end type sadt_regressor
@@ -93,6 +92,7 @@ contains
         tmp%is_hist = f_
         tmp%is_layer_wise_sum = f_
         tmp%lr_layer = 0d0
+        tmp%is_classification = f_
         new_sadt_regressor = tmp
     end function new_sadt_regressor
 

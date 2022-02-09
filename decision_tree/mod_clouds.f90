@@ -17,7 +17,6 @@ module mod_clouds
     !> Extended type of regressor of 'clouds'
     !> https://www.researchgate.net/publication/2424791_CLOUDS_A_decision_tree_classifier_for_large_datasets
     type, extends(base_tree) ::  clouds_regressor
-        logical(kind=4) :: is_classification=f_ !< is classification tree or not
     contains
         procedure :: fit => fit_clouds_regressor
     end type clouds_regressor
@@ -105,6 +104,7 @@ contains
         tmp%is_hist = t_
         tmp%is_layer_wise_sum = f_
         tmp%lr_layer = 0d0
+        tmp%is_classification = f_
         new_clouds_regressor = tmp
     end function new_clouds_regressor
 

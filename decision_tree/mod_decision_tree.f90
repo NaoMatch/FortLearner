@@ -17,7 +17,6 @@ module mod_decision_tree
     !> Extended type of regressor of 'classificaton and regression tree'
     !> https://www.routledge.com/Classification-and-Regression-Trees/Breiman-Friedman-Stone-Olshen/p/book/9780412048418
     type, extends(base_tree) :: decision_tree_regressor
-        logical(kind=4) :: is_classification=f_ !< is classification tree or not
     contains
         procedure :: fit => fit_decision_tree_regressor
     end type decision_tree_regressor
@@ -80,6 +79,7 @@ contains
         tmp%is_hist = f_
         tmp%is_layer_wise_sum = f_
         tmp%lr_layer = 0d0
+        tmp%is_classification = f_
         new_decision_tree_regressor = tmp
     end function new_decision_tree_regressor
 

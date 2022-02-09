@@ -17,7 +17,6 @@ module mod_isolation_tree
 
     !> Extended type of 'isolation_tree'
     type, extends(base_tree) :: isolation_tree
-        logical(kind=4) :: is_classification=f_ !< is classification or not
     contains
         procedure :: fit => fit_isolation_tree
     end type isolation_tree
@@ -55,6 +54,7 @@ contains
         tmp%is_layer_wise_sum = f_
         tmp%lr_layer = 0d0
         tmp%is_isolation_tree = t_
+        tmp%is_classification = f_
         new_isolation_tree = tmp
     end function new_isolation_tree
 
