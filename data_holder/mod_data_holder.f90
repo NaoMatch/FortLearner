@@ -55,6 +55,7 @@ module mod_data_holder
         real(kind=8), allocatable :: rr_mat_r8(:,:)    !< random rotated explanatory variable kind=8
 
         type(discretizer) :: disc                      !< discretizer object
+        real(kind=8), pointer :: cluster_centers_ptr(:,:)
         ! 
         type(work_space), allocatable :: x_hist_row(:) !< to be stored binned array of input explanatory variables by row to speed up by memory sequential access. @todo It could be achieved by storing the transposed and binned array in 'x_hist'. 
         ! real(kind=8), pointer :: x_t_ptr
