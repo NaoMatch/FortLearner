@@ -25,6 +25,7 @@ module mod_node
 
         logical(kind=8), allocatable :: is_used(:) ! Use Features
         logical(kind=8), allocatable :: is_useless(:) ! Useless(no validate split) Features
+        logical(kind=8), allocatable :: is_useless_center(:) ! Useless Centroid
         real(kind=8)   :: gain_best   = - huge(0.0d0)
         real(kind=8)   :: gain_best_w = - huge(0.0d0) ! weighted gain = gain * (n_samples_in_current_node) / (all training samples)
         real(kind=8)   :: impurity    =   huge(0.0d0) ! Self
@@ -38,6 +39,8 @@ module mod_node
         ! sum of y's
         real(kind=8), allocatable :: sum_p(:), sum_l(:), sum_r(:)
         ! average of y's
+        ! Clustering: threshold_tree
+        integer(kind=8) :: n_clusters
         ! Classification: class probability
         integer(kind=8) :: n_labels
         integer(kind=8), allocatable :: uniq_label(:)
@@ -185,6 +188,7 @@ contains
         print*, "Split Feature ID: ", this%feature_id_
         print*, "Split threshold:  ", this%threshold_
         print*, "Node Label:       ", this%label_
+        print*, "Label_Counter:    ", this%label_counter
         print*, "Response:         ", this%response
         print*, "Impurity:         ", this%impurity
         print*, "Gain:             ", this%gain_best
@@ -193,6 +197,8 @@ contains
         print*, "No. Sample_left:  ", this%n_samples_l
         print*, "No. Sample_right: ", this%n_samples_r
         print*, "P = L + R:        ", this%n_samples .eq. this%n_samples_l + this%n_samples_r
+        print*, "Allocate L:       ", allocated(this%node_l)
+        print*, "Allocate R:       ", allocated(this%node_r)
     end subroutine print_node_info_axis
 
     subroutine print_node_info_oblq(this)

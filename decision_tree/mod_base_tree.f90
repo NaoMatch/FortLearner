@@ -13,6 +13,7 @@ module mod_base_tree
     !> A type of base tree for various decision tree algorithms
     type base_tree
         logical(kind=4)                  :: is_classification = f_
+        logical(kind=4)                  :: is_threshold_tree = f_
 
         character(len=256)               :: algo_name              !< algorithm name
         logical(kind=4)                  :: is_trained = f_        !< is trained or not. If not, cannot predict and dump.
@@ -43,6 +44,7 @@ module mod_base_tree
 
         integer(kind=8) :: n_samples_                              !< number of samples in training
         integer(kind=8) :: n_columns_                              !< number of columns
+        integer(kind=8) :: n_clusters_                              !< number of columns
         integer(kind=8) :: n_outputs_                              !< number of output dimension of objective variable
         integer(kind=8) :: n_labels_                              !< number of output dimension of objective variable
         integer(kind=8) :: n_leaf_nodes_                           !< number of leaf node
@@ -355,9 +357,9 @@ contains
             call count_leaf_nodes(this%root_node_oblq_ptr, n_leaf_nodes, is_root=t_)
         end if
         this%n_leaf_nodes_ = n_leaf_nodes
-        ! print*, "N_LEAF_NODES : ", n_leaf_nodes
+        ! print*, "induction_stop_check, N_LEAF_NODES : ", n_leaf_nodes
         if (hparam_ptr%max_leaf_nodes .ne. -1_8 .and. hparam_ptr%max_leaf_nodes .le. n_leaf_nodes) then
-            ! print*, "STOP: Max Leaf Node"
+            ! print*, "induction_stop_check, STOP: Max Leaf Node", n_leaf_nodes
             is_stop = t_
             return
         end if
@@ -370,7 +372,7 @@ contains
             call check_splittable_leaf(this%root_node_oblq_ptr, exist_splittable_leaf)
         end if
         if (.not. exist_splittable_leaf) then
-            ! print*, "STOP: NO SPLITTABLE LEAF"
+            ! print*, "induction_stop_check, STOP: NO SPLITTABLE LEAF"
             is_stop = t_
             return
         end if
@@ -426,10 +428,14 @@ contains
             allocate(this%root_node_axis_ptr%indices(this%hparam%max_samples))
             allocate(this%root_node_axis_ptr%is_used(this%n_columns_))
             allocate(this%root_node_axis_ptr%is_useless(this%n_columns_))
+            allocate(this%root_node_axis_ptr%is_useless_center(this%n_clusters_))
             allocate(this%root_node_axis_ptr%sum_p(this%n_outputs_))
-            this%root_node_axis_ptr%is_used = f_
-            this%root_node_axis_ptr%is_useless = f_
+            this%root_node_axis_ptr%is_used(:) = f_
+            this%root_node_axis_ptr%is_useless(:) = f_
+            this%root_node_axis_ptr%is_useless_center(:) = f_
+            this%root_node_axis_ptr%n_clusters = this%n_clusters_
             this%root_node_axis_ptr%is_hist = this%is_hist
+
 
             if ( this%hparam%boot_strap ) then
                 call rand_integer(1_8, this%n_samples_, this%root_node_axis_ptr%indices, this%hparam%max_samples)
@@ -442,6 +448,7 @@ contains
 
             if (is_classification) then
                 call groupby_count(uniq_labels, label_counter, data_holder_ptr%y_ptr%y_i8_ptr(:,1), this%n_samples_)
+
                 this%root_node_axis_ptr%n_labels = size(uniq_labels)
                 this%root_node_axis_ptr%uniq_label = uniq_labels
                 this%root_node_axis_ptr%label_counter = label_counter
@@ -551,13 +558,15 @@ contains
     !! \param is_classification classification tree or not
     !! \param lr_layer learning rate per layer for 'lawu_regressor' only
     !! \param is_hist use binned array or not.
-    subroutine adopt_node_ptrs_axis(this, node_ptrs, data_holder_ptr, hparam_ptr, is_classification, lr_layer, is_hist)
+    subroutine adopt_node_ptrs_axis(this, node_ptrs, data_holder_ptr, hparam_ptr, &
+        is_classification, is_threshold_tree, lr_layer, is_hist)
         implicit none
         class(base_tree) :: this
         type(node_axis_ptr), allocatable, intent(inout) :: node_ptrs(:)
         type(data_holder), pointer                      :: data_holder_ptr
         type(hparam_decisiontree), pointer              :: hparam_ptr
         logical(kind=4)                                 :: is_classification
+        logical(kind=4)                                 :: is_threshold_tree
         real(kind=8)                                    :: lr_layer
         logical(kind=4), optional                       :: is_hist
 
@@ -576,11 +585,13 @@ contains
                 if ( associated(selected_node_ptr) ) nullify(selected_node_ptr)
                 call extract_best_split_node_axis(this%root_node_axis_ptr, selected_node_ptr)
                 call adopting_twins_axis(selected_node_ptr, data_holder_ptr, hparam_ptr, is_classification, &
-                    this%lr_layer, is_hist=is_hist_optional)
+                        is_threshold_tree, &
+                        this%lr_layer, is_hist=is_hist_optional)
             case(2_8:5_8) ! others
                 do n=1, size(node_ptrs), 1
                     call adopting_twins_axis(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr, & 
-                        is_classification, this%lr_layer, is_hist=is_hist_optional)
+                            is_classification, &
+                            is_threshold_tree, this%lr_layer, is_hist=is_hist_optional)
                 end do
         end select
     end subroutine adopt_node_ptrs_axis

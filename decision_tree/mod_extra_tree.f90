@@ -151,7 +151,7 @@ contains
             time_splti = time_splti + time_diff(date_value1, date_value2)
 
             call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, this%is_classification, &
-                this%lr_layer)
+                this%is_threshold_tree, this%lr_layer)
 
             call this%induction_stop_check(hparam_ptr, is_stop)
             if (is_stop) exit
@@ -235,7 +235,7 @@ contains
 
 
             call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, this%is_classification, &
-                this%lr_layer)
+                this%is_threshold_tree, this%lr_layer)
 
             call this%induction_stop_check(hparam_ptr, is_stop)
             if (is_stop) exit

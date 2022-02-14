@@ -10,8 +10,7 @@ module mod_threshold_tree
     implicit none
 
     type, extends(base_tree) :: threshold_tree
-        type(kmeans)    :: km
-        type(breathing_kmeans)    :: bkm
+        type(kmeans) :: km
     contains
         procedure :: fit     => fit_threshold_tree
         procedure :: predict => predict_threshold_tree
@@ -35,7 +34,11 @@ contains
         new_threshold_tree%is_classification = t_
         new_threshold_tree%hparam%min_samples_leaf = 1_8
         new_threshold_tree%hparam%min_samples_split = 2_8
+        new_threshold_tree%hparam%max_leaf_nodes = n_clusters
         new_threshold_tree%hparam%fashion_int = 2_8
+
+        ! Threshold Tree
+        new_threshold_tree%is_threshold_tree = t_
     end function new_threshold_tree
 
 
@@ -54,23 +57,30 @@ contains
         type(hparam_decisiontree), pointer :: hparam_ptr
         logical(kind=4)                    :: is_stop
 
+        real(kind=8), allocatable, target  :: cluster_centers(:,:)
+
         integer(kind=8)                    :: depth
         type(node_axis_ptr), allocatable   :: selected_node_ptrs(:)
         type(node_splitter)                :: splitter
 
         this%n_labels_ = this%hparam%n_clusters
-
         this%km = kmeans(n_clusters=this%hparam%n_clusters, tolerance=1d-6)
         call this%km%fit(x)
         allocate( labels(this%km%n_samples,1) )
+        cluster_centers = this%km%cluster_centers(:,:)
+
         labels(:,1) = this%km%predict(x)
 
-        ! this%bkm = breathing_kmeans(n_clusters=this%hparam%n_clusters, n_clusters_breathing_in=2_8)
-        ! call this%bkm%fit(x)
-        ! allocate( labels(this%bkm%n_samples,1) )
-        ! labels(:,1) = this%bkm%predict(x)
+        if (maxval( labels ) .eq. 1_8) then
+            do depth=1, this%hparam%n_clusters, 1
+                print*, cluster_centers(:,depth)
+            end do
+        end if
+
+        this%n_clusters_ = this%hparam%n_clusters
 
         dholder = data_holder(x, labels)
+        dholder%cluster_centers_ptr => cluster_centers
         dholder_ptr => dholder
 
         call this%init(dholder_ptr)
@@ -93,8 +103,9 @@ contains
 
             call this%extract_split_node_ptrs_axis(selected_node_ptrs, depth)
             call splitter%split_threshold_tree(selected_node_ptrs, dholder_ptr, hparam_ptr, &
-                dholder_ptr%n_columns, this%hparam%n_clusters)
-            call this%adopt_node_ptrs_axis(selected_node_ptrs, dholder_ptr, hparam_ptr, this%is_classification, &
+                dholder_ptr%n_columns, this%hparam%n_clusters, this%km%cluster_centers)
+            call this%adopt_node_ptrs_axis(selected_node_ptrs, dholder_ptr, hparam_ptr, &
+                this%is_classification, this%is_threshold_tree, &
                 this%lr_layer)
 
             call this%induction_stop_check(hparam_ptr, is_stop)
@@ -108,8 +119,8 @@ contains
             end if
         end do
 
-        call this%root_node_axis_ptr%print_node_info_axis()
-
+        ! print*, "***** END *****"
+        ! call this%print_info(this%root_node_axis_ptr)
         call this%postprocess(this%is_classification)
         this%is_trained = t_
     end subroutine fit_threshold_tree

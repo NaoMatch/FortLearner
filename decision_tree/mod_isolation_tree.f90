@@ -19,6 +19,7 @@ module mod_isolation_tree
     type, extends(base_tree) :: isolation_tree
     contains
         procedure :: fit => fit_isolation_tree
+        procedure :: predict => predict_isolation_tree
     end type isolation_tree
 
     !> An interface to create new 'isolation_tree'
@@ -128,6 +129,20 @@ contains
         call this%postprocess(this%is_classification)
         this%is_trained = t_
     end subroutine fit_isolation_tree
+
+
+    function predict_isolation_tree(this, x, return_depth)
+        implicit none
+        class(isolation_tree)    :: this
+        real(kind=8), intent(in) :: x(:,:)
+        real(kind=8), ALLOCATABLE :: predict_isolation_tree(:,:)
+        logical(kind=4), optional :: return_depth
+        if (present(return_depth)) then
+            predict_isolation_tree = this%predict_response(x, return_depth=return_depth)
+        else
+            predict_isolation_tree = this%predict_response(x)
+        end if
+    end function predict_isolation_tree
 
 
 end module mod_isolation_tree

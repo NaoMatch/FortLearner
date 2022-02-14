@@ -5,6 +5,7 @@ module mod_splitter
     use mod_data_holder
     use mod_sort
     use mod_timer
+    use mod_math
     use mod_stats
     use mod_linalg
     use mod_discretizer
@@ -62,7 +63,7 @@ module mod_splitter
 contains
 
     subroutine split_threshold_tree(this, node_ptrs, data_holder_ptr, hparam_ptr, & 
-        n_columns, n_clusters)
+        n_columns, n_clusters, cluster_centers)
         implicit none
         class(node_splitter)               :: this
         type(node_axis_ptr), intent(inout) :: node_ptrs(:)
@@ -70,21 +71,22 @@ contains
         type(hparam_decisiontree), pointer :: hparam_ptr
         integer(kind=8), intent(in)        :: n_columns
         integer(kind=8), intent(in)        :: n_clusters
+        real(kind=8), intent(in)  :: cluster_centers(n_columns, n_clusters)
         integer(kind=8) :: n
 
         if ( size(node_ptrs) .eq. 1 ) then
             call this%split_threshold_tree_indivisuals(node_ptrs(1)%node_ptr, data_holder_ptr, hparam_ptr, &
-                n_columns, n_clusters)
+                n_columns, n_clusters, cluster_centers)
         else
             do n=1, size(node_ptrs), 1
                 call this%split_threshold_tree_indivisuals(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr, &
-                    n_columns, n_clusters)
+                    n_columns, n_clusters, cluster_centers)
             end do
         end if
     end subroutine split_threshold_tree
 
     subroutine split_threshold_tree_indivisuals(this, node_ptr, data_holder_ptr, hparam_ptr, &
-        n_columns, n_clusters)
+        n_columns, n_clusters, cluster_centers)
         implicit none
         class(node_splitter)         :: this
         type(node_axis), pointer     :: node_ptr
@@ -92,22 +94,38 @@ contains
         type(hparam_decisiontree), pointer   :: hparam_ptr
         integer(kind=8), intent(in)  :: n_columns
         integer(kind=8), intent(in)  :: n_clusters
+        real(kind=8), intent(in)  :: cluster_centers(n_columns, n_clusters)
 
         real(kind=8)    :: dummy, cost, u, best_cost
-        integer(kind=8) :: fid, min_fid_val, max_fid_val
-        integer(kind=8) :: best_fid, lbl, fct
-        real(kind=8) :: best_threshold
+        integer(kind=8) :: fid, min_fid_val, max_fid_val, c
+        integer(kind=8) :: best_fid, lbl, fct, split_idx
+        real(kind=8) :: best_threshold, thre, min_center, max_center
         real(kind=8) :: min_val, max_val, val, split_val
-        integer(kind=8) :: n, idx, factor, count_eval
+        integer(kind=8) :: n, idx, factor, count_eval, i
         integer(kind=8) :: n_samples_l, n_samples_r
-        real(kind=8), allocatable :: tmp_f(:), s(:), r(:) 
-        integer(kind=8), allocatable :: tmp_i(:)
-
+        integer(kind=8) :: count_miss, best_count_miss, best_dim
+        integer(kind=8) :: start_idx, stop_idx, cidx
+        real(kind=8), allocatable :: tmp_f(:), s(:), r(:), l(:) , tmp_c(:)
+        integer(kind=8), allocatable :: tmp_i(:), tmp_if(:), tmp_ic(:), left_center_count(:), tmp_y(:), item_counter(:), uniq_y(:)
+        real(kind=8), allocatable :: tmp_c_unsort(:)
+        logical(kind=4) :: cond1, cond2
+        real(kind=8) :: min_threshold, max_threshold
+        real(kind=8) :: old_thre, new_thre, impurity_l, impurity_r
+        integer(kind=8) :: curr_cidx, miss_true
 
         allocate(tmp_f(node_ptr%n_samples))
         allocate(tmp_i(node_ptr%n_samples))
+        allocate(tmp_if(node_ptr%n_samples))
+        allocate(tmp_y(node_ptr%n_samples))
+        allocate(tmp_c(n_clusters))
+        allocate(tmp_c_unsort(n_clusters))
+        allocate(left_center_count(n_clusters))
+        allocate(tmp_ic(n_clusters))
+        allocate(uniq_y(n_clusters))
+        allocate(item_counter(n_clusters))
         allocate(s(node_ptr%n_columns))
         allocate(r(node_ptr%n_columns))
+        allocate(l(node_ptr%n_columns))
 
         count_eval = 0_8
 
@@ -158,12 +176,124 @@ contains
                 end do
             end do
         else
+            l(:) = minval(cluster_centers(:,:), dim=2)
+            r(:) = maxval(cluster_centers(:,:), dim=2)
+
+            best_count_miss = huge(0_8)
+            best_dim = -2
+            best_threshold = huge(0d0)
+            ! print*, size(item_counter)
+            ! print*, size(node_ptr%label_counter)
+            ! print*, node_ptr%label_counter
+            item_counter(:) = node_ptr%label_counter(:)
+
+            do fid = 1, n_columns, 1
+                ! Sort ------------------------------------------------------------
+                do c=1, n_clusters, 1
+                    tmp_c(c) = cluster_centers(fid, c)
+                    if (node_ptr%is_useless_center(c)) tmp_c(c) = huge(0d0)
+                    tmp_ic(c) = c
+                    tmp_c_unsort(c) = tmp_c(c)
+                end do
+                call quick_argsort(tmp_c, tmp_ic, n_clusters)
+
+                do n=1, node_ptr%n_samples, 1
+                    idx = node_ptr%indices(n)
+                    tmp_f(n)  = data_holder_ptr%x_ptr%x_r8_ptr(idx, fid)
+                    tmp_if(n) = idx
+                end do
+                call quick_argsort(tmp_f, tmp_if, node_ptr%n_samples)
+                tmp_y(:) = data_holder_ptr%y_ptr%y_i8_ptr(tmp_if, 1)
+                ! END Sort ------------------------------------------------------------
+
+                ! Count Mistakes ------------------------------------------------------------
+                left_center_count(:) = 0_8
+                min_center = tmp_c(1)
+                max_center = tmp_c(n_clusters-count(node_ptr%is_useless_center(:)))
+                split_idx = linear_search(tmp_f, node_ptr%n_samples, min_center)
+                ! print*, '*********************************************************************************************'
+                ! print*, "tmp_c: ", tmp_c
+                ! print*, "node_ptr%is_useless_center: ", node_ptr%is_useless_center
+                ! print*, "min_center: ", min_center
+                do n=1, split_idx, 1
+                    cidx = tmp_y(n)
+                    left_center_count(cidx) = left_center_count(cidx) + 1_8
+                end do
+
+                count_miss = 0_8
+                thre = tmp_f(split_idx)
+                do n=1, node_ptr%n_samples, 1
+                    cidx = tmp_y(n)
+                    if ((tmp_f(n) <= thre) .neqv. (tmp_c_unsort(cidx) <= thre)) then
+                        count_miss = count_miss + 1
+                    end if
+                end do
+                old_thre = thre
+                curr_cidx = linear_search(tmp_c, n_clusters, old_thre)
+
+                if (count_miss < best_count_miss) then
+                    best_count_miss = count_miss
+                    best_dim = fid
+                    best_threshold = old_thre
+                end if
+
+                do i=split_idx+1, node_ptr%n_samples, 1
+                    new_thre = tmp_f(i)
+
+                    if ( max_center < new_thre ) exit
+
+                    do while (t_)
+                        if (new_thre < tmp_c(curr_cidx) ) exit
+                        cidx = tmp_ic(curr_cidx)
+                        count_miss = count_miss + item_counter(cidx) - 2_8 * left_center_count(cidx)
+                        curr_cidx = curr_cidx + 1
+                    end do
+
+                    cidx = tmp_y(i)
+                    left_center_count(cidx) = left_center_count(cidx) + 1_8
+
+                    if     (            tmp_c_unsort(cidx) <= new_thre) then
+                        count_miss = count_miss - 1
+                    elseif ( new_thre < tmp_c_unsort(cidx)            ) then
+                        count_miss = count_miss + 1
+                    end if
+                        
+                    if (count_miss < best_count_miss) then
+                        best_count_miss = count_miss
+                        best_dim = fid
+                        best_threshold = new_thre
+                        count_eval = count_eval + 1
+                        impurity_l = gini(left_center_count, n_clusters)
+                        impurity_r = gini(item_counter(:)-left_center_count(:), n_clusters)
+                    end if
+
+                    ! miss_true = count_mistakes(tmp_f, tmp_y, tmp_c_unsort, node_ptr%n_samples, n_clusters, new_thre)
+                    ! print*, "fid              : ", fid
+                    ! print*, "left_center_count: ", left_center_count
+                    ! print*, "new_thre         : ", new_thre
+                    ! print*, "count_miss       : ", count_miss
+                    ! print*, "best_count_miss  : ", best_count_miss
+                    ! print*, "best_dim         : ", best_dim
+                    ! print*, "best_threshold   : ", best_threshold
+                    ! print*, "miss_true        : ", miss_true
+                    ! print*, "impurity_l       : ", impurity_l
+                    ! print*, "impurity_r       : ", impurity_r
+                end do
+
+
+            end do
+
+            ! print*, '*********************************************************************************************'
+            ! print*, '*********************************************************************************************'
+            ! print*, "best_count_miss   : ", best_count_miss
+            ! print*, "best_dim          : ", best_dim
+            ! print*, "best_threshold    : ", best_threshold
+            ! print*, "item_counter      : ", item_counter
         end if
 
         node_ptr%is_trained = t_
         node_ptr%eval_counter = count_eval
-        node_ptr%gain_best   = best_cost
-        node_ptr%gain_best_w = best_cost * dble(node_ptr%n_samples) / dble(data_holder_ptr%n_samples)
+        node_ptr%gain_best   = best_count_miss
 
         if ( count_eval .eq. 0 ) then
             node_ptr%is_terminal = t_
@@ -171,8 +301,10 @@ contains
             return
         end if
 
-        node_ptr%feature_id_ = best_fid
+        node_ptr%feature_id_ = best_dim
         node_ptr%threshold_ = best_threshold
+        node_ptr%impurity_l = impurity_l
+        node_ptr%impurity_r = impurity_r
 
         if (allocated(node_ptr%label_counter_l)) deallocate(node_ptr%label_counter_l)
         if (allocated(node_ptr%label_counter_r)) deallocate(node_ptr%label_counter_r)
@@ -188,10 +320,10 @@ contains
         node_ptr%label_counter_r(:) = 0_8
 
         do n=1, node_ptr%n_samples, 1
-            idx = tmp_i(n)
+            idx = node_ptr%indices(n)
             lbl = data_holder_ptr%y_ptr%y_i8_ptr(idx, 1)
-            val = data_holder_ptr%x_ptr%x_r8_ptr(idx, best_fid)
-            fct = val <= best_threshold
+            val = data_holder_ptr%x_ptr%x_r8_ptr(idx, node_ptr%feature_id_)
+            fct = val <= node_ptr%threshold_
             node_ptr%label_counter_l(lbl) = node_ptr%label_counter_l(lbl) + 1_8*fct
         end do
         node_ptr%label_counter_r(:) = node_ptr%label_counter(:) - node_ptr%label_counter_l(:)
@@ -201,6 +333,27 @@ contains
         node_ptr%label_l = maxloc(node_ptr%label_counter_l(:), dim=1)
         node_ptr%label_r = maxloc(node_ptr%label_counter_r(:), dim=1)
         call node_ptr%hparam_check(hparam_ptr)
+    contains
+        function count_mistakes(x_sorted, y_sorted, c_unsorted, n_samples, n_clusters, threshold)
+            implicit none
+            real(kind=8), intent(in)    :: x_sorted(n_samples)
+            integer(kind=8), intent(in) :: y_sorted(n_samples)
+            real(kind=8), intent(in)    :: c_unsorted(n_clusters)
+            integer(kind=8), intent(in) :: n_samples
+            integer(kind=8), intent(in) :: n_clusters
+            real(kind=8), intent(in)    :: threshold
+
+            integer(kind=8) :: count_mistakes, i, yidx
+
+            count_mistakes = 0_8
+
+            do i=1, n_samples, 1
+                yidx = y_sorted(i)
+                if ( (x_sorted(i) <= threshold) .neqv. (c_unsorted(yidx) <= threshold) ) then
+                    count_mistakes = count_mistakes + 1
+                end if
+            end do
+        end function count_mistakes
     end subroutine split_threshold_tree_indivisuals
 
 
