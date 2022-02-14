@@ -17,7 +17,6 @@ module mod_decision_tree
     !> Extended type of regressor of 'classificaton and regression tree'
     !> https://www.routledge.com/Classification-and-Regression-Trees/Breiman-Friedman-Stone-Olshen/p/book/9780412048418
     type, extends(base_tree) :: decision_tree_regressor
-        logical(kind=4) :: is_classification=f_ !< is classification tree or not
     contains
         procedure :: fit => fit_decision_tree_regressor
     end type decision_tree_regressor
@@ -80,6 +79,7 @@ contains
         tmp%is_hist = f_
         tmp%is_layer_wise_sum = f_
         tmp%lr_layer = 0d0
+        tmp%is_classification = f_
         new_decision_tree_regressor = tmp
     end function new_decision_tree_regressor
 
@@ -135,7 +135,7 @@ contains
             call splitter%split_decision_tree_regressor(selected_node_ptrs, data_holder_ptr, hparam_ptr, &
                 n_columns, feature_indices_, feature_indices_scanning_range_, is_permute_per_node)
             call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, this%is_classification, &
-                this%lr_layer)
+                this%is_threshold_tree, this%lr_layer)
 
             call this%induction_stop_check(hparam_ptr, is_stop)
             if (is_stop) exit

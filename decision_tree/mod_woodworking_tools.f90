@@ -13,7 +13,9 @@ module mod_woodworking_tools
         real(kind=8), allocatable :: split_thresholds_(:)
         real(kind=8), allocatable :: intercepts_(:)
         logical(kind=4), allocatable :: is_terminals_(:)
+
         real(kind=8), allocatable :: responses_(:,:)
+        integer(kind=8), allocatable :: labels_(:)
     contains
         procedure :: alloc
     end type train_results
@@ -86,13 +88,19 @@ contains
         if (allocated(this%intercepts_)) deallocate(this%intercepts_)
         if (allocated(this%is_terminals_)) deallocate(this%is_terminals_)
         if (allocated(this%responses_)) deallocate(this%responses_)
+        if (allocated(this%labels_)) deallocate(this%labels_)
 
         allocate(this%split_features_(n_nodes))
         allocate(this%coefs_(n_nodes, n_features))
         allocate(this%split_thresholds_(n_nodes))
         allocate(this%intercepts_(n_nodes))
         allocate(this%is_terminals_(n_nodes))
-        allocate(this%responses_(n_nodes,n_outputs))
+
+        if (is_classification) then
+            allocate(this%labels_(n_nodes))
+        else
+            allocate(this%responses_(n_nodes,n_outputs))
+        end if
     end subroutine alloc
 
 
@@ -121,10 +129,14 @@ contains
         results%split_features_(node_id) = root_node_ptr%feature_id_
         results%split_thresholds_(node_id) = root_node_ptr%threshold_
         results%is_terminals_(node_id) = root_node_ptr%is_terminal
-        results%responses_(node_id,:) = root_node_ptr%response
+        if (is_classification) then
+            results%labels_(node_id) = root_node_ptr%label_
+        else
+            results%responses_(node_id,:) = root_node_ptr%response
+        end if
         ! print*, "   goto Next?"
         if (.not. root_node_ptr%is_terminal) then
-            ! print*, "   --- YES" 
+            ! print*, "   --- YES"
             call extract_train_results_axis(root_node_ptr%node_l, results, node_id, is_classification, is_root=f_)
             call extract_train_results_axis(root_node_ptr%node_r, results, node_id, is_classification, is_root=f_)
         end if
@@ -283,26 +295,29 @@ contains
     !! \param data_holder_ptr data_holder pointer
     !! \param hparam_ptr decision tree hyperparameter pointer
     !! \param is_classification classification task or not
-    subroutine adopting_twins_axis(node_ptr, data_holder_ptr, hparam_ptr, is_classification, lr_layer, is_hist)
+    subroutine adopting_twins_axis(node_ptr, data_holder_ptr, hparam_ptr, &
+        is_classification, is_threshold_tree, lr_layer, is_hist)
         implicit none
         type(node_axis), pointer :: node_ptr
         type(data_holder), pointer :: data_holder_ptr
         type(hparam_decisiontree), pointer :: hparam_ptr
         logical(kind=4)           :: is_classification
+        logical(kind=4)           :: is_threshold_tree
         real(kind=8)              :: lr_layer
         logical(kind=4), optional :: is_hist
 
         integer(kind=8) :: date_value1(8), date_value2(8)
         type(node_axis), target :: node_axis_l, node_axis_r
-        integer(kind=8) :: i, cnt_l, cnt_r, cls, idx, fid
+        integer(kind=8) :: i, cnt_l, cnt_r, cls, idx, cidx, fid
         real(kind=8), allocatable :: f(:), tmp_y(:,:)
         real(kind=8) :: avg, imp
-        logical(kind=4) :: is_hist_optional
+        logical(kind=4) :: is_hist_optional, condition_1, condition_2
         integer(kind=8) :: n_samples_unroll, n_columns_unroll, j, jk, ik, k, row_idx, bin_idx, row_idx_next
         integer(kind=4) :: counter, factor
         integer(kind=8), save :: tot_time=0
         real(kind=8), ALLOCATABLE :: tmp_r(:)
         integer(kind=4), ALLOCATABLE :: bin_indices(:)
+        logical(kind=4), ALLOCATABLE :: is_mistake(:), is_left_sample(:), is_left_center(:)
 
         real(kind=8), pointer :: tmp_x_ptr(:,:)
 
@@ -317,6 +332,30 @@ contains
 
         node_ptr%is_used(node_ptr%feature_id_) = t_
 
+        if (is_threshold_tree) then
+            allocate(is_mistake(node_ptr%n_samples))
+            allocate(is_left_sample(node_ptr%n_samples))
+            is_mistake(:) = f_
+            is_left_sample(:) = f_
+            do i=1, node_ptr%n_samples
+                idx = node_ptr%indices(i)
+                cidx = data_holder_ptr%y_ptr%y_i8_ptr(idx,1)
+                condition_1 = data_holder_ptr%x_ptr%x_r8_ptr(idx,       node_ptr%feature_id_) .le. node_ptr%threshold_
+                condition_2 = data_holder_ptr%cluster_centers_ptr(node_ptr%feature_id_, cidx) .le. node_ptr%threshold_
+                if ( condition_1 .neqv. condition_2 ) then
+                    is_mistake(i) = t_
+                end if
+                is_left_sample(i) = condition_1
+            end do
+
+            allocate(is_left_center(node_ptr%n_clusters))
+            do cidx=1, node_ptr%n_clusters, 1
+                condition_2 = data_holder_ptr%cluster_centers_ptr(node_ptr%feature_id_, cidx) .le. node_ptr%threshold_
+                is_left_center(cidx) = condition_2
+            end do
+        end if
+        ! ---------------------------------------------------------------------
+        ! Basic Information
         allocate(node_axis_l%is_used(data_holder_ptr%n_columns))
         allocate(node_axis_l%is_useless(data_holder_ptr%n_columns))
         node_axis_l%is_used = node_ptr%is_used
@@ -324,13 +363,26 @@ contains
         node_axis_l%is_hist = node_ptr%is_hist
         node_axis_l%depth = node_ptr%depth+1
         node_axis_l%n_columns = node_ptr%n_columns
-        ! node_axis_l%n_classes = node_ptr%n_classes
+        node_axis_l%n_clusters = node_ptr%n_clusters
         node_axis_l%impurity = node_ptr%impurity_l
-        node_axis_l%n_samples = node_ptr%n_samples_l
-        node_axis_l%sum_p = node_ptr%sum_l
-        call node_axis_l%hparam_check(hparam_ptr)
-        allocate(node_axis_l%indices(node_axis_l%n_samples))
+        if (is_classification) then
+            node_axis_l%n_labels = node_ptr%n_labels
+            node_axis_l%label_counter = node_ptr%label_counter_l
+            node_axis_l%label_proba = node_ptr%label_proba_l
+            node_axis_l%label_ = maxloc(node_ptr%label_counter_l, dim=1)
+        else
+            node_axis_l%sum_p = node_ptr%sum_l
+        end if
 
+        node_axis_l%n_samples = node_ptr%n_samples_l
+        if (is_threshold_tree) then
+            allocate(node_axis_l%is_useless_center(node_ptr%n_clusters))
+            node_axis_l%is_useless_center(:) = (.not. is_left_center(:)) .or. node_ptr%is_useless_center(:)
+        end if
+        call node_axis_l%hparam_check(hparam_ptr)
+
+        ! ---------------------------------------------------------------------
+        ! Basic Information
         allocate(node_axis_r%is_used(data_holder_ptr%n_columns))
         allocate(node_axis_r%is_useless(data_holder_ptr%n_columns))
         node_axis_r%is_used = node_ptr%is_used
@@ -338,17 +390,58 @@ contains
         node_axis_r%is_hist = node_ptr%is_hist
         node_axis_r%depth = node_ptr%depth+1
         node_axis_r%n_columns = node_ptr%n_columns
-        ! node_axis_r%n_classes = node_ptr%n_classes
+        node_axis_r%n_clusters = node_ptr%n_clusters
         node_axis_r%impurity = node_ptr%impurity_r
+        if (is_classification) then
+            node_axis_r%n_labels = node_ptr%n_labels
+            node_axis_r%label_counter = node_ptr%label_counter_r
+            node_axis_r%label_proba = node_ptr%label_proba_r
+            node_axis_r%label_ = maxloc(node_ptr%label_counter_r, dim=1)
+        else
+            node_axis_r%sum_p = node_ptr%sum_r
+        end if
         node_axis_r%n_samples = node_ptr%n_samples_r
-        node_axis_r%sum_p = node_ptr%sum_r
+        if (is_threshold_tree) then
+            allocate(node_axis_r%is_useless_center(node_ptr%n_clusters))
+            node_axis_r%is_useless_center(:) = is_left_center(:) .or. node_ptr%is_useless_center(:)
+        end if
         call node_axis_r%hparam_check(hparam_ptr)
+
+        if (is_threshold_tree) then
+            ! Count number of samples, misclassified samples are removed.
+            node_axis_l%n_samples = 0
+            node_axis_r%n_samples = 0
+            do i=1, node_ptr%n_samples, 1
+                if (.not. is_mistake(i)) then
+                    if (is_left_sample(i)) then
+                        node_axis_l%n_samples = node_axis_l%n_samples + 1
+                    else
+                        node_axis_r%n_samples = node_axis_r%n_samples + 1
+                    end if
+                end if
+            end do
+            ! print*, '*********************************************************************************************'
+            ! print*, '*********************************************************************************************'
+            ! print*, node_ptr%n_samples
+            ! print*, count(is_mistake)
+            ! print*, count(is_left_sample)
+            ! print*, is_mistake
+            ! print*, is_left_sample
+            ! print*, node_axis_l%n_samples
+            ! print*, node_axis_r%n_samples
+            node_ptr%n_samples_l = node_axis_l%n_samples
+            node_ptr%n_samples_r = node_axis_r%n_samples
+        end if
+        allocate(node_axis_l%indices(node_axis_l%n_samples))
         allocate(node_axis_r%indices(node_axis_r%n_samples))
 
+        ! ---------------------------------------------------------------------
+        ! Child Node Index
         cnt_l=1
         cnt_r=1
         fid = node_ptr%feature_id_
         if (is_hist_optional) then
+            ! Histogram-based Algorithm
             do i=1, node_ptr%n_samples
                 idx = node_ptr%indices(i)
                 if ( data_holder_ptr%x_hist(idx, fid) .le. node_ptr%threshold_ ) then
@@ -359,7 +452,36 @@ contains
                     cnt_r = cnt_r + 1
                 end if
             end do
+        elseif (is_threshold_tree) then
+            ! Threshold-Tree Algorithm
+            ! print*, '*********************************************************************************************'
+            ! print*, '*********************************************************************************************'
+            ! print*, "node_ptr%n_samples: ",    node_ptr%n_samples
+            ! print*, "node_axis_l%n_samples: ", node_axis_l%n_samples, size(node_axis_l%indices)
+            ! print*, "node_axis_r%n_samples: ", node_axis_r%n_samples, size(node_axis_r%indices)
+            do i=1, node_ptr%n_samples
+                idx = node_ptr%indices(i)
+                if (.not. is_mistake(i)) then
+                    if ( is_left_sample(i) ) then
+                        node_axis_l%indices(cnt_l) = idx
+                        cnt_l = cnt_l + 1
+                    else
+                        node_axis_r%indices(cnt_r) = idx
+                        cnt_r = cnt_r + 1
+                    end if
+                else
+                    cidx = data_holder_ptr%y_ptr%y_i8_ptr(idx, 1)
+                    if ( is_left_sample(i) ) then
+                        node_axis_l%label_counter(cidx) = node_axis_l%label_counter(cidx) - 1
+                    else
+                        node_axis_r%label_counter(cidx) = node_axis_r%label_counter(cidx) - 1
+                    end if
+                end if
+            end do
+            node_axis_l%impurity = gini(node_axis_l%label_counter, size(node_axis_l%label_counter)+0_8)
+            node_axis_r%impurity = gini(node_axis_r%label_counter, size(node_axis_r%label_counter)+0_8)
         else
+            ! Others(CART, ExtraTree,,,)
             if (data_holder_ptr % is_trans_x) then
                 do i=1, node_ptr%n_samples
                     idx = node_ptr%indices(i)
@@ -385,21 +507,29 @@ contains
             end if
         end if
 
-        node_axis_l%response = node_ptr%response_l
-        imp = 0d0
-        do i=1, node_axis_l%n_samples
-            idx = node_axis_l%indices(i)
-            imp = imp + sum((data_holder_ptr%y_ptr%y_r8_ptr(idx,:) - node_axis_l%response) ** 2d0)
-        end do
-        node_axis_l%impurity = imp / dble(node_axis_l%n_samples) / dble(node_ptr%n_outputs)
 
-        node_axis_r%response = node_ptr%response_r
-        imp = 0d0
-        do i=1, node_axis_r%n_samples
-            idx = node_axis_r%indices(i)
-            imp = imp + sum((data_holder_ptr%y_ptr%y_r8_ptr(idx,:) - node_axis_r%response) ** 2d0)
-        end do
-        node_axis_r%impurity = imp / dble(node_axis_r%n_samples) / dble(node_ptr%n_outputs)
+        ! ---------------------------------------------------------------------
+        ! Gain
+        if (is_classification) then
+            node_axis_l%label_ = node_ptr%label_l
+            node_axis_r%label_ = node_ptr%label_r
+        else
+            node_axis_l%response = node_ptr%response_l
+            imp = 0d0
+            do i=1, node_axis_l%n_samples
+                idx = node_axis_l%indices(i)
+                imp = imp + sum((data_holder_ptr%y_ptr%y_r8_ptr(idx,:) - node_axis_l%response) ** 2d0)
+            end do
+            node_axis_l%impurity = imp / dble(node_axis_l%n_samples) / dble(node_ptr%n_outputs)
+
+            node_axis_r%response = node_ptr%response_r
+            imp = 0d0
+            do i=1, node_axis_r%n_samples
+                idx = node_axis_r%indices(i)
+                imp = imp + sum((data_holder_ptr%y_ptr%y_r8_ptr(idx,:) - node_axis_r%response) ** 2d0)
+            end do
+            node_axis_r%impurity = imp / dble(node_axis_r%n_samples) / dble(node_ptr%n_outputs)
+        end if
 
         if (allocated(data_holder_ptr%x_hist) .and. node_ptr%is_hist ) then
             ! --------------------------------------------------------------------------------------
@@ -494,6 +624,8 @@ contains
         end if
         ! print*, tot_time, "[msec]"
 
+        call node_axis_l%hparam_check(hparam_ptr)
+        call node_axis_r%hparam_check(hparam_ptr)
         node_ptr%node_l = node_axis_l
         node_ptr%node_r = node_axis_r
     end subroutine adopting_twins_axis

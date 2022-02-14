@@ -16,7 +16,6 @@ module mod_extra_tree
     !> Extended type of regressor of 'extremely randomized tree' or 'extra tree'
     !> https://link.springer.com/article/10.1007/s10994-006-6226-1
     type, extends(base_tree) :: extra_tree_regressor
-        logical(kind=4) :: is_classification=f_ !< is classification tree or not
     contains
         ! procedure :: fit => fit_extra_tree_regressor
         procedure :: fit => fit_extra_tree_regressor
@@ -90,6 +89,7 @@ contains
         tmp%is_hist = f_
         tmp%is_layer_wise_sum = f_
         tmp%lr_layer = 0d0
+        tmp%is_classification = f_
         new_extra_tree_regressor = tmp
     end function new_extra_tree_regressor
 
@@ -151,7 +151,7 @@ contains
             time_splti = time_splti + time_diff(date_value1, date_value2)
 
             call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, this%is_classification, &
-                this%lr_layer)
+                this%is_threshold_tree, this%lr_layer)
 
             call this%induction_stop_check(hparam_ptr, is_stop)
             if (is_stop) exit
@@ -235,7 +235,7 @@ contains
 
 
             call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, this%is_classification, &
-                this%lr_layer)
+                this%is_threshold_tree, this%lr_layer)
 
             call this%induction_stop_check(hparam_ptr, is_stop)
             if (is_stop) exit

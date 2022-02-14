@@ -17,7 +17,6 @@ module mod_clouds
     !> Extended type of regressor of 'clouds'
     !> https://www.researchgate.net/publication/2424791_CLOUDS_A_decision_tree_classifier_for_large_datasets
     type, extends(base_tree) ::  clouds_regressor
-        logical(kind=4) :: is_classification=f_ !< is classification tree or not
     contains
         procedure :: fit => fit_clouds_regressor
     end type clouds_regressor
@@ -105,6 +104,7 @@ contains
         tmp%is_hist = t_
         tmp%is_layer_wise_sum = f_
         tmp%lr_layer = 0d0
+        tmp%is_classification = f_
         new_clouds_regressor = tmp
     end function new_clouds_regressor
 
@@ -171,7 +171,7 @@ contains
             call splitter%split_clouds_regressor(selected_node_ptrs, data_holder_ptr, hparam_ptr, &
                 n_columns, feature_indices_, feature_indices_scanning_range_, is_permute_per_node)
             call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, &
-                this%is_classification, this%lr_layer, is_hist=t_)
+                this%is_classification, this%is_threshold_tree, this%lr_layer, is_hist=t_)
 
             call this%induction_stop_check(hparam_ptr, is_stop)
             if (is_stop) exit

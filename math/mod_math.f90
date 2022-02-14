@@ -71,11 +71,17 @@ contains
         implicit none
         integer(kind=4), intent(in) :: class_counts(n_classes)
         integer(kind=4), intent(in) :: n_classes
-        real(kind=4)                :: gini_i4
+        real(kind=4)                :: gini_i4, tmp_gini
         integer(kind=4)             :: n_samples_tot, c
 
-        include "./include/math/gini/inc_gini_detail.f90"
-        gini_i4 = 1.0 - n_samples_tot / n_samples_tot**2.0
+        tot_num = sum(class_counts(:))
+        tmp_gini = 0.0
+        do c=1, n_classes, 1
+            if (class_counts(c) .ne. 0_8) then
+                tmp_gini = tmp_gini + ( class_counts(c) / dble(tot_num) )**2.0
+            end if
+        end do
+        gini_i4 = 1.0 - tmp_gini
     end function gini_i4
     include "./include/math/gini/inc_gini.f90"
 

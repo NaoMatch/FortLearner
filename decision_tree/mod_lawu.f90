@@ -16,7 +16,6 @@ module mod_lawu
 
     !> Extended type of 'lawu_regressor'
     type, extends(base_tree) :: lawu_regressor
-        logical(kind=4) :: is_classification=f_ !< is classification or not
     contains
         procedure :: fit => fit_lawu_regressor
     end type lawu_regressor
@@ -109,6 +108,7 @@ contains
         tmp%is_hist = t_
         tmp%lr_layer = tmp%hparam%learning_rate_layer
         tmp%is_layer_wise_sum = t_
+        tmp%is_classification = f_
         new_lawu_regressor = tmp
     end function new_lawu_regressor
 
@@ -202,7 +202,7 @@ contains
                 n_columns, feature_indices_, feature_indices_scanning_range_, is_permute_per_node)
 
             call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, &
-                this%is_classification, this%lr_layer, is_hist=this%is_hist)
+                this%is_classification, this%is_threshold_tree, this%lr_layer, is_hist=this%is_hist)
 
             call this%induction_stop_check(hparam_ptr, is_stop)
             if (is_stop) exit

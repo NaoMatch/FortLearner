@@ -7,10 +7,14 @@ module mod_base_tree
     use mod_random
     use mod_sort
     use mod_woodworking_tools
+    use mod_stats
     implicit none
     
     !> A type of base tree for various decision tree algorithms
     type base_tree
+        logical(kind=4)                  :: is_classification = f_
+        logical(kind=4)                  :: is_threshold_tree = f_
+
         character(len=256)               :: algo_name              !< algorithm name
         logical(kind=4)                  :: is_trained = f_        !< is trained or not. If not, cannot predict and dump.
         logical(kind=4)                  :: is_axis_parallel = t_  !< is axis paralle split or not.
@@ -29,6 +33,7 @@ module mod_base_tree
         logical(kind=4), allocatable     :: is_terminals_(:)       !< boolean array of terminal or not (#nodes)
         ! Classification and Regression
         real(kind=8), allocatable        :: responses_(:,:)        !< output response of all nodes. calculated by sample mean.
+        integer(kind=8), allocatable     :: labels_(:)        !< output response of all nodes. calculated by sample mean.
         ! Anomaly Detection
         logical(kind=4)                  :: is_isolation_tree = f_ !< is isolation tree or not.
 
@@ -39,14 +44,17 @@ module mod_base_tree
 
         integer(kind=8) :: n_samples_                              !< number of samples in training
         integer(kind=8) :: n_columns_                              !< number of columns
+        integer(kind=8) :: n_clusters_                              !< number of columns
         integer(kind=8) :: n_outputs_                              !< number of output dimension of objective variable
+        integer(kind=8) :: n_labels_                              !< number of output dimension of objective variable
         integer(kind=8) :: n_leaf_nodes_                           !< number of leaf node
     contains
         procedure :: init => init_base_tree
         procedure :: induction_stop_check
         procedure :: init_root_node
         procedure :: postprocess
-        procedure :: predict => predict_response
+        procedure :: predict_response
+        procedure :: predict_labels
         procedure :: extract_split_node_ptrs_axis
         procedure :: extract_split_node_ptrs_oblq
         procedure :: adopt_node_ptrs_axis
@@ -349,9 +357,9 @@ contains
             call count_leaf_nodes(this%root_node_oblq_ptr, n_leaf_nodes, is_root=t_)
         end if
         this%n_leaf_nodes_ = n_leaf_nodes
-        ! print*, "N_LEAF_NODES : ", n_leaf_nodes
+        ! print*, "induction_stop_check, N_LEAF_NODES : ", n_leaf_nodes
         if (hparam_ptr%max_leaf_nodes .ne. -1_8 .and. hparam_ptr%max_leaf_nodes .le. n_leaf_nodes) then
-            ! print*, "STOP: Max Leaf Node"
+            ! print*, "induction_stop_check, STOP: Max Leaf Node", n_leaf_nodes
             is_stop = t_
             return
         end if
@@ -364,7 +372,7 @@ contains
             call check_splittable_leaf(this%root_node_oblq_ptr, exist_splittable_leaf)
         end if
         if (.not. exist_splittable_leaf) then
-            ! print*, "STOP: NO SPLITTABLE LEAF"
+            ! print*, "induction_stop_check, STOP: NO SPLITTABLE LEAF"
             is_stop = t_
             return
         end if
@@ -412,15 +420,22 @@ contains
         logical(kind=4)            :: is_classification
         integer(kind=8)            :: i
 
+        integer(kind=8), ALLOCATABLE :: uniq_labels(:), label_counter(:) ! for classification tree
+
         this%n_outputs_ = data_holder_ptr%n_outputs
         if (associated(this%root_node_axis_ptr)) then
+            if ( .not. this%is_isolation_tree ) this%hparam%max_samples = this%n_samples_
             allocate(this%root_node_axis_ptr%indices(this%hparam%max_samples))
             allocate(this%root_node_axis_ptr%is_used(this%n_columns_))
             allocate(this%root_node_axis_ptr%is_useless(this%n_columns_))
+            allocate(this%root_node_axis_ptr%is_useless_center(this%n_clusters_))
             allocate(this%root_node_axis_ptr%sum_p(this%n_outputs_))
-            this%root_node_axis_ptr%is_used = f_
-            this%root_node_axis_ptr%is_useless = f_
+            this%root_node_axis_ptr%is_used(:) = f_
+            this%root_node_axis_ptr%is_useless(:) = f_
+            this%root_node_axis_ptr%is_useless_center(:) = f_
+            this%root_node_axis_ptr%n_clusters = this%n_clusters_
             this%root_node_axis_ptr%is_hist = this%is_hist
+
 
             if ( this%hparam%boot_strap ) then
                 call rand_integer(1_8, this%n_samples_, this%root_node_axis_ptr%indices, this%hparam%max_samples)
@@ -432,7 +447,13 @@ contains
             end if
 
             if (is_classification) then
-                stop "Classification Tree Not Implemented!"
+                call groupby_count(uniq_labels, label_counter, data_holder_ptr%y_ptr%y_i8_ptr(:,1), this%n_samples_)
+
+                this%root_node_axis_ptr%n_labels = size(uniq_labels)
+                this%root_node_axis_ptr%uniq_label = uniq_labels
+                this%root_node_axis_ptr%label_counter = label_counter
+                this%root_node_axis_ptr%label_ = uniq_labels(maxloc(label_counter, dim=1))
+                this%root_node_axis_ptr%label_proba = label_counter / dble(this%n_samples_)
             elseif ( this%is_isolation_tree ) then
                 this%root_node_axis_ptr%sum_p    = (/0d0/)
                 this%root_node_axis_ptr%response = (/0d0/)
@@ -537,13 +558,15 @@ contains
     !! \param is_classification classification tree or not
     !! \param lr_layer learning rate per layer for 'lawu_regressor' only
     !! \param is_hist use binned array or not.
-    subroutine adopt_node_ptrs_axis(this, node_ptrs, data_holder_ptr, hparam_ptr, is_classification, lr_layer, is_hist)
+    subroutine adopt_node_ptrs_axis(this, node_ptrs, data_holder_ptr, hparam_ptr, &
+        is_classification, is_threshold_tree, lr_layer, is_hist)
         implicit none
         class(base_tree) :: this
         type(node_axis_ptr), allocatable, intent(inout) :: node_ptrs(:)
         type(data_holder), pointer                      :: data_holder_ptr
         type(hparam_decisiontree), pointer              :: hparam_ptr
         logical(kind=4)                                 :: is_classification
+        logical(kind=4)                                 :: is_threshold_tree
         real(kind=8)                                    :: lr_layer
         logical(kind=4), optional                       :: is_hist
 
@@ -562,11 +585,13 @@ contains
                 if ( associated(selected_node_ptr) ) nullify(selected_node_ptr)
                 call extract_best_split_node_axis(this%root_node_axis_ptr, selected_node_ptr)
                 call adopting_twins_axis(selected_node_ptr, data_holder_ptr, hparam_ptr, is_classification, &
-                    this%lr_layer, is_hist=is_hist_optional)
+                        is_threshold_tree, &
+                        this%lr_layer, is_hist=is_hist_optional)
             case(2_8:5_8) ! others
                 do n=1, size(node_ptrs), 1
                     call adopting_twins_axis(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr, & 
-                        is_classification, this%lr_layer, is_hist=is_hist_optional)
+                            is_classification, &
+                            is_threshold_tree, this%lr_layer, is_hist=is_hist_optional)
                 end do
         end select
     end subroutine adopt_node_ptrs_axis
@@ -695,6 +720,144 @@ contains
         990 continue
         stop "Number of feature mismatch."
     end function predict_response
+
+
+    !> A function to predict responses.
+    !> If classification tree, returns class probabiities. **NOT IMPLEMENTD**
+    !> If regression tree, returns responses.
+    !! \param x explanatory array
+    !! \param return_depth **optional** return sample depth. If terminal node contains multiple instances, add 'avg_depth(n_samples in node)'. Use isolation_tree and isolation_forest only.
+    function predict_labels(this, x, return_depth)
+        implicit none
+        class(base_tree)                  :: this
+        real(kind=8), target, intent(in)  :: x(:,:)
+        integer(kind=8), allocatable         :: predict_labels(:,:)
+        logical(kind=4), optional         :: return_depth
+
+        real(kind=8), pointer        :: x_ptr(:,:)
+        integer(kind=8), allocatable :: indices(:)
+        integer(kind=8)              :: x_shape(2), n_samples, n_columns, i
+        logical(kind=4)              :: return_depth_opt
+
+        x_shape = shape(x)
+        n_samples  = x_shape(1)
+        n_columns  = x_shape(2)
+
+        if ( n_columns .ne. this%n_columns_ ) goto 990
+
+        allocate(predict_labels(n_samples, 1))
+        allocate(indices(n_samples))
+        do i=1, n_samples, 1
+            indices(i) = i
+        end do
+
+        x_ptr => x
+        predict_labels = 0d0
+        if (this%is_layer_wise_sum) then
+            do i=1, n_samples, 1
+                predict_labels(i,:) = this%mean_y(:)
+            end do
+        end if
+        if (this%is_axis_parallel) then
+            call predict_labels_axis(this%results, x_ptr, indices, & 
+                predict_labels, n_samples, this%n_labels_, is_root=t_)
+        else
+            stop "Predict Labels for Oblique Tree is Not Implemented."
+        end if
+
+        return
+        990 continue
+        stop "Number of feature mismatch."
+    end function predict_labels
+
+
+    !> A subroutine to predict responses for tree with 'axis-parallel' node.
+    !! \param x_ptr pointer to explanatory variable
+    !! \param indices sample indices in current path.
+    !! \param responses sample responses
+    !! \param n_samples n_samplesber of samples in current path
+    !! \param n_outputs n_samplesber of outputs
+    !! \param is_root is root node or not
+    !! \param is_layer_wise_sum performs response summation for each layer, instead of returning only the response of the terminal node.
+    !! \param lr_layer learing rate per layer
+    !! \param is_isolation_tree is 'isolation_tree' or not
+    recursive subroutine predict_labels_axis(result, x_ptr, indices, responses, n_samples, n_outputs, &
+        is_root)
+        implicit none
+        type(train_results)   :: result
+        real(kind=8), pointer :: x_ptr(:,:)
+        integer(kind=8)       :: indices(n_samples)
+        integer(kind=8)          :: responses(:,:)
+        integer(kind=8)       :: n_samples, n_outputs
+        logical(kind=4)       :: is_root
+
+        integer(kind=8), save        :: node_id
+        integer(kind=8)              :: idx, i, fid, lbl
+        integer(kind=8)              :: count_l, count_r, factor
+        real(kind=8)                 :: threshold
+        real(kind=8), allocatable    :: tmp_f(:)
+        logical(kind=4), allocatable :: lt_thresholds(:)
+        integer(kind=8), allocatable :: indices_l(:), indices_r(:)
+
+        if (is_root) node_id = 0_8
+        node_id = node_id + 1_8
+        
+        ! print*, size(result%is_terminals_), node_id
+        if (n_samples .eq. 0 .and. result%is_terminals_(node_id)) return
+        if (n_samples .eq. 0) goto 999
+        
+        if ( result%is_terminals_(node_id) ) then
+            lbl = result%labels_(node_id)
+            do i=1, n_samples
+                idx = indices(i)
+                responses(idx,1) = lbl
+            end do
+            return
+        end if
+
+        allocate(tmp_f(n_samples))
+        fid = result%split_features_(node_id)
+        do i=1, n_samples, 1
+            idx = indices(i)
+            tmp_f(i) = x_ptr(idx, fid)
+        end do
+        threshold = result%split_thresholds_(node_id)
+
+        allocate(lt_thresholds(n_samples))
+        lt_thresholds = tmp_f .le. threshold
+        count_l = count(lt_thresholds)
+        count_r = n_samples - count_l
+        allocate(indices_l(count_l))
+        allocate(indices_r(count_r))
+        indices_l = -1_8
+        indices_r = -1_8
+        count_l = 1_8
+        count_r = 1_8
+        do i=1, n_samples, 1
+            idx = indices(i)
+            if (lt_thresholds(i)) then
+                indices_l(count_l) = idx
+                count_l = count_l + 1_8
+            else
+                indices_r(count_r) = idx
+                count_r = count_r + 1_8
+            end if
+        end do
+
+        999 continue
+        if ( .not. allocated(indices_l) .and. .not. allocated(indices_r)) then
+            count_l = 1_8
+            count_r = 1_8
+            allocate(indices_l(0_8))
+            allocate(indices_r(0_8))
+        end if
+
+        call predict_labels_axis(result, x_ptr, indices_l, responses, count_l-1, n_outputs, is_root=f_)
+        call predict_labels_axis(result, x_ptr, indices_r, responses, count_r-1, n_outputs, is_root=f_)
+        deallocate(indices_l, indices_r, tmp_f, lt_thresholds)
+    end subroutine predict_labels_axis
+
+
 
 
     !> A subroutine to predict responses for tree with 'axis-parallel' node.
@@ -952,10 +1115,16 @@ contains
             this%coefs_ = results%coefs_
         end if
 
+        ! print*, "get", results%labels_
         this%split_thresholds_ = results%split_thresholds_
         this%is_terminals_ = results%is_terminals_
-        this%responses_ = results%responses_
+        if (is_classification) then
+            this%labels_ = results%labels_
+        else
+            this%responses_ = results%responses_
+        end if
 
+        ! print*, "store"
         this%results = results
         if ( associated(this%root_node_axis_ptr) ) nullify(this%root_node_axis_ptr)
         if ( associated(this%root_node_oblq_ptr) ) nullify(this%root_node_oblq_ptr)
