@@ -80,5 +80,19 @@ main:
 	# main.f90 -o main.out \
 	# $(option_blas)
 	# ./main.out
-	gfortran ../../multi_layer_perceptron/mod_multi_layer_perceptron.f90 ./main.f90 -o main.out 
+	# gfortran \
+	# 	../../multi_layer_perceptron/mod_multi_layer_perceptron.f90 \
+	# 	../../multi_layer_perceptron/mod_my_model.f90 \
+	# 	./main.f90 \
+	# 	-o main.out 
+	gfortran \
+		../../common/mod_const.f90 \
+		./mod_variable.f90 \
+		./mod_neural_network_utils.f90 \
+		./mod_square.f90 \
+		./mod_sum.f90 \
+		./mod_base_model.f90 \
+		./mod_my_model.f90 \
+		./main.f90 \
+		-o main.out 
 	./main.out

@@ -5,11 +5,22 @@ module mod_multi_layer_perceptron
         integer(kind=4)           :: dim
         integer(kind=4)           :: generation
         logical(kind=1)           :: is_check = .false.
-        type(layer), pointer :: creator => null()
+        type(layer), pointer      :: creator => null()
+        type(variable), pointer   :: grad => null()
+        real(kind=8), allocatable :: x(:,:)
     contains
         procedure :: info => info_variable
-        procedure :: plot_graph
     end type variable
+
+    interface variable
+        module procedure :: new_variable
+    end interface variable
+
+
+    type variable_ptr
+        type(variable), pointer :: ptr
+    end type variable_ptr
+
 
     type layer
         integer(kind=4)         :: input_dim
@@ -28,14 +39,6 @@ module mod_multi_layer_perceptron
         module procedure :: new_layer
     end interface layer
 
-    interface variable
-        module procedure :: new_variable
-    end interface variable
-
-    type variable_ptr
-        type(variable), pointer :: ptr
-    end type variable_ptr
-
     type layer_ptr
         type(layer), pointer :: ptr
     end type layer_ptr
@@ -52,7 +55,8 @@ module mod_multi_layer_perceptron
         type(layer), allocatable :: layer_array(:)
     contains
         procedure :: dense
-        procedure :: add_layer
+        procedure :: relu
+        procedure :: dense_relu
     end type model_builder
 
     interface model_builder
@@ -60,9 +64,71 @@ module mod_multi_layer_perceptron
     end interface model_builder
 
 
-
+    type layer_stacker
+    contains
+        procedure :: hoge
+    end type layer_stacker
 
 contains
+
+    subroutine hoge(this)
+        implicit none
+        class(layer_stacker) :: this
+        print*, "hoge"
+    end subroutine hoge
+
+    function dense(this, input_var, input_dim, output_dim, layer_info)
+        implicit none
+        class(model_builder)        :: this
+        type(variable), target      :: input_var
+        integer(kind=4), intent(in) :: input_dim, output_dim
+        type(variable), target      :: dense
+        type(layer), target         :: layer_info
+
+        layer_info%layer_type = "dense"
+        layer_info%input_var0 => input_var
+        layer_info%input_dim = input_dim
+        layer_info%output_dim = output_dim
+
+        dense%creator => layer_info
+        dense%dim = output_dim
+
+        layer_info%output_var => dense
+    end function dense
+
+    function relu(this, input_var, input_dim, output_dim, layer_info)
+        implicit none
+        class(model_builder)        :: this
+        type(variable), target      :: input_var
+        integer(kind=4), intent(in) :: input_dim, output_dim
+        type(variable), target      :: relu
+        type(layer), target         :: layer_info
+
+        layer_info%layer_type = "relu"
+        layer_info%input_var0 => input_var
+        layer_info%input_dim = input_dim
+        layer_info%output_dim = output_dim
+
+        relu%creator => layer_info
+        relu%dim = output_dim
+
+        layer_info%output_var => relu
+    end function relu
+
+    recursive function dense_relu(this, input_var, input_dim, output_dim, layer_infos) result(out_var)
+        implicit none
+        class(model_builder)        :: this
+        type(variable), target      :: input_var
+        integer(kind=4), intent(in) :: input_dim, output_dim
+        type(variable), target      :: out_var
+        type(layer), target         :: layer_infos(2)
+
+        type(variable), target      :: med_var
+
+        med_var = this%dense(input_var, input_dim, output_dim, layer_infos(1))
+        out_var = this%relu(med_var, output_dim, output_dim, layer_infos(2))
+    end function dense_relu
+
 
     function new_layer(layer_type, input_dim, output_dim)
         implicit none
@@ -104,68 +170,16 @@ contains
     end function new_model_builder
 
 
-    function dense(this, input_var, input_dim, output_dim)
+    function new_variable(x)
         implicit none
-        class(model_builder)                  :: this
-        type(variable), target, intent(inout) :: input_var
-        type(variable), target                :: dense
-        integer(kind=4), intent(in), optional :: input_dim, output_dim
+        type(variable)         :: new_variable
+        real(kind=8), optional :: x(:,:)
 
-        type(variable), pointer                :: output_var
-
-        type(variable), target :: in_var_dense
-        type(variable), target :: out_var_dense
-        type(layer), target    :: lay_dense
-
-        ! output_var => dense
-        dense = variable()
-
-        ! Shape Check
-        if (present(input_dim)) then
-            input_var%dim = input_dim
+        if (present(x)) then
+            new_variable%x = x
+            new_variable%dim = size(x, dim=2)
         end if
-
-        if (present(output_dim)) then
-            dense%dim = output_dim
-        end if
-
-        ! Layer Information
-        lay_dense%input_dim = input_dim
-        lay_dense%output_dim = output_dim
-        lay_dense%layer_type = "dense"
-        lay_dense%generation = input_var%generation+1
-
-        ! Generation
-        dense%generation = input_var%generation+1
-        allocate(dense%creator)
-        dense%creator => lay_dense
-
-        this%input_array  = [this%input_array,  input_var]
-        this%output_array = [this%output_array, dense]
-        this%layer_array  = [this%layer_array,  lay_dense]
-
-        ! Check
-        call input_var%info()
-        call dense%info()
-        call lay_dense%info()
-    end function dense
-
-
-    function new_variable(dim, generation)
-        implicit none
-        type(variable)            :: new_variable
-        integer(kind=4), optional :: dim
-        integer(kind=4), optional :: generation
-
-        if (present(dim)) then
-            new_variable%dim = dim
-        end if
-
-        if (present(generation)) then
-            new_variable%generation = generation
-        else
-            new_variable%generation = 0
-        end if
+        new_variable%generation = 0
     end function new_variable
 
 
@@ -185,54 +199,17 @@ contains
     end subroutine info_variable
 
 
-    recursive subroutine plot_graph(this, is_first)
-        implicit none
-        class(variable) :: this
-        logical(kind=1), OPTIONAL :: is_first
-        type(variable_ptr), ALLOCATABLE, save :: var_ptr_arr(:)
-
-        if (present(is_first)) then
-            if (allocated(var_ptr_arr)) deallocate(var_ptr_arr)
-            allocate(var_ptr_arr(0))
-        end if
-
-        call this%info()
-
-        call this%creator%info()
-
-    end subroutine plot_graph
-
-
     subroutine info_layer(this)
         implicit none
         class(layer) :: this
         integer(kind=8) :: len_type_name
         print*, "****************************************************************"
         print*, "LAYER: "
+        print*, "    LayerType:  ", this%layer_type
         print*, "    InputDim:   ", this%input_dim
         print*, "    OutputDim:  ", this%output_dim
         print*, "    Generation: ", this%generation
-        print*, "    LayerType:  ", this%layer_type
     end subroutine info_layer
-
-
-    function add_layer(this, input_var0, input_var1, layer_type)
-        implicit none
-        class(model_builder)     :: this
-        type(variable), target   :: input_var0
-        type(variable), optional :: input_var1
-        type(variable)           :: add_layer
-        type(layer), target      :: layer_type
-
-        allocate(add_layer%creator)
-        add_layer%creator => layer_type
-
-        allocate(layer_type%input_var0)
-        input_var0%dim = layer_type%input_dim
-        layer_type%input_var0 => input_var0
-
-    end function add_layer
-
 
 
 end module mod_multi_layer_perceptron
