@@ -72,7 +72,7 @@ contains
         integer(kind=4), intent(in) :: class_counts(n_classes)
         integer(kind=4), intent(in) :: n_classes
         real(kind=4)                :: gini_i4, tmp_gini
-        integer(kind=4)             :: n_samples_tot, c
+        integer(kind=4)             :: n_samples_tot, c, tot_num
 
         tot_num = sum(class_counts(:))
         tmp_gini = 0.0
