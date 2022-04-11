@@ -8,11 +8,14 @@ module mod_isolation_forest
         character(len=256) :: algo_name                !< alogorithm name
         logical(kind=4) :: is_axis_parallel=t_         !< axis-parallel split or not
         integer(kind=8) :: n_estimators_               !< number of base estimators
+        integer(kind=8) :: n_outputs_               !< number of base estimators
         type(hparam_decisiontree) :: hparam            !< decision tree hyperparameter
         type(isolation_tree), allocatable :: trees(:)  !< array of 'isolation_tree'
     contains
         procedure :: fit     => fit_isolation_forest
         procedure :: predict => predict_isolation_forest
+        procedure :: dump => dump_isolation_forest
+        procedure :: load => load_isolation_forest
     end type isolation_forest
     
     !> An interface to create new 'isolation_forest'
@@ -97,5 +100,35 @@ contains
         predict_isolation_forest = predict_isolation_forest / dble(this%n_estimators_)
         predict_isolation_forest(:,1) = 2d0**(-predict_isolation_forest(:,1)/avg_depth(n_samples))
     end function predict_isolation_forest
+
+
+    subroutine dump_isolation_forest(this, file_name)
+        implicit none
+        class(isolation_forest) :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit, i
+        open(newunit=newunit, file=file_name, form="unformatted", status="replace")
+        write(newunit) this%hparam%n_estimators ! dump fail
+        write(newunit) this%n_outputs_ ! dump fail
+        do i=1, size(this%trees(:)), 1
+            call this%trees(i)%dump_base_tree(newunit)
+        end do
+        close(newunit)
+    end subroutine dump_isolation_forest
+
+
+    subroutine load_isolation_forest(this, file_name)
+        implicit none
+        class(isolation_forest) :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit, i
+        open(newunit=newunit, file=file_name, form="unformatted")
+        read(newunit) this%n_estimators_; allocate(this%trees(this%n_estimators_))
+        read(newunit) this%n_outputs_
+        do i=1, size(this%trees(:)), 1
+            call this%trees(i)%load_base_tree(newunit)
+        end do
+        close(newunit)
+    end subroutine load_isolation_forest
 
 end module mod_isolation_forest

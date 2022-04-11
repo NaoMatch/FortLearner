@@ -1,4 +1,5 @@
 module mod_clouds
+    use iso_fortran_env
     use mod_const
     use mod_common
     use mod_error
@@ -19,6 +20,9 @@ module mod_clouds
     type, extends(base_tree) ::  clouds_regressor
     contains
         procedure :: fit => fit_clouds_regressor
+        procedure :: predict => predict_clouds_regressor
+        procedure :: dump => dump_clouds_regressor
+        procedure :: load => load_clouds_regressor
     end type clouds_regressor
     
     !> An interface to create new 'clouds_regressor'
@@ -193,6 +197,37 @@ contains
 
         this % is_trained = t_
     end subroutine fit_clouds_regressor
+
+
+    function predict_clouds_regressor(this, x)
+        implicit none
+        class(clouds_regressor)    :: this
+        real(kind=8), intent(in) :: x(:,:)
+        integer(kind=8), ALLOCATABLE :: predict_clouds_regressor(:,:)
+        predict_clouds_regressor = this%predict_response(x)
+    end function predict_clouds_regressor
+
+
+    subroutine dump_clouds_regressor(this, file_name)
+        implicit none
+        class(clouds_regressor)      :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit
+        open(newunit=newunit, file=file_name, form="unformatted", status="replace")
+        call this%dump_base_tree(newunit)
+        close(newunit)
+    end subroutine dump_clouds_regressor
+
+
+    subroutine load_clouds_regressor(this, file_name)
+        implicit none
+        class(clouds_regressor)      :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit
+        open(newunit=newunit, file=file_name, form="unformatted")
+        call this%load_base_tree(newunit)
+        close(newunit)
+    end subroutine load_clouds_regressor
 
 
 end module mod_clouds

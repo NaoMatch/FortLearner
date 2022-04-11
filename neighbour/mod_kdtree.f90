@@ -36,8 +36,8 @@ module mod_kdtree
 
         integer(kind=8) :: n_samples !< number of samples
         integer(kind=8) :: n_columns !< number of columns
-        real(kind=8), ALLOCATABLE :: x_sq_sum_row(:) !< sum squared value by row of explanatory data
-        real(kind=8), ALLOCATABLE :: q_sq_sum_row(:) !< sum squared value by row of query data
+        real(kind=8), ALLOCATABLE :: x_sq_sum(:) !< sum squared value by row of explanatory data
+        real(kind=8), ALLOCATABLE :: q_sq_sum(:) !< sum squared value by row of query data
     contains
         procedure :: build
         procedure :: build_rec
@@ -51,7 +51,12 @@ module mod_kdtree
         procedure :: query_nearest_radius
         procedure :: query_nearest_radius_rec_get_leaf_ptr
         procedure :: query_nearest_radius_search_subtree
-    end type kdtree
+
+        procedure :: dump => dump_kdtree
+        procedure :: dump_node
+        procedure :: load => load_kdtree
+        procedure :: load_node
+end type kdtree
 
     !> Construct New 'kdtree' object.
     interface kdtree
@@ -60,6 +65,132 @@ module mod_kdtree
 
 
 contains
+
+    subroutine dump_kdtree(this, file_name)
+        class(kdtree) :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8) :: newunit
+        open(newunit=newunit, file=file_name, form='unformatted', status='replace')
+        write(newunit) this%n_samples
+        write(newunit) this%n_columns
+        call this%dump_node(this%root_node_ptr_, newunit)
+        write(newunit) this%min_samples_in_leaf
+        write(newunit) this%x_sq_sum(:)
+        close(newunit)
+    end subroutine dump_kdtree
+
+
+    recursive subroutine dump_node(this, node_ptr, newunit)
+        implicit none
+        class(kdtree)                 :: this
+        type(node_type), pointer, intent(in) :: node_ptr
+        integer(kind=8), intent(in)     :: newunit
+
+        logical(kind=4) :: is_terminal
+        integer(kind=8) :: x_shape(2)
+        type(node_type), pointer :: node_l_ptr, node_r_ptr
+
+        is_terminal = .not. associated(node_ptr%node_l_ptr)
+        ! node Info
+        write(newunit) is_terminal
+        write(newunit) node_ptr%is_root
+        write(newunit) node_ptr%is_leaf
+        write(newunit) node_ptr%is_left
+        write(newunit) node_ptr%depth
+        write(newunit) node_ptr%n_samples
+        write(newunit) node_ptr%n_samples_
+        write(newunit) node_ptr%n_columns
+        write(newunit) node_ptr%min_samples_in_leaf
+        write(newunit) node_ptr%split_val
+        write(newunit) node_ptr%split_fid
+        write(newunit) node_ptr%indices(:)
+
+        if (is_terminal) then
+            ! Additional Info
+            x_shape(:) = shape(node_ptr%x_)
+            write(newunit) x_shape(:)
+            write(newunit) node_ptr%x_(:,:)
+            write(newunit) node_ptr%x_sq_(:)
+            write(newunit) node_ptr%indices_(:)
+        else
+            call this%dump_node(node_ptr%node_l_ptr, newunit)
+            call this%dump_node(node_ptr%node_r_ptr, newunit)
+        end if
+
+    end subroutine dump_node
+
+    subroutine load_kdtree(this, file_name)
+        class(kdtree) :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8) :: newunit
+        open(newunit=newunit, file=file_name, form='unformatted')
+        read(newunit) this%n_samples
+        read(newunit) this%n_columns
+        allocate(this%root_node_ptr_)
+        call this%load_node(this%root_node_ptr_, newunit)
+        read(newunit) this%min_samples_in_leaf
+        read(newunit) this%x_sq_sum(:)
+        close(newunit)
+    end subroutine load_kdtree
+
+
+    recursive subroutine load_node(this, node_ptr, newunit)
+        implicit none
+        class(kdtree)                 :: this
+        type(node_type), pointer, intent(in) :: node_ptr
+        integer(kind=8), intent(in)     :: newunit
+
+        logical(kind=4) :: is_terminal
+        integer(kind=8) :: x_shape(2)
+        integer(kind=8), save :: i=0
+
+        ! i=i+1
+        ! print*, i
+
+        is_terminal = .not. associated(node_ptr%node_l_ptr)
+        ! node Info
+        ! print*, "node Info"
+        read(newunit) is_terminal
+        read(newunit) node_ptr%is_root
+        read(newunit) node_ptr%is_leaf
+        read(newunit) node_ptr%is_left
+        read(newunit) node_ptr%depth
+        read(newunit) node_ptr%n_samples
+        read(newunit) node_ptr%n_samples_
+        read(newunit) node_ptr%n_columns
+        read(newunit) node_ptr%min_samples_in_leaf
+        read(newunit) node_ptr%split_val
+        read(newunit) node_ptr%split_fid
+        allocate(node_ptr%indices(node_ptr%n_samples))
+        read(newunit) node_ptr%indices
+
+        allocate(node_ptr%node_l_ptr)
+        allocate(node_ptr%node_r_ptr)
+        allocate(node_ptr%node_l_ptr%node_p_ptr)
+        allocate(node_ptr%node_r_ptr%node_p_ptr)
+        node_ptr%node_l_ptr%node_p_ptr => node_ptr
+        node_ptr%node_r_ptr%node_p_ptr => node_ptr
+
+        if (is_terminal) then
+            nullify(node_ptr%node_l_ptr)
+            nullify(node_ptr%node_r_ptr)
+            ! Additional Info
+            ! print*, "Additional Info"
+            read(newunit) x_shape(:)
+            allocate(node_ptr%x_(x_shape(1), x_shape(2)))
+            read(newunit) node_ptr%x_(:,:)
+            allocate(node_ptr%x_sq_(x_shape(1)))
+            read(newunit) node_ptr%x_sq_(:)    
+            allocate(node_ptr%indices_(x_shape(1)))
+            read(newunit) node_ptr%indices_(:)    
+        else
+            call this%load_node(node_ptr%node_l_ptr, newunit)
+            call this%load_node(node_ptr%node_r_ptr, newunit)
+        end if
+
+    end subroutine load_node
+
+
     !> Construct New 'kdtree' object.
     !! \param min_samples_in_leaf minimum number of samples in leaf node.
     function new_kdtree(min_samples_in_leaf)
@@ -345,9 +476,9 @@ contains
         q_shape = shape(q_ptr)
         n_samples = q_shape(1)
         n_columns = q_shape(2)
-        call ifdealloc(this%q_sq_sum_row)
-        allocate(this%q_sq_sum_row(n_samples))
-        call matrix_sqsum_row(q_ptr, this%q_sq_sum_row, n_samples, n_columns, parallel=f_)
+        call ifdealloc(this%q_sq_sum)
+        allocate(this%q_sq_sum(n_samples))
+        call matrix_sqsum_row(q_ptr, this%q_sq_sum, n_samples, n_columns, parallel=f_)
 
         ! print*, 2
         if ( allocated(query_nearest_radius%indices) ) &
@@ -364,7 +495,7 @@ contains
         do i=1, n_samples, 1
             q_idx = i
             q_vals = q_ptr(q_idx,:)
-            q_sq = this%q_sq_sum_row(q_idx)
+            q_sq = this%q_sq_sum(q_idx)
             allocate(nearest_dsts(1))
             allocate(nearest_idxs(1))
             nearest_dsts = radius_sq
@@ -562,7 +693,7 @@ contains
         real(kind=8)                 :: val, max_radius, q_sq
         integer(kind=8)              :: i, nearest_idx, fid, q_idx
         integer(kind=8), allocatable :: indices(:), nearest_idxs(:)
-        real(kind=8), allocatable :: nearest_dsts(:), q_vals(:), q_sq_sum_row(:)
+        real(kind=8), allocatable :: nearest_dsts(:), q_vals(:), q_sq_sum(:)
         type(node_type), target :: root_node
         type(node_type), pointer :: root_node_ptr, node_ptr, leaf_node_ptr
 
@@ -573,9 +704,9 @@ contains
         q_shape = shape(q_ptr)
         n_samples = q_shape(1)
         n_columns = q_shape(2)
-        call ifdealloc(this%q_sq_sum_row)
-        allocate(this%q_sq_sum_row(n_samples))
-        call matrix_sqsum_row(q_ptr, this%q_sq_sum_row, n_samples, n_columns, parallel=f_)
+        call ifdealloc(this%q_sq_sum)
+        allocate(this%q_sq_sum(n_samples))
+        call matrix_sqsum_row(q_ptr, this%q_sq_sum, n_samples, n_columns, parallel=f_)
 
         ! print*, 2
         if ( allocated(query_nearest_n_neighbors%indices) ) &
@@ -598,7 +729,7 @@ contains
         do i=1, n_samples, 1
             q_idx = i
             q_vals = q_ptr(q_idx,:)
-            q_sq = this%q_sq_sum_row(q_idx)
+            q_sq = this%q_sq_sum(q_idx)
             nearest_dsts = huge(0d0)
             nearest_idxs = -2
             call this%query_nearest_n_neighbors_rec_get_leaf_ptr(this%root_node_ptr_, q_vals, q_sq, & 
@@ -685,7 +816,7 @@ contains
         end if
 
         ! x_idx = root_node_ptr%data_index
-        ! dist_from_q_to_x = q_sq + this%x_sq_sum_row(x_idx) - 2d0*dot_product( q(:),this%x(x_idx,:) )
+        ! dist_from_q_to_x = q_sq + this%x_sq_sum(x_idx) - 2d0*dot_product( q(:),this%x(x_idx,:) )
         ! if (nearest_dist > dist_from_q_to_x) then
         !     nearest_dist = dist_from_q_to_x 
         !     nearest_idx = x_idx

@@ -26,38 +26,16 @@ program main_decision_tree_extra_tree
     type(data_holder), target     :: dholder
     type(data_holder), pointer    :: dholder_ptr
 
-    file_name_x_train_csv = "../sample_data/make_regression_X_0000100000x00100.csv"
-    file_name_y_train_csv = "../sample_data/make_regression_y_0000100000x00100.csv"
     file_name_x_train_bin = "../sample_data/make_regression_X_0000100000x00100.bin"
     file_name_y_train_bin = "../sample_data/make_regression_y_0000100000x00100.bin"
-    n_samples_train = 100000
-    n_columns_train = 100
-    skip_header = t_
-    dtype_in  = "r"
-    dtype_out = "r"
-
-    print*, '============================================================='
-    print*, "CSV to Binary"
-    print*, "    x_train"
-    call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
-        n_samples_train, n_columns_train, skip_header, dtype_in, dtype_out)
-    print*, "    y_train"
-    call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
-        n_samples_train, 1_8, skip_header, dtype_in, dtype_out)
-
-    print*, '============================================================='
-    print*, "Read Binary"
-    print*, "    x_train"
     call read_bin_2d(file_name_x_train_bin, x_train)
-    print*, "    y_train"
     call read_bin_2d(file_name_y_train_bin, y_train)
-
     dholder = data_holder(x_train, y_train, is_trans_x=f_)
     dholder_ptr => dholder
 
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, "Train, Test, Dump Trained Model"
-    lw = lawu_regressor(max_depth=8_8, learning_rate_layer=0.950d0)
+    lw = lawu_regressor(max_depth=2_8, learning_rate_layer=0.950d0)
     call lw%fit(dholder_ptr)
     y_train_pred = lw%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
@@ -65,7 +43,7 @@ program main_decision_tree_extra_tree
 
     ! Load, Test ------------------------------------------------------------------------
     print*, "Load Trained Model, Test"
-    lw2 = lawu_regressor(max_depth=8_8, learning_rate_layer=0.950d0)
+    lw2 = lawu_regressor(max_depth=2_8, learning_rate_layer=0.950d0)
     call lw2%load(file_name="et.bin")
     y_train_pred = lw2%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))

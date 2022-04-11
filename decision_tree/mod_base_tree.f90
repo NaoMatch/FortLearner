@@ -44,9 +44,9 @@ module mod_base_tree
 
         integer(kind=8) :: n_samples_                              !< number of samples in training
         integer(kind=8) :: n_columns_                              !< number of columns
-        integer(kind=8) :: n_clusters_                              !< number of columns
+        integer(kind=8) :: n_clusters_ = 0_8                       !< number of columns
         integer(kind=8) :: n_outputs_                              !< number of output dimension of objective variable
-        integer(kind=8) :: n_labels_                              !< number of output dimension of objective variable
+        integer(kind=8) :: n_labels_                               !< number of output dimension of objective variable
         integer(kind=8) :: n_leaf_nodes_                           !< number of leaf node
     contains
         procedure :: init => init_base_tree
@@ -61,8 +61,8 @@ module mod_base_tree
         procedure :: adopt_node_ptrs_oblq
         procedure :: adopt_node_ptrs_axis_for_isolation_tree
 
-        procedure :: dump => dump_tree
-        procedure :: load => load_tree
+        procedure :: dump_base_tree
+        procedure :: load_base_tree
 
         procedure, pass :: print_info_axis
         procedure, pass :: print_info_oblq
@@ -92,212 +92,217 @@ contains
     !> A subroutine to dump fitted 'base_tree' object or its extended objects
     !> If not fitted, cannot dump training results.
     !! \param file_name output file name
-    subroutine dump_tree(this, file_name)
+    subroutine dump_base_tree(this, unit)
         implicit none
         class(base_tree) :: this
-        character(len=*) :: file_name
+        integer(kind=8), intent(in)  :: unit
         integer(kind=8)  :: n_nodes, n_feature_fractions
         integer(kind=8)  :: dummy
-        open(10, file=file_name, form="unformatted", status="replace")
+        ! open(unit, file=file_name, form="unformatted", status="replace")
         if (.not. this % is_trained) then
             print*, trim(this % algo_name),  " is not trained. Cannot dump model."
-            write(10) f_ ! dump fail
-            close(10)
+            write(unit) f_ ! dump fail
+            close(unit)
             stop
         end if
-        write(10) t_ ! dump fail
-        write(10) this%algo_name
-        write(10) this%is_axis_parallel
-        write(10) this%is_hist
-        write(10) this%is_layer_wise_sum
+        write(unit) t_ ! dump fail
+        write(unit) this%is_classification
+        write(unit) this%is_threshold_tree
+        write(unit) this%algo_name
+        write(unit) this%is_axis_parallel
+        write(unit) this%is_hist
+        write(unit) this%is_layer_wise_sum
         ! 
         ! 
         dummy = allocated(this%hparam%feature_fractions)
         n_feature_fractions = size(this%hparam%feature_fractions) * dummy
-        write(10) n_feature_fractions
-        write(10) this%hparam%n_estimators
-        write(10) this%hparam%criterion_int
-        write(10) this%hparam%criterion_boost_int
-        write(10) this%hparam%verbose
-        write(10) this%hparam%max_epoch
-        write(10) this%hparam%max_patient
-        write(10) this%hparam%max_retry
-        write(10) this%hparam%max_alpha
-        write(10) this%hparam%min_alpha
-        write(10) this%hparam%n_repeats
-        write(10) this%hparam%n_rounds
-        write(10) this%hparam%max_bins
-        write(10) this%hparam%strategy_int
-        write(10) this%hparam%max_depth
-        write(10) this%hparam%min_samples_split
-        write(10) this%hparam%min_samples_leaf
-        write(10) this%hparam%max_features
-        write(10) this%hparam%max_feature_use
-        write(10) this%hparam%max_leaf_nodes
-        write(10) this%hparam%fashion_int
-        write(10) this%hparam%print_mod
-        write(10) this%hparam%num_threads_in_node
-        write(10) this%hparam%num_threads_in_forest
-        write(10) this%hparam%step_size_for_multi_grain
-        write(10) this%hparam%min_columns_in_grain
-        write(10) this%hparam%n_cascades
-        write(10) this%hparam%n_forest_per_layer
+        write(unit) n_feature_fractions
+        write(unit) this%hparam%n_estimators
+        write(unit) this%hparam%criterion_int
+        write(unit) this%hparam%criterion_boost_int
+        write(unit) this%hparam%verbose
+        write(unit) this%hparam%max_epoch
+        write(unit) this%hparam%max_patient
+        write(unit) this%hparam%max_retry
+        write(unit) this%hparam%max_alpha
+        write(unit) this%hparam%min_alpha
+        write(unit) this%hparam%n_repeats
+        write(unit) this%hparam%n_rounds
+        write(unit) this%hparam%max_bins
+        write(unit) this%hparam%strategy_int
+        write(unit) this%hparam%max_depth
+        write(unit) this%hparam%min_samples_split
+        write(unit) this%hparam%min_samples_leaf
+        write(unit) this%hparam%max_features
+        write(unit) this%hparam%max_feature_use
+        write(unit) this%hparam%max_leaf_nodes
+        write(unit) this%hparam%fashion_int
+        write(unit) this%hparam%print_mod
+        write(unit) this%hparam%num_threads_in_node
+        write(unit) this%hparam%num_threads_in_forest
+        write(unit) this%hparam%step_size_for_multi_grain
+        write(unit) this%hparam%min_columns_in_grain
+        write(unit) this%hparam%n_cascades
+        write(unit) this%hparam%n_forest_per_layer
         if (n_feature_fractions .gt. 0_8) then
-            write(10) this%hparam%feature_fractions
+            write(unit) this%hparam%feature_fractions
         else
-            write(10) 0_8
+            write(unit) 0_8
         end if
-        write(10) this%hparam%learning_rate
-        write(10) this%hparam%learning_rate_layer
-        write(10) this%hparam%drop_rate
-        write(10) this%hparam%update_ratio
-        write(10) this%hparam%momentum
-        write(10) this%hparam%prunig_threshold
-        write(10) this%hparam%weight_decay
-        write(10) this%hparam%top_ratio
-        write(10) this%hparam%min_weight_fraction_leaf
-        write(10) this%hparam%min_impurity_decrease
-        write(10) this%hparam%other_ratio
-        write(10) this%hparam%lambda1
-        write(10) this%hparam%lambda2
-        write(10) this%hparam%row_sampling
-        write(10) this%hparam%skip_used_features
-        write(10) this%hparam%boot_strap
-        write(10) this%hparam%random_splitter
-        write(10) this%hparam%criterion
-        write(10) this%hparam%strategy
-        write(10) this%hparam%fashion
+        write(unit) this%hparam%learning_rate
+        write(unit) this%hparam%learning_rate_layer
+        write(unit) this%hparam%drop_rate
+        write(unit) this%hparam%update_ratio
+        write(unit) this%hparam%momentum
+        write(unit) this%hparam%prunig_threshold
+        write(unit) this%hparam%weight_decay
+        write(unit) this%hparam%top_ratio
+        write(unit) this%hparam%min_weight_fraction_leaf
+        write(unit) this%hparam%min_impurity_decrease
+        write(unit) this%hparam%other_ratio
+        write(unit) this%hparam%lambda1
+        write(unit) this%hparam%lambda2
+        write(unit) this%hparam%row_sampling
+        write(unit) this%hparam%skip_used_features
+        write(unit) this%hparam%boot_strap
+        write(unit) this%hparam%random_splitter
+        write(unit) this%hparam%criterion
+        write(unit) this%hparam%strategy
+        write(unit) this%hparam%fashion
         
         n_nodes = size(this%results%split_features_)
-        write(10) n_nodes
-        write(10) this%results%n_columns_
-        write(10) this%results%n_outputs_
+        write(unit) n_nodes
+        write(unit) this%results%n_columns_
+        write(unit) this%results%n_outputs_
         if (this%is_axis_parallel) then
-            write(10) this%results%split_features_
-            write(10) this%results%split_thresholds_
-            write(10) this%results%is_terminals_
-            write(10) this%results%responses_
+            write(unit) this%results%split_features_
         else
-            stop "NotImplementedError: 'dump_tree' for oblique tree is not implemented."
+            write(unit) this%results%coefs_
         end if
+        write(unit) this%results%split_thresholds_
+        write(unit) this%results%is_terminals_
+        write(unit) this%results%responses_
 
         if (this%is_layer_wise_sum) then
-            write(10) this%mean_y
+            write(unit) this%mean_y
         else
-            write(10) 0_8
+            write(unit) 0_8
         end if
-
-        print*, "Dump Success!, ", trim(this % algo_name)
-        close(10)
-    end subroutine dump_tree
+        write(unit) this%lr_layer
+        ! print*, "Dump Success!, ", trim(this % algo_name)
+        ! close(unit)
+    end subroutine dump_base_tree
 
 
     !> A subroutine to load 'base_tree' object or its extended objects
     !> If not fitted, cannot load.
     !! \param file_name loading file name
-    subroutine load_tree(this, file_name)
+    subroutine load_base_tree(this, unit)
         implicit none
         class(base_tree) :: this
-        character(len=*) :: file_name
+        integer(kind=8), intent(in)  :: unit
         logical(kind=4)  :: is_dump_successed, is_allocated_feature_fractions
         integer(kind=8)  :: n_nodes, n_feature_fractions, dummy, n_columns_, n_outputs_
-        open(10, file=file_name, form="unformatted")
-        read(10) is_dump_successed
+        ! open(unit, file=file_name, form="unformatted")
+        read(unit) is_dump_successed
         if (.not. is_dump_successed) then
             print*, trim(this % algo_name),  " failed dump of the model."
             stop
         end if
 
         this%is_trained = is_dump_successed
-        read(10) this%algo_name
-        read(10) this%is_axis_parallel
-        read(10) this%is_hist
-        read(10) this%is_layer_wise_sum
+        read(unit) this%is_classification
+        read(unit) this%is_threshold_tree
+        read(unit) this%algo_name
+        read(unit) this%is_axis_parallel
+        read(unit) this%is_hist
+        read(unit) this%is_layer_wise_sum
         ! 
         ! 
-        read(10) n_feature_fractions
-        read(10) this%hparam%n_estimators
-        read(10) this%hparam%criterion_int
-        read(10) this%hparam%criterion_boost_int
-        read(10) this%hparam%verbose
-        read(10) this%hparam%max_epoch
-        read(10) this%hparam%max_patient
-        read(10) this%hparam%max_retry
-        read(10) this%hparam%max_alpha
-        read(10) this%hparam%min_alpha
-        read(10) this%hparam%n_repeats
-        read(10) this%hparam%n_rounds
-        read(10) this%hparam%max_bins
-        read(10) this%hparam%strategy_int
-        read(10) this%hparam%max_depth
-        read(10) this%hparam%min_samples_split
-        read(10) this%hparam%min_samples_leaf
-        read(10) this%hparam%max_features
-        read(10) this%hparam%max_feature_use
-        read(10) this%hparam%max_leaf_nodes
-        read(10) this%hparam%fashion_int
-        read(10) this%hparam%print_mod
-        read(10) this%hparam%num_threads_in_node
-        read(10) this%hparam%num_threads_in_forest
-        read(10) this%hparam%step_size_for_multi_grain
-        read(10) this%hparam%min_columns_in_grain
-        read(10) this%hparam%n_cascades
-        read(10) this%hparam%n_forest_per_layer
+        read(unit) n_feature_fractions
+        read(unit) this%hparam%n_estimators
+        read(unit) this%hparam%criterion_int
+        read(unit) this%hparam%criterion_boost_int
+        read(unit) this%hparam%verbose
+        read(unit) this%hparam%max_epoch
+        read(unit) this%hparam%max_patient
+        read(unit) this%hparam%max_retry
+        read(unit) this%hparam%max_alpha
+        read(unit) this%hparam%min_alpha
+        read(unit) this%hparam%n_repeats
+        read(unit) this%hparam%n_rounds
+        read(unit) this%hparam%max_bins
+        read(unit) this%hparam%strategy_int
+        read(unit) this%hparam%max_depth
+        read(unit) this%hparam%min_samples_split
+        read(unit) this%hparam%min_samples_leaf
+        read(unit) this%hparam%max_features
+        read(unit) this%hparam%max_feature_use
+        read(unit) this%hparam%max_leaf_nodes
+        read(unit) this%hparam%fashion_int
+        read(unit) this%hparam%print_mod
+        read(unit) this%hparam%num_threads_in_node
+        read(unit) this%hparam%num_threads_in_forest
+        read(unit) this%hparam%step_size_for_multi_grain
+        read(unit) this%hparam%min_columns_in_grain
+        read(unit) this%hparam%n_cascades
+        read(unit) this%hparam%n_forest_per_layer
         if (n_feature_fractions .gt. 0_8) then
             allocate(this%hparam%feature_fractions(n_feature_fractions))
-            read(10) this%hparam%feature_fractions
+            read(unit) this%hparam%feature_fractions
         else
-            read(10) dummy
+            read(unit) dummy
         end if
-        read(10) this%hparam%learning_rate
-        read(10) this%hparam%learning_rate_layer
-        read(10) this%hparam%drop_rate
-        read(10) this%hparam%update_ratio
-        read(10) this%hparam%momentum
-        read(10) this%hparam%prunig_threshold
-        read(10) this%hparam%weight_decay
-        read(10) this%hparam%top_ratio
-        read(10) this%hparam%min_weight_fraction_leaf
-        read(10) this%hparam%min_impurity_decrease
-        read(10) this%hparam%other_ratio
-        read(10) this%hparam%lambda1
-        read(10) this%hparam%lambda2
-        read(10) this%hparam%row_sampling
-        read(10) this%hparam%skip_used_features
-        read(10) this%hparam%boot_strap
-        read(10) this%hparam%random_splitter
-        read(10) this%hparam%criterion
-        read(10) this%hparam%strategy
-        read(10) this%hparam%fashion
+        read(unit) this%hparam%learning_rate
+        read(unit) this%hparam%learning_rate_layer
+        read(unit) this%hparam%drop_rate
+        read(unit) this%hparam%update_ratio
+        read(unit) this%hparam%momentum
+        read(unit) this%hparam%prunig_threshold
+        read(unit) this%hparam%weight_decay
+        read(unit) this%hparam%top_ratio
+        read(unit) this%hparam%min_weight_fraction_leaf
+        read(unit) this%hparam%min_impurity_decrease
+        read(unit) this%hparam%other_ratio
+        read(unit) this%hparam%lambda1
+        read(unit) this%hparam%lambda2
+        read(unit) this%hparam%row_sampling
+        read(unit) this%hparam%skip_used_features
+        read(unit) this%hparam%boot_strap
+        read(unit) this%hparam%random_splitter
+        read(unit) this%hparam%criterion
+        read(unit) this%hparam%strategy
+        read(unit) this%hparam%fashion
 
-        read(10) n_nodes
-        read(10) this%results % n_columns_
-        read(10) this%results % n_outputs_
+        read(unit) n_nodes
+        read(unit) this%results % n_columns_
+        read(unit) this%results % n_outputs_
         this%n_columns_ = this%results % n_columns_
         this%n_outputs_ = this%results % n_outputs_
         if (this%is_axis_parallel) then
             allocate(this%results%split_features_(n_nodes))
-            allocate(this%results%split_thresholds_(n_nodes))
-            allocate(this%results%is_terminals_(n_nodes))
-            allocate(this%results%responses_(n_nodes, this%results % n_outputs_))
-            read(10) this%results % split_features_
-            read(10) this%results % split_thresholds_
-            read(10) this%results % is_terminals_
-            read(10) this%results % responses_
+            read(unit) this%results % split_features_
         else
-            stop "Oblique load and dump is not implemented."
+            allocate(this%results%coefs_(n_nodes, this%n_columns_))
+            read(unit) this%results % coefs_
         end if
+        allocate(this%results%split_thresholds_(n_nodes))
+        allocate(this%results%is_terminals_(n_nodes))
+        allocate(this%results%responses_(n_nodes, this%results % n_outputs_))
+        read(unit) this%results % split_thresholds_
+        read(unit) this%results % is_terminals_
+        read(unit) this%results % responses_
 
         if (this%is_layer_wise_sum) then
             allocate(this%mean_y(this%n_outputs_))
-            read(10) this%mean_y
+            read(unit) this%mean_y
         else
-            read(10) dummy
+            read(unit) dummy
         end if
-
-        print*, "Load Success!, ", trim(this % algo_name)
-        close(10); return
-    end subroutine load_tree
+        read(unit) this%lr_layer
+        ! print*, "Load Success!, ", trim(this % algo_name)
+        ! close(unit); return
+    end subroutine load_base_tree
 
 
     !> A recursive subroutine to print node informations with axis-parallel split.
@@ -435,8 +440,7 @@ contains
             this%root_node_axis_ptr%is_useless_center(:) = f_
             this%root_node_axis_ptr%n_clusters = this%n_clusters_
             this%root_node_axis_ptr%is_hist = this%is_hist
-
-
+            
             if ( this%hparam%boot_strap ) then
                 call rand_integer(1_8, this%n_samples_, this%root_node_axis_ptr%indices, this%hparam%max_samples)
                 call quick_sort(this%root_node_axis_ptr%indices, this%hparam%max_samples)
@@ -445,10 +449,9 @@ contains
                     this%root_node_axis_ptr%indices(i) = i
                 end do
             end if
-
+            
             if (is_classification) then
                 call groupby_count(uniq_labels, label_counter, data_holder_ptr%y_ptr%y_i8_ptr(:,1), this%n_samples_)
-
                 this%root_node_axis_ptr%n_labels = size(uniq_labels)
                 this%root_node_axis_ptr%uniq_label = uniq_labels
                 this%root_node_axis_ptr%label_counter = label_counter
@@ -584,6 +587,7 @@ contains
                 ! print*, "No. Nodes: ", n_nodes
                 if ( associated(selected_node_ptr) ) nullify(selected_node_ptr)
                 call extract_best_split_node_axis(this%root_node_axis_ptr, selected_node_ptr)
+                if (.not. associated(selected_node_ptr)) return
                 call adopting_twins_axis(selected_node_ptr, data_holder_ptr, hparam_ptr, is_classification, &
                         is_threshold_tree, &
                         this%lr_layer, is_hist=is_hist_optional)
@@ -629,6 +633,7 @@ contains
                 ! print*, "No. Nodes: ", n_nodes
                 if ( associated(selected_node_ptr) ) nullify(selected_node_ptr)
                 call extract_best_split_node_oblq(this%root_node_oblq_ptr, selected_node_ptr)
+                if (.not. associated(selected_node_ptr)) return
                 call adopting_twins_oblq(selected_node_ptr, data_holder_ptr, hparam_ptr, is_classification, &
                     this%lr_layer, is_hist=is_hist_optional)
             case(2_8:5_8) ! others
@@ -676,6 +681,7 @@ contains
         integer(kind=8), allocatable :: indices(:)
         integer(kind=8)              :: x_shape(2), n_samples, n_columns, i
         logical(kind=4)              :: return_depth_opt
+
 
         x_shape = shape(x)
         n_samples  = x_shape(1)
@@ -996,6 +1002,7 @@ contains
         real(kind=8), allocatable    :: res(:), tmp_x(:,:), tmp_r(:)
         logical(kind=4), allocatable :: lt_thresholds(:)
         integer(kind=8), allocatable :: indices_l(:), indices_r(:)
+
 
         if (is_root) node_id = 0_8
         node_id = node_id + 1_8

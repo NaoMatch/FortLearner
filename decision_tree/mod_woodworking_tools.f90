@@ -321,17 +321,28 @@ contains
 
         real(kind=8), pointer :: tmp_x_ptr(:,:)
 
+        ! print*, "adopting_twins_axis"
+
         if (node_ptr%depth .eq. 0_8) tot_time = 0
 
-        if ( node_ptr%is_terminal ) return
+        ! print*, "adopting_twins_axis", 1, node_ptr%is_terminal
+        if ( node_ptr%is_terminal ) then
+            ! print*, "terminal"
+            return
+        end if
 
-        if (allocated(node_ptr%node_l)) return
+        ! print*, "adopting_twins_axis", 2, allocated(node_ptr%node_l)
+        if (allocated(node_ptr%node_l)) then
+            ! print*, "allocated"
+            return
+        end if
 
         is_hist_optional = f_
         if (present(is_hist)) is_hist_optional = is_hist
 
         node_ptr%is_used(node_ptr%feature_id_) = t_
 
+        ! print*, "adopting_twins_axis", 3, is_threshold_tree
         if (is_threshold_tree) then
             allocate(is_mistake(node_ptr%n_samples))
             allocate(is_left_sample(node_ptr%n_samples))
@@ -356,6 +367,7 @@ contains
         end if
         ! ---------------------------------------------------------------------
         ! Basic Information
+        ! print*, "adopting_twins_axis", 4, "Basic Information_L"
         allocate(node_axis_l%is_used(data_holder_ptr%n_columns))
         allocate(node_axis_l%is_useless(data_holder_ptr%n_columns))
         node_axis_l%is_used = node_ptr%is_used
@@ -383,6 +395,7 @@ contains
 
         ! ---------------------------------------------------------------------
         ! Basic Information
+        ! print*, "adopting_twins_axis", 5, "Basic Information_R"
         allocate(node_axis_r%is_used(data_holder_ptr%n_columns))
         allocate(node_axis_r%is_useless(data_holder_ptr%n_columns))
         node_axis_r%is_used = node_ptr%is_used
@@ -407,6 +420,7 @@ contains
         end if
         call node_axis_r%hparam_check(hparam_ptr)
 
+        ! print*, "adopting_twins_axis", 6, "is_threshold_tree"
         if (is_threshold_tree) then
             ! Count number of samples, misclassified samples are removed.
             node_axis_l%n_samples = 0
@@ -437,6 +451,7 @@ contains
 
         ! ---------------------------------------------------------------------
         ! Child Node Index
+        ! print*, "adopting_twins_axis", 7, "Child Node Index"
         cnt_l=1
         cnt_r=1
         fid = node_ptr%feature_id_
@@ -510,6 +525,7 @@ contains
 
         ! ---------------------------------------------------------------------
         ! Gain
+        ! print*, "adopting_twins_axis", 8, "Gain"
         if (is_classification) then
             node_axis_l%label_ = node_ptr%label_l
             node_axis_r%label_ = node_ptr%label_r
@@ -531,6 +547,7 @@ contains
             node_axis_r%impurity = imp / dble(node_axis_r%n_samples) / dble(node_ptr%n_outputs)
         end if
 
+        ! print*, "adopting_twins_axis", 9, "allocated(data_holder_ptr%x_hist) .and. node_ptr%is_hist"
         if (allocated(data_holder_ptr%x_hist) .and. node_ptr%is_hist ) then
             ! --------------------------------------------------------------------------------------
             ! --------------------------------------------------------------------------------------
@@ -789,6 +806,9 @@ contains
 
         node_ptr%node_l = node_oblq_l
         node_ptr%node_r = node_oblq_r
+
+        ! call node_ptr%node_l%print_node_info_oblq()
+        ! call node_ptr%node_r%print_node_info_oblq()
     end subroutine adopting_twins_oblq
 
 

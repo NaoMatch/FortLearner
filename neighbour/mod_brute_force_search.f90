@@ -15,6 +15,8 @@ module mod_brute_force_search
     contains
         procedure :: build => build_brute_force_search
         procedure :: query => query_brute_force_search
+        procedure :: dump => dump_brute_force_search
+        procedure :: load => load_brute_force_search
 
         procedure :: query_brute_force_search_n_neighbors
         procedure :: query_brute_force_search_radius
@@ -77,6 +79,8 @@ contains
         q_shape = shape(q)
         n_samples = q_shape(1)
         n_columns = q_shape(2)
+        if (allocated(query_brute_force_search%indices)) deallocate(query_brute_force_search%indices)
+        if (allocated(query_brute_force_search%distances)) deallocate(query_brute_force_search%distances)
 
         allocate(q_sq_sum(n_samples))
         call matrix_sqsum_row(q, q_sq_sum, n_samples, n_columns, parallel=f_)
@@ -229,7 +233,7 @@ contains
         allocate(indices(this%n_samples))
         r_sq = radius**2d0
         !$omp parallel num_threads(4)
-        !$omp do private(c, indices, tmp)
+        !$omp do private(c, indices, count_in_ball, tmp)
         do c=1, n_samples, 1
             do n=1, this%n_samples, 1
                 indices(n) = n
@@ -247,5 +251,41 @@ contains
         !$omp end do
         !$omp end parallel
     end subroutine query_brute_force_search_radius
+
+
+    subroutine dump_brute_force_search(this, file_name)
+        implicit none
+        class(brute_force_search)    :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8) :: newunit
+
+        open(newunit=newunit, file=file_name, form="unformatted", status="replace")
+        write(newunit) this%n_samples
+        write(newunit) this%n_columns
+        write(newunit) this%x(:,:)
+        write(newunit) this%x_sq_sum(:)
+        close(newunit)
+    end subroutine dump_brute_force_search
+
+
+    subroutine load_brute_force_search(this, file_name)
+        implicit none
+        class(brute_force_search)    :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8) :: newunit
+
+        if (allocated(this%x)) deallocate(this%x)
+        if (allocated(this%x_sq_sum)) deallocate(this%x_sq_sum)
+
+        open(newunit=newunit, file=file_name, form='unformatted')
+        read(newunit) this%n_samples
+        read(newunit) this%n_columns
+        allocate(this%x(this%n_samples, this%n_columns))
+        allocate(this%x_sq_sum(this%n_samples))
+        read(newunit) this%x(:,:)
+        read(newunit) this%x_sq_sum(:)
+        close(newunit)
+    end subroutine load_brute_force_search
+
 
 end module mod_brute_force_search
