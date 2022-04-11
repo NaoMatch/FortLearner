@@ -8,6 +8,8 @@ module mod_breathing_kmeans
     implicit none
 
     type breathing_kmeans
+        character(len=256) :: algo_name = "breathing_kmeans" !< algorithm name
+
         type(kmeans) :: km
         integer(kind=8) :: n_samples, n_columns
         type(hparam_breathing_kmeans) :: hparam
@@ -20,6 +22,9 @@ module mod_breathing_kmeans
         procedure :: breathing_out
         procedure :: utility
         procedure :: score
+
+        procedure :: dump     => dump_breathing_kmeans
+        procedure :: load     => load_breathing_kmeans
     end type breathing_kmeans
 
     interface breathing_kmeans
@@ -27,6 +32,23 @@ module mod_breathing_kmeans
     end interface breathing_kmeans
 
 contains
+
+    subroutine dump_breathing_kmeans(this, file_name)
+        class(breathing_kmeans) :: this
+        character(len=*) :: file_name
+        call this%km%dump(file_name=file_name)
+    end subroutine dump_breathing_kmeans
+    
+    !> A subroutine to load 'kmeans' object
+    !> If not fitted, cannot load.
+    !! \param file_name loading file name
+    subroutine load_breathing_kmeans(this, file_name)
+        implicit none
+        class(breathing_kmeans)    :: this
+        character(len=*) :: file_name
+        call this%km%load(file_name=file_name)
+    end subroutine load_breathing_kmeans
+
 
     function new_breathing_kmeans(n_clusters, n_clusters_breathing_in)
         implicit none

@@ -52,6 +52,11 @@ module mod_balltree
         procedure :: query => query_balltree
         procedure :: query_balltree_n_neighbors_rec
         procedure :: query_balltree_radius_rec
+
+        procedure :: dump => dump_balltree
+        procedure :: dump_ball
+        procedure :: load => load_balltree
+        procedure :: load_ball
     end type balltree
 
     !> New 'balltree' constructor.
@@ -61,6 +66,130 @@ module mod_balltree
 
 
 contains
+
+    subroutine dump_balltree(this, file_name)
+        implicit none
+        class(balltree) :: this
+        character(len=*), intent(in) ::file_name
+        integer(kind=8) :: newunit
+        open(newunit=newunit, file=file_name, form='unformatted', status='replace')
+        write(newunit) this%n_samples
+        write(newunit) this%n_columns
+        write(newunit) this%split_algo
+        write(newunit) this%split_algo_int
+        call this%dump_ball(this%root_ball_ptr, newunit)
+        write(newunit) this%min_samples_in_leaf
+        write(newunit) this%x_sq_sum(:)
+        close(newunit)
+    end subroutine dump_balltree
+
+    recursive subroutine dump_ball(this, ball_ptr, newunit)
+        implicit none
+        class(balltree)                 :: this
+        type(ball), pointer, intent(in) :: ball_ptr
+        integer(kind=8), intent(in)     :: newunit
+
+        logical(kind=4) :: is_terminal
+        integer(kind=8) :: x_shape(2)
+        type(ball), pointer :: ball_l_ptr, ball_r_ptr
+
+        is_terminal = .not. associated(ball_ptr%ball_l_ptr)
+        ! Ball Info
+        write(newunit) is_terminal
+        write(newunit) ball_ptr%is_root
+        write(newunit) ball_ptr%is_leaf
+        write(newunit) ball_ptr%is_left
+        write(newunit) ball_ptr%depth
+        write(newunit) ball_ptr%n_samples
+        write(newunit) ball_ptr%n_columns
+        write(newunit) ball_ptr%min_samples_in_leaf
+        write(newunit) ball_ptr%split_algo_int
+        write(newunit) ball_ptr%radius
+        write(newunit) ball_ptr%radius_sq
+        write(newunit) ball_ptr%center(:)
+        
+        if (is_terminal) then
+            ! Additional Info
+            x_shape(:) = shape(ball_ptr%x)
+            write(newunit) x_shape(:)
+            write(newunit) ball_ptr%indices(:)
+            write(newunit) ball_ptr%x(:,:)
+            write(newunit) ball_ptr%x_sq_sum(:)    
+        else
+            call this%dump_ball(ball_ptr%ball_l_ptr, newunit)
+            call this%dump_ball(ball_ptr%ball_r_ptr, newunit)
+        end if
+    end subroutine dump_ball
+
+    subroutine load_balltree(this, file_name)
+        implicit none
+        class(balltree)                 :: this
+        character(len=*), intent(in) ::file_name
+        integer(kind=8) :: newunit
+        open(newunit=newunit, file=file_name, form='unformatted')
+        read(newunit) this%n_samples
+        read(newunit) this%n_columns
+        read(newunit) this%split_algo
+        read(newunit) this%split_algo_int
+        if (associated(this%root_ball_ptr)) nullify(this%root_ball_ptr)
+        allocate(this%root_ball_ptr)
+        call this%load_ball(this%root_ball_ptr, newunit)
+        read(newunit) this%min_samples_in_leaf
+        read(newunit) this%x_sq_sum(:)
+        close(newunit)
+    end subroutine load_balltree
+
+    recursive subroutine load_ball(this, ball_ptr, newunit)
+        implicit none
+        class(balltree)                    :: this
+        type(ball), pointer, intent(inout) :: ball_ptr
+        integer(kind=8), intent(in)        :: newunit
+
+        logical(kind=4) :: is_terminal
+        integer(kind=8) :: x_shape(2)
+        integer(kind=8), save :: i=0
+
+        is_terminal = .not. associated(ball_ptr%ball_l_ptr)
+        x_shape(:) = shape(ball_ptr%x)
+
+        ! Ball Info
+        read(newunit) is_terminal
+        read(newunit) ball_ptr%is_root
+        read(newunit) ball_ptr%is_leaf
+        read(newunit) ball_ptr%is_left
+        read(newunit) ball_ptr%depth
+        read(newunit) ball_ptr%n_samples
+        read(newunit) ball_ptr%n_columns
+        read(newunit) ball_ptr%min_samples_in_leaf
+        read(newunit) ball_ptr%split_algo_int
+        read(newunit) ball_ptr%radius
+        read(newunit) ball_ptr%radius_sq
+        allocate(ball_ptr%center(this%n_columns))
+        read(newunit) ball_ptr%center(:)
+        
+        allocate(ball_ptr%ball_l_ptr)
+        allocate(ball_ptr%ball_r_ptr)
+        allocate(ball_ptr%ball_l_ptr%ball_p_ptr)
+        allocate(ball_ptr%ball_r_ptr%ball_p_ptr)
+        ball_ptr%ball_l_ptr%ball_p_ptr => ball_ptr
+        ball_ptr%ball_r_ptr%ball_p_ptr => ball_ptr
+
+        if (is_terminal) then
+            nullify(ball_ptr%ball_l_ptr)
+            nullify(ball_ptr%ball_r_ptr)
+            ! Additional Info
+            read(newunit) x_shape(:)
+            allocate(ball_ptr%indices(ball_ptr%n_samples))
+            read(newunit) ball_ptr%indices(:)
+            allocate(ball_ptr%x(x_shape(1), x_shape(2)))
+            allocate(ball_ptr%x_sq_sum(x_shape(1)))
+            read(newunit) ball_ptr%x(:,:)
+            read(newunit) ball_ptr%x_sq_sum(:)    
+        else
+            call this%load_ball(ball_ptr%ball_l_ptr, newunit)
+            call this%load_ball(ball_ptr%ball_r_ptr, newunit)
+        end if
+    end subroutine load_ball
 
     ! ----------------------------------------------------------------------------------
     ! For Ball Tree
@@ -126,6 +255,7 @@ contains
         ! print*, "Allocate Indices      : ", times(6)
     end subroutine build_balltree
 
+    
     !> Building 'balltree' recursively using in 'build_balltree'.
     !! \param ball_ptr pointer to current 'ball'
     !! \param x_ptr pointer to 'x'
@@ -227,8 +357,8 @@ contains
                 q_sq_sum = sum( q_i(:)**2d0 )
                 call this%query_balltree_radius_rec(distances, indices, &
                     this%root_ball_ptr, q_i, q_sq_sum, n_samples, n_columns, radius_sq)
-                query_balltree%distances(n)%dst = sqrt(distances(:))
-                query_balltree%indices(n)%idx = indices(:)
+                query_balltree%distances(n)%dst = [query_balltree%distances(n)%dst, sqrt(distances(:))]
+                query_balltree%indices(n)%idx   = [query_balltree%indices(n)%idx, indices(:)]
                 deallocate( distances, indices )
             end do
             !$omp end do
@@ -327,7 +457,7 @@ contains
 
         distance_q_and_c = sum( (q_i(:) - root_ball_ptr%center(:))**2d0 )
 
-        if ( distance_q_and_c - root_ball_ptr%radius .gt. radius_sq ) then
+        if ( distance_q_and_c - root_ball_ptr%radius_sq .gt. radius_sq ) then
             return
         elseif ( root_ball_ptr%is_leaf ) then
             allocate( distance_q_and_s(root_ball_ptr%n_samples) )
@@ -347,8 +477,8 @@ contains
 
                 if ( count_in_ball > 0 ) then
                     call quick_argselect(distance_q_and_s, tmp_i, size(distance_q_and_s)+0_8, count_in_ball)
-                    distances = [distances, distance_q_and_s(1:n)]
-                    indices = [indices, tmp_i(1:n)]
+                    distances = [distances, distance_q_and_s(1:count_in_ball)]
+                    indices = [indices, tmp_i(1:count_in_ball)]
                 end if
             end if
         else

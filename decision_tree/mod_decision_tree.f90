@@ -19,6 +19,9 @@ module mod_decision_tree
     type, extends(base_tree) :: decision_tree_regressor
     contains
         procedure :: fit => fit_decision_tree_regressor
+        procedure :: predict => predict_decision_tree_regressor
+        procedure :: dump => dump_decision_tree_regressor
+        procedure :: load => load_decision_tree_regressor
     end type decision_tree_regressor
 
     !> An interface to create new 'decision_tree_regressor'
@@ -134,6 +137,11 @@ contains
             call this%extract_split_node_ptrs_axis(selected_node_ptrs, depth)
             call splitter%split_decision_tree_regressor(selected_node_ptrs, data_holder_ptr, hparam_ptr, &
                 n_columns, feature_indices_, feature_indices_scanning_range_, is_permute_per_node)
+            ! if ( size(selected_node_ptrs) .ge. 1_8 ) then
+            !     do n=1, size(selected_node_ptrs), 1
+            !         call selected_node_ptrs(n)%node_ptr%print_node_info_axis()
+            !     end do
+            ! end if
             call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, this%is_classification, &
                 this%is_threshold_tree, this%lr_layer)
 
@@ -152,5 +160,37 @@ contains
         call this%postprocess(this%is_classification)
         this%is_trained = t_
     end subroutine fit_decision_tree_regressor
+
+
+    function predict_decision_tree_regressor(this, x)
+        implicit none
+        class(decision_tree_regressor)    :: this
+        real(kind=8), intent(in) :: x(:,:)
+        integer(kind=8), ALLOCATABLE :: predict_decision_tree_regressor(:,:)
+        predict_decision_tree_regressor = this%predict_response(x)
+    end function predict_decision_tree_regressor
+
+
+    subroutine dump_decision_tree_regressor(this, file_name)
+        implicit none
+        class(decision_tree_regressor)      :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit
+        open(newunit=newunit, file=file_name, form="unformatted", status="replace")
+        call this%dump_base_tree(newunit)
+        close(newunit)
+    end subroutine dump_decision_tree_regressor
+
+
+    subroutine load_decision_tree_regressor(this, file_name)
+        implicit none
+        class(decision_tree_regressor)      :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit
+        open(newunit=newunit, file=file_name, form="unformatted")
+        call this%load_base_tree(newunit)
+        close(newunit)
+    end subroutine load_decision_tree_regressor
+
 
 end module mod_decision_tree

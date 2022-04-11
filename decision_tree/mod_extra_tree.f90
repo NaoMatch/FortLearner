@@ -20,6 +20,9 @@ module mod_extra_tree
         ! procedure :: fit => fit_extra_tree_regressor
         procedure :: fit => fit_extra_tree_regressor
         procedure :: fit_faster => fit_extra_tree_regressor_faster
+        procedure :: predict => predict_extra_tree_regressor
+        procedure :: dump => dump_extra_tree_regressor
+        procedure :: load => load_extra_tree_regressor
     end type extra_tree_regressor
 
     !> An interface to create new 'extra_tree_regressor'
@@ -254,5 +257,34 @@ contains
         ! print*, "SplitTime: ", time_splti
     end subroutine fit_extra_tree_regressor_faster
 
+    function predict_extra_tree_regressor(this, x)
+        implicit none
+        class(extra_tree_regressor)    :: this
+        real(kind=8), intent(in) :: x(:,:)
+        integer(kind=8), ALLOCATABLE :: predict_extra_tree_regressor(:,:)
+        predict_extra_tree_regressor = this%predict_response(x)
+    end function predict_extra_tree_regressor
+
+
+    subroutine dump_extra_tree_regressor(this, file_name)
+        implicit none
+        class(extra_tree_regressor)      :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit
+        open(newunit=newunit, file=file_name, form="unformatted", status="replace")
+        call this%dump_base_tree(newunit)
+        close(newunit)
+    end subroutine dump_extra_tree_regressor
+
+
+    subroutine load_extra_tree_regressor(this, file_name)
+        implicit none
+        class(extra_tree_regressor)      :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit
+        open(newunit=newunit, file=file_name, form="unformatted")
+        call this%load_base_tree(newunit)
+        close(newunit)
+    end subroutine load_extra_tree_regressor
 
 end module mod_extra_tree

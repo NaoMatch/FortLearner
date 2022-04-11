@@ -20,6 +20,8 @@ module mod_isolation_tree
     contains
         procedure :: fit => fit_isolation_tree
         procedure :: predict => predict_isolation_tree
+        procedure :: dump => dump_isolation_tree
+        procedure :: load => load_isolation_tree
     end type isolation_tree
 
     !> An interface to create new 'isolation_tree'
@@ -143,6 +145,28 @@ contains
             predict_isolation_tree = this%predict_response(x)
         end if
     end function predict_isolation_tree
+
+
+    subroutine dump_isolation_tree(this, file_name)
+        implicit none
+        class(isolation_tree)      :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit
+        open(newunit=newunit, file=file_name, form="unformatted", status="replace")
+        call this%dump_base_tree(newunit)
+        close(newunit)
+    end subroutine dump_isolation_tree
+
+
+    subroutine load_isolation_tree(this, file_name)
+        implicit none
+        class(isolation_tree)      :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit
+        open(newunit=newunit, file=file_name, form="unformatted")
+        call this%load_base_tree(newunit)
+        close(newunit)
+    end subroutine load_isolation_tree
 
 
 end module mod_isolation_tree

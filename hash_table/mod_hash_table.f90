@@ -23,6 +23,8 @@ module mod_hash_table
         procedure :: create_table
         procedure :: search
         procedure :: search_all
+        procedure :: dump => dump_hash_table
+        procedure :: load => load_hash_table
     end type hash_table
     
     interface hash_table
@@ -54,9 +56,11 @@ contains
             this%indices(i) = i
         end do
 
+        ! Input to Hash Value
         this%hashes = one_at_a_time_hash(x, this%n_samples, this%n_columns)
         call quick_argsort(this%hashes, this%indices, this%n_samples)
 
+        ! Collect Unique Values
         this%n_hash_key = count_unique(this%hashes, this%n_samples)
         call collect_unique_values(this%unique_hashes, this%hashes, this%n_samples)
 
@@ -75,8 +79,10 @@ contains
                 end do
                 this%hash2indices(l)%vector = this%indices(ini:fin)
                 ini = fin + 1
+                call quick_sort(this%hash2indices(l)%vector, size(this%hash2indices(l)%vector)+0_8)
             end do
             this%hash2indices(this%n_hash_key)%vector = this%indices(ini:this%n_samples)
+            call quick_sort(this%hash2indices(this%n_hash_key)%vector, size(this%hash2indices(this%n_hash_key)%vector)+0_8)
         end if
     end subroutine create_table
 
@@ -112,5 +118,40 @@ contains
         !opm end do
         !opm end parallel
     end function search_all
+
+    subroutine dump_hash_table(this, file_name)
+        implicit none
+        class(hash_table) :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8) :: newunit, n
+        open(newunit=newunit, file=file_name, form="unformatted", status="replace")
+        write(newunit) this%n_columns
+        write(newunit) this%n_hash_key
+        write(newunit) this%unique_hashes
+        do n=1, this%n_hash_key, 1
+            write(newunit) size(this%hash2indices(n)%vector(:))+0_8
+            write(newunit) this%hash2indices(n)%vector(:)
+        end do
+        close(newunit)
+    end subroutine dump_hash_table
+
+    subroutine load_hash_table(this, file_name)
+        implicit none
+        class(hash_table) :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8) :: newunit, n, n_vec
+        open(newunit=newunit, file=file_name, form="unformatted")
+        read(newunit) this%n_columns
+        read(newunit) this%n_hash_key
+        allocate(this%unique_hashes(this%n_hash_key))
+        read(newunit) this%unique_hashes
+        allocate(this%hash2indices(this%n_hash_key))
+        do n=1, this%n_hash_key, 1
+            read(newunit) n_vec
+            allocate(this%hash2indices(n)%vector(n_vec))
+            read(newunit) this%hash2indices(n)%vector(:)
+        end do
+        close(newunit)
+    end subroutine load_hash_table
 
 end module mod_hash_table

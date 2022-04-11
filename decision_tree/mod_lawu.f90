@@ -18,6 +18,9 @@ module mod_lawu
     type, extends(base_tree) :: lawu_regressor
     contains
         procedure :: fit => fit_lawu_regressor
+        procedure :: predict => predict_lawu_regressor
+        procedure :: dump => dump_lawu_regressor
+        procedure :: load => load_lawu_regressor
     end type lawu_regressor
 
     !> An interface to create new 'lawu_regressor'
@@ -230,4 +233,33 @@ contains
     end subroutine fit_lawu_regressor
 
 
+    function predict_lawu_regressor(this, x)
+        implicit none
+        class(lawu_regressor)    :: this
+        real(kind=8), intent(in) :: x(:,:)
+        real(kind=8), ALLOCATABLE :: predict_lawu_regressor(:,:)
+        predict_lawu_regressor = this%predict_response(x)
+    end function predict_lawu_regressor
+
+
+    subroutine dump_lawu_regressor(this, file_name)
+        implicit none
+        class(lawu_regressor)      :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit
+        open(newunit=newunit, file=file_name, form="unformatted", status="replace")
+        call this%dump_base_tree(newunit)
+        close(newunit)
+    end subroutine dump_lawu_regressor
+
+
+    subroutine load_lawu_regressor(this, file_name)
+        implicit none
+        class(lawu_regressor)      :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit
+        open(newunit=newunit, file=file_name, form="unformatted")
+        call this%load_base_tree(newunit)
+        close(newunit)
+    end subroutine load_lawu_regressor
 end module mod_lawu
