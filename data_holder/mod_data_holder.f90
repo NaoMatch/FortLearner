@@ -63,6 +63,7 @@ module mod_data_holder
         procedure :: preprocess_store_colwise
         procedure :: preprocess_random_rotate
         procedure :: preprocess_hist
+        procedure :: preprocess_presort
     end type data_holder
 
     !> An interface to create new 'data_holder'.
@@ -87,7 +88,6 @@ contains
 
         integer(kind=8) :: x_shape(2), y_shape(2)
         type(error)     :: err
-
 
         new_data_holder_r8_r8 % is_trans_x = is_trans_x
         x_shape = shape(x)

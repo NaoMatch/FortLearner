@@ -510,6 +510,7 @@ contains
                 end do
             else
                 do i=1, node_ptr%n_samples
+                    ! print*, i, cnt_l, node_axis_l%n_samples, cnt_r, node_axis_r%n_samples
                     idx = node_ptr%indices(i)
                     if ( data_holder_ptr%x_ptr%x_r8_ptr(idx, fid) .le. node_ptr%threshold_ ) then
                         node_axis_l%indices(cnt_l) = idx
