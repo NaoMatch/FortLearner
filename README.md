@@ -9,6 +9,7 @@ make test
 multi layer perceptron, product quantization    
 
 # Update
+2022/04/19: sliq (base estimator of xgboost, w/o openmp)
 2022/02/15: threshold_tree  
 2022/01/22: breathing_kmeans  
 2022/01/09: locality_sensitive_hashing(random projection, p-stable random projection), balltree(n_neighbors, radius), exact_duplicate_search, one_at_a_time_hash, hash_table(no collision check)  
