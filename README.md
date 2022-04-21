@@ -6,7 +6,9 @@ cd test_script
 make test  
 
 # WIP:
-multi layer perceptron, product quantization    
+oblivious tree  
+~multi layer perceptron, product quantization~
+
 
 # Update
 2022/04/22: minibatch_kmeans  
@@ -138,6 +140,7 @@ http://odds.cs.stonybrook.edu/forestcovercovertype-dataset/
   * extra_tree_regressor
   * clouds_regressor
   * lawu_regressor
+  * sliq_regressor
 * Ensemble Trees:
   * random_forest_regressor
   * extra_trees_regressor
@@ -150,12 +153,18 @@ http://odds.cs.stonybrook.edu/forestcovercovertype-dataset/
 * Dimensionality Reduction:
   * pca
 * Clustering
-  * kmeans++
+  * kmeans
+  * minibatch_kmeans
+  * breathing_kmeans
+  * threshold_tree
 * Anomaly Detection
   * isolation_tree
   * isolation_forest
 * Nearest Neighbours Search
   * kdtree
+  * balltree
+  * bruteforce
+  * lsh
  
 # ToDo
 * Matrix Factorization
@@ -163,12 +172,11 @@ http://odds.cs.stonybrook.edu/forestcovercovertype-dataset/
   * Non-Negative Matrix Factorization
 * Decision Tree
   * Axis-Parallel
-    * sliq
     * residual likelihood tree
+    * oblivious_tree
   * Oblique
     * simulated annealing decision tree
     * rotation tree
-    * random rotation tree
     * soft decision tree
     * CART-LC
     * OC1
