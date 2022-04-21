@@ -22,6 +22,7 @@ module mod_hyperparameter
         integer(kind=8) :: n_clusters = 5_8
         integer(kind=8) :: max_iter = 500_8
         real(kind=8)    :: tolerance=1d-6
+        integer(kind=8) :: max_samples = 256_8
     end type hparam_kmeans
 
     ! kmeans

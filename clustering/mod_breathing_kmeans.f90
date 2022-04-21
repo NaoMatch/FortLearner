@@ -1,4 +1,5 @@
 module mod_breathing_kmeans
+    use mod_base_kmeans
     use mod_kmeans
     use mod_hyperparameter
     use mod_sort
