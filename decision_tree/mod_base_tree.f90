@@ -593,6 +593,7 @@ contains
                         this%lr_layer, is_hist=is_hist_optional)
             case(2_8:5_8) ! others
                 do n=1, size(node_ptrs), 1
+                    ! print*, node_ptrs(n)%node_ptr%feature_id_
                     call adopting_twins_axis(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr, & 
                             is_classification, &
                             is_threshold_tree, this%lr_layer, is_hist=is_hist_optional)

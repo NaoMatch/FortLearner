@@ -60,6 +60,7 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_random_rotation_decision_tree.out \
 						./mod/mod_sadt.out \
 						./mod/mod_sliq.out \
+						./mod/mod_oblivious_tree.out \
 						\
 						./mod/mod_gradient_boosting_clouds.out \
 						./mod/mod_gradient_boosting_extra_tree.out \
@@ -101,22 +102,23 @@ build:
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../preprocessing/mod_discretizer.f90       -o ./mod/mod_discretizer.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../preprocessing/mod_scaler.f90                                                        -o ./mod/mod_scaler.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../data_holder/mod_data_holder.f90         -o ./mod/mod_data_holder.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_base_kmeans.f90                                                           -o ./mod/mod_base_kmeans.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_kmeans.f90                                                           -o ./mod/mod_kmeans.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_minibatch_kmeans.f90                                                           -o ./mod/mod_minibatch_kmeans.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_breathing_kmeans.f90                                                           -o ./mod/mod_breathing_kmeans.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_node.f90                -o ./mod/mod_node.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_splitter.f90            -o ./mod/mod_splitter.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_woodworking_tools.f90   -o ./mod/mod_woodworking_tools.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_base_tree.f90           -o ./mod/mod_base_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_decision_tree.f90       -o ./mod/mod_decision_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_extra_tree.f90          -o ./mod/mod_extra_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_clouds.f90          -o ./mod/mod_clouds.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_lawu.f90          -o ./mod/mod_lawu.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_sadt.f90          -o ./mod/mod_sadt.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_isolation_tree.f90          -o ./mod/mod_isolation_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_random_rotation_decision_tree.f90          -o ./mod/mod_random_rotation_decision_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_sliq.f90          -o ./mod/mod_sliq.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_base_kmeans.f90                                                           -o ./mod/mod_base_kmeans.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_kmeans.f90                                                           -o ./mod/mod_kmeans.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_minibatch_kmeans.f90                                                           -o ./mod/mod_minibatch_kmeans.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_breathing_kmeans.f90                                                           -o ./mod/mod_breathing_kmeans.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_node.f90                -o ./mod/mod_node.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_splitter.f90            -o ./mod/mod_splitter.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_woodworking_tools.f90   -o ./mod/mod_woodworking_tools.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_base_tree.f90           -o ./mod/mod_base_tree.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_decision_tree.f90       -o ./mod/mod_decision_tree.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_extra_tree.f90          -o ./mod/mod_extra_tree.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_clouds.f90          -o ./mod/mod_clouds.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_lawu.f90          -o ./mod/mod_lawu.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_sadt.f90          -o ./mod/mod_sadt.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_isolation_tree.f90          -o ./mod/mod_isolation_tree.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_random_rotation_decision_tree.f90          -o ./mod/mod_random_rotation_decision_tree.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_sliq.f90          -o ./mod/mod_sliq.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_oblivious_tree.f90          -o ./mod/mod_oblivious_tree.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_clouds.f90          -o ./mod/mod_gradient_boosting_clouds.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_extra_tree.f90          -o ./mod/mod_gradient_boosting_extra_tree.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_lawu.f90          -o ./mod/mod_gradient_boosting_lawu.out
@@ -151,7 +153,7 @@ test:
 	# make main_boosting_tree_gradient_boosting_tree_regressor
 	# make main_clustering_breathing_kmeans
 	# make main_clustering_kmeans
-	make main_clustering_minibatch_kmeans
+	# make main_clustering_minibatch_kmeans
 	# make main_decision_tree_clouds
 	# make main_decision_tree_decision_tree
 	# make main_decision_tree_extra_tree
@@ -160,6 +162,7 @@ test:
 	# make main_decision_tree_random_rotation_decision_tree
 	# make main_decision_tree_sadt
 	# make main_decision_tree_sliq
+	make main_decision_tree_oblivious_tree
 	# make main_forest_random_forest
 	# make main_forest_extra_trees
 	# make main_forest_isolation_forest
@@ -304,6 +307,14 @@ main_decision_tree_sliq:
 	main_decision_tree_sliq.f90 -o main_decision_tree_sliq.out \
 	$(option_blas)
 	./main_decision_tree_sliq.out
+
+main_decision_tree_oblivious_tree:
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main_decision_tree_oblivious_tree.f90 -o main_decision_tree_oblivious_tree.out \
+	$(option_blas)
+	./main_decision_tree_oblivious_tree.out
 
 main_forest_random_forest:
 	$(compiler_fortran) -w -unroll \
