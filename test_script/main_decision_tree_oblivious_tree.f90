@@ -42,7 +42,7 @@ program main_decision_tree_oblivious_tree
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, '*********************************************************************************************'
     print*, "Train, Test, Dump Trained Model"
-    obtree = oblivious_tree_regressor(max_depth=6_8, min_samples_leaf=10_8)
+    obtree = oblivious_tree_regressor(max_depth=8_8, min_samples_leaf=10_8)
     call date_and_time(values=date_value1)
     call obtree%fit(dholder_ptr)
     call date_and_time(values=date_value2)
@@ -54,7 +54,7 @@ program main_decision_tree_oblivious_tree
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, '*********************************************************************************************'
     print*, "Train, Test, Dump Trained Model"
-    dtreg = decision_tree_regressor(max_depth=6_8, min_samples_leaf=10_8)
+    dtreg = decision_tree_regressor(max_depth=8_8, min_samples_leaf=10_8)
     call date_and_time(values=date_value1)
     call dtreg%fit(dholder_ptr)
     call date_and_time(values=date_value2)
@@ -66,7 +66,7 @@ program main_decision_tree_oblivious_tree
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, '*********************************************************************************************'
     print*, "Train, Test, Dump Trained Model"
-    sliqreg = sliq_regressor(max_depth=6_8, min_samples_leaf=10_8)
+    sliqreg = sliq_regressor(max_depth=8_8, min_samples_leaf=10_8)
     call date_and_time(values=date_value1)
     call sliqreg%fit(dholder_ptr)
     call date_and_time(values=date_value2)
@@ -78,7 +78,7 @@ program main_decision_tree_oblivious_tree
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, '*********************************************************************************************'
     print*, "Train, Test, Dump Trained Model"
-    cloudsreg = clouds_regressor(max_depth=6_8, min_samples_leaf=10_8)
+    cloudsreg = clouds_regressor(max_depth=8_8, min_samples_leaf=10_8)
     call date_and_time(values=date_value1)
     call cloudsreg%fit(dholder_ptr)
     call date_and_time(values=date_value2)

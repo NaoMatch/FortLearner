@@ -116,6 +116,7 @@ contains
         integer(kind=8), save        :: time_preprocess=0
         integer(kind=8), save        :: time_get_data=0
         integer(kind=8), save        :: time_split_check=0
+        logical(kind=4) :: is_first
         n_nodes = size( node_ptrs )
         n_samples = data_holder_ptr%n_samples
         n_outputs = data_holder_ptr%n_outputs
@@ -144,8 +145,6 @@ contains
         call date_and_time(values=date_value2)
         time_preprocess = time_preprocess + time_diff(date_value1, date_value2)
 
-        print*, "n_tot, n_samples: ", n_tot, n_samples
-    
         allocate(node_labels_counter_diff(n_nodes))
         allocate(node_labels_counter_l(n_nodes))
         allocate(node_labels_counter_r(n_nodes))
@@ -201,6 +200,7 @@ contains
   
             call date_and_time(values=date_value1)
             node_labels_counter_diff(:) = 0_8
+            is_first = t_
             do i=i_start+1, i_stop, 1
                 sample_idx = data_holder_ptr%works(fid)%i_i8(i)
                 node_label  = node_labels(sample_idx)
@@ -216,10 +216,10 @@ contains
 
                     gain = 0d0
                     do n=1, n_nodes, 1
-                        ! if (node_labels_counter_diff(n) >= 1_8) then
+                        if (node_labels_counter_diff(n) >= 1_8 .or. is_first) then
                             avg_l(n,:) = tot_l(n,:) / dble(node_labels_counter_l(n))
                             avg_r(n,:) = tot_r(n,:) / dble(node_labels_counter_r(n))
-                        ! end if
+                        end if
 
                         do o=1, n_outputs, 1
                             gain = gain + tot_p_sq(n,o) &
@@ -227,7 +227,7 @@ contains
                                 - node_labels_counter_r(n) * avg_r(n,o)**2d0
                         end do
                     end do
-                    gain = gain / dble(n_samples)
+                    gain = gain / dble(n_tot)
 
                     if (gain_best > gain) then
                         gain_best = gain
@@ -244,6 +244,7 @@ contains
                     node_labels_counter_diff(:) = 0_8
                 end if
 
+                is_first = f_
             end do
             call date_and_time(values=date_value2)
             time_split_check = time_split_check + time_diff(date_value1, date_value2)
@@ -286,7 +287,7 @@ contains
             node_ptrs(n)%node_ptr%response_r = res_r(n,:)
             call node_ptrs(n)%node_ptr%hparam_check(hparam_ptr)    
 
-            call node_ptrs(n)%node_ptr%print_node_info_axis()
+            ! call node_ptrs(n)%node_ptr%print_node_info_axis()
         end do
 
         ! stop "強制終了"

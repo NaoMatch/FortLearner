@@ -88,12 +88,12 @@ contains
         call date_and_time(values=date_value1)
         call data_holder_ptr % preprocess_presort()
         call date_and_time(values=date_value2)
-        print*, "Presort: ", time_diff(date_value1, date_value2)
+        ! print*, "Presort: ", time_diff(date_value1, date_value2)
         
         call date_and_time(values=date_value1)
         call data_holder_ptr % preprocess_y_sq()
         call date_and_time(values=date_value2)
-        print*, "SQSUM:  ", time_diff(date_value1, date_value2)
+        ! print*, "SQSUM:  ", time_diff(date_value1, date_value2)
         
         call this%init(data_holder_ptr)
 
