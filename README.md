@@ -6,7 +6,7 @@ cd test_script
 make test  
 
 # WIP:
-oblivious tree  
+dbscan  
 ~multi layer perceptron, product quantization~
 
 
@@ -142,6 +142,7 @@ http://odds.cs.stonybrook.edu/forestcovercovertype-dataset/
   * clouds_regressor
   * lawu_regressor
   * sliq_regressor
+  * oblivious_tree_regressor  
 * Ensemble Trees:
   * random_forest_regressor
   * extra_trees_regressor
