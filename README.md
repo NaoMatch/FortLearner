@@ -11,6 +11,7 @@ oblivious tree
 
 
 # Update
+2022/04/27: oblivious_tree (not so optimized)  
 2022/04/22: minibatch_kmeans  
 2022/04/19: sliq (base estimator of xgboost, w/o openmp)  
 2022/02/15: threshold_tree  
