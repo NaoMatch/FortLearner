@@ -59,11 +59,13 @@ module mod_data_holder
         ! 
         type(work_space), allocatable :: x_hist_row(:) !< to be stored binned array of input explanatory variables by row to speed up by memory sequential access. @todo It could be achieved by storing the transposed and binned array in 'x_hist'. 
         ! real(kind=8), pointer :: x_t_ptr
+        real(kind=8), allocatable :: y_sq(:,:)
     contains
         procedure :: preprocess_store_colwise
         procedure :: preprocess_random_rotate
         procedure :: preprocess_hist
         procedure :: preprocess_presort
+        procedure :: preprocess_y_sq
     end type data_holder
 
     !> An interface to create new 'data_holder'.
@@ -146,6 +148,25 @@ contains
         ! print*, "finish"
         this%is_hist = t_
     end subroutine preprocess_hist
+
+    subroutine preprocess_y_sq(this)
+        implicit none
+        class(data_holder)           :: this
+        integer(kind=8) :: c, i, j
+        integer(kind=8) :: n_samples, n_outputs
+
+        if (allocated(this%y_sq)) deallocate(this%y_sq)
+
+        n_samples = this % n_samples
+        n_outputs = this % n_outputs
+        allocate(this%y_sq(n_samples, n_outputs))
+
+        do j=1, n_outputs, 1
+            do i=1, n_samples, 1
+                this%y_sq(i,j) = this%y_ptr%y_r8_ptr(i,j)**2d0
+            end do
+        end do
+    end subroutine preprocess_y_sq
 
 
     !> A subroutine to store input explanatory array with column wise

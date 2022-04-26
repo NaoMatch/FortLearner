@@ -46,14 +46,17 @@ module mod_splitter
         procedure :: split_sliq_regressor_indivisuals
         procedure :: split_sliq_regressor_all
 
+        procedure :: split_oblivious_tree_regressor
+        procedure :: split_oblivious_tree_regressor_all_nodes
+
         ! procedure :: split_random_rotation_extra_tree_regressor
         ! procedure :: split_random_rotation_extra_tree_regressor_indivisuals
         
         ! procedure :: split_oblivious_extra_tree_regressor
         ! procedure :: split_oblivious_extra_tree_regressor_all
 
-        procedure :: split_weighted_oblique_decision_tree_classifier
-        procedure :: split_weighted_oblique_decision_tree_classifier_indivisuals
+        ! procedure :: split_weighted_oblique_decision_tree_classifier
+        ! procedure :: split_weighted_oblique_decision_tree_classifier_indivisuals
     end type node_splitter
 
 
@@ -66,6 +69,237 @@ module mod_splitter
     type(node_oblq)  :: node_temp
 
 contains
+
+    !> A subroutine to split node by 'Random Rotation Ensembles'.
+    !> https://jmlr.org/papers/volume17/blaser16a/blaser16a.pdf
+    subroutine split_oblivious_tree_regressor(this, node_ptrs, &
+        data_holder_ptr, hparam_ptr)
+        implicit none
+        class(node_splitter)               :: this
+        type(node_axis_ptr), intent(inout) :: node_ptrs(:)
+        type(data_holder), pointer         :: data_holder_ptr
+        type(hparam_decisiontree), pointer :: hparam_ptr
+        call this%split_oblivious_tree_regressor_all_nodes(node_ptrs, data_holder_ptr, hparam_ptr)
+    end subroutine split_oblivious_tree_regressor
+
+
+    subroutine split_oblivious_tree_regressor_all_nodes(this, node_ptrs, data_holder_ptr, hparam_ptr)
+        implicit none
+        class(node_splitter) :: this
+        type(node_axis_ptr), intent(inout) :: node_ptrs(:)
+        type(data_holder), pointer         :: data_holder_ptr
+        type(hparam_decisiontree), pointer :: hparam_ptr
+
+        integer(kind=8) :: o, m, n, n_nodes, n_samples, n_samples_in_node, node_idx, idx, n_unique, n_tot
+        integer(kind=8) :: fid, sample_idx, position, n_outputs, i, node_label, f, n_columns
+        real(kind=8)    :: val_f
+        integer(kind=8), allocatable :: node_labels(:), uniq_vals(:)
+        integer(kind=8), allocatable :: node_labels_counter_l(:), node_labels_counter_r(:), node_labels_counter_p(:)
+        integer(kind=8), allocatable :: node_labels_counter_diff(:)
+        integer(kind=8), allocatable :: ini_position(:), fin_position(:)
+        
+        real(kind=8), allocatable :: tmp_f(:)
+        real(kind=8), allocatable :: tmp_y(:,:), val_y(:), tmp_y_sq(:,:)
+        integer(kind=8) :: i_start, i_stop, ini, fin
+        integer(kind=8) :: count_l, count_r
+        integer(kind=8), allocatable :: n_samples_l(:), n_samples_r(:)
+        real(kind=8) :: gain, gain_best
+        real(kind=8) :: n_outs_inv, n_rows_inv
+        real(kind=8), allocatable :: tot_p_sq(:,:), tot_p(:,:), tot_l(:,:), tot_r(:,:)
+        real(kind=8), allocatable :: avg_l(:,:), avg_r(:,:)
+        real(kind=8), allocatable :: res_l(:,:), res_r(:,:)
+        real(kind=8), allocatable :: sum_l(:,:), sum_r(:,:)
+        real(kind=8) :: best_threshold
+        integer(kind=8), allocatable :: feature_ids(:)
+        integer(kind=8) :: best_fid, count_eval
+        integer(kind=8)        :: date_value1(8), date_value2(8)
+        integer(kind=8), save        :: time_preprocess=0
+        integer(kind=8), save        :: time_get_data=0
+        integer(kind=8), save        :: time_split_check=0
+        logical(kind=4) :: is_first
+        n_nodes = size( node_ptrs )
+        n_samples = data_holder_ptr%n_samples
+        n_outputs = data_holder_ptr%n_outputs
+        n_columns = data_holder_ptr%n_columns
+
+        ! Number of Samples
+        allocate(node_labels_counter_p(n_nodes))
+        allocate(node_labels(n_samples))
+        allocate(tot_p_sq(n_nodes, n_outputs))
+        allocate(tot_p(n_nodes, n_outputs))
+        n_tot = 0
+        node_labels(:) = -1_8
+        node_labels_counter_p(:) = 0_8
+        tot_p_sq(:,:) = 0d0
+        call date_and_time(values=date_value1)
+        do n=1, n_nodes, 1
+            do m=1, node_ptrs(n)%node_ptr%n_samples, 1
+                idx = node_ptrs(n)%node_ptr%indices(m)
+                node_labels(idx) = n
+                tot_p_sq(n,:) = tot_p_sq(n,:) + data_holder_ptr%y_sq(idx,:)
+            end do
+            node_labels_counter_p(n) = node_ptrs(n)%node_ptr%n_samples
+            tot_p(n,:) = node_ptrs(n)%node_ptr%sum_p(:)
+            n_tot = n_tot + node_ptrs(n)%node_ptr%n_samples
+        end do
+        call date_and_time(values=date_value2)
+        time_preprocess = time_preprocess + time_diff(date_value1, date_value2)
+
+        allocate(node_labels_counter_diff(n_nodes))
+        allocate(node_labels_counter_l(n_nodes))
+        allocate(node_labels_counter_r(n_nodes))
+        allocate(tot_l(n_nodes, n_outputs))
+        allocate(tot_r(n_nodes, n_outputs))
+        allocate(feature_ids(n_columns))
+        allocate(tmp_f(n_tot))
+        allocate(tmp_y(n_tot, n_outputs))
+        allocate(tmp_y_sq(n_tot, n_outputs))
+        allocate(avg_l(n_nodes, n_outputs))
+        allocate(avg_r(n_nodes, n_outputs))
+        allocate(res_l(n_nodes, n_outputs), res_r(n_nodes, n_outputs))
+        allocate(n_samples_l(n_nodes), n_samples_r(n_nodes))
+        allocate(sum_l(n_nodes, n_outputs), sum_r(n_nodes, n_outputs))
+        do i=1, n_columns, 1
+            feature_ids(i) = i
+        end do
+        call permutation(feature_ids, n_columns)
+
+        gain_best = huge(0d0)
+        count_eval = 0
+        do f=1, n_columns, 1
+            node_labels_counter_l(:) = 0_8
+            tot_l(:,:) = 0d0
+            fid = feature_ids(f)
+
+            ! Useless Feature Skip
+            if ( node_ptrs(1)%node_ptr%is_useless(fid) ) cycle
+
+            do i=1, n_samples, 1
+                sample_idx = data_holder_ptr%works(fid)%i_i8(i)
+                node_label = node_labels(sample_idx)
+                if (node_label .eq. -1_8) cycle
+
+                node_labels_counter_l(node_label) = node_labels_counter_l(node_label) + 1
+                tot_l(node_label,:) = tot_l(node_label,:) + data_holder_ptr%y_ptr%y_r8_ptr(sample_idx,:)
+
+                if ( minval(node_labels_counter_l, dim=1) >= hparam_ptr%min_samples_leaf ) exit
+            end do
+
+            i_start = i
+            i_stop  = n_tot - hparam_ptr%min_samples_leaf
+
+            call date_and_time(values=date_value1)
+            if (n_samples .eq. n_tot) then
+                tmp_f(:) = data_holder_ptr%works(fid)%x_r8(:)
+                tmp_y(:,:) = data_holder_ptr%y_ptr%y_r8_ptr(data_holder_ptr%works(fid)%i_i8(:), :)
+                tmp_y_sq(:,:) = data_holder_ptr%y_sq(data_holder_ptr%works(fid)%i_i8(:), :)
+            end if
+            call date_and_time(values=date_value2)
+            time_get_data = time_get_data + time_diff(date_value1, date_value2)
+    
+  
+            call date_and_time(values=date_value1)
+            node_labels_counter_diff(:) = 0_8
+            is_first = t_
+            do i=i_start+1, i_stop, 1
+                sample_idx = data_holder_ptr%works(fid)%i_i8(i)
+                node_label  = node_labels(sample_idx)
+                if (node_label .eq. -1_8) cycle
+    
+                node_labels_counter_diff(node_label) = node_labels_counter_diff(node_label) + 1
+                tot_l(node_label,:) = tot_l(node_label,:) + data_holder_ptr%y_ptr%y_r8_ptr(sample_idx,:)
+    
+                if (tmp_f(i) .ne. tmp_f(i+1)) then
+                    tot_r(:,:) = tot_p(:,:) - tot_l(:,:)
+                    node_labels_counter_l(:) = node_labels_counter_l(:) + node_labels_counter_diff(:)
+                    node_labels_counter_r(:) = node_labels_counter_p(:) - node_labels_counter_l(:)
+
+                    gain = 0d0
+                    do n=1, n_nodes, 1
+                        if (node_labels_counter_diff(n) >= 1_8 .or. is_first) then
+                            avg_l(n,:) = tot_l(n,:) / dble(node_labels_counter_l(n))
+                            avg_r(n,:) = tot_r(n,:) / dble(node_labels_counter_r(n))
+                        end if
+
+                        do o=1, n_outputs, 1
+                            gain = gain + tot_p_sq(n,o) &
+                                - node_labels_counter_l(n) * avg_l(n,o)**2d0 &
+                                - node_labels_counter_r(n) * avg_r(n,o)**2d0
+                        end do
+                    end do
+                    gain = gain / dble(n_tot)
+
+                    if (gain_best > gain) then
+                        gain_best = gain
+                        best_fid = fid
+                        best_threshold = (tmp_f(i) + tmp_f(i+1)) * .5d0
+                        res_l(:,:) = avg_l(:,:)
+                        res_r(:,:) = avg_r(:,:)
+                        n_samples_l(:) = node_labels_counter_l(:)
+                        n_samples_r(:) = node_labels_counter_r(:)
+                        sum_l(:,:) = tot_l(:,:)
+                        sum_r(:,:) = tot_r(:,:)
+                        count_eval = count_eval + 1
+                    end if
+                    node_labels_counter_diff(:) = 0_8
+                end if
+
+                is_first = f_
+            end do
+            call date_and_time(values=date_value2)
+            time_split_check = time_split_check + time_diff(date_value1, date_value2)
+    
+        end do
+
+        ! print*, node_ptrs(1)%node_ptr%depth, best_fid, best_threshold, n_nodes
+
+        do n=1, n_nodes, 1
+            node_ptrs(n)%node_ptr%is_trained = t_
+            node_ptrs(n)%node_ptr%eval_counter = count_eval
+            node_ptrs(n)%node_ptr%gain_best   = gain_best
+            node_ptrs(n)%node_ptr%gain_best_w = gain_best * &
+                dble(node_ptrs(n)%node_ptr%n_samples) / dble(data_holder_ptr%n_samples)
+    
+            if ( count_eval .eq. 0 ) then
+                node_ptrs(n)%node_ptr%is_terminal = t_
+                call node_ptrs(n)%node_ptr%hparam_check(hparam_ptr)
+                return
+            end if
+    
+            node_ptrs(n)%node_ptr%feature_id_ = best_fid
+            node_ptrs(n)%node_ptr%threshold_ = best_threshold
+    
+            if (allocated(node_ptrs(n)%node_ptr%sum_l))      deallocate(node_ptrs(n)%node_ptr%sum_l)
+            if (allocated(node_ptrs(n)%node_ptr%sum_r))      deallocate(node_ptrs(n)%node_ptr%sum_r)
+            if (allocated(node_ptrs(n)%node_ptr%response_l)) deallocate(node_ptrs(n)%node_ptr%response_l)
+            if (allocated(node_ptrs(n)%node_ptr%response_r)) deallocate(node_ptrs(n)%node_ptr%response_r)
+    
+            allocate(node_ptrs(n)%node_ptr%sum_l(data_holder_ptr%n_outputs))
+            allocate(node_ptrs(n)%node_ptr%sum_r(data_holder_ptr%n_outputs))
+            allocate(node_ptrs(n)%node_ptr%response_l(data_holder_ptr%n_outputs))
+            allocate(node_ptrs(n)%node_ptr%response_r(data_holder_ptr%n_outputs))
+    
+            node_ptrs(n)%node_ptr%sum_l = sum_l(n,:)
+            node_ptrs(n)%node_ptr%sum_r = sum_r(n,:)
+            node_ptrs(n)%node_ptr%n_samples_l = n_samples_l(n)
+            node_ptrs(n)%node_ptr%n_samples_r = n_samples_r(n)
+            node_ptrs(n)%node_ptr%response_l = res_l(n,:)
+            node_ptrs(n)%node_ptr%response_r = res_r(n,:)
+            call node_ptrs(n)%node_ptr%hparam_check(hparam_ptr)    
+
+            ! call node_ptrs(n)%node_ptr%print_node_info_axis()
+        end do
+
+        ! stop "強制終了"
+        ! print*, '*********************************************************************************************'
+        ! print*, '*********************************************************************************************'
+        ! print*, "time_preprocess: ", time_preprocess
+        ! print*, "time_get_data: ", time_get_data
+        ! print*, "time_split_check: ", time_split_check
+    end subroutine split_oblivious_tree_regressor_all_nodes
+
+
+
 
     !> A subroutine to split node by 'Random Rotation Ensembles'.
     !> https://jmlr.org/papers/volume17/blaser16a/blaser16a.pdf
@@ -2081,244 +2315,244 @@ contains
     end subroutine split_clouds_regressor_indivisuals
 
 
-    !------------------------------------------------------------------------------------------------------------------------------------------ 
-    !------------------------------------------------------------------------------------------------------------------------------------------ 
-    !> A subroutine to split node by 'clouds'.
-    subroutine split_weighted_oblique_decision_tree_classifier(this, node_ptrs, data_holder_ptr, hparam_ptr, &
-        n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
-        implicit none
-        class(node_splitter)               :: this
-        type(node_axis_ptr), intent(inout) :: node_ptrs(:)
-        type(data_holder), pointer         :: data_holder_ptr
-        type(hparam_decisiontree), pointer :: hparam_ptr
-        integer(kind=8), intent(in)        :: n_columns
-        integer(kind=8), intent(inout)     :: feature_indices(n_columns)
-        integer(kind=8), intent(in)        :: feature_indices_scanning_range(2)
-        logical(kind=4), intent(in)        :: is_permute_per_node
-        integer(kind=8) :: n
+    ! !------------------------------------------------------------------------------------------------------------------------------------------ 
+    ! !------------------------------------------------------------------------------------------------------------------------------------------ 
+    ! !> A subroutine to split node by 'clouds'.
+    ! subroutine split_weighted_oblique_decision_tree_classifier(this, node_ptrs, data_holder_ptr, hparam_ptr, &
+    !     n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
+    !     implicit none
+    !     class(node_splitter)               :: this
+    !     type(node_axis_ptr), intent(inout) :: node_ptrs(:)
+    !     type(data_holder), pointer         :: data_holder_ptr
+    !     type(hparam_decisiontree), pointer :: hparam_ptr
+    !     integer(kind=8), intent(in)        :: n_columns
+    !     integer(kind=8), intent(inout)     :: feature_indices(n_columns)
+    !     integer(kind=8), intent(in)        :: feature_indices_scanning_range(2)
+    !     logical(kind=4), intent(in)        :: is_permute_per_node
+    !     integer(kind=8) :: n
 
-        if ( size(node_ptrs) .eq. 1 ) then
-            call this%split_weighted_oblique_decision_tree_classifier_indivisuals(node_ptrs(1)%node_ptr, data_holder_ptr, & 
-                hparam_ptr, n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
-        else
-            do n=1, size(node_ptrs), 1
-                call this%split_weighted_oblique_decision_tree_classifier_indivisuals(node_ptrs(n)%node_ptr, & 
-                data_holder_ptr, hparam_ptr, n_columns, feature_indices, &
-                feature_indices_scanning_range, is_permute_per_node)
-            end do
-        end if
-    end subroutine split_weighted_oblique_decision_tree_classifier
+    !     if ( size(node_ptrs) .eq. 1 ) then
+    !         call this%split_weighted_oblique_decision_tree_classifier_indivisuals(node_ptrs(1)%node_ptr, data_holder_ptr, & 
+    !             hparam_ptr, n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
+    !     else
+    !         do n=1, size(node_ptrs), 1
+    !             call this%split_weighted_oblique_decision_tree_classifier_indivisuals(node_ptrs(n)%node_ptr, & 
+    !             data_holder_ptr, hparam_ptr, n_columns, feature_indices, &
+    !             feature_indices_scanning_range, is_permute_per_node)
+    !         end do
+    !     end if
+    ! end subroutine split_weighted_oblique_decision_tree_classifier
 
-    !> A subroutine to split node by 'clouds_regressor'.
-    subroutine split_weighted_oblique_decision_tree_classifier_indivisuals(this, node_ptr, data_holder_ptr, hparam_ptr, &
-        n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
-        implicit none
-        class(node_splitter)               :: this
-        type(node_axis), pointer           :: node_ptr
-        type(data_holder), pointer         :: data_holder_ptr
-        type(hparam_decisiontree), pointer :: hparam_ptr
-        integer(kind=8), intent(in)        :: n_columns
-        integer(kind=8), intent(inout)     :: feature_indices(n_columns)
-        integer(kind=8), intent(in)        :: feature_indices_scanning_range(2)
-        logical(kind=4), intent(in)        :: is_permute_per_node
+    ! !> A subroutine to split node by 'clouds_regressor'.
+    ! subroutine split_weighted_oblique_decision_tree_classifier_indivisuals(this, node_ptr, data_holder_ptr, hparam_ptr, &
+    !     n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
+    !     implicit none
+    !     class(node_splitter)               :: this
+    !     type(node_axis), pointer           :: node_ptr
+    !     type(data_holder), pointer         :: data_holder_ptr
+    !     type(hparam_decisiontree), pointer :: hparam_ptr
+    !     integer(kind=8), intent(in)        :: n_columns
+    !     integer(kind=8), intent(inout)     :: feature_indices(n_columns)
+    !     integer(kind=8), intent(in)        :: feature_indices_scanning_range(2)
+    !     logical(kind=4), intent(in)        :: is_permute_per_node
 
-        integer(kind=8) :: date_value1(8), date_value2(8), time1, time2, time3
+    !     integer(kind=8) :: date_value1(8), date_value2(8), time1, time2, time3
 
-        real(kind=8) :: n_rows_inv, n_outs_inv
-        real(kind=8), allocatable :: res_l(:), res_r(:), sum_l(:), sum_r(:), avg_l(:), avg_r(:)
-        real(kind=8), allocatable :: tot_p(:), tot_l(:), tot_r(:)
-        real(kind=8) :: gain, gain_best, best_threshold
-        integer(kind=8) :: i_start, i_stop, fid, f, i, j, k, best_fid, r
-        integer(kind=8) :: count_l, count_r, idx, count_eval
-        integer(kind=8) :: num_l, num_r
-        integer(kind=8) :: ini_f_idx, fin_f_idx
-        real(kind=8), allocatable :: tmp_y(:,:), tmp_y_idx(:), tmp_f_copy(:)
-        integer(kind=8), allocatable :: feature_ids(:), indices(:)
-        integer(kind=8) :: factor, b
-        real(kind=8) :: min_val, max_val, rand_val
+    !     real(kind=8) :: n_rows_inv, n_outs_inv
+    !     real(kind=8), allocatable :: res_l(:), res_r(:), sum_l(:), sum_r(:), avg_l(:), avg_r(:)
+    !     real(kind=8), allocatable :: tot_p(:), tot_l(:), tot_r(:)
+    !     real(kind=8) :: gain, gain_best, best_threshold
+    !     integer(kind=8) :: i_start, i_stop, fid, f, i, j, k, best_fid, r
+    !     integer(kind=8) :: count_l, count_r, idx, count_eval
+    !     integer(kind=8) :: num_l, num_r
+    !     integer(kind=8) :: ini_f_idx, fin_f_idx
+    !     real(kind=8), allocatable :: tmp_y(:,:), tmp_y_idx(:), tmp_f_copy(:)
+    !     integer(kind=8), allocatable :: feature_ids(:), indices(:)
+    !     integer(kind=8) :: factor, b
+    !     real(kind=8) :: min_val, max_val, rand_val
         
-        real(kind=8), allocatable    :: sum_hist_y(:,:), tmp_r(:)
-        integer(kind=8), allocatable :: tmp_f(:), count_hist(:), bin_indices(:)
+    !     real(kind=8), allocatable    :: sum_hist_y(:,:), tmp_r(:)
+    !     integer(kind=8), allocatable :: tmp_f(:), count_hist(:), bin_indices(:)
 
-        integer(kind=8) :: buffer_idx(15), buffer_len=15, n_samples_unroll
-        integer(kind=8) :: row_idx, bin_idx
-        integer(kind=8), save :: tot_time=0, tot_time2=0
-        if (node_ptr%depth .eq. 0_8) tot_time=0
-        if (node_ptr%depth .eq. 0_8) tot_time2=0
+    !     integer(kind=8) :: buffer_idx(15), buffer_len=15, n_samples_unroll
+    !     integer(kind=8) :: row_idx, bin_idx
+    !     integer(kind=8), save :: tot_time=0, tot_time2=0
+    !     if (node_ptr%depth .eq. 0_8) tot_time=0
+    !     if (node_ptr%depth .eq. 0_8) tot_time2=0
 
-        time1 = 0
-        time2 = 0
-        time3 = 0
-        allocate(tot_p(data_holder_ptr%n_outputs))
-        allocate(tot_l(data_holder_ptr%n_outputs))
-        allocate(tot_r(data_holder_ptr%n_outputs))
-        allocate(res_l(data_holder_ptr%n_outputs))
-        allocate(res_r(data_holder_ptr%n_outputs))
-        allocate(sum_l(data_holder_ptr%n_outputs))
-        allocate(sum_r(data_holder_ptr%n_outputs))
-        allocate(avg_l(data_holder_ptr%n_outputs))
-        allocate(avg_r(data_holder_ptr%n_outputs))
-        node_ptr%n_outputs = data_holder_ptr%n_outputs
+    !     time1 = 0
+    !     time2 = 0
+    !     time3 = 0
+    !     allocate(tot_p(data_holder_ptr%n_outputs))
+    !     allocate(tot_l(data_holder_ptr%n_outputs))
+    !     allocate(tot_r(data_holder_ptr%n_outputs))
+    !     allocate(res_l(data_holder_ptr%n_outputs))
+    !     allocate(res_r(data_holder_ptr%n_outputs))
+    !     allocate(sum_l(data_holder_ptr%n_outputs))
+    !     allocate(sum_r(data_holder_ptr%n_outputs))
+    !     allocate(avg_l(data_holder_ptr%n_outputs))
+    !     allocate(avg_r(data_holder_ptr%n_outputs))
+    !     node_ptr%n_outputs = data_holder_ptr%n_outputs
 
-        gain_best = - huge(0d0)
-        n_rows_inv = 1d0 / dble(node_ptr%n_samples)
-        n_outs_inv = 1d0 / dble(node_ptr%n_outputs)
-        ! tot_p = node_ptr%sum_p
-        ! tot_p = sum(data_holder_ptr%y_ptr%y_r8_ptr(node_ptr%indices,:), dim=1)
-        count_eval = 0_8
+    !     gain_best = - huge(0d0)
+    !     n_rows_inv = 1d0 / dble(node_ptr%n_samples)
+    !     n_outs_inv = 1d0 / dble(node_ptr%n_outputs)
+    !     ! tot_p = node_ptr%sum_p
+    !     ! tot_p = sum(data_holder_ptr%y_ptr%y_r8_ptr(node_ptr%indices,:), dim=1)
+    !     count_eval = 0_8
 
-        i_start = hparam_ptr%min_samples_leaf
-        i_stop = node_ptr%n_samples-i_start
+    !     i_start = hparam_ptr%min_samples_leaf
+    !     i_stop = node_ptr%n_samples-i_start
 
-        allocate(tmp_y(node_ptr%n_samples, node_ptr%n_outputs))
-        allocate(tmp_f(node_ptr%n_samples))
-        allocate(tmp_f_copy(node_ptr%n_samples))
-        allocate(indices(node_ptr%n_samples))
-        allocate(feature_ids(node_ptr%n_columns))
-        allocate(sum_hist_y(hparam_ptr%max_bins, data_holder_ptr%n_outputs))
-        allocate(count_hist(hparam_ptr%max_bins))
-        if (is_permute_per_node) call permutation(feature_indices, n_columns)
+    !     allocate(tmp_y(node_ptr%n_samples, node_ptr%n_outputs))
+    !     allocate(tmp_f(node_ptr%n_samples))
+    !     allocate(tmp_f_copy(node_ptr%n_samples))
+    !     allocate(indices(node_ptr%n_samples))
+    !     allocate(feature_ids(node_ptr%n_columns))
+    !     allocate(sum_hist_y(hparam_ptr%max_bins, data_holder_ptr%n_outputs))
+    !     allocate(count_hist(hparam_ptr%max_bins))
+    !     if (is_permute_per_node) call permutation(feature_indices, n_columns)
 
-        do i=1, node_ptr%n_samples, 1
-            idx = node_ptr%indices(i)
-            tmp_y(i,:) = data_holder_ptr%y_ptr%y_r8_ptr(idx,:)
-        end do
-        tot_p(:) = sum(tmp_y, dim=1)
+    !     do i=1, node_ptr%n_samples, 1
+    !         idx = node_ptr%indices(i)
+    !         tmp_y(i,:) = data_holder_ptr%y_ptr%y_r8_ptr(idx,:)
+    !     end do
+    !     tot_p(:) = sum(tmp_y, dim=1)
 
-        if ( .not. allocated(node_ptr%hist_self_sum_y) ) then
-            ! ---------------------------------------------------------------------------------------------
-            ! ---------------------------------------------------------------------------------------------
-            ! Transposed
-            allocate(node_ptr%hist_self_sum_y(node_ptr%n_columns, hparam_ptr%max_bins, node_ptr%n_outputs))
-            allocate(node_ptr%hist_self_count(node_ptr%n_columns, hparam_ptr%max_bins))
-            allocate(tmp_r(node_ptr%n_outputs))
-            allocate(bin_indices(node_ptr%n_columns))
-            node_ptr%hist_self_sum_y(:,:,:) = 0d0
-            node_ptr%hist_self_count(:,:)   = 0_4
-            n_samples_unroll = node_ptr%n_samples - mod(node_ptr%n_samples, 7)
-            call date_and_time(values=date_value1)
-            do i=1, node_ptr%n_samples, 1
-                row_idx = node_ptr%indices(i)
-                tmp_r = data_holder_ptr%y_ptr%y_r8_ptr(row_idx,:)
-                bin_indices = data_holder_ptr % x_hist_row(row_idx) % i_i4
-                do j=1, node_ptr%n_columns, 1
-                    bin_idx = bin_indices(j)
-                    node_ptr%hist_self_sum_y(j,bin_idx,:) = node_ptr%hist_self_sum_y(j,bin_idx,:) + tmp_r
-                    node_ptr%hist_self_count(j,bin_idx)   = node_ptr%hist_self_count(j,bin_idx) + 1_4
-                end do
-            end do
-            call date_and_time(values=date_value2)
+    !     if ( .not. allocated(node_ptr%hist_self_sum_y) ) then
+    !         ! ---------------------------------------------------------------------------------------------
+    !         ! ---------------------------------------------------------------------------------------------
+    !         ! Transposed
+    !         allocate(node_ptr%hist_self_sum_y(node_ptr%n_columns, hparam_ptr%max_bins, node_ptr%n_outputs))
+    !         allocate(node_ptr%hist_self_count(node_ptr%n_columns, hparam_ptr%max_bins))
+    !         allocate(tmp_r(node_ptr%n_outputs))
+    !         allocate(bin_indices(node_ptr%n_columns))
+    !         node_ptr%hist_self_sum_y(:,:,:) = 0d0
+    !         node_ptr%hist_self_count(:,:)   = 0_4
+    !         n_samples_unroll = node_ptr%n_samples - mod(node_ptr%n_samples, 7)
+    !         call date_and_time(values=date_value1)
+    !         do i=1, node_ptr%n_samples, 1
+    !             row_idx = node_ptr%indices(i)
+    !             tmp_r = data_holder_ptr%y_ptr%y_r8_ptr(row_idx,:)
+    !             bin_indices = data_holder_ptr % x_hist_row(row_idx) % i_i4
+    !             do j=1, node_ptr%n_columns, 1
+    !                 bin_idx = bin_indices(j)
+    !                 node_ptr%hist_self_sum_y(j,bin_idx,:) = node_ptr%hist_self_sum_y(j,bin_idx,:) + tmp_r
+    !                 node_ptr%hist_self_count(j,bin_idx)   = node_ptr%hist_self_count(j,bin_idx) + 1_4
+    !             end do
+    !         end do
+    !         call date_and_time(values=date_value2)
 
-            ! ---------------------------------------------------------------------------------------------
-            ! ---------------------------------------------------------------------------------------------
-            ! Normal
-            ! allocate(node_ptr%hist_self_sum_y(hparam_ptr%max_bins, node_ptr%n_columns, node_ptr%n_outputs))
-            ! allocate(node_ptr%hist_self_count(hparam_ptr%max_bins, node_ptr%n_columns))
-            ! allocate(tmp_r(node_ptr%n_outputs))
-            ! allocate(bin_indices(node_ptr%n_columns))
-            ! node_ptr%hist_self_sum_y(:,:,:) = 0d0
-            ! node_ptr%hist_self_count(:,:)   = 0_4
-            ! n_samples_unroll = node_ptr%n_samples - mod(node_ptr%n_samples, 7)
-            ! call date_and_time(values=date_value1)
-            ! do i=1, node_ptr%n_samples, 1
-            !     row_idx = node_ptr%indices(i)
-            !     tmp_r = data_holder_ptr%y_ptr%y_r8_ptr(row_idx,:)
-            !     bin_indices = data_holder_ptr % x_hist_row(row_idx) % i_i4
-            !     do j=1, node_ptr%n_columns, 1
-            !         bin_idx = bin_indices(j)
-            !         node_ptr%hist_self_sum_y(bin_idx,j,:) = node_ptr%hist_self_sum_y(bin_idx,j,:) + tmp_r
-            !         node_ptr%hist_self_count(bin_idx,j)   = node_ptr%hist_self_count(bin_idx,j) + 1_4
-            !     end do
-            ! end do
-            ! call date_and_time(values=date_value2)
+    !         ! ---------------------------------------------------------------------------------------------
+    !         ! ---------------------------------------------------------------------------------------------
+    !         ! Normal
+    !         ! allocate(node_ptr%hist_self_sum_y(hparam_ptr%max_bins, node_ptr%n_columns, node_ptr%n_outputs))
+    !         ! allocate(node_ptr%hist_self_count(hparam_ptr%max_bins, node_ptr%n_columns))
+    !         ! allocate(tmp_r(node_ptr%n_outputs))
+    !         ! allocate(bin_indices(node_ptr%n_columns))
+    !         ! node_ptr%hist_self_sum_y(:,:,:) = 0d0
+    !         ! node_ptr%hist_self_count(:,:)   = 0_4
+    !         ! n_samples_unroll = node_ptr%n_samples - mod(node_ptr%n_samples, 7)
+    !         ! call date_and_time(values=date_value1)
+    !         ! do i=1, node_ptr%n_samples, 1
+    !         !     row_idx = node_ptr%indices(i)
+    !         !     tmp_r = data_holder_ptr%y_ptr%y_r8_ptr(row_idx,:)
+    !         !     bin_indices = data_holder_ptr % x_hist_row(row_idx) % i_i4
+    !         !     do j=1, node_ptr%n_columns, 1
+    !         !         bin_idx = bin_indices(j)
+    !         !         node_ptr%hist_self_sum_y(bin_idx,j,:) = node_ptr%hist_self_sum_y(bin_idx,j,:) + tmp_r
+    !         !         node_ptr%hist_self_count(bin_idx,j)   = node_ptr%hist_self_count(bin_idx,j) + 1_4
+    !         !     end do
+    !         ! end do
+    !         ! call date_and_time(values=date_value2)
 
 
-            ! print*, time_diff(date_value1, date_value2), "[msec]"
-        end if
+    !         ! print*, time_diff(date_value1, date_value2), "[msec]"
+    !     end if
 
-        ini_f_idx = feature_indices_scanning_range(1)
-        fin_f_idx = feature_indices_scanning_range(2)
-        n_samples_unroll = node_ptr%n_samples - mod(node_ptr%n_samples, buffer_len)
-        do f=ini_f_idx, fin_f_idx, 1
-            fid = feature_indices(f)
-            ! print*, '============================================================='
-            ! print*, "FeatureID: ", fid
-            ! Useless or Used Feature Skip
-            if ( node_ptr%is_useless(fid) ) cycle
-            if ( node_ptr%is_used(fid) .and. hparam_ptr%skip_used_features ) cycle
+    !     ini_f_idx = feature_indices_scanning_range(1)
+    !     fin_f_idx = feature_indices_scanning_range(2)
+    !     n_samples_unroll = node_ptr%n_samples - mod(node_ptr%n_samples, buffer_len)
+    !     do f=ini_f_idx, fin_f_idx, 1
+    !         fid = feature_indices(f)
+    !         ! print*, '============================================================='
+    !         ! print*, "FeatureID: ", fid
+    !         ! Useless or Used Feature Skip
+    !         if ( node_ptr%is_useless(fid) ) cycle
+    !         if ( node_ptr%is_used(fid) .and. hparam_ptr%skip_used_features ) cycle
 
-            tot_l = 0d0
-            count_l = 0
-            do b=1, hparam_ptr%max_bins-1, 1
-                ! Transposed
-                tot_l = tot_l + node_ptr%hist_self_sum_y(fid,b,:)
-                count_l = count_l + node_ptr%hist_self_count(fid,b)
-                if (count_l .eq. 0_8) cycle
+    !         tot_l = 0d0
+    !         count_l = 0
+    !         do b=1, hparam_ptr%max_bins-1, 1
+    !             ! Transposed
+    !             tot_l = tot_l + node_ptr%hist_self_sum_y(fid,b,:)
+    !             count_l = count_l + node_ptr%hist_self_count(fid,b)
+    !             if (count_l .eq. 0_8) cycle
 
-                ! Normal
-                ! tot_l = tot_l + node_ptr%hist_self_sum_y(b,fid,:)
-                ! count_l = count_l + node_ptr%hist_self_count(b,fid)
-                if (count_l .ge. node_ptr%n_samples) exit
+    !             ! Normal
+    !             ! tot_l = tot_l + node_ptr%hist_self_sum_y(b,fid,:)
+    !             ! count_l = count_l + node_ptr%hist_self_count(b,fid)
+    !             if (count_l .ge. node_ptr%n_samples) exit
 
-                tot_r = tot_p - tot_l
-                count_r = node_ptr%n_samples - count_l
-                if (count_r .eq. 0_8) exit
+    !             tot_r = tot_p - tot_l
+    !             count_r = node_ptr%n_samples - count_l
+    !             if (count_r .eq. 0_8) exit
 
-                avg_l = tot_l / dble(count_l)
-                avg_r = tot_r / dble(count_r)
-                gain = dble(count_l*count_r)*n_rows_inv * sum( (avg_l-avg_r)**2d0 ) * n_outs_inv
-                ! print*,    real(tot_p), " : ", &
-                !     real(avg_l), real(count_l), &
-                !     " : ", real(avg_r), real(count_r), &
-                !     " : ", real(gain), real(gain_best), &
-                !     " : ", real(res_l), real(res_r), &
-                !     " : ", tot_l, tot_r
+    !             avg_l = tot_l / dble(count_l)
+    !             avg_r = tot_r / dble(count_r)
+    !             gain = dble(count_l*count_r)*n_rows_inv * sum( (avg_l-avg_r)**2d0 ) * n_outs_inv
+    !             ! print*,    real(tot_p), " : ", &
+    !             !     real(avg_l), real(count_l), &
+    !             !     " : ", real(avg_r), real(count_r), &
+    !             !     " : ", real(gain), real(gain_best), &
+    !             !     " : ", real(res_l), real(res_r), &
+    !             !     " : ", tot_l, tot_r
 
-                if (gain_best .lt. gain) then
-                    gain_best = gain
-                    best_fid = fid
-                    best_threshold = b
-                    res_l = avg_l
-                    res_r = avg_r
-                    num_l = count_l
-                    num_r = count_r
-                    sum_l = tot_l
-                    sum_r = tot_r
-                    count_eval = count_eval+1
-                end if
-            end do
-            if ( hparam_ptr%max_features .ne. -1 ) then
-                if ( hparam_ptr%max_features .le. f .and. count_eval .ge. 1 ) then
-                    exit
-                end if
-            end if
-        end do
+    !             if (gain_best .lt. gain) then
+    !                 gain_best = gain
+    !                 best_fid = fid
+    !                 best_threshold = b
+    !                 res_l = avg_l
+    !                 res_r = avg_r
+    !                 num_l = count_l
+    !                 num_r = count_r
+    !                 sum_l = tot_l
+    !                 sum_r = tot_r
+    !                 count_eval = count_eval+1
+    !             end if
+    !         end do
+    !         if ( hparam_ptr%max_features .ne. -1 ) then
+    !             if ( hparam_ptr%max_features .le. f .and. count_eval .ge. 1 ) then
+    !                 exit
+    !             end if
+    !         end if
+    !     end do
 
-        node_ptr%is_trained = t_
-        node_ptr%eval_counter = count_eval
-        node_ptr%gain_best = gain_best
+    !     node_ptr%is_trained = t_
+    !     node_ptr%eval_counter = count_eval
+    !     node_ptr%gain_best = gain_best
 
-        if ( count_eval .eq. 0 ) then
-            node_ptr%is_terminal = t_
-            return
-        end if
+    !     if ( count_eval .eq. 0 ) then
+    !         node_ptr%is_terminal = t_
+    !         return
+    !     end if
 
-        node_ptr%feature_id_ = best_fid
-        node_ptr%threshold_ = best_threshold
+    !     node_ptr%feature_id_ = best_fid
+    !     node_ptr%threshold_ = best_threshold
 
-        allocate(node_ptr%sum_l(node_ptr%n_outputs))
-        allocate(node_ptr%sum_r(node_ptr%n_outputs))
-        allocate(node_ptr%response_l(node_ptr%n_outputs))
-        allocate(node_ptr%response_r(node_ptr%n_outputs))
+    !     allocate(node_ptr%sum_l(node_ptr%n_outputs))
+    !     allocate(node_ptr%sum_r(node_ptr%n_outputs))
+    !     allocate(node_ptr%response_l(node_ptr%n_outputs))
+    !     allocate(node_ptr%response_r(node_ptr%n_outputs))
 
-        node_ptr%sum_l = sum_l
-        node_ptr%sum_r = sum_r
-        node_ptr%n_samples_l = num_l
-        node_ptr%n_samples_r = num_r
-        node_ptr%response_l = res_l
-        node_ptr%response_r = res_r
-        call node_ptr%hparam_check(hparam_ptr)
-        ! print*, node_ptr%n_samples, num_l, num_r
-    end subroutine split_weighted_oblique_decision_tree_classifier_indivisuals
+    !     node_ptr%sum_l = sum_l
+    !     node_ptr%sum_r = sum_r
+    !     node_ptr%n_samples_l = num_l
+    !     node_ptr%n_samples_r = num_r
+    !     node_ptr%response_l = res_l
+    !     node_ptr%response_r = res_r
+    !     call node_ptr%hparam_check(hparam_ptr)
+    !     ! print*, node_ptr%n_samples, num_l, num_r
+    ! end subroutine split_weighted_oblique_decision_tree_classifier_indivisuals
 
 end module mod_splitter
