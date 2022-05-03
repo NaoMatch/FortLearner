@@ -9,7 +9,7 @@ module mod_pca
 
     !> Type for Priciple Component Analysis
     type pca
-        logical(kind=4)           :: is_trained = f_           !< is trained or not. If not, cannot predict and dump.
+        logical(kind=4)           :: is_fitted = f_           !< is trained or not. If not, cannot predict and dump.
         integer(kind=8)           :: n_columns                 !< number of columns
         type(eigen_system)        :: eig                       !< type for eigen_system to diagonalization covariance matirx
         real(kind=4), allocatable :: means_of_matrix_r4(:)     !< mean values of input explanatory variable by column (#columns), kind=4
@@ -91,7 +91,7 @@ contains
         this%eig%eigen_vectors_r4 = this%eig%eigen_vectors_r4(:,eig_idx)
 
         deallocate(cov_mat_copy)
-        this%is_trained = t_
+        this%is_fitted = t_
         this%n_columns = n_columns
     end subroutine fit_pca_r4
     include "./include/pca_fit_pca/inc_fit_pca.f90"
@@ -112,7 +112,7 @@ contains
         x_shape = shape(x)
         n_samples = x_shape(1)
         n_columns = x_shape(2)
-        call err%check_estimator_is_trained(this%is_trained, "pca")
+        call err%check_estimator_is_fitted(this%is_fitted, "pca")
         call err%check_number_of_features_mismatch(int(this%n_columns, kind=kind(n_columns)), n_columns, "pca")
 
         allocate(transform_pca_r4(n_samples, n_columns))
