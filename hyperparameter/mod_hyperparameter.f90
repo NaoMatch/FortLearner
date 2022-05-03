@@ -17,6 +17,12 @@ module mod_hyperparameter
         ! procedure :: false_only
     end type
 
+    type, extends(hparam_base) :: hparam_nipals
+        integer(kind=8) :: n_components=5_8
+        integer(kind=8) :: max_iteration=100_8
+        real(kind=8) :: tolerance=1d-8
+    end type hparam_nipals
+
     ! kmeans
     type, extends(hparam_base) :: hparam_kmeans
         integer(kind=8) :: n_clusters = 5_8
