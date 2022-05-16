@@ -23,6 +23,12 @@ module mod_hyperparameter
         real(kind=8) :: tolerance=1d-8
     end type hparam_nipals
 
+    type, extends(hparam_base) :: hparam_ica
+        integer(kind=8) :: n_components=5_8
+        integer(kind=8) :: max_iteration=100_8
+        real(kind=8) :: tolerance=1d-8
+    end type hparam_ica
+
     ! kmeans
     type, extends(hparam_base) :: hparam_kmeans
         integer(kind=8) :: n_clusters = 5_8

@@ -79,6 +79,7 @@ common           := 	./mod/mod_const.out \
 						\
 						./mod/mod_pca.out \
 						./mod/mod_nipals.out \
+						./mod/mod_ica.out \
 
 
 build:
@@ -96,10 +97,11 @@ build:
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../linalg/mod_linalg.f90 -o ./mod/mod_linalg.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../linalg/mod_eig.f90 -o ./mod/mod_eig.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../optimization/mod_optimization.f90 -o ./mod/mod_optimization.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hash_table/mod_hash_table.f90 -o ./mod/mod_hash_table.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decomposition/mod_pca.f90 -o ./mod/mod_pca.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decomposition/mod_nipals.f90 -o ./mod/mod_nipals.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decomposition/mod_ica.f90 -o ./mod/mod_ica.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_nearest_neighbour.f90 -o ./mod/mod_nearest_neighbour.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_brute_force_search.f90 -o ./mod/mod_brute_force_search.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_kdtree.f90 -o ./mod/mod_kdtree.out
@@ -170,7 +172,8 @@ test:
 	# make main_decision_tree_sadt
 	# make main_decision_tree_sliq
 	# make main_decision_tree_oblivious_tree
-	make main_decomposition_nipals
+	# make main_decomposition_nipals
+	make main_decomposition_ica
 	# make main_forest_random_forest
 	# make main_forest_extra_trees
 	# make main_forest_isolation_forest
@@ -331,6 +334,14 @@ main_decomposition_nipals:
 	main_decomposition_nipals.f90 -o main_decomposition_nipals.out \
 	$(option_blas)
 	./main_decomposition_nipals.out
+
+main_decomposition_ica:
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main_decomposition_ica.f90 -o main_decomposition_ica.out \
+	$(option_blas)
+	./main_decomposition_ica.out
 
 main_forest_random_forest:
 	$(compiler_fortran) -w -unroll \
