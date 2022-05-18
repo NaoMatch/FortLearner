@@ -9,9 +9,13 @@ module mod_dbscan
     type dbscan
         type(hparam_dbscan) :: hparam
         integer(kind=8), allocatable :: labels_(:)
+        logical(kind=4), allocatable :: is_visited(:)
+        type(kdtree) :: ktree
+        type(balltree) :: btree
+        type(brute_force_search) :: brute
     contains
         procedure :: fit => fit_dbscan
-        procedure :: expanding_cluster
+        procedure :: expanding
     end type dbscan
 
     !> An interface to create new 'dbscan' object.
@@ -22,12 +26,12 @@ module mod_dbscan
 contains
 
 
-    function new_dbscan(min_nearest_samples, min_radius, neighbour_algo, min_samples_in_leaf)
+    function new_dbscan(n_neighbors, radius, neighbour_algo, min_samples_in_leaf)
         implicit none
         type(dbscan)               :: new_dbscan
         type(dbscan)               :: tmp
-        integer(kind=8), optional  :: min_nearest_samples
-        real(kind=8), optional     :: min_radius
+        integer(kind=8), optional  :: n_neighbors
+        real(kind=8), optional     :: radius
         character(len=*), optional :: neighbour_algo
         integer(kind=8), optional  :: min_samples_in_leaf
 
@@ -39,8 +43,8 @@ contains
         neighbour_algo_list(2) = "balltree"
         neighbour_algo_list(3) = "brute_force_search"
 
-        if ( present(min_nearest_samples) ) tmp%hparam%min_nearest_samples = min_nearest_samples
-        if ( present(min_radius) ) tmp%hparam%min_radius = min_radius
+        if ( present(n_neighbors) ) tmp%hparam%n_neighbors = n_neighbors
+        if ( present(radius) ) tmp%hparam%radius = radius
         if ( present(neighbour_algo) ) tmp%hparam%neighbour_algo = neighbour_algo
         if ( present(min_samples_in_leaf) ) tmp%hparam%min_samples_in_leaf = min_samples_in_leaf
 
@@ -59,79 +63,92 @@ contains
 
         integer(kind=8) :: xshape(2), n_samples, n_columns
         integer(kind=8) :: i, j, label
-        type(kdtree)   :: ktree
-        type(balltree) :: btree
-        type(brute_force_search) :: brf
+        type(kdtree), target   :: ktree
+        type(balltree), target :: btree
+        type(brute_force_search), target :: brf
         type(neighbor_results), target  :: res
         type(neighbor_results), pointer :: res_ptr
 
         real(kind=8) :: diff_sum
+        real(kind=8), allocatable :: query(:,:)
         integer(kind=8) :: diff_count
 
         logical(kind=4), allocatable :: is_visited(:)
+        logical(kind=4) :: go_next_cluster
 
+        
         if (allocated(this%labels_)) deallocate(this%labels_)
         xshape(:) = shape(x)
         n_samples = xshape(1)
         n_columns = xshape(2)
         allocate(this%labels_(n_samples))
+        allocate(query(1, n_columns))
         this%labels_(:) = -1
 
         if (this%hparam%neighbour_algo_int .eq. 1_8) then
-            ktree = kdtree(min_samples_in_leaf=this%hparam%min_samples_in_leaf)
-            call ktree%build(x)
-            res = ktree%query(x, radius=this%hparam%min_radius)
+            this%ktree = kdtree(min_samples_in_leaf=this%hparam%min_samples_in_leaf)
+            call this%ktree%build(x)
+            res = this%ktree%query(x, radius=this%hparam%radius)
         elseif (this%hparam%neighbour_algo_int .eq. 2_8) then
-            btree = balltree(min_samples_in_leaf=this%hparam%min_samples_in_leaf)
-            call btree%build(x)
-            res = btree%query(x, radius=this%hparam%min_radius)
+            this%btree = balltree(min_samples_in_leaf=this%hparam%min_samples_in_leaf)
+            call this%btree%build(x)
+            res = this%btree%query(x, radius=this%hparam%radius)
         else
-            brf = brute_force_search()
-            call brf%build(x)
-            res = brf%query(x, radius=this%hparam%min_radius)
+            this%brute = brute_force_search()
+            call this%brute%build(x)
+            res = this%brute%query(x, radius=this%hparam%radius)
         end if
         res_ptr => res
 
-        allocate(is_visited(n_samples))
+        allocate(this%is_visited(n_samples)); this%is_visited(:) = f_
         label = 1
-        is_visited(:) = f_
         do i=1, n_samples, 1
-            if ( is_visited(i) ) cycle
-            if ( size(res%indices(i)%idx) >= this%hparam%min_nearest_samples ) then
-                call this%expanding_cluster(i, label, is_visited, n_samples, res_ptr)
+            if (this%is_visited(i)) cycle
+            this%is_visited(i) = t_
+            this%labels_(i) = label
+            go_next_cluster = this%expanding(res_ptr, query_idx=i, label=label)
+            if ( go_next_cluster ) then
                 label = label + 1
             end if
         end do
     end subroutine fit_dbscan
 
-
-    recursive subroutine expanding_cluster(this, point_idx, label, is_visited, n_samples, res_ptr)
+    function expanding(this, res_ptr, query_idx, label)
         implicit none
+        logical(kind=4) :: expanding
         class(dbscan) :: this
-        integer(kind=8), intent(in) :: point_idx
-        integer(kind=8), intent(in) :: label, n_samples
-        logical(kind=4), intent(inout) :: is_visited(n_samples)
-        type(neighbor_results), pointer, intent(in) :: res_ptr
-        integer(kind=8) :: i, idx
+        type(neighbor_results), pointer :: res_ptr
+        integer(kind=8), intent(in) :: query_idx
+        integer(kind=8), intent(in) :: label
 
-        integer(kind=8), allocatable :: seeds(:)
+        integer(kind=8), allocatable :: seeds(:), seeds_new(:)
+        integer(kind=8) :: idx
 
-        if (is_visited(point_idx)) return
-        allocate(seeds(0))
+        seeds = res_ptr%indices(query_idx)%idx
+        if ( size(seeds) < this%hparam%n_neighbors ) then
+            this%labels_(query_idx) = -1
+            expanding = f_
+            return
+        end if
 
-        seeds = [seeds, res_ptr%indices(point_idx)%idx]
-        do while ( size(seeds)>0 )
+        do while (size(seeds)>0)
             idx = seeds(1)
-            if (.not. is_visited(idx)) then
-                is_visited(idx) = t_
-                seeds = [seeds, res_ptr%indices(idx)%idx]
-                if ( size(res_ptr%indices(idx)%idx) >= this%hparam%min_nearest_samples ) then
-                    this%labels_(idx) = label
+            if ( .not. this%is_visited(idx) ) then
+                this%is_visited(idx) = t_
+                this%labels_(idx) = label
+                seeds_new = res_ptr%indices(idx)%idx
+                if (size(seeds_new) >= this%hparam%n_neighbors) then
+                    seeds = [seeds, seeds_new]
                 end if
             end if
             seeds = [seeds(2:)]
         end do
-    end subroutine expanding_cluster
+        expanding = t_
+    end function expanding
+
+
+
+
 
 
 end module mod_dbscan
