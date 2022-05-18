@@ -18,6 +18,8 @@ program main_csv2bin
     real(kind=8), ALLOCATABLE :: y_train_pred(:,:)
     integer(kind=8), ALLOCATABLE :: feature_indices(:), feature_indices_scanning_range(:)
 
+    print*, '============================================================='
+    print*, '============================================================='
     file_name_x_train_csv = "../sample_data/make_regression_X_0000100000x00100.csv"
     file_name_y_train_csv = "../sample_data/make_regression_y_0000100000x00100.csv"
     file_name_x_train_bin = "../sample_data/make_regression_X_0000100000x00100.bin"
@@ -28,7 +30,6 @@ program main_csv2bin
     dtype_in  = "r"
     dtype_out = "r"
 
-    print*, '============================================================='
     print*, "CSV to Binary"
     print*, "    x_train"
     call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
@@ -36,5 +37,25 @@ program main_csv2bin
     print*, "    y_train"
     call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
         n_samples_train, 1_8, skip_header, dtype_in, dtype_out)
+
+        print*, '============================================================='
+    print*, '============================================================='
+    file_name_x_train_csv = "../sample_data/make_brobs_X_750x2.csv"
+    file_name_y_train_csv = "../sample_data/make_brobs_DBSCAN_750x2.csv"
+    file_name_x_train_bin = "../sample_data/make_brobs_X_750x2.bin"
+    file_name_y_train_bin = "../sample_data/make_brobs_DBSCAN_750x2.bin"
+    n_samples_train = 750
+    n_columns_train = 2
+    skip_header = t_
+    dtype_in  = "r"
+    dtype_out = "r"
+
+    print*, "CSV to Binary"
+    print*, "    x_train"
+    call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
+        n_samples_train, n_columns_train, skip_header, dtype_in, dtype_out)
+    print*, "    y_train"
+    call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
+        n_samples_train, 1_8, skip_header, "i", "i")
     
 end program main_csv2bin

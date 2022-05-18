@@ -24,6 +24,15 @@ module mod_hyperparameter
     end type hparam_nipals
 
     ! kmeans
+    type, extends(hparam_base) :: hparam_dbscan
+        integer(kind=8) :: n_neighbors = 10_8
+        real(kind=8)    :: radius=1d0
+        character(len=256) :: neighbour_algo="kdtree"
+        integer(kind=8) :: neighbour_algo_int
+        integer(kind=8) :: min_samples_in_leaf = 64_8
+    end type hparam_dbscan
+
+    ! kmeans
     type, extends(hparam_base) :: hparam_kmeans
         integer(kind=8) :: n_clusters = 5_8
         integer(kind=8) :: max_iter = 500_8

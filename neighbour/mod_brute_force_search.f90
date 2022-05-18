@@ -233,7 +233,7 @@ contains
         allocate(indices(this%n_samples))
         r_sq = radius**2d0
         !$omp parallel num_threads(4)
-        !$omp do private(c, indices, count_in_ball, tmp)
+        !$omp do private(c, indices, count_in_ball, tmp, n)
         do c=1, n_samples, 1
             do n=1, this%n_samples, 1
                 indices(n) = n
@@ -244,8 +244,7 @@ contains
 
             call quick_argselect(tmp, indices, this%n_samples, count_in_ball)
 
-            call quick_argsort(tmp(1:count_in_ball), indices(1:count_in_ball), count_in_ball)
-            res%indices(c)%idx   = [res%indices(c)%idx, indices(1:count_in_ball)]
+            res%indices(c)%idx   = [res%indices(c)%idx,   indices(1:count_in_ball)]
             res%distances(c)%dst = [res%distances(c)%dst, sqrt(tmp(1:count_in_ball))]
         end do
         !$omp end do
