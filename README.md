@@ -6,8 +6,8 @@ cd test_script
 make test  
 
 # WIP:
-ica    
-~multi layer perceptron, product quantization~
+adaboost  
+~multi layer perceptron, product quantization, ica~
 
 
 # Update
