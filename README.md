@@ -12,7 +12,7 @@ adaboost
 
 # Update
 2022/05/03: nipals  
-2022/05/02: dbscan  
+2022/05/02: dbscan(modify 2022/05/19)  
 2022/04/27: oblivious_tree (not so optimized)  
 2022/04/22: minibatch_kmeans  
 2022/04/19: sliq (base estimator of xgboost, w/o openmp)  
