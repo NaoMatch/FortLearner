@@ -852,16 +852,16 @@ contains
         integer(kind=8)             :: half_position
         real(kind=8), allocatable   :: vector_copy(:)
         real(kind=8)                :: min_val_half
-        logical(kind=4)             :: is_odd
+        logical(kind=4)             :: is_even
 
         allocate(vector_copy(n_samples))
         vector_copy(:) = vector(:)
 
-        is_odd = mod(n_samples, 2_8) == 0_8
+        is_even = mod(n_samples, 2_8) == 0_8
         half_position = n_samples / 2_8
 
         call quick_select(vector_copy, n_samples, half_position)
-        if (is_odd) then
+        if (is_even) then
             min_val_half = minval(vector_copy(half_position+1:n_samples))
             median_value_of_vector_r8 = (vector_copy(half_position)+min_val_half) * .5d0
         else
