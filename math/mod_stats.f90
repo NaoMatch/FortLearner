@@ -72,6 +72,11 @@ module mod_stats
         module procedure get_matrix_minmax_parallel_r8
     end interface get_matrix_minmax_parallel
 
+    !> Median Interface
+    interface median
+            module procedure median_value_of_vector_r8
+    end interface median
+
     !> Interface to call mean_value_of_vector_r4, mean_value_of_vector_r8, mean_value_of_vector_i4, mean_value_of_vector_i8
     interface mean  
         module procedure mean_value_of_vector_r4
@@ -832,6 +837,37 @@ contains
         mean_value_of_vector_r4 = tmp_sum / float(n_samples)
     end function mean_value_of_vector_r4
     include "./include/stats/mean_value_of_vector/inc_mean_value_of_vector.f90"
+
+
+    !> A function to calculate mean value of vector.
+    !! \return mean_value_of_vector_r4 mean value of vector
+    !! \param vector input 1-dim vector
+    !! \param n_samples size to input vector
+    function median_value_of_vector_r8(vector, n_samples)
+        implicit none
+        real(kind=8)                :: median_value_of_vector_r8
+        real(kind=8), intent(in)    :: vector(n_samples)
+        integer(kind=8), intent(in) :: n_samples
+
+        integer(kind=8)             :: half_position
+        real(kind=8), allocatable   :: vector_copy(:)
+        real(kind=8)                :: min_val_half
+        logical(kind=4)             :: is_odd
+
+        allocate(vector_copy(n_samples))
+        vector_copy(:) = vector(:)
+
+        is_odd = mod(n_samples, 2_8) == 0_8
+        half_position = n_samples / 2_8
+
+        call quick_select(vector_copy, n_samples, half_position)
+        if (is_odd) then
+            min_val_half = minval(vector_copy(half_position+1:n_samples))
+            median_value_of_vector_r8 = (vector_copy(half_position)+min_val_half) * .5d0
+        else
+            median_value_of_vector_r8 = vector_copy(half_position+1)
+        end if
+    end function median_value_of_vector_r8
 
 
     !> A function to calculate mean value of matrix, exactly equal to sum(matrix, dim=1)/N.
