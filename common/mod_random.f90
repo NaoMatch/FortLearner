@@ -35,6 +35,10 @@ module mod_random
         module procedure permutation_head_i8
     end interface ! permutation_head
 
+    interface preprocess_for_weighted_sampling
+        module procedure preprocess_for_weighted_sampling_r8_i8
+    end interface preprocess_for_weighted_sampling
+
     !> Interface to call rand_integer_i4, rand_integer_i8
     interface rand_integer
         module procedure rand_integer_scl_i4
@@ -48,6 +52,11 @@ module mod_random
         module procedure roulette_selection_r4
         module procedure roulette_selection_r8
     end interface roulette_selection
+
+    interface weighted_sampling
+        module procedure weighted_sampling_with_preprocess_r8
+        module procedure weighted_sampling_without_preprocess_r8
+    end interface weighted_sampling
 
 
 contains
@@ -133,6 +142,52 @@ contains
     include "./include/random/permutation_head/inc_permutation_head.f90"
 
 
+    subroutine preprocess_for_weighted_sampling_r8_i8(thresholds, candidates, weights, n_weights)
+        implicit none
+        real(kind=8), intent(inout) :: thresholds(n_weights)
+        integer(kind=8), intent(inout) :: candidates(n_weights)
+        real(kind=8), intent(in) :: weights(n_weights)
+        integer(kind=8), intent(in) :: n_weights
+
+        real(kind=8)                   :: weight_sum
+        integer(kind=8)                :: h, l, i, j, k, idx
+        integer(kind=8), allocatable   :: hl(:)
+
+        weight_sum = sum(weights)
+        thresholds(:) = weights(:) * n_weights / weight_sum 
+
+        allocate(hl(n_weights))
+        candidates(:) = 1_8
+        hl(:) = 1_8
+        l = 1
+        h = n_weights        
+
+        do i=1, n_weights, 1
+            if ( thresholds(i) < 1d0 ) then
+                hl(l) = i
+                l = l + 1
+            else
+                hl(h) = i
+                h = h - 1
+            end if
+        end do
+    
+        do while ( (l>1) .and. (h<n_weights) ) 
+            j = hl(l-1)
+            k = hl(h+1)
+    
+            candidates(j) = k
+            thresholds(k) = thresholds(k) + thresholds(j) - 1d0
+            if (thresholds(k)<1d0) then
+                hl(l-1) = k
+                h = h + 1
+            else
+                l = l - 1
+            end if
+        end do 
+    end subroutine preprocess_for_weighted_sampling_r8_i8
+
+
     !> A subroutine to generate random integer with duplication
     !! \param lo minimum value
     !! \param hi maximum value
@@ -171,5 +226,92 @@ contains
     end subroutine rand_integer_scl_i4
 
 
+    subroutine weighted_sampling_with_preprocess_r8(indices, n_samples, weights, n_weights)
+        implicit none
+        integer(kind=8), intent(inout) :: indices(n_samples)
+        integer(kind=8), intent(in)    :: n_samples
+        real(kind=8), intent(in)       :: weights(n_weights)
+        integer(kind=8), intent(in)    :: n_weights
+
+        real(kind=8)                   :: weight_sum
+        integer(kind=8)                :: h, l, i, j, k, idx
+        real(kind=8), allocatable      :: thresholds(:), rand_vals(:)
+        integer(kind=8), allocatable   :: candidates(:), hl(:), rand_idxs(:)
+
+        allocate(thresholds(n_weights))
+        weight_sum = sum(weights)
+        thresholds(:) = weights(:) * n_weights / weight_sum 
+
+        allocate(candidates(n_weights), hl(n_weights))
+        candidates(:) = 1_8
+        hl(:) = 1_8
+        l = 1
+        h = n_weights        
+
+        do i=1, n_weights, 1
+            if ( thresholds(i) < 1d0 ) then
+                hl(l) = i
+                l = l + 1
+            else
+                hl(h) = i
+                h = h - 1
+            end if
+        end do
+    
+        do while ( (l>1) .and. (h<n_weights) ) 
+            j = hl(l-1)
+            k = hl(h+1)
+    
+            candidates(j) = k
+            thresholds(k) = thresholds(k) + thresholds(j) - 1d0
+            if (thresholds(k)<1d0) then
+                hl(l-1) = k
+                h = h + 1
+            else
+                l = l - 1
+            end if
+        end do 
+            
+        allocate(rand_vals(n_samples), rand_idxs(n_samples))
+        call random_number(rand_vals)
+        rand_idxs = int(rand_vals*n_weights) + 1
+        call random_number(rand_vals)
+    
+        do i=1, n_samples, 1
+            idx = rand_idxs(i)
+            if ( rand_vals(i)<=thresholds(idx) ) then
+                indices(i) = idx
+            else
+                indices(i) = candidates(idx)
+            end if
+        end do
+    end subroutine weighted_sampling_with_preprocess_r8
+
+    subroutine weighted_sampling_without_preprocess_r8(indices, n_samples, thresholds, candidates, n_weights)
+        implicit none
+        integer(kind=8), intent(inout) :: indices(n_samples)
+        integer(kind=8), intent(in)    :: n_samples
+        real(kind=8), intent(in)       :: thresholds(n_weights)
+        integer(kind=8), intent(in)    :: candidates(n_weights)
+        integer(kind=8), intent(in)    :: n_weights
+
+        integer(kind=8)                :: idx, i
+        real(kind=8), allocatable      :: rand_vals(:)
+        integer(kind=8), allocatable   :: rand_idxs(:)
+
+        allocate(rand_vals(n_samples), rand_idxs(n_samples))
+        call random_number(rand_vals)
+        rand_idxs = int(rand_vals*n_weights) + 1
+        call random_number(rand_vals)
+    
+        do i=1, n_samples, 1
+            idx = rand_idxs(i)
+            if ( rand_vals(i)<=thresholds(idx) ) then
+                indices(i) = idx
+            else
+                indices(i) = candidates(idx)
+            end if
+        end do
+    end subroutine weighted_sampling_without_preprocess_r8
 
 end module mod_random
