@@ -3,8 +3,8 @@ from sklearn.datasets import make_regression, make_blobs
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import DBSCAN
 
-n_samples_list = [100000]
-n_columns_list = [100]
+n_samples_list = [1000, 100000]
+n_columns_list = [5, 100]
 # n_samples_list = [100, 1000, 10000, 100000, 1000000]
 # n_columns_list = [10, 50, 100, 200, 400]
 
