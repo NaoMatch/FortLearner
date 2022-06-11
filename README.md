@@ -6,11 +6,12 @@ cd test_script
 make test  
 
 # WIP:
-adaboost  
-~multi layer perceptron, product quantization, ica~
+product_quantization  
+~multi layer perceptron, ica~
 
 
 # Update
+2022/06/11: adaboost  
 2022/05/03: nipals  
 2022/05/02: dbscan(modify 2022/05/19)  
 2022/04/27: oblivious_tree (not so optimized)  
