@@ -23,6 +23,12 @@ module mod_hyperparameter
         real(kind=8) :: tolerance=1d-8
     end type hparam_nipals
 
+    type, extends(hparam_base) :: hparam_adaboost
+        integer(kind=8)    :: n_estimators=5_8
+        character(len=256) :: loss_type="linear"
+        integer(kind=8)    :: loss_type_int=1_8
+    end type hparam_adaboost
+
     ! kmeans
     type, extends(hparam_base) :: hparam_dbscan
         integer(kind=8) :: n_neighbors = 10_8
