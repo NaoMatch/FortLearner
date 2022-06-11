@@ -418,11 +418,12 @@ contains
     !! \return returns tree with initialized root node
     !! \param data_holder_ptr pointer to 'data_holder'
     !! \param is_classification classification tree or not
-    subroutine init_root_node(this, data_holder_ptr, is_classification)
+    subroutine init_root_node(this, data_holder_ptr, is_classification, sample_indices)
         implicit none
         class(base_tree)           :: this
         type(data_holder), pointer :: data_holder_ptr
         logical(kind=4)            :: is_classification
+        integer(kind=8), optional  :: sample_indices(:)
         integer(kind=8)            :: i
 
         integer(kind=8), ALLOCATABLE :: uniq_labels(:), label_counter(:) ! for classification tree
@@ -441,7 +442,11 @@ contains
             this%root_node_axis_ptr%n_clusters = this%n_clusters_
             this%root_node_axis_ptr%is_hist = this%is_hist
             
-            if ( this%hparam%boot_strap ) then
+            if ( present(sample_indices) ) then
+                do i=1, this%n_samples_, 1
+                    this%root_node_axis_ptr%indices(i) = sample_indices(i)
+                end do
+            elseif ( this%hparam%boot_strap ) then
                 call rand_integer(1_8, this%n_samples_, this%root_node_axis_ptr%indices, this%hparam%max_samples)
                 call quick_sort(this%root_node_axis_ptr%indices, this%hparam%max_samples)
             else
