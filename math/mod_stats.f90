@@ -72,6 +72,16 @@ module mod_stats
         module procedure get_matrix_minmax_parallel_r8
     end interface get_matrix_minmax_parallel
 
+    !> Median Interface
+    interface median
+            module procedure median_value_of_vector_r8
+    end interface median
+
+    !> Weighted Median Interface
+    interface weighted_median
+            module procedure weighted_median_value_of_vector_r8_r8
+    end interface weighted_median
+
     !> Interface to call mean_value_of_vector_r4, mean_value_of_vector_r8, mean_value_of_vector_i4, mean_value_of_vector_i8
     interface mean  
         module procedure mean_value_of_vector_r4
@@ -833,6 +843,76 @@ contains
     end function mean_value_of_vector_r4
     include "./include/stats/mean_value_of_vector/inc_mean_value_of_vector.f90"
 
+
+    !> A function to calculate median value of vector.
+    !! \return median_value_of_vector_r8 median value of vector
+    !! \param vector input 1-dim vector
+    !! \param n_samples size to input vector
+    function median_value_of_vector_r8(vector, n_samples)
+        implicit none
+        real(kind=8)                :: median_value_of_vector_r8
+        real(kind=8), intent(in)    :: vector(n_samples)
+        integer(kind=8), intent(in) :: n_samples
+
+        integer(kind=8)             :: half_position
+        real(kind=8), allocatable   :: vector_copy(:)
+        real(kind=8)                :: min_val_half
+        logical(kind=4)             :: is_even
+
+        allocate(vector_copy(n_samples))
+        vector_copy(:) = vector(:)
+
+        is_even = mod(n_samples, 2_8) == 0_8
+        half_position = n_samples / 2_8
+
+        call quick_select(vector_copy, n_samples, half_position)
+        if (is_even) then
+            min_val_half = minval(vector_copy(half_position+1:n_samples))
+            median_value_of_vector_r8 = (vector_copy(half_position)+min_val_half) * .5d0
+        else
+            median_value_of_vector_r8 = vector_copy(half_position+1)
+        end if
+    end function median_value_of_vector_r8
+
+
+    !> A function to calculate weighted median value of vector.
+    !! \return weighted_median_value_of_vector_r8_r8 weighted median value of vector
+    !! \param vector input 1-dim vector
+    !! \param weight input 1-dim weight
+    !! \param n_samples size to input vector
+    !! \todo implement prune and search algorithm, https://nscpolteksby.ac.id/ebook/files/Ebook/Computer%20Engineering/Algorithm%20Design%20and%20Applications%20A4%20(2015)/10.%20Chapter%209%20-%20Fast%20Sorting%20and%20Selection.pdf
+    function weighted_median_value_of_vector_r8_r8(vector, weight, n_samples)
+        implicit none
+        real(kind=8) :: weighted_median_value_of_vector_r8_r8
+        real(kind=8), intent(in) :: vector(n_samples)
+        real(kind=8), intent(in) :: weight(n_samples)
+        integer(kind=8), intent(in) :: n_samples
+
+        integer(kind=8) :: i
+        real(kind=8) :: w_half, w_sum, min_w, max_w
+        real(kind=8), allocatable :: vector_copy(:), weight_copy(:)
+
+        call get_minmax(min_w, max_w, weight, n_samples)
+        if (min_w .eq. max_w) then
+            weighted_median_value_of_vector_r8_r8 = median(vector, n_samples)
+            return
+        end if
+
+        allocate(vector_copy(n_samples))
+        allocate(weight_copy(n_samples))
+        vector_copy(:) = vector(:)
+        weight_copy(:) = weight(:)
+
+        call quick_argsort(vector_copy, weight_copy, n_samples)
+        
+        w_sum = 0d0
+        w_half = sum(weight_copy) * .5d0
+        do i=1, n_samples, 1
+            w_sum = w_sum + weight_copy(i)
+            if (w_sum >= w_half) exit
+        end do
+        weighted_median_value_of_vector_r8_r8 = vector_copy(i)
+    end function weighted_median_value_of_vector_r8_r8
 
     !> A function to calculate mean value of matrix, exactly equal to sum(matrix, dim=1)/N.
     !! \return mean_values_of_matrix_r4 mean values of matrix

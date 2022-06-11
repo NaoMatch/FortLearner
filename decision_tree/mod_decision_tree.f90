@@ -94,7 +94,7 @@ contains
     !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
     !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
     subroutine fit_decision_tree_regressor(this, data_holder_ptr, print_node, &
-        feature_indices, feature_indices_scanning_range)
+        feature_indices, feature_indices_scanning_range, sample_indices)
         implicit none
 
         class(decision_tree_regressor) :: this
@@ -102,6 +102,7 @@ contains
         logical(kind=4), OPTIONAL      :: print_node
         integer(kind=8), optional      :: feature_indices(:)
         integer(kind=8), optional      :: feature_indices_scanning_range(2)
+        integer(kind=8), optional      :: sample_indices(:)
 
         type(node_axis), target            :: root_node
         type(hparam_decisiontree), target  :: hparam
@@ -120,7 +121,11 @@ contains
 
         if (associated(this%root_node_axis_ptr)) nullify(this%root_node_axis_ptr)
         this%root_node_axis_ptr => root_node
-        call this%init_root_node(data_holder_ptr, is_classification=this%is_classification)
+        if (present(sample_indices)) then
+            call this%init_root_node(data_holder_ptr, is_classification=this%is_classification, sample_indices=sample_indices)
+        else
+            call this%init_root_node(data_holder_ptr, is_classification=this%is_classification)
+        end if
 
         hparam = this%hparam
         hparam_ptr => hparam
@@ -166,7 +171,7 @@ contains
         implicit none
         class(decision_tree_regressor)    :: this
         real(kind=8), intent(in) :: x(:,:)
-        integer(kind=8), ALLOCATABLE :: predict_decision_tree_regressor(:,:)
+        real(kind=8), ALLOCATABLE :: predict_decision_tree_regressor(:,:)
         predict_decision_tree_regressor = this%predict_response(x)
     end function predict_decision_tree_regressor
 

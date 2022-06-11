@@ -20,12 +20,12 @@ program main_csv2bin
 
     print*, '============================================================='
     print*, '============================================================='
-    file_name_x_train_csv = "../sample_data/make_regression_X_0000100000x00100.csv"
-    file_name_y_train_csv = "../sample_data/make_regression_y_0000100000x00100.csv"
-    file_name_x_train_bin = "../sample_data/make_regression_X_0000100000x00100.bin"
-    file_name_y_train_bin = "../sample_data/make_regression_y_0000100000x00100.bin"
-    n_samples_train = 100000
-    n_columns_train = 100
+    file_name_x_train_csv = "../sample_data/make_regression_X_0000001000x00005.csv"
+    file_name_y_train_csv = "../sample_data/make_regression_y_0000001000x00005.csv"
+    file_name_x_train_bin = "../sample_data/make_regression_X_0000001000x00005.bin"
+    file_name_y_train_bin = "../sample_data/make_regression_y_0000001000x00005.bin"
+    n_samples_train = 1000
+    n_columns_train = 5
     skip_header = t_
     dtype_in  = "r"
     dtype_out = "r"
