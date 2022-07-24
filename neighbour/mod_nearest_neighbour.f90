@@ -18,6 +18,10 @@ module mod_nearest_neighbour
         type(distance), ALLOCATABLE :: distances(:)
     end type neighbor_results
 
+    type neighbor_indices
+        type(index),    ALLOCATABLE :: indices(:)
+    end type neighbor_indices
+
     !> Common members of 'node' for 'kdtree', 'ball' for 'balltree'.
     type base_node_for_nearest_neighbor
         integer(kind=8) :: idx !< node index
