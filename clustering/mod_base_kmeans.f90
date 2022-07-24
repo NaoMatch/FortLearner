@@ -22,7 +22,10 @@ module mod_base_kmeans
         integer(kind=8)              :: n_samples=-1               !< training results. #samples
         integer(kind=8)              :: n_columns=-1               !< training results. #columns
         logical(kind=4)              :: is_trained = f_            !< training results. already fitted or not
-        real(kind=8), allocatable    :: cluster_centers(:,:)       !< training results. coordinates of cluster centroids. dimension=(#centroids, #columns)    
+        real(kind=8), allocatable    :: cluster_centers(:,:)       !< training results. coordinates of cluster centroids. dimension=(#columns, #centroids)
+        real(kind=8), allocatable    :: cluster_centers_t(:,:)       !< training results. transposed coordinates of cluster centroids. dimension=(#centroids, #columns)
+
+        real(kind=8), allocatable :: distance_table(:,:)
     contains
         procedure :: score    => score_base_kmeans
         procedure :: dump     => dump_base_kmeans
@@ -212,12 +215,12 @@ contains
         end if
     end subroutine update_cluster_centers_diff_only
 
-        !> A subroutine to calculate the distance of 'x' from the centroid
-        !! \param x data points (#samples, #columns)
-        !! \param center coordinates of centroid (#columns)
-        !! \param distance distance from the centroid (#samples)
-        !! \param n_samples number of samples
-        !! \param n_columns number of columns
+    !> A subroutine to calculate the distance of 'x' from the centroid
+    !! \param x data points (#samples, #columns)
+    !! \param center coordinates of centroid (#columns)
+    !! \param distance distance from the centroid (#samples)
+    !! \param n_samples number of samples
+    !! \param n_columns number of columns
     subroutine calculate_distance_from_center_slow(x, center, distance, n_samples, n_columns)
         real(kind=8), intent(in)    :: x(n_samples, n_columns)
         real(kind=8), intent(in)    :: center(n_columns)
@@ -402,14 +405,18 @@ contains
 
     !> A subroutine to predict cluster index of new data
     !! \param x data to be predicted
-    function predict_base_kmeans(this, x)
+    function predict_base_kmeans(this, x, hold_distance_table)
         class(base_kmeans) :: this
         real(kind=8), intent(in) :: x(:,:)
         integer(kind=8), allocatable :: predict_base_kmeans(:)
+        logical(kind=4), optional :: hold_distance_table
 
         type(error)               :: err
         integer(kind=8)           :: x_shape(2), n_samples, n_columns, c
-        real(kind=8), allocatable :: distance(:,:), x_sq_sum_row(:)
+        integer(kind=8)           :: i, j, factor
+        real(kind=8), allocatable :: distance(:,:), x_sq_sum_row(:), c_sq_sum_row(:), min_dist(:)
+        real(kind=8)              :: tmp_c_sq_sum
+        integer(kind=8)        :: date_value1(8), date_value2(8)
 
         x_shape = shape(x)
         n_samples = x_shape(1)
@@ -419,12 +426,50 @@ contains
         call err%check_estimator_is_fitted(this%is_trained, this%algo_name)
         call err%check_number_of_features_mismatch(this%n_columns, n_columns, this%algo_name)
 
-        allocate(distance(n_samples, this%hparam%n_clusters))
-        do c=1, this%hparam%n_clusters, 1
-            call calculate_distance_from_center_slow(x, this%cluster_centers(:,c), distance(:,c), & 
-                n_samples, n_columns)
+        call ifdealloc(this%distance_table)
+        allocate(this%distance_table(n_samples, this%hparam%n_clusters))
+        allocate(x_sq_sum_row(n_samples), c_sq_sum_row(this%hparam%n_clusters))
+        call date_and_time(values=date_value1)
+        call matrix_sqsum_row(x, x_sq_sum_row, n_samples, n_columns)
+        c_sq_sum_row(:) = sum(this%cluster_centers**2, dim=1)
+        call date_and_time(values=date_value2)
+        ! print*, "matrix_sqsum_row: ", time_diff(date_value1, date_value2)
+
+        call date_and_time(values=date_value1)
+        do j=1, this%hparam%n_clusters, 1
+            tmp_c_sq_sum = c_sq_sum_row(j)
+            do i=1, n_samples, 1
+                this%distance_table(i,j) = x_sq_sum_row(i) + tmp_c_sq_sum
+            end do
         end do
-        predict_base_kmeans = minloc(distance, dim=2)
+        call date_and_time(values=date_value2)
+        ! print*, "spread: ", time_diff(date_value1, date_value2)
+
+        call date_and_time(values=date_value1)
+        call dgemm("N", "N", & 
+                    n_samples, this%hparam%n_clusters, n_columns, &
+                    -2d0, & 
+                    x, n_samples, &
+                    this%cluster_centers, n_columns, &
+                    1d0, &
+                    this%distance_table, n_samples)
+        call date_and_time(values=date_value2)
+        ! print*, "dgemm: ", time_diff(date_value1, date_value2)
+        
+        call date_and_time(values=date_value1)
+        predict_base_kmeans = minloc(this%distance_table, dim=2)
+        call date_and_time(values=date_value2)
+
+        if (present(hold_distance_table)) then
+            if (hold_distance_table) then
+                ! hold distance_table
+            else
+                deallocate(this%distance_table)
+            end if
+        else
+            deallocate(this%distance_table)
+        end if
+        ! print*, "minloc(distance, dim=2): ", time_diff(date_value1, date_value2)
     end function predict_base_kmeans
 
 end module mod_base_kmeans

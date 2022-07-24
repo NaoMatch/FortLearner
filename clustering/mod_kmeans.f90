@@ -116,6 +116,9 @@ contains
         end do
         this % is_trained = t_
         this % cluster_centers(:,:) = new_cluster_centers(:,:)
+
+        allocate(this%cluster_centers_t(this%hparam%n_clusters, this%n_columns))
+        this % cluster_centers_t(:,:) = transpose(new_cluster_centers(:,:))
     end subroutine fit_slow_kmeans
 
     !> A subroutine to fit 'kmeans' object by optimized(heuristic) method.
@@ -209,6 +212,9 @@ contains
         end do
         this % is_trained = t_
         this % cluster_centers(:,:) = new_cluster_centers(:,:)
+
+        allocate(this%cluster_centers_t(this%hparam%n_clusters, this%n_columns))
+        this % cluster_centers_t(:,:) = transpose(new_cluster_centers(:,:))
     end subroutine fit_kmeans
 
     !> A subroutine to fit 'kmeans' object by optimized(heuristic) method and dgemv.
@@ -291,6 +297,9 @@ contains
         end do
         this % is_trained = t_
         this % cluster_centers(:,:) = new_cluster_centers(:,:)
+
+        allocate(this%cluster_centers_t(this%hparam%n_clusters, this%n_columns))
+        this % cluster_centers_t(:,:) = transpose(new_cluster_centers(:,:))
     end subroutine fit_dgemv_kmeans
 
     !> A subroutine to fit 'kmeans' object by optimized(heuristic) method and dgemm.
@@ -375,6 +384,9 @@ contains
         end do
         this % is_trained = t_
         this % cluster_centers(:,:) = new_cluster_centers(:,:)
+
+        allocate(this%cluster_centers_t(this%hparam%n_clusters, this%n_columns))
+        this % cluster_centers_t(:,:) = transpose(new_cluster_centers(:,:))
     end subroutine fit_dgemm_kmeans
 
     !> A subroutine to fit 'kmeans' object by elkan's method.
@@ -568,6 +580,9 @@ contains
         ! print*, "time_update_cluster_indices             : ", time_update_cluster_indices
         this%is_trained = t_
         this%cluster_centers(:,:) = new_cluster_centers(:,:)
+
+        allocate(this%cluster_centers_t(this%hparam%n_clusters, this%n_columns))
+        this % cluster_centers_t(:,:) = transpose(new_cluster_centers(:,:))
     end subroutine fit_elkan_kmeans
 
 
