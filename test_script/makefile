@@ -2,7 +2,7 @@ compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
 opt              := -O3	
-option           := -cpp -D_x86_64 -fopenmp
+option           := -cpp -D_x86_64 -fopenmp -fbounds-check
 option_blas      := -lopenblas
 
 asm              := ./mod/inc_sum_up_vector_c.out \
@@ -210,8 +210,8 @@ test:
 	make main_linear_regression_lasso_regression
 	make main_linear_regression_linear_regression
 	make main_linear_regression_ridge_regression
-	make main_neighbour_balltree
 	make main_neighbour_brute_force_search
+	make main_neighbour_balltree
 	make main_neighbour_kdtree
 	make main_neighbour_product_quantization
 	make main_stats_count_and_sum_up_gt
