@@ -5,12 +5,14 @@ Machine learning scripts for Fortranner.
 cd test_script  
 make test  
 
-# WIP:
-product_quantization  
-~multi layer perceptron, ica~
+# WIP:  
+multi layer perceptron  
+~ica~
 
 
 # Update
+2022/07/28: bug fix(kdtree, balltree)  
+2022/07/24: product_quantization  
 2022/06/11: adaboost  
 2022/05/03: nipals  
 2022/05/02: dbscan(modify 2022/05/19)  
