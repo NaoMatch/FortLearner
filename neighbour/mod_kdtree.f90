@@ -404,8 +404,8 @@ contains
         call this%build_rec(node_ptr%node_l_ptr, x_ptr, node_idx, split_indices_l)
 
         node_idx = node_idx + 1
-        allocate(split_indices_r(size(split_indices)))
-        split_indices_r = split_indices
+        allocate(split_indices_r(0))
+        ! split_indices_r = []
         call this%build_rec(node_ptr%node_r_ptr, x_ptr, node_idx, split_indices_r)
     end subroutine build_rec
 
@@ -787,7 +787,7 @@ contains
         integer(kind=8) :: i, j, idx, x_idx, f_idx, n_samples_l, n_samples_r, idx_l, idx_r
         integer(kind=8), allocatable :: indices_l(:), indices_r(:), indices(:), tmp_i(:)
         logical(kind=4), allocatable :: tmp_l(:)
-        logical(kind=4) :: goto_left
+        logical(kind=4) :: goto_left, check_dup
         real(kind=8), allocatable :: XxQ(:), tmp_d(:)
         integer(kind=8) :: n
 
@@ -805,10 +805,12 @@ contains
                 do i=1, root_node_ptr%n_samples_
                     indices(i) = root_node_ptr%indices_(i)
                 end do
+                check_dup = check_duplication(root_node_ptr%indices_(:), root_node_ptr%n_samples_)
+                ! print*, "left node index duplication: ", check_dup
                 tmp_d = [XxQ, nearest_dsts]
                 tmp_i = [indices, nearest_idxs]
                 n = minval((/size(tmp_d)+0_8, n_neighbors/))
-                call quick_argselect(tmp_d, tmp_i, size(tmp_d)+0_8, n)
+                call quick_argsort(tmp_d, tmp_i, size(tmp_d)+0_8)
                 nearest_dsts(1:n) = tmp_d(1:n)
                 nearest_idxs(1:n) = tmp_i(1:n)
             end if
@@ -860,6 +862,7 @@ contains
         real(kind=8) :: max_radius
         real(kind=8), allocatable :: XxQ(:), tmp_d(:)
         integer(kind=8), allocatable :: tmp_i(:), indices(:)
+        logical(kind=4) :: check_dup
 
         if (subtree_root_node_ptr%is_leaf) then
             ! Search Closest Point from Leaf Node
@@ -877,7 +880,9 @@ contains
                 tmp_d = [XxQ, nearest_dsts]
                 tmp_i = [indices, nearest_idxs]
                 n = minval((/size(tmp_d)+0_8, n_neighbors/))
-                call quick_argselect(tmp_d, tmp_i, size(tmp_d)+0_8, n)
+                call quick_argsort(tmp_d, tmp_i, size(tmp_d)+0_8)
+                check_dup = check_duplication(tmp_i, size(tmp_i)+0_8)
+                ! print*, "other leaf node duplication check: ", check_dup
                 nearest_dsts(1:n) = tmp_d(1:n)
                 nearest_idxs(1:n) = tmp_i(1:n)
             end if
@@ -887,8 +892,8 @@ contains
             fid = subtree_root_node_ptr%split_fid
             val_x = subtree_root_node_ptr%split_val
             val_q = q(fid)
-            dist_from_q_to_plane = (val_q-val_x)**2d0
-            max_radius = minval(nearest_dsts)
+            dist_from_q_to_plane = (val_q - val_x)**2d0
+            max_radius = maxval(nearest_dsts)
 
             if (max_radius < dist_from_q_to_plane) then
                 if (val_q <= val_x) then
@@ -899,7 +904,6 @@ contains
                         q, q_sq, nearest_dsts, nearest_idxs, n_columns, n_neighbors)
                 end if
             else
-
                 call this%query_nearest_n_neighbors_search_subtree(subtree_root_node_ptr%node_l_ptr, &
                     q, q_sq, nearest_dsts, nearest_idxs, n_columns, n_neighbors)
                 call this%query_nearest_n_neighbors_search_subtree(subtree_root_node_ptr%node_r_ptr, &
@@ -907,5 +911,27 @@ contains
             end if
         end if
     end subroutine query_nearest_n_neighbors_search_subtree
+
+    function check_duplication(vector, n_samples)
+        implicit none
+        logical(kind=4) :: check_duplication
+        integer(kind=8), intent(in) :: vector(n_samples)
+        integer(kind=8), intent(in) :: n_samples
+        integer(kind=8), allocatable :: vector_copy(:)
+        integer(kind=8) :: i
+
+        check_duplication = f_
+        allocate(vector_copy(n_samples))
+        vector_copy(:) = vector(:)
+        call quick_sort(vector_copy, n_samples)
+        do i=1, n_samples-1, 1
+            if (vector_copy(i) == vector_copy(i+1)) then
+                check_duplication = t_
+                return
+            end if
+        end do
+    end function check_duplication
+
+
 
 end module mod_kdtree
