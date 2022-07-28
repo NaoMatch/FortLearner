@@ -242,7 +242,7 @@ contains
 
             count_in_ball = count( tmp(:) .le. r_sq )
 
-            call quick_argselect(tmp, indices, this%n_samples, count_in_ball)
+            call quick_argsort(tmp, indices, size(tmp)+0_8)
 
             res%indices(c)%idx   = [res%indices(c)%idx,   indices(1:count_in_ball)]
             res%distances(c)%dst = [res%distances(c)%dst, sqrt(tmp(1:count_in_ball))]

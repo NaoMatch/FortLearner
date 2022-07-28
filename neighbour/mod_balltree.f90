@@ -349,8 +349,8 @@ contains
             end do
 
             allocate(q_i(n_columns))
-            !$omp parallel num_threads(4)
-            !$omp do private(n, distances, indices, q_i, q_sq_sum)
+            !!$omp parallel num_threads(4)
+            !!$omp do private(n, distances, indices, q_i, q_sq_sum)
             do n=1, n_samples, 1
                 allocate( distances(0), indices(0) )
                 q_i(:) = q_ptr(n,:)
@@ -359,10 +359,12 @@ contains
                     this%root_ball_ptr, q_i, q_sq_sum, n_samples, n_columns, radius_sq)
                 query_balltree%distances(n)%dst = [query_balltree%distances(n)%dst, sqrt(distances(:))]
                 query_balltree%indices(n)%idx   = [query_balltree%indices(n)%idx, indices(:)]
+                call quick_argsort(query_balltree%distances(n)%dst, query_balltree%indices(n)%idx, &
+                        size(query_balltree%indices(n)%idx)+0_8)
                 deallocate( distances, indices )
             end do
-            !$omp end do
-            !$omp end parallel
+            !!$omp end do
+            !!$omp end parallel
         end if
     end function query_balltree
 
@@ -411,7 +413,7 @@ contains
                 tmp_d = [distance_q_and_s, distances]
                 tmp_i = [tmp_i, indices]
                 n = minval((/size(tmp_d)+0_8, n_neighbors/))
-                call quick_argselect(tmp_d, tmp_i, size(tmp_d)+0_8, n)
+                call quick_argsort(tmp_d, tmp_i, size(tmp_d)+0_8)
                 distances(1:n) = tmp_d(1:n)
                 indices(1:n) = tmp_i(1:n)
             end if
@@ -476,7 +478,7 @@ contains
                 count_in_ball = count(distance_q_and_s <= radius_sq)
 
                 if ( count_in_ball > 0 ) then
-                    call quick_argselect(distance_q_and_s, tmp_i, size(distance_q_and_s)+0_8, count_in_ball)
+                    call quick_argsort(distance_q_and_s, tmp_i, root_ball_ptr%n_samples)
                     distances = [distances, distance_q_and_s(1:count_in_ball)]
                     indices = [indices, tmp_i(1:count_in_ball)]
                 end if
@@ -691,7 +693,7 @@ contains
         ! Get Pivot
         ! call date_and_time(values=date_value1)        
         med_idx = this%n_samples / 2_8
-        call quick_argselect(tmp_vec, this%indices, this%n_samples, med_idx)
+        call quick_argsort(tmp_vec, this%indices, this%n_samples)
         cnt_l = med_idx
         cnt_r = this%n_samples - cnt_l
         med_idx = this%indices(med_idx)
