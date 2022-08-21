@@ -5,11 +5,11 @@ module mod_var
     type variable
         real(kind=8), allocatable :: v(:,:)
         real(kind=8), allocatable :: g(:,:)
+        real(kind=8), allocatable :: g_(:,:)
         type(activation_function), pointer :: creator_ptr
         class(*), allocatable :: creator_tmp
     contains
         procedure :: backward => backward_variable
-        procedure :: backward_variable_subroutine
         procedure :: clear => clear_variable
     end type variable
 
@@ -31,23 +31,22 @@ module mod_var
         type(variable), pointer :: input_ptr2
         type(variable_ptr), allocatable :: input_ptrs(:)
     contains
-        ! Forward
-        ! Elementary function
-        procedure :: square
-        procedure :: exponential
-        ! Operations that perform four arithmetic operations
-        procedure :: addition
-        procedure :: substraction
-        procedure :: multiply
-        procedure :: division
-        ! Operation to change the shape of the array
-        procedure :: summation
-        procedure :: broadcast
-        ! Othres
-        procedure :: absolute_value
-        ! Backward
-        procedure :: backward => backward_activation_funcion
-        procedure :: backward_activation_funcion_subroutine
+        ! ! Forward
+        ! ! Elementary function
+        ! procedure :: square
+        ! procedure :: exponential
+        ! ! Operations that perform four arithmetic operations
+        ! procedure :: addition
+        ! procedure :: substraction
+        ! procedure :: multiply
+        ! procedure :: division
+        ! ! Operation to change the shape of the array
+        ! procedure :: summation
+        ! procedure :: broadcast
+        ! ! Othres
+        ! procedure :: absolute_value
+        ! ! Backward
+        ! procedure :: backward => backward_activation_funcion
     end type activation_function
 
     type creator_ptr
@@ -81,316 +80,274 @@ contains
         implicit none
         class(variable) :: this
         type(variable)  :: var
-        if (associated(this%creator_ptr)) then
-            this%creator_ptr%input_ptr%g = this%creator_ptr%backward(this%g)
-            call this%creator_ptr%input_ptr%backward()
-        end if
-    end subroutine backward_variable
-
-    recursive subroutine backward_variable_subroutine(this)
-        implicit none
-        class(variable) :: this
-        type(variable)  :: var
         type(variable_ptr), allocatable :: var_ptrs(:)
+        type(creator_ptr), allocatable :: creator_ptrs(:)
+        type(creator_ptr) :: creator_ptr_tmp
         integer(kind=8) :: i
+        
         if (associated(this%creator_ptr)) then
             ! print*, '*********************************************************************************************'
             ! print*, this%creator_ptr%act_name, size(this%creator_ptr%input_ptrs)
-            call this%creator_ptr%backward_activation_funcion_subroutine(this%g)
+            ! call this%creator_ptr%backward(this%g)
             allocate(var_ptrs(0))
             var_ptrs = [var_ptrs, this%creator_ptr%input_ptrs]
             do i=1, size(var_ptrs), 1
-                call var_ptrs(i)%ptr%backward_variable_subroutine()
+                call var_ptrs(i)%ptr%backward()
             end do
         end if
-    end subroutine backward_variable_subroutine
+    end subroutine backward_variable
 
 
 
-    function square(this, input_var) result(output_var)
-        implicit none
-        class(activation_function), target :: this
-        type(variable), target :: input_var
-        type(variable) :: output_var
-        this%act_name = "square"
-        output_var%creator_ptr => this
-        output_var%creator_ptr%input_ptr => input_var
-        if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
-        allocate(output_var%creator_ptr%input_ptrs(1))
-        output_var%creator_ptr%input_ptrs(1)%ptr => input_var
-        call allocater_mat(output_var%v, shape(input_var%v))
-        output_var%v = input_var%v**2d0
-    end function square
+    ! function square(this, input_var) result(output_var)
+    !     implicit none
+    !     class(activation_function), target :: this
+    !     type(variable), target :: input_var
+    !     type(variable) :: output_var
+    !     this%act_name = "square"
+    !     output_var%creator_ptr => this
+    !     output_var%creator_ptr%input_ptr => input_var
+    !     if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
+    !     allocate(output_var%creator_ptr%input_ptrs(1))
+    !     output_var%creator_ptr%input_ptrs(1)%ptr => input_var
+    !     call allocater_mat(output_var%v, shape(input_var%v))
+    !     output_var%v = input_var%v**2d0
+    ! end function square
     
-    function exponential(this, input_var) result(output_var)
-        implicit none
-        class(activation_function), target :: this
-        type(variable), target :: input_var
-        type(variable) :: output_var
-        this%act_name = "exponential"
-        output_var%creator_ptr => this
-        output_var%creator_ptr%input_ptr => input_var
-        if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
-        allocate(output_var%creator_ptr%input_ptrs(1))
-        output_var%creator_ptr%input_ptrs(1)%ptr => input_var
-        call allocater_mat(output_var%v, shape(input_var%v))
-        output_var%v = exp(input_var%v)
-    end function exponential
+    ! function exponential(this, input_var) result(output_var)
+    !     implicit none
+    !     class(activation_function), target :: this
+    !     type(variable), target :: input_var
+    !     type(variable) :: output_var
+    !     this%act_name = "exponential"
+    !     output_var%creator_ptr => this
+    !     output_var%creator_ptr%input_ptr => input_var
+    !     if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
+    !     allocate(output_var%creator_ptr%input_ptrs(1))
+    !     output_var%creator_ptr%input_ptrs(1)%ptr => input_var
+    !     call allocater_mat(output_var%v, shape(input_var%v))
+    !     output_var%v = exp(input_var%v)
+    ! end function exponential
 
-    function summation(this, input_var, dim) result(output_var)
-        implicit none
-        class(activation_function), target :: this
-        type(variable), target :: input_var
-        integer(kind=4), optional :: dim
-        type(variable) :: output_var
-        real(kind=8), allocatable :: v_sum(:,:)
-        integer(kind=4) :: out_shape(2)
-        this%act_name = "summation"
-        output_var%creator_ptr => this
-        output_var%creator_ptr%input_ptr => input_var
-        if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
-        allocate(output_var%creator_ptr%input_ptrs(1))
-        output_var%creator_ptr%input_ptrs(1)%ptr => input_var
-        if (present(dim)) then
-            this%dim = dim
-            if (dim>=3 .or. dim<=0) stop "dim -> 1<=dim<=2 or None."
-            if (dim==1) then
-                out_shape = [1, size(input_var%v(1,:))]
-            else
-                out_shape = [size(input_var%v(:,1)), 1]
-            end if
-            call allocater_mat(output_var%v, out_shape)
-            output_var%v(:,:) = reshape(sum(input_var%v(:,:), dim=this%dim), shape=out_shape)
-        else
-            this%dim = -1
-            call allocater_mat(output_var%v, [1,1])
-            output_var%v = reshape( (/sum(input_var%v(:,:))/), shape = [1,1] )
-        end if
-    end function summation
+    ! function summation(this, input_var, dim) result(output_var)
+    !     implicit none
+    !     class(activation_function), target :: this
+    !     type(variable), target :: input_var
+    !     integer(kind=4), optional :: dim
+    !     type(variable) :: output_var
+    !     real(kind=8), allocatable :: v_sum(:,:)
+    !     integer(kind=4) :: out_shape(2)
+    !     this%act_name = "summation"
+    !     output_var%creator_ptr => this
+    !     output_var%creator_ptr%input_ptr => input_var
+    !     if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
+    !     allocate(output_var%creator_ptr%input_ptrs(1))
+    !     output_var%creator_ptr%input_ptrs(1)%ptr => input_var
+    !     if (present(dim)) then
+    !         this%dim = dim
+    !         if (dim>=3 .or. dim<=0) stop "dim -> 1<=dim<=2 or None."
+    !         if (dim==1) then
+    !             out_shape = [1, size(input_var%v(1,:))]
+    !         else
+    !             out_shape = [size(input_var%v(:,1)), 1]
+    !         end if
+    !         call allocater_mat(output_var%v, out_shape)
+    !         output_var%v(:,:) = reshape(sum(input_var%v(:,:), dim=this%dim), shape=out_shape)
+    !     else
+    !         this%dim = -1
+    !         call allocater_mat(output_var%v, [1,1])
+    !         output_var%v = reshape( (/sum(input_var%v(:,:))/), shape = [1,1] )
+    !     end if
+    ! end function summation
 
-    function multiply(this, input_var1, input_var2) result(output_var)
-        implicit none
-        class(activation_function), target :: this
-        type(variable), target :: input_var1
-        type(variable), target :: input_var2
-        type(variable) :: output_var
-        this%act_name = "multiply"
-        output_var%creator_ptr => this
-        output_var%creator_ptr%input_ptr => input_var1
-        output_var%creator_ptr%input_ptr2 => input_var2
-        if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
-        allocate(output_var%creator_ptr%input_ptrs(2))
-        output_var%creator_ptr%input_ptrs(1)%ptr => input_var1
-        output_var%creator_ptr%input_ptrs(2)%ptr => input_var2
-        call allocater_mat(output_var%v, shape(input_var1%v))
-        output_var%v = input_var1%v*input_var2%v
-    end function multiply
+    ! function multiply(this, input_var1, input_var2) result(output_var)
+    !     implicit none
+    !     class(activation_function), target :: this
+    !     type(variable), target :: input_var1
+    !     type(variable), target :: input_var2
+    !     type(variable) :: output_var
+    !     this%act_name = "multiply"
+    !     output_var%creator_ptr => this
+    !     output_var%creator_ptr%input_ptr => input_var1
+    !     output_var%creator_ptr%input_ptr2 => input_var2
+    !     if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
+    !     allocate(output_var%creator_ptr%input_ptrs(2))
+    !     output_var%creator_ptr%input_ptrs(1)%ptr => input_var1
+    !     output_var%creator_ptr%input_ptrs(2)%ptr => input_var2
+    !     call allocater_mat(output_var%v, shape(input_var1%v))
+    !     output_var%v = input_var1%v*input_var2%v
+    ! end function multiply
 
-    function broadcast(this, input_var, dim, n_copies) result(output_var)
-        implicit none
-        class(activation_function), target :: this
-        type(variable), target :: input_var
-        type(variable) :: output_var
-        integer(kind=4), intent(in) :: dim
-        integer(kind=4), intent(in) :: n_copies
-        integer(kind=4) :: n, out_shape(2)
+    ! function broadcast(this, input_var, dim, n_copies) result(output_var)
+    !     implicit none
+    !     class(activation_function), target :: this
+    !     type(variable), target :: input_var
+    !     type(variable) :: output_var
+    !     integer(kind=4), intent(in) :: dim
+    !     integer(kind=4), intent(in) :: n_copies
+    !     integer(kind=4) :: n, out_shape(2)
 
         
-        this%act_name = "broadcast"
-        output_var%creator_ptr => this
-        output_var%creator_ptr%input_ptr => input_var
-        if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
-        allocate(output_var%creator_ptr%input_ptrs(1))
-        output_var%creator_ptr%input_ptrs(1)%ptr => input_var
+    !     this%act_name = "broadcast"
+    !     output_var%creator_ptr => this
+    !     output_var%creator_ptr%input_ptr => input_var
+    !     if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
+    !     allocate(output_var%creator_ptr%input_ptrs(1))
+    !     output_var%creator_ptr%input_ptrs(1)%ptr => input_var
 
-        this%dim = dim
-        if (dim>=3 .or. dim<=0) stop "dim -> 1<=dim<=2 or None."
-        if (dim==1) then
-            out_shape = [n_copies, size(input_var%v(1,:))]
-        else
-            out_shape = [size(input_var%v(:,1)), n_copies]
-        end if
-        call allocater_mat(output_var%v, out_shape)
+    !     this%dim = dim
+    !     if (dim>=3 .or. dim<=0) stop "dim -> 1<=dim<=2 or None."
+    !     if (dim==1) then
+    !         out_shape = [n_copies, size(input_var%v(1,:))]
+    !     else
+    !         out_shape = [size(input_var%v(:,1)), n_copies]
+    !     end if
+    !     call allocater_mat(output_var%v, out_shape)
 
-        if (dim==1) then
-            do n=1, n_copies, 1
-                output_var%v(n,:) = input_var%v(1,:)
-            end do    
-        else
-            do n=1, n_copies, 1
-                output_var%v(:,n) = input_var%v(:,1)
-            end do    
-        end if
-    end function broadcast
+    !     if (dim==1) then
+    !         do n=1, n_copies, 1
+    !             output_var%v(n,:) = input_var%v(1,:)
+    !         end do    
+    !     else
+    !         do n=1, n_copies, 1
+    !             output_var%v(:,n) = input_var%v(:,1)
+    !         end do    
+    !     end if
+    ! end function broadcast
 
-    function addition(this, input_var1, input_var2) result(output_var)
-        implicit none
-        class(activation_function), target :: this
-        type(variable), target :: input_var1
-        type(variable), target :: input_var2
-        type(variable) :: output_var
+    ! function addition(this, input_var1, input_var2) result(output_var)
+    !     implicit none
+    !     class(activation_function), target :: this
+    !     type(variable), target :: input_var1
+    !     type(variable), target :: input_var2
+    !     type(variable) :: output_var
 
-        this%act_name = "addition"
-        output_var%creator_ptr => this
-        output_var%creator_ptr%input_ptr => input_var1
-        output_var%creator_ptr%input_ptr2 => input_var2
-        if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
-        allocate(output_var%creator_ptr%input_ptrs(2))
-        output_var%creator_ptr%input_ptrs(1)%ptr => input_var1
-        output_var%creator_ptr%input_ptrs(2)%ptr => input_var2
-        call allocater_mat(output_var%v, shape(input_var1%v))
-        output_var%v = input_var1%v + input_var2%v
-    end function addition
+    !     this%act_name = "addition"
+    !     output_var%creator_ptr => this
+    !     output_var%creator_ptr%input_ptr => input_var1
+    !     output_var%creator_ptr%input_ptr2 => input_var2
+    !     if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
+    !     allocate(output_var%creator_ptr%input_ptrs(2))
+    !     output_var%creator_ptr%input_ptrs(1)%ptr => input_var1
+    !     output_var%creator_ptr%input_ptrs(2)%ptr => input_var2
+    !     call allocater_mat(output_var%v, shape(input_var1%v))
+    !     output_var%v = input_var1%v + input_var2%v
+    ! end function addition
 
-    function substraction(this, input_var1, input_var2) result(output_var)
-        implicit none
-        class(activation_function), target :: this
-        type(variable), target :: input_var1
-        type(variable), target :: input_var2
-        type(variable) :: output_var
+    ! function substraction(this, input_var1, input_var2) result(output_var)
+    !     implicit none
+    !     class(activation_function), target :: this
+    !     type(variable), target :: input_var1
+    !     type(variable), target :: input_var2
+    !     type(variable) :: output_var
 
-        this%act_name = "substraction"
-        output_var%creator_ptr => this
-        output_var%creator_ptr%input_ptr => input_var1
-        output_var%creator_ptr%input_ptr2 => input_var2
-        if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
-        allocate(output_var%creator_ptr%input_ptrs(2))
-        output_var%creator_ptr%input_ptrs(1)%ptr => input_var1
-        output_var%creator_ptr%input_ptrs(2)%ptr => input_var2
-        call allocater_mat(output_var%v, shape(input_var1%v))
-        output_var%v = input_var1%v - input_var2%v
-    end function substraction
+    !     this%act_name = "substraction"
+    !     output_var%creator_ptr => this
+    !     output_var%creator_ptr%input_ptr => input_var1
+    !     output_var%creator_ptr%input_ptr2 => input_var2
+    !     if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
+    !     allocate(output_var%creator_ptr%input_ptrs(2))
+    !     output_var%creator_ptr%input_ptrs(1)%ptr => input_var1
+    !     output_var%creator_ptr%input_ptrs(2)%ptr => input_var2
+    !     call allocater_mat(output_var%v, shape(input_var1%v))
+    !     output_var%v = input_var1%v - input_var2%v
+    ! end function substraction
 
-    function division(this, input_var1, input_var2) result(output_var)
-        implicit none
-        class(activation_function), target :: this
-        type(variable), target :: input_var1
-        type(variable), target :: input_var2
-        type(variable) :: output_var
+    ! function division(this, input_var1, input_var2) result(output_var)
+    !     implicit none
+    !     class(activation_function), target :: this
+    !     type(variable), target :: input_var1
+    !     type(variable), target :: input_var2
+    !     type(variable) :: output_var
 
-        this%act_name = "division"
-        output_var%creator_ptr => this
-        output_var%creator_ptr%input_ptr => input_var1
-        output_var%creator_ptr%input_ptr2 => input_var2
-        if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
-        allocate(output_var%creator_ptr%input_ptrs(2))
-        output_var%creator_ptr%input_ptrs(1)%ptr => input_var1
-        output_var%creator_ptr%input_ptrs(2)%ptr => input_var2
-        call allocater_mat(output_var%v, shape(input_var1%v))
-        output_var%v = input_var1%v / input_var2%v
-    end function division
+    !     this%act_name = "division"
+    !     output_var%creator_ptr => this
+    !     output_var%creator_ptr%input_ptr => input_var1
+    !     output_var%creator_ptr%input_ptr2 => input_var2
+    !     if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
+    !     allocate(output_var%creator_ptr%input_ptrs(2))
+    !     output_var%creator_ptr%input_ptrs(1)%ptr => input_var1
+    !     output_var%creator_ptr%input_ptrs(2)%ptr => input_var2
+    !     call allocater_mat(output_var%v, shape(input_var1%v))
+    !     output_var%v = input_var1%v / input_var2%v
+    ! end function division
 
-    function absolute_value(this, input_var) result(output_var)
-        implicit none
-        class(activation_function), target :: this
-        type(variable), target :: input_var
-        type(variable) :: output_var
+    ! function absolute_value(this, input_var) result(output_var)
+    !     implicit none
+    !     class(activation_function), target :: this
+    !     type(variable), target :: input_var
+    !     type(variable) :: output_var
 
-        this%act_name = "absolute_value"
-        output_var%creator_ptr => this
-        output_var%creator_ptr%input_ptr => input_var
-        if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
-        allocate(output_var%creator_ptr%input_ptrs(1))
-        output_var%creator_ptr%input_ptrs(1)%ptr => input_var
-        call allocater_mat(output_var%v, shape(input_var%v))
-        output_var%v = abs(input_var%v)
-        call allocater_mat(output_var%creator_ptr%m, shape(input_var%v))
-        call create_mask(output_var%creator_ptr%m, input_var%v, 0d0, -1d0)
-    end function absolute_value
+    !     this%act_name = "absolute_value"
+    !     output_var%creator_ptr => this
+    !     output_var%creator_ptr%input_ptr => input_var
+    !     if (allocated(output_var%creator_ptr%input_ptrs)) deallocate(output_var%creator_ptr%input_ptrs)
+    !     allocate(output_var%creator_ptr%input_ptrs(1))
+    !     output_var%creator_ptr%input_ptrs(1)%ptr => input_var
+    !     call allocater_mat(output_var%v, shape(input_var%v))
+    !     output_var%v = abs(input_var%v)
+    !     call allocater_mat(output_var%creator_ptr%m, shape(input_var%v))
+    !     call create_mask(output_var%creator_ptr%m, input_var%v, 0d0, -1d0)
+    ! end function absolute_value
 
 
-    function backward_activation_funcion(this, grad_in) result(grad_out)
-        implicit none
-        class(activation_function) :: this
-        real(kind=8), intent(in) :: grad_in(:,:)
-        real(kind=8), allocatable :: grad_out(:,:)
-        integer(kind=8) :: i, j
+    ! subroutine backward_activation_funcion(this, grad_in)
+    !     implicit none
+    !     class(activation_function) :: this
+    !     real(kind=8), intent(in) :: grad_in(:,:)
+    !     integer(kind=8) :: i, j
 
-        if (this%act_name == "square") then
-            grad_out = 2d0 * this%input_ptr%v(:,:) * grad_in(:,:)
-        elseif (this%act_name == "exponential") then
-            grad_out = exp(this%input_ptr%v(:,:)) * grad_in(:,:)
-        ! elseif (this%act_name == "multiply") then
-        !     grad_out = exp(this%input_ptr%v(:,:)) * grad_in(:,:)
-        elseif (this%act_name == "summation") then
-            if (this%dim == -1) then
-                grad_out = ones_array_2d(shape(this%input_ptr%v)+0_8) * grad_in(1,1)
-            elseif (this%dim == 1) then
-                call allocater_mat(grad_out, shape(this%input_ptr%v))
-                do i=1, size(this%input_ptr%v(:,1)), 1
-                    grad_out(i,:) = grad_in(1,:)
-                end do
-            else ! this%dim == 2
-                call allocater_mat(grad_out, shape(this%input_ptr%v))
-                do j=1, size(this%input_ptr%v(1,:)), 1
-                    grad_out(:,j) = grad_in(:,1)
-                end do
-            end if
-        elseif (this%act_name == "broadcast") then
-
-        else
-            print*, trim(this%act_name)
-            stop "NotImplementedError."
-        end if
-    end function backward_activation_funcion
-
-    subroutine backward_activation_funcion_subroutine(this, grad_in)
-        implicit none
-        class(activation_function) :: this
-        real(kind=8), intent(in) :: grad_in(:,:)
-        integer(kind=8) :: i, j
-
-        if (this%act_name == "square") then
-            call allocater_mat(this%input_ptr%g, shape(this%input_ptr%v(:,:)))
-            this%input_ptrs(1)%ptr%g = 2d0 * this%input_ptrs(1)%ptr%v(:,:) * grad_in(:,:)
-        elseif (this%act_name == "exponential") then
-            call allocater_mat(this%input_ptr%g, shape(this%input_ptr%v(:,:)))
-            this%input_ptrs(1)%ptr%g = exp(this%input_ptrs(1)%ptr%v(:,:))  * grad_in(:,:)
-        elseif (this%act_name == "multiply") then
-            call allocater_mat(this%input_ptrs(1)%ptr%g, shape(this%input_ptr%v(:,:)))
-            call allocater_mat(this%input_ptrs(2)%ptr%g, shape(this%input_ptr%v(:,:)))
-            this%input_ptrs(1)%ptr%g = this%input_ptrs(2)%ptr%v(:,:)  * grad_in(:,:)
-            this%input_ptrs(2)%ptr%g = this%input_ptrs(1)%ptr%v(:,:)  * grad_in(:,:)
-        elseif (this%act_name == "substraction") then
-            call allocater_mat(this%input_ptrs(1)%ptr%g, shape(this%input_ptr%v(:,:)))
-            call allocater_mat(this%input_ptrs(2)%ptr%g, shape(this%input_ptr%v(:,:)))
-            this%input_ptrs(1)%ptr%g = grad_in(:,:)
-            this%input_ptrs(2)%ptr%g = -grad_in(:,:)
-        elseif (this%act_name == "addition") then
-            call allocater_mat(this%input_ptrs(1)%ptr%g, shape(this%input_ptr%v(:,:)))
-            call allocater_mat(this%input_ptrs(2)%ptr%g, shape(this%input_ptr%v(:,:)))
-            this%input_ptrs(1)%ptr%g = grad_in(:,:)
-            this%input_ptrs(2)%ptr%g = grad_in(:,:)
-        elseif (this%act_name == "division") then
-            call allocater_mat(this%input_ptrs(1)%ptr%g, shape(this%input_ptr%v(:,:)))
-            call allocater_mat(this%input_ptrs(2)%ptr%g, shape(this%input_ptr%v(:,:)))
-            this%input_ptrs(1)%ptr%g = 1d0 / this%input_ptrs(2)%ptr%v * grad_in(:,:)
-            this%input_ptrs(2)%ptr%g = -this%input_ptrs(1)%ptr%v / (this%input_ptrs(2)%ptr%v)**2d0 * grad_in(:,:)
-        elseif (this%act_name == "absolute_value") then
-            call allocater_mat(this%input_ptrs(1)%ptr%g, shape(this%input_ptr%v(:,:)))
-            this%input_ptrs(1)%ptr%g = grad_in(:,:) * this%m(:,:)
-        elseif (this%act_name == "broadcast") then
-            call allocater_mat(this%input_ptrs(1)%ptr%g, [1, size(this%input_ptr%v(1,:))])
-            this%input_ptrs(1)%ptr%g(1,:) = sum(grad_in(:,:), dim=1)
-        elseif (this%act_name == "summation") then
-            if (this%dim == -1) then
-                this%input_ptrs(1)%ptr%g = ones_array_2d(shape(this%input_ptrs(1)%ptr%v)+0_8) * grad_in(1,1)
-            elseif (this%dim == 1) then
-                call allocater_mat(this%input_ptrs(1)%ptr%g, shape(this%input_ptrs(1)%ptr%v))
-                do i=1, size(this%input_ptrs(1)%ptr%v(:,1)), 1
-                    this%input_ptrs(1)%ptr%g(i,:) = grad_in(1,:)
-                end do
-            else ! this%dim == 2
-                call allocater_mat(this%input_ptrs(1)%ptr%g, shape(this%input_ptrs(1)%ptr%v))
-                do j=1, size(this%input_ptrs(1)%ptr%v(1,:)), 1
-                    this%input_ptrs(1)%ptr%g(:,j) = grad_in(:,1)
-                end do
-            end if
-        else
-            print*, trim(this%act_name)
-            stop "NotImplementedError."
-        end if
-    end subroutine backward_activation_funcion_subroutine
+    !     if (this%act_name == "square") then
+    !         call allocater_mat(this%input_ptr%g, shape(this%input_ptr%v(:,:)))
+    !         this%input_ptrs(1)%ptr%g = 2d0 * this%input_ptrs(1)%ptr%v(:,:) * grad_in(:,:)
+    !     elseif (this%act_name == "exponential") then
+    !         call allocater_mat(this%input_ptr%g, shape(this%input_ptr%v(:,:)))
+    !         this%input_ptrs(1)%ptr%g = exp(this%input_ptrs(1)%ptr%v(:,:))  * grad_in(:,:)
+    !     elseif (this%act_name == "multiply") then
+    !         call allocater_mat(this%input_ptrs(1)%ptr%g, shape(this%input_ptr%v(:,:)))
+    !         call allocater_mat(this%input_ptrs(2)%ptr%g, shape(this%input_ptr%v(:,:)))
+    !         this%input_ptrs(1)%ptr%g = this%input_ptrs(2)%ptr%v(:,:)  * grad_in(:,:)
+    !         this%input_ptrs(2)%ptr%g = this%input_ptrs(1)%ptr%v(:,:)  * grad_in(:,:)
+    !     elseif (this%act_name == "substraction") then
+    !         call allocater_mat(this%input_ptrs(1)%ptr%g, shape(this%input_ptr%v(:,:)))
+    !         call allocater_mat(this%input_ptrs(2)%ptr%g, shape(this%input_ptr%v(:,:)))
+    !         this%input_ptrs(1)%ptr%g = grad_in(:,:)
+    !         this%input_ptrs(2)%ptr%g = -grad_in(:,:)
+    !     elseif (this%act_name == "addition") then
+    !         call allocater_mat(this%input_ptrs(1)%ptr%g, shape(this%input_ptr%v(:,:)))
+    !         call allocater_mat(this%input_ptrs(2)%ptr%g, shape(this%input_ptr%v(:,:)))
+    !         this%input_ptrs(1)%ptr%g = grad_in(:,:)
+    !         this%input_ptrs(2)%ptr%g = grad_in(:,:)
+    !     elseif (this%act_name == "division") then
+    !         call allocater_mat(this%input_ptrs(1)%ptr%g, shape(this%input_ptr%v(:,:)))
+    !         call allocater_mat(this%input_ptrs(2)%ptr%g, shape(this%input_ptr%v(:,:)))
+    !         this%input_ptrs(1)%ptr%g = 1d0 / this%input_ptrs(2)%ptr%v * grad_in(:,:)
+    !         this%input_ptrs(2)%ptr%g = -this%input_ptrs(1)%ptr%v / (this%input_ptrs(2)%ptr%v)**2d0 * grad_in(:,:)
+    !     elseif (this%act_name == "absolute_value") then
+    !         call allocater_mat(this%input_ptrs(1)%ptr%g, shape(this%input_ptr%v(:,:)))
+    !         this%input_ptrs(1)%ptr%g = grad_in(:,:) * this%m(:,:)
+    !     elseif (this%act_name == "broadcast") then
+    !         call allocater_mat(this%input_ptrs(1)%ptr%g, [1, size(this%input_ptr%v(1,:))])
+    !         this%input_ptrs(1)%ptr%g(1,:) = sum(grad_in(:,:), dim=1)
+    !     elseif (this%act_name == "summation") then
+    !         if (this%dim == -1) then
+    !             this%input_ptrs(1)%ptr%g = ones_array_2d(shape(this%input_ptrs(1)%ptr%v)+0_8) * grad_in(1,1)
+    !         elseif (this%dim == 1) then
+    !             call allocater_mat(this%input_ptrs(1)%ptr%g, shape(this%input_ptrs(1)%ptr%v))
+    !             do i=1, size(this%input_ptrs(1)%ptr%v(:,1)), 1
+    !                 this%input_ptrs(1)%ptr%g(i,:) = grad_in(1,:)
+    !             end do
+    !         else ! this%dim == 2
+    !             call allocater_mat(this%input_ptrs(1)%ptr%g, shape(this%input_ptrs(1)%ptr%v))
+    !             do j=1, size(this%input_ptrs(1)%ptr%v(1,:)), 1
+    !                 this%input_ptrs(1)%ptr%g(:,j) = grad_in(:,1)
+    !             end do
+    !         end if
+    !     else
+    !         print*, trim(this%act_name)
+    !         stop "NotImplementedError."
+    !     end if
+    ! end subroutine backward_activation_funcion
 
 
     function ones_array_1d(arr_shape)

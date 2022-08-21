@@ -39,4 +39,6 @@ module mod_const
 
     real(kind=8), parameter    :: euler_gamma = 0.577215664901532860606512090082d0
 
+    integer(kind=8), parameter :: MAX_STACK_SIZE = 100 ! Maximum number of models
+
 end module mod_const
