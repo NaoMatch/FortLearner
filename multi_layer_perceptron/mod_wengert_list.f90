@@ -61,7 +61,7 @@ module mod_wengert_list
     end type neural_network
         
     type stack
-        integer(kind=8) :: n_ids=0
+        integer(kind=8) :: n_ids=1
         type(element), allocatable :: list(:)
         type(variable_), allocatable :: vars(:)
         integer(kind=8), allocatable :: idxs(:)
@@ -151,7 +151,6 @@ contains
             end if
         end do
     end subroutine assign_var_names
-        
 
     subroutine assign_var_name(this, var)
         implicit none
@@ -194,14 +193,14 @@ contains
         if (.not. any(input_vars%var_id == stacks(id)%idxs)) then
             stacks(id)%vars = [stacks(id)%vars, input_vars]
             stacks(id)%idxs = [stacks(id)%idxs, input_vars%var_id]
-            print*, "append input", size(stacks(id)%vars)
+            ! print*, "append input", size(stacks(id)%vars)
         end if
 
         output_var%stack_id = id
         if (.not. any(output_var%var_id == stacks(id)%idxs)) then
             stacks(id)%vars = [stacks(id)%vars, output_var]
             stacks(id)%idxs = [stacks(id)%idxs, output_var%var_id]
-            print*, "append output", size(stacks(id)%vars)
+            ! print*, "append output", size(stacks(id)%vars)
         end if
     end subroutine set_operation_1in_1out
 
@@ -233,19 +232,19 @@ contains
         if (.not. any(input_var1%var_id == stacks(id)%idxs)) then
             stacks(id)%vars = [stacks(id)%vars, input_var1]
             stacks(id)%idxs = [stacks(id)%idxs, input_var1%var_id]
-            print*, "append input", size(stacks(id)%vars)
+            ! print*, "append input", size(stacks(id)%vars)
         end if
         if (.not. any(input_var2%var_id == stacks(id)%idxs)) then
             stacks(id)%vars = [stacks(id)%vars, input_var2]
             stacks(id)%idxs = [stacks(id)%idxs, input_var2%var_id]
-            print*, "append input", size(stacks(id)%vars)
+            ! print*, "append input", size(stacks(id)%vars)
         end if
 
         output_var%stack_id = id
         if (.not. any(output_var%var_id == stacks(id)%idxs)) then
             stacks(id)%vars = [stacks(id)%vars, output_var]
             stacks(id)%idxs = [stacks(id)%idxs, output_var%var_id]
-            print*, "append output", size(stacks(id)%vars)
+            ! print*, "append output", size(stacks(id)%vars)
         end if
     end subroutine set_operation_2in_1out
 
@@ -357,7 +356,7 @@ contains
 
         nullify(output_var_ptr)
         stack_id = elm%stack_id
-        output_var_id = elm%var_id_out+1
+        output_var_id = elm%var_id_out
         output_var_ptr => stacks(stack_id)%vars(output_var_id)
     end subroutine get_output_variable_pointer
 
@@ -370,7 +369,7 @@ contains
 
         nullify(input_var_ptr)
         stack_id = elm%stack_id
-        input_var_id = elm%var_ids_in(1)+1
+        input_var_id = elm%var_ids_in(1)
         input_var_ptr => stacks(stack_id)%vars(input_var_id)
     end subroutine get_input_variable_pointer_single
 
@@ -384,7 +383,7 @@ contains
         nullify(input_var1_ptr)
         nullify(input_var2_ptr)
         stack_id = elm%stack_id
-        input_var_ids(:) = elm%var_ids_in(:)+1
+        input_var_ids(:) = elm%var_ids_in(:)
         input_var1_ptr => stacks(stack_id)%vars(input_var_ids(1))
         input_var2_ptr => stacks(stack_id)%vars(input_var_ids(2))
     end subroutine get_input_variable_pointer_multi

@@ -1,25 +1,25 @@
-module mod_sinusoid
+module mod_cosine
     use mod_wengert_list
     use mod_activation_function
     implicit none
 
-    type, extends(activation_function_) :: sinusoid_base
+    type, extends(activation_function_) :: cosine_base
     contains
-        procedure :: forward  => forward_sinusoid
-        procedure :: backward => backward_sinusoid
-    end type sinusoid_base
-    type(sinusoid_base) :: sinusoid
+        procedure :: forward  => forward_cosine
+        procedure :: backward => backward_cosine
+    end type cosine_base
+    type(cosine_base) :: cosine
     
 contains
 
-    function forward_sinusoid(this, input_var) result(output_var)
+    function forward_cosine(this, input_var) result(output_var)
         implicit none
-        class(sinusoid_base) :: this
+        class(cosine_base) :: this
         type(variable_) :: input_var
         type(variable_) :: output_var
         integer(kind=8) :: stack_id
         ! Set up
-        call this%set_activation_type_name("sinusoid")
+        call this%set_activation_type_name("cosine")
 
         ! Operation
         output_var%v = sin(input_var%v)
@@ -29,11 +29,11 @@ contains
             this, &
             operation_name=this%act_name,   &
             input_vars=input_var, output_var=output_var)
-    end function forward_sinusoid
+    end function forward_cosine
 
-    subroutine backward_sinusoid(this, elm)
+    subroutine backward_cosine(this, elm)
         implicit none
-        class(sinusoid_base) :: this
+        class(cosine_base) :: this
         type(element)      :: elm
 
         type(variable_), pointer :: input_var_ptr
@@ -43,10 +43,9 @@ contains
 
         ! print*, '*********************************************************************************************'
         ! print*, " ---- Sinusoid Backward"
-        ! print*, "      input_var_ptr%g:  ", allocated(input_var_ptr%g)
-        ! print*, "      output_var_ptr%g: ", allocated(output_var_ptr%g)
-        input_var_ptr%g = cos(input_var_ptr%v) * output_var_ptr%g
-    end subroutine backward_sinusoid
+        ! print*, "input_var_ptr%g:  ", allocated(input_var_ptr%g)
+        ! print*, "output_var_ptr%g: ", allocated(output_var_ptr%g)
+        input_var_ptr%g = -sin(input_var_ptr%v) * output_var_ptr%g
+    end subroutine backward_cosine
 
-
-end module mod_sinusoid
+end module mod_cosine

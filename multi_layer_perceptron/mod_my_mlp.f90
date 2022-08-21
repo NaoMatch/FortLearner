@@ -1,8 +1,7 @@
 module mod_my_mlp
     use mod_var
     use mod_wengert_list
-    use mod_square
-    use mod_sinusoid
+    include "./inc_use_activation_functions.f90"
     implicit none
 
     type, extends(neural_network) :: my_mlp
@@ -23,20 +22,37 @@ contains
         new_my_mlp%opt = opt
     end function new_my_mlp
 
-    function forward_my_mlp(this, input_var) result(output_vars)
+    function forward_my_mlp(this, input_vars) result(output_vars)
         implicit none
         class(my_mlp) :: this
-        type(variable_) :: input_var
+        type(variable_) :: input_vars(2)
         type(variable_), allocatable :: output_vars(:)
-        type(variable_) :: var_sq, var_sin, var
+        type(variable_) :: var_add, var_sub, var_mul, var_div
+        type(variable_) :: var_exp, var_log, var_cos, var_sin
+        type(variable_) :: var_sq, var_sqr, var_tan
+        type(variable_) :: var_asin, var_acos, var_atan
         integer(kind=8) :: id
-        call this%init(input_var)
+        call this%init(input_vars)
 
-        var = square%forward(input_var)
-        var = sinusoid%forward(var)
+        var_add = addition%forward(input_vars(1), input_vars(2))
+        var_sub = substraction%forward(input_vars(1), input_vars(2))
+
+        var_mul = multiplication%forward(var_add, var_sub)
+        var_div = division%forward(var_mul, var_sub)
+
+        var_exp = exponential%forward(var_div)
+        var_log = log_natural%forward(var_div)
+        var_cos = cosine%forward(var_log)
+        var_sin = sinusoid%forward(var_cos)
+        var_sq = square%forward(var_sin)
+        var_sqr = square_root%forward(var_sq)
+        var_tan = tangent%forward(var_sqr)
+        var_asin = arcsinusoid%forward(var_tan)
+        var_acos = arccosine%forward(var_asin)
+        var_atan = arctangent%forward(var_acos)
 
         allocate(output_vars(1))
-        output_vars = var
+        output_vars = var_atan
     end function forward_my_mlp
 
 

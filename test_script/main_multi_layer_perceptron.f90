@@ -7,18 +7,26 @@ program main_multi_layer_perceptron
     implicit none
 
     type(variable_) :: input_var, output_vars(1)
+    type(variable_) :: input_vars(2)
     type(variable_) :: loss_var(1)
     type(my_mlp) :: nn_model, nn_model2
     type(optimizer_) :: opt
 
     opt = optimizer_(learning_rate=.1d0, alpha=0d0)
-    input_var = variable_(.5d0)
+
+    input_vars(1) = variable_(1.5d0)
+    input_vars(2) = variable_(0.5d0)
+
     nn_model = my_mlp(opt=opt)
-    output_vars = nn_model%forward(input_var)
+    output_vars = nn_model%forward(input_vars)
 
     call stacks(1)%print()
     call backward(output_vars)
-    
+
+    print*, stacks(1)%vars(1)%g
+    ! print*, stacks(1)%vars(2)%g
+    ! print*, stacks(1)%vars(3)%g
+
 
 
 

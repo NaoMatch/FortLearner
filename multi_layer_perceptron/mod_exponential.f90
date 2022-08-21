@@ -1,39 +1,39 @@
-module mod_square
+module mod_exponential
     use mod_wengert_list
     use mod_activation_function
     implicit none
 
-    type, extends(activation_function_) :: square_base
+    type, extends(activation_function_) :: exponential_base
     contains
-        procedure :: forward  => forward_square
-        procedure :: backward => backward_square
-    end type square_base
-    type(square_base) :: square
+        procedure :: forward  => forward_exponential
+        procedure :: backward => backward_exponential
+    end type exponential_base
+    type(exponential_base) :: exponential
     
 contains
 
-    function forward_square(this, input_var) result(output_var)
+    function forward_exponential(this, input_var) result(output_var)
         implicit none
-        class(square_base) :: this
+        class(exponential_base) :: this
         type(variable_) :: input_var
         type(variable_) :: output_var
         integer(kind=8) :: stack_id
         ! Set up
-        call this%set_activation_type_name("square")
+        call this%set_activation_type_name("exponential")
 
         ! Operation
-        output_var%v = input_var%v**2d0
+        output_var%v = exp(input_var%v)
 
         ! Append 'variables' to Stack
         call set_operation(&
             this, &
             operation_name=this%act_name,   &
             input_vars=input_var, output_var=output_var)
-    end function forward_square
+    end function forward_exponential
     
-    subroutine backward_square(this, elm)
+    subroutine backward_exponential(this, elm)
         implicit none
-        class(square_base) :: this
+        class(exponential_base) :: this
         type(element)      :: elm
 
         type(variable_), pointer :: input_var_ptr
@@ -42,13 +42,11 @@ contains
         call get_output_variable_pointer(elm, output_var_ptr)
 
         ! print*, '*********************************************************************************************'
-        ! print*, " ---- Square Backward"
+        ! print*, " ---- Exponential Backward"
         ! print*, "      var ids in/out  : ", input_var_ptr%var_id, output_var_ptr%var_id
         ! print*, "      input_var_ptr%v : ", allocated(input_var_ptr%v)
         ! print*, "      input_var_ptr%g : ", allocated(input_var_ptr%g)
         ! print*, "      output_var_ptr%g: ", allocated(output_var_ptr%g)
-        input_var_ptr%g = 2d0 * input_var_ptr%v * output_var_ptr%g
-    end subroutine backward_square
-
-    
-end module mod_square
+        input_var_ptr%g = exp(input_var_ptr%v) * output_var_ptr%g
+    end subroutine backward_exponential
+end module mod_exponential

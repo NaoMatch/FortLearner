@@ -88,9 +88,20 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_optimizer.out \
 						./mod/mod_wengert_list.out \
 						./mod/mod_activation_function.out \
-						./mod/mod_square.out \
-						./mod/mod_sinusoid.out \
 						./mod/mod_addition.out \
+						./mod/mod_substraction.out \
+						./mod/mod_multiplication.out \
+						./mod/mod_division.out \
+						./mod/mod_square.out \
+						./mod/mod_square_root.out \
+						./mod/mod_sinusoid.out \
+						./mod/mod_cosine.out \
+						./mod/mod_tangent.out \
+						./mod/mod_arcsinusoid.out \
+						./mod/mod_arccosine.out \
+						./mod/mod_arctangent.out \
+						./mod/mod_exponential.out \
+						./mod/mod_log_natural.out \
 						./mod/mod_backwards.out \
 						./mod/mod_my_mlp.out \
 
@@ -178,9 +189,20 @@ build:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_optimizer.f90 -o ./mod/mod_optimizer.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_wengert_list.f90 -o ./mod/mod_wengert_list.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_activation_function.f90 -o ./mod/mod_activation_function.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_square.f90 -o ./mod/mod_square.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_sinusoid.f90 -o ./mod/mod_sinusoid.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_addition.f90 -o ./mod/mod_addition.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_multiplication.f90 -o ./mod/mod_multiplication.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_substraction.f90 -o ./mod/mod_substraction.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_division.f90 -o ./mod/mod_division.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_square.f90 -o ./mod/mod_square.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_square_root.f90 -o ./mod/mod_square_root.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_sinusoid.f90 -o ./mod/mod_sinusoid.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_cosine.f90 -o ./mod/mod_cosine.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_tangent.f90 -o ./mod/mod_tangent.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_arcsinusoid.f90 -o ./mod/mod_arcsinusoid.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_arccosine.f90 -o ./mod/mod_arccosine.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_arctangent.f90 -o ./mod/mod_arctangent.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_exponential.f90 -o ./mod/mod_exponential.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_log_natural.f90 -o ./mod/mod_log_natural.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_backwards.f90 -o ./mod/mod_backwards.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_my_mlp.f90 -o ./mod/mod_my_mlp.out
 	\
@@ -208,9 +230,20 @@ build_subset:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_optimizer.f90 -o ./mod/mod_optimizer.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_wengert_list.f90 -o ./mod/mod_wengert_list.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_activation_function.f90 -o ./mod/mod_activation_function.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_square.f90 -o ./mod/mod_square.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_sinusoid.f90 -o ./mod/mod_sinusoid.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_addition.f90 -o ./mod/mod_addition.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_multiplication.f90 -o ./mod/mod_multiplication.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_substraction.f90 -o ./mod/mod_substraction.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_division.f90 -o ./mod/mod_division.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_square.f90 -o ./mod/mod_square.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_square_root.f90 -o ./mod/mod_square_root.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_sinusoid.f90 -o ./mod/mod_sinusoid.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_cosine.f90 -o ./mod/mod_cosine.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_tangent.f90 -o ./mod/mod_tangent.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_arcsinusoid.f90 -o ./mod/mod_arcsinusoid.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_arccosine.f90 -o ./mod/mod_arccosine.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_arctangent.f90 -o ./mod/mod_arctangent.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_exponential.f90 -o ./mod/mod_exponential.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_log_natural.f90 -o ./mod/mod_log_natural.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_backwards.f90 -o ./mod/mod_backwards.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_my_mlp.f90 -o ./mod/mod_my_mlp.out
 

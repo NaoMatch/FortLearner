@@ -1,7 +1,6 @@
 module mod_backwards
     use mod_wengert_list
-    use mod_square
-    use mod_sinusoid
+    include "./inc_use_activation_functions.f90"
     implicit none
     
 contains
@@ -13,7 +12,7 @@ contains
         integer(kind=8) :: stack_id, var_id
 
         stack_id = var%stack_id
-        var_id = var%var_id + 1
+        var_id = var%var_id
         allocate(stacks(stack_id)%vars(var_id)%g(1,1))
         stacks(stack_id)%vars(var_id)%g = 1d0
     end subroutine set_initial_gradient
@@ -46,11 +45,17 @@ contains
         call backward_activation_functions(elm)
 
         call get_previous_layer_elements(elm, elms)
-
         do while (size(elms)>0)
-            call backward_activation_functions(elms(1))
+            ! Backward Last Element
             n_elms = size(elms)
+            call backward_activation_functions(elms(n_elms))
+
+            ! Get & Remove Last Element
+            elm = elms(n_elms)
             elms = elms(1:n_elms-1)
+
+            ! Get Previous Layer
+            call get_previous_layer_elements(elm, elms)
         end do
     end subroutine backward_variable_
 
@@ -59,15 +64,18 @@ contains
         type(element) :: current_elm
         type(element), allocatable :: previous_elms(:)
 
-        integer(kind=8) :: i, id, stack_id, n_elm
+        integer(kind=8) :: i, j, id, stack_id, n_elm
         integer(kind=8), allocatable :: input_var_ids(:)
 
         stack_id = current_elm%stack_id
         input_var_ids = current_elm%var_ids_in(:)
         do i=1, size(input_var_ids), 1
             id = input_var_ids(i)
-
-            previous_elms = [previous_elms, stacks(stack_id)%list(id)]
+            do j=1, size(stacks(stack_id)%list), 1
+                if (stacks(stack_id)%list(j)%var_id_out == id) then
+                    previous_elms = [previous_elms, stacks(stack_id)%list(j)]
+                end if
+            end do
         end do
     end subroutine get_previous_layer_elements
 
@@ -75,15 +83,38 @@ contains
     subroutine backward_activation_functions(elm)
         implicit none
         type(element)   :: elm
-        type(variable_) :: output_var
-        type(variable_) :: input_var1, input_var2
 
-        call get_output_vars(elm, output_var)
-
-        if (elm%opr_name == "square") then
+        if     (elm%opr_name == "square") then
             call square%backward(elm)
+        elseif (elm%opr_name == "square_root") then
+            call square_root%backward(elm)
         elseif (elm%opr_name == "sinusoid") then
             call sinusoid%backward(elm)
+        elseif (elm%opr_name == "cosine") then
+            call cosine%backward(elm)
+        elseif (elm%opr_name == "tangent") then
+            call tangent%backward(elm)
+        elseif (elm%opr_name == "arcsinusoid") then
+            call arcsinusoid%backward(elm)
+        elseif (elm%opr_name == "arccosine") then
+            call arccosine%backward(elm)
+        elseif (elm%opr_name == "arctangent") then
+            call arctangent%backward(elm)
+        elseif (elm%opr_name == "addition") then
+            call addition%backward(elm)
+        elseif (elm%opr_name == "substraction") then
+            call substraction%backward(elm)
+        elseif (elm%opr_name == "multiplication") then
+            call multiplication%backward(elm)
+        elseif (elm%opr_name == "division") then
+            call division%backward(elm)
+        elseif (elm%opr_name == "exponential") then
+            call exponential%backward(elm)
+        elseif (elm%opr_name == "log_natural") then
+            call log_natural%backward(elm)
+        else
+            print*, trim(elm%opr_name)
+            stop "NotImplementedError!"
         end if
     end subroutine backward_activation_functions
 
@@ -94,7 +125,7 @@ contains
 
         integer(kind=8) :: var_id
 
-        var_id = elm%var_ids_in(1)+1
+        var_id = elm%var_ids_in(1)
         input_var_ptr => stacks(elm%stack_id)%vars(var_id)
     end subroutine get_input_var_ptr
 
@@ -105,7 +136,7 @@ contains
 
         integer(kind=8) :: var_id
 
-        var_id = elm%var_ids_in(1)+1
+        var_id = elm%var_ids_in(1)
         input_var = stacks(elm%stack_id)%vars(var_id)
     end function get_input_var
 
@@ -116,7 +147,7 @@ contains
         
         integer(kind=8) :: var_id
 
-        var_id = elm%var_id_out+1
+        var_id = elm%var_id_out
         output_var = stacks(elm%stack_id)%vars(var_id)
     end subroutine get_output_vars
 
