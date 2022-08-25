@@ -1,4 +1,5 @@
 module mod_backwards
+    use mod_sort
     use mod_wengert_list
     include "./inc_use_activation_functions.f90"
     implicit none
@@ -13,7 +14,7 @@ contains
 
         stack_id = var%stack_id
         var_id = var%var_id
-        allocate(stacks(stack_id)%vars(var_id)%g(1,1))
+        if (.not. allocated(stacks(stack_id)%vars(var_id)%g)) allocate(stacks(stack_id)%vars(var_id)%g(1,1))
         stacks(stack_id)%vars(var_id)%g = 1d0
     end subroutine set_initial_gradient
 
@@ -37,17 +38,31 @@ contains
         type(element), allocatable :: elms(:)
         type(variable_), allocatable :: vars(:)
         class(*), pointer :: opr
-        integer(kind=8) :: n_elms
+        integer(kind=8) :: n_elms, e
+        integer(kind=8), allocatable :: generations(:), indices(:)
 
         allocate(elms(0))
 
         elm = get_list_element(var%var_id, var%stack_id)
         call backward_activation_functions(elm)
+        ! print*, elm%opr_name
 
         call get_previous_layer_elements(elm, elms)
         do while (size(elms)>0)
+            allocate(generations(0))
+            allocate(indices(0))
+
             ! Backward Last Element
             n_elms = size(elms)
+            do e=1, n_elms, 1
+                generations = [generations, elms(e)%generation]
+                indices = [indices, e]
+            end do
+            ! print*, generations, " ::: ", indices
+            call quick_argsort(generations, indices, n_elms)
+            elms = elms(indices)
+            ! print*, n_elms
+            ! print*, generations, indices, n_elms
             call backward_activation_functions(elms(n_elms))
 
             ! Get & Remove Last Element
@@ -56,6 +71,9 @@ contains
 
             ! Get Previous Layer
             call get_previous_layer_elements(elm, elms)
+
+            deallocate(generations)
+            deallocate(indices)    
         end do
     end subroutine backward_variable_
 
@@ -64,8 +82,9 @@ contains
         type(element) :: current_elm
         type(element), allocatable :: previous_elms(:)
 
-        integer(kind=8) :: i, j, id, stack_id, n_elm
+        integer(kind=8) :: i, j, id, stack_id, n_elm, p
         integer(kind=8), allocatable :: input_var_ids(:)
+        logical(kind=4) :: to_be_append
 
         stack_id = current_elm%stack_id
         input_var_ids = current_elm%var_ids_in(:)
@@ -73,7 +92,14 @@ contains
             id = input_var_ids(i)
             do j=1, size(stacks(stack_id)%list), 1
                 if (stacks(stack_id)%list(j)%var_id_out == id) then
-                    previous_elms = [previous_elms, stacks(stack_id)%list(j)]
+                    to_be_append = .true.
+                    do p=1, size(previous_elms), 1
+                        if ( stacks(stack_id)%list(j)%elm_id == previous_elms(p)%elm_id ) then
+                            to_be_append = .false.
+                            exit
+                        end if
+                    end do
+                    if (to_be_append) previous_elms = [previous_elms, stacks(stack_id)%list(j)]
                 end if
             end do
         end do
@@ -167,6 +193,20 @@ contains
         end do
         elm%var_id_out = -1
     end function get_list_element
+
+    subroutine clear_grad(var)
+        implicit none
+        type(variable_) :: var
+
+        integer(kind=8) :: stack_id, v
+
+        stack_id = var%stack_id
+
+        do v=1, size(stacks(stack_id)%vars), 1
+            if (.not. allocated(stacks(stack_id)%vars(v)%g)) cycle
+            stacks(stack_id)%vars(v)%g = 0d0
+        end do
+    end subroutine clear_grad
 
     
 end module mod_backwards

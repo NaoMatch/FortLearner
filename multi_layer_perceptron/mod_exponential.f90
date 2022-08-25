@@ -47,6 +47,11 @@ contains
         ! print*, "      input_var_ptr%v : ", allocated(input_var_ptr%v)
         ! print*, "      input_var_ptr%g : ", allocated(input_var_ptr%g)
         ! print*, "      output_var_ptr%g: ", allocated(output_var_ptr%g)
-        input_var_ptr%g = exp(input_var_ptr%v) * output_var_ptr%g
+        if (allocated(input_var_ptr%g)) then
+            input_var_ptr%g = input_var_ptr%g + exp(input_var_ptr%v) * output_var_ptr%g
+        else
+            input_var_ptr%g =                   exp(input_var_ptr%v) * output_var_ptr%g
+        end if
+        ! print*, input_var_ptr%g        
     end subroutine backward_exponential
 end module mod_exponential

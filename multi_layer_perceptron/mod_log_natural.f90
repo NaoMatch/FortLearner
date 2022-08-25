@@ -22,6 +22,7 @@ contains
         call this%set_activation_type_name("log_natural")
 
         ! Operation
+        if (.not. allocated(output_var%v)) allocate(output_var%v(1,1))
         output_var%v = log(input_var%v)
 
         ! Append 'variables' to Stack
@@ -47,6 +48,10 @@ contains
         ! print*, "      input_var_ptr%v : ", allocated(input_var_ptr%v)
         ! print*, "      input_var_ptr%g : ", allocated(input_var_ptr%g)
         ! print*, "      output_var_ptr%g: ", allocated(output_var_ptr%g)
-        input_var_ptr%g = output_var_ptr%g / input_var_ptr%v
+        if (allocated(input_var_ptr%g)) then
+            input_var_ptr%g = input_var_ptr%g + output_var_ptr%g / input_var_ptr%v
+        else
+            input_var_ptr%g = output_var_ptr%g / input_var_ptr%v
+        end if
     end subroutine backward_log_natural
 end module mod_log_natural

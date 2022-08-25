@@ -46,8 +46,19 @@ contains
         ! print*, "      input_var1_ptr%g: ", allocated(input_var1_ptr%g)
         ! print*, "      input_var2_ptr%g: ", allocated(input_var2_ptr%g)
 
-        input_var1_ptr%g = output_var_ptr%g
-        input_var2_ptr%g = output_var_ptr%g
+        if (allocated(input_var1_ptr%g)) then
+            input_var1_ptr%g = input_var1_ptr%g + output_var_ptr%g
+        else
+            input_var1_ptr%g =                    output_var_ptr%g
+        end if
+
+        if (allocated(input_var2_ptr%g)) then
+            input_var2_ptr%g = input_var2_ptr%g + output_var_ptr%g
+        else
+            input_var2_ptr%g =                    output_var_ptr%g
+        end if
+        ! print*, input_var1_ptr%g        
+        ! print*, input_var2_ptr%g        
     end subroutine backward_addition    
 
 

@@ -47,8 +47,13 @@ contains
         ! print*, "      input_var_ptr%v : ", allocated(input_var_ptr%v)
         ! print*, "      input_var_ptr%g : ", allocated(input_var_ptr%g)
         ! print*, "      output_var_ptr%g: ", allocated(output_var_ptr%g)
-        input_var_ptr%g = 2d0 * input_var_ptr%v * output_var_ptr%g
+        if (allocated(input_var_ptr%g)) then
+            input_var_ptr%g = input_var_ptr%g + 2d0 * input_var_ptr%v * output_var_ptr%g
+        else
+            input_var_ptr%g = 2d0 * input_var_ptr%v * output_var_ptr%g
+        end if
     end subroutine backward_square
+
 
     
 end module mod_square

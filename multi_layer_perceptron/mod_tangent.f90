@@ -47,6 +47,10 @@ contains
         ! print*, "      input_var_ptr%v : ", allocated(input_var_ptr%v)
         ! print*, "      input_var_ptr%g : ", allocated(input_var_ptr%g)
         ! print*, "      output_var_ptr%g: ", allocated(output_var_ptr%g)
-        input_var_ptr%g = output_var_ptr%g / cos(input_var_ptr%v)**2d0
+        if (allocated(input_var_ptr%g)) then
+            input_var_ptr%g = input_var_ptr%g + output_var_ptr%g / cos(input_var_ptr%v)**2d0
+        else
+            input_var_ptr%g = output_var_ptr%g / cos(input_var_ptr%v)**2d0
+        end if
     end subroutine backward_tangent
 end module mod_tangent

@@ -10,6 +10,7 @@ module mod_wengert_list
         character(len=256)         :: var_name="None"
         integer(kind=8)            :: var_id
         integer(kind=8)            :: stack_id
+        integer(kind=8)            :: generation=0
     contains
     end type variable_
 
@@ -85,8 +86,21 @@ module mod_wengert_list
     type(stack), target :: stacks(MAX_STACK_SIZE)
     logical(kind=4) :: is_used_stacks(MAX_STACK_SIZE) = .false.
 
-contains
+    interface operator (.eq.)
+        module procedure compare_element
+    end interface operator (.eq.)    
 
+contains
+    function compare_element(elm1, elm2) result(ret)
+        implicit none
+        type(element), intent(in) :: elm1
+        type(element), intent(in) :: elm2
+        logical(kind=4) :: ret
+    
+        ret = .false.
+        if (elm1%elm_id == elm2%elm_id) ret = .true.
+    end function compare_element
+    
     function new_optimizer_(learning_rate, alpha)
         implicit none
         type(optimizer_) :: new_optimizer_
@@ -101,6 +115,7 @@ contains
         class(element) :: this
         integer(kind=8)       :: i
         print*, '*********************************************************************************************'
+        print*, "elm_id :       ", int(this%elm_id)    ! output variable name
         print*, "var_name_out : ", trim(this%var_name_out)    ! output variable name
         print*, "var_id_out   : ", int(this%var_id_out)      ! output variable name
         print*, "opr_name     : ", trim(this%opr_name)       ! operation name
@@ -182,6 +197,8 @@ contains
 
         allocate(elm%opr, mold=opr)
         elm%opr => opr
+        elm%elm_id       = size(stacks(id)%list)+1
+        elm%generation   = input_vars%generation
         elm%var_name_out = output_var%var_name
         elm%var_id_out   = output_var%var_id
         elm%opr_name     = operation_name
@@ -197,6 +214,7 @@ contains
         end if
 
         output_var%stack_id = id
+        output_var%generation = elm%generation + 1
         if (.not. any(output_var%var_id == stacks(id)%idxs)) then
             stacks(id)%vars = [stacks(id)%vars, output_var]
             stacks(id)%idxs = [stacks(id)%idxs, output_var%var_id]
@@ -221,6 +239,8 @@ contains
 
         allocate(elm%opr, mold=opr)
         elm%opr => opr
+        elm%elm_id       = size(stacks(id)%list)+1
+        elm%generation   = maxval([input_var1%generation, input_var2%generation])
         elm%var_name_out = output_var%var_name
         elm%var_id_out   = output_var%var_id
         elm%opr_name     = operation_name
@@ -241,6 +261,7 @@ contains
         end if
 
         output_var%stack_id = id
+        output_var%generation = elm%generation + 1
         if (.not. any(output_var%var_id == stacks(id)%idxs)) then
             stacks(id)%vars = [stacks(id)%vars, output_var]
             stacks(id)%idxs = [stacks(id)%idxs, output_var%var_id]
@@ -248,6 +269,7 @@ contains
         end if
     end subroutine set_operation_2in_1out
 
+    
     function new_variable_s_(sclr)
         implicit none
         type(variable_) :: new_variable_s_
