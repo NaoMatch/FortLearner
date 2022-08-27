@@ -11,6 +11,7 @@ module mod_wengert_list
         integer(kind=8)            :: var_id
         integer(kind=8)            :: stack_id
         integer(kind=8)            :: generation=0
+        logical(kind=4)            :: require_grad=.true.
     contains
     end type variable_
 
@@ -89,6 +90,10 @@ module mod_wengert_list
     interface operator (.eq.)
         module procedure compare_element
     end interface operator (.eq.)    
+
+    interface allocate_var
+        module procedure :: allocate_var_rank2
+    end interface allocate_var
 
 contains
     function compare_element(elm1, elm2) result(ret)
@@ -270,18 +275,22 @@ contains
     end subroutine set_operation_2in_1out
 
     
-    function new_variable_s_(sclr)
+    function new_variable_s_(sclr, stack_id)
         implicit none
         type(variable_) :: new_variable_s_
+        integer(kind=8), optional :: stack_id
         real(kind=8), intent(in) :: sclr
         new_variable_s_%v = reshape( (/sclr/), shape = [1,1] )
+        if (present(stack_id)) new_variable_s_%stack_id = stack_id
     end function new_variable_s_
     
-    function new_variable_m_(mtrx)
+    function new_variable_m_(mtrx, stack_id)
         implicit none
         type(variable_) :: new_variable_m_
+        integer(kind=8), optional :: stack_id
         real(kind=8), intent(in) :: mtrx(:,:)
         new_variable_m_%v = mtrx(:,:)
+        if (present(stack_id)) new_variable_m_%stack_id = stack_id
     end function new_variable_m_
 
     function new_variable_()
@@ -405,11 +414,18 @@ contains
         nullify(input_var1_ptr)
         nullify(input_var2_ptr)
         stack_id = elm%stack_id
-        input_var_ids(:) = elm%var_ids_in(:)
+        input_var_ids(:size(elm%var_ids_in(:))) = elm%var_ids_in(:)
         input_var1_ptr => stacks(stack_id)%vars(input_var_ids(1))
-        input_var2_ptr => stacks(stack_id)%vars(input_var_ids(2))
+        if (size(elm%var_ids_in(:))>1) input_var2_ptr => stacks(stack_id)%vars(input_var_ids(2))
     end subroutine get_input_variable_pointer_multi
 
+
+    subroutine allocate_var_rank2(var, var_shape)
+        implicit none
+        type(variable_) :: var
+        integer(kind=4) :: var_shape(2)
+        allocate(var%v(var_shape(1), var_shape(2)))
+    end subroutine allocate_var_rank2
 
 
 end module mod_wengert_list 

@@ -88,6 +88,8 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_optimizer.out \
 						./mod/mod_wengert_list.out \
 						./mod/mod_activation_function.out \
+						./mod/mod_absolute_value.out \
+						./mod/mod_power.out \
 						./mod/mod_addition.out \
 						./mod/mod_substraction.out \
 						./mod/mod_multiplication.out \
@@ -189,6 +191,8 @@ build:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_optimizer.f90 -o ./mod/mod_optimizer.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_wengert_list.f90 -o ./mod/mod_wengert_list.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_activation_function.f90 -o ./mod/mod_activation_function.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_power.f90 -o ./mod/mod_power.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_absolute_value.f90 -o ./mod/mod_absolute_value.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_addition.f90 -o ./mod/mod_addition.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_multiplication.f90 -o ./mod/mod_multiplication.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_substraction.f90 -o ./mod/mod_substraction.out
@@ -230,6 +234,8 @@ build_subset:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_optimizer.f90 -o ./mod/mod_optimizer.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_wengert_list.f90 -o ./mod/mod_wengert_list.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_activation_function.f90 -o ./mod/mod_activation_function.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_power.f90 -o ./mod/mod_power.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_absolute_value.f90 -o ./mod/mod_absolute_value.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_addition.f90 -o ./mod/mod_addition.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_multiplication.f90 -o ./mod/mod_multiplication.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_substraction.f90 -o ./mod/mod_substraction.out

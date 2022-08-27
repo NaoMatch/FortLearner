@@ -22,11 +22,11 @@ contains
         new_my_mlp%opt = opt
     end function new_my_mlp
 
-    function forward_my_mlp(this, input_var) result(output_vars)
+    function forward_my_mlp(this, input_var) result(output_var)
         implicit none
         class(my_mlp) :: this
         type(variable_) :: input_var
-        type(variable_), allocatable :: output_vars(:)
+        type(variable_) :: output_var
         type(variable_) :: var_add, var_sub, var_mul, var_div
         type(variable_) :: var_exp, var_log, var_cos, var_sin
         type(variable_) :: var_sq, var_sqr, var_tan
@@ -35,13 +35,31 @@ contains
         integer(kind=8) :: id
         call this%init(input_var)
 
-        var_sq = square%forward(input_var)
-        var_sq_sq_1 = square%forward(var_sq)
-        var_sq_sq_2 = square%forward(var_sq)
-        var_add = addition%forward(var_sq_sq_1, var_sq_sq_2)
+        ! var_sq = square%forward(input_var)
+        var_sq = input_var * input_var
+        var_sq_sq_1 = var_sq * var_sq
+        var_sq_sq_2 = var_sq * var_sq
+        var_add = var_sq_sq_1 + var_sq_sq_2
+        var_div = var_sq_sq_1 / var_sq
+        var_sub = var_add - var_div
 
-        allocate(output_vars(1))
-        output_vars = var_add
+        var_add = 10d0 + var_sub
+        var_add = var_add + 10d0
+
+        var_add = var_add / 10d0
+        var_add = 10d0 / var_add
+
+        var_add = .10d0 * var_add
+        var_add = var_add * 2d0
+
+        var_add = .10d0 - var_add
+        var_add = var_add - 2d0
+        ! var_add = abs(var_add)
+
+        var_add = abs(var_add)
+        var_add = var_add ** 2.8d0
+        output_var = sqrt(var_add)
+        ! output_var = var_add
 
     end function forward_my_mlp
 

@@ -1,43 +1,44 @@
-module mod_square_root
+module mod_absolute_value
     use mod_wengert_list
     use mod_activation_function
     implicit none
 
-    type, extends(activation_function_) :: square_root_base
+    type, extends(activation_function_) :: absolute_value_base
     contains
-        procedure :: forward  => forward_square_root
-        procedure :: backward => backward_square_root
-    end type square_root_base
-    type(square_root_base) :: square_root
+        procedure :: forward  => forward_absolute_value
+        procedure :: backward => backward_absolute_value
+    end type absolute_value_base
+    type(absolute_value_base) :: absolute_value
 
-    interface sqrt
-        module procedure :: sqrt_var
-    end interface sqrt    
+    interface abs
+        module procedure :: abs_var
+    end interface abs
+    
 contains
 
-    function forward_square_root(this, input_var) result(output_var)
+    function forward_absolute_value(this, input_var) result(output_var)
         implicit none
-        class(square_root_base) :: this
+        class(absolute_value_base) :: this
         type(variable_) :: input_var
         type(variable_) :: output_var
         integer(kind=8) :: stack_id
         ! Set up
-        call this%set_activation_type_name("square_root")
+        call this%set_activation_type_name("absolute_value")
 
         ! Operation
         call allocate_var(output_var, var_shape=shape(input_var%v))
-        output_var%v = sqrt(input_var%v)
+        output_var%v = abs(input_var%v)
 
         ! Append 'variables' to Stack
         call set_operation(&
             this, &
             operation_name=this%act_name,   &
             input_vars=input_var, output_var=output_var)
-    end function forward_square_root
+    end function forward_absolute_value
     
-    subroutine backward_square_root(this, elm)
+    subroutine backward_absolute_value(this, elm)
         implicit none
-        class(square_root_base) :: this
+        class(absolute_value_base) :: this
         type(element)      :: elm
 
         type(variable_), pointer :: input_var_ptr
@@ -52,17 +53,18 @@ contains
         ! print*, "      input_var_ptr%g : ", allocated(input_var_ptr%g)
         ! print*, "      output_var_ptr%g: ", allocated(output_var_ptr%g)
         if (allocated(input_var_ptr%g)) then
-            input_var_ptr%g = input_var_ptr%g + .5d0 / sqrt(input_var_ptr%v) * output_var_ptr%g
+            input_var_ptr%g = input_var_ptr%g + output_var_ptr%g * input_var_ptr%v / abs(input_var_ptr%v)
         else
-            input_var_ptr%g =                 + .5d0 / sqrt(input_var_ptr%v) * output_var_ptr%g
+            input_var_ptr%g =                 + output_var_ptr%g * input_var_ptr%v / abs(input_var_ptr%v)
         end if
-    end subroutine backward_square_root
+    end subroutine backward_absolute_value
 
-    function sqrt_var(input_var) result(output_var)
+    function abs_var(input_var) result(output_var)
         implicit none
         type(variable_) :: input_var
         type(variable_) :: output_var
-        output_var = square_root%forward(input_var)
-    end function sqrt_var
+        output_var = absolute_value%forward(input_var)
+    end function abs_var
 
-end module mod_square_root
+
+end module mod_absolute_value

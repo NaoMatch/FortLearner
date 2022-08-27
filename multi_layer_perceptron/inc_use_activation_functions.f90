@@ -5,6 +5,8 @@ use mod_multiplication
 use mod_division
 
 ! Elementary functions
+use mod_absolute_value
+use mod_power
 use mod_square
 use mod_square_root
 use mod_sinusoid

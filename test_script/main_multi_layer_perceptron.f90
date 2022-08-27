@@ -7,7 +7,7 @@ program main_multi_layer_perceptron
     use mod_my_mlp
     implicit none
 
-    type(variable_) :: input_var, output_vars(1)
+    type(variable_) :: input_var, output_vars(1), output_var
     type(variable_) :: input_vars(2)
     type(variable_) :: loss_var(1)
     type(my_mlp) :: nn_model, nn_model2
@@ -19,12 +19,12 @@ program main_multi_layer_perceptron
     input_var = variable_(2.0d0)
 
     nn_model = my_mlp(opt=opt)
-    output_vars = nn_model%forward(input_var)
+    output_var = nn_model%forward(input_var)
     
-    call clear_grad(output_vars(1))
+    call clear_grad(output_var)
     call stacks(1)%print()
-    call backward(output_vars)
-    print*, "OUTPUT: ", output_vars(1)%v
+    call backward(output_var)
+    print*, "OUTPUT: ", output_var%v
     print*, stacks(1)%vars(1)%g
 
 

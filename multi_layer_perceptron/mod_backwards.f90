@@ -18,17 +18,13 @@ contains
         stacks(stack_id)%vars(var_id)%g = 1d0
     end subroutine set_initial_gradient
 
-    subroutine backward(vars)
+    subroutine backward(var)
         implicit none
-        type(variable_) :: vars(:)
+        type(variable_) :: var
         integer(kind=8) :: n_vars
 
-        n_vars = size(vars)
-        if (n_vars /= 1) then
-            stop "Backward must be 1."
-        end if
-        call set_initial_gradient(vars(1))
-        call backward_variable_(vars(1))
+        call set_initial_gradient(var)
+        call backward_variable_(var)
     end subroutine backward
 
     recursive subroutine backward_variable_(var)
@@ -138,6 +134,10 @@ contains
             call exponential%backward(elm)
         elseif (elm%opr_name == "log_natural") then
             call log_natural%backward(elm)
+        elseif (elm%opr_name == "absolute_value") then
+            call absolute_value%backward(elm)
+        elseif (elm%opr_name == "power") then
+            call power%backward(elm)
         else
             print*, trim(elm%opr_name)
             stop "NotImplementedError!"

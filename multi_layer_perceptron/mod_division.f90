@@ -9,7 +9,13 @@ module mod_division
         procedure :: backward => backward_division
     end type division_base
     type(division_base) :: division
-    
+
+    interface operator(/)
+        module procedure division_var_var
+        module procedure division_var_scl
+        module procedure division_scl_var
+    end interface operator(/)
+
 contains
     function forward_division(this, input_var1, input_var2) result(output_var)
         implicit none
@@ -30,6 +36,7 @@ contains
             operation_name=this%act_name,   &
             input_var1=input_var1, input_var2=input_var2, output_var=output_var)
     end function forward_division
+
 
     subroutine backward_division(this, elm)
         implicit none
@@ -60,4 +67,35 @@ contains
         ! print*, input_var1_ptr%g        
         ! print*, input_var2_ptr%g        
     end subroutine backward_division    
+
+
+    function division_var_var(input_var1, input_var2) result(output_var)
+        implicit none
+        type(variable_), intent(in) :: input_var1, input_var2
+        type(variable_) :: output_var
+        output_var = division%forward(input_var1, input_var2)
+    end function division_var_var    
+
+
+    function division_var_scl(input_var, input_scl) result(output_var)
+        implicit none
+        type(variable_), intent(in) :: input_var
+        real(kind=8), intent(in) :: input_scl
+        type(variable_) :: output_var
+        type(variable_) :: input_var_new
+        input_var_new = variable_(input_scl, stack_id=input_var%stack_id)
+        output_var = division%forward(input_var, input_var_new)
+    end function division_var_scl    
+
+
+    function division_scl_var(input_scl, input_var) result(output_var)
+        implicit none
+        real(kind=8), intent(in) :: input_scl
+        type(variable_), intent(in) :: input_var
+        type(variable_) :: output_var
+        type(variable_) :: input_var_new
+        input_var_new = variable_(input_scl, stack_id=input_var%stack_id)
+        output_var = division%forward(input_var_new, input_var)
+    end function division_scl_var    
+
 end module mod_division
