@@ -32,7 +32,7 @@ contains
         call set_operation(&
             this, &
             operation_name=this%act_name,   &
-            input_vars=input_var, output_var=output_var)
+            input_vars=input_var, output_var=output_var, dim=-1_8)
     end function forward_square_root
     
     subroutine backward_square_root(this, elm)

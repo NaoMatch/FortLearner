@@ -27,13 +27,13 @@ contains
         call this%set_activation_type_name("power")
 
         ! Operation
-        output_var%v = input_var1%v ** input_var2%v
+        output_var%var = input_var1%var ** input_var2%var
 
         ! Append 'variables' to Stack
         call set_operation(&
             this, &
             operation_name=this%act_name,   &
-            input_var1=input_var1, input_var2=input_var2, output_var=output_var)
+            input_var1=input_var1, input_var2=input_var2, output_var=output_var, dim=-1_8)
     end function forward_power
 
 
@@ -44,21 +44,19 @@ contains
 
         type(variable_), pointer :: input_var1_ptr, input_var2_ptr
         type(variable_), pointer :: output_var_ptr
+        integer(kind=8) :: pow_index
         call get_input_variable_pointer(elm, input_var1_ptr, input_var2_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
 
-        ! print*, '*********************************************************************************************'
-        ! print*, " ---- Addition Backward"
-        ! print*, "      input_var1_ptr%g: ", allocated(input_var1_ptr%g)
-        ! print*, "      input_var2_ptr%g: ", allocated(input_var2_ptr%g)
-
-        if (allocated(input_var1_ptr%g)) then
-            input_var1_ptr%g = input_var1_ptr%g + input_var2_ptr%v * (input_var1_ptr%v**(input_var2_ptr%v-1)) * output_var_ptr%g
+        call debug_print(__FILE__, __LINE__, elm, input_var1_ptr, input_var2_ptr, output_var_ptr, t_)
+        pow_index = input_var2_ptr%var%s
+        if (input_var1_ptr%grd%dtype==-1) then
+            input_var1_ptr%grd = (pow_index+0d0) * (input_var1_ptr%var**(pow_index-1)) * output_var_ptr%grd
         else
-            input_var1_ptr%g =                    input_var2_ptr%v * (input_var1_ptr%v**(input_var2_ptr%v-1)) * output_var_ptr%g
+            input_var1_ptr%grd = input_var1_ptr%grd + (pow_index+0d0) * (input_var1_ptr%var**(pow_index-1)) * output_var_ptr%grd
         end if
-        ! print*, input_var1_ptr%g        
-        ! print*, input_var2_ptr%g        
+
+        call debug_print(__FILE__, __LINE__, elm, input_var1_ptr, input_var2_ptr, output_var_ptr, f_)
     end subroutine backward_power    
 
 
@@ -76,7 +74,7 @@ contains
         real(kind=8), intent(in)    :: input_scl
         type(variable_) :: input_scl_var
         type(variable_) :: output_var
-        input_scl_var = variable_(input_scl, stack_id=input_var%stack_id)
+        input_scl_var = variable_(input_scl, stack_id=input_var%stack_id, require_grad=.false.)
         output_var = power%forward(input_var, input_scl_var)
     end function power_var_scl
 

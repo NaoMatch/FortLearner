@@ -23,12 +23,13 @@ contains
 
         ! Operation
         output_var%v = input_var%v**2d0
+        output_var%var = input_var%var**2_8
 
         ! Append 'variables' to Stack
         call set_operation(&
             this, &
             operation_name=this%act_name,   &
-            input_vars=input_var, output_var=output_var)
+            input_vars=input_var, output_var=output_var, dim=-1_8)
     end function forward_square
     
     subroutine backward_square(this, elm)

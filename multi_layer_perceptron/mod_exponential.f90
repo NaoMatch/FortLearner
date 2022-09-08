@@ -9,7 +9,10 @@ module mod_exponential
         procedure :: backward => backward_exponential
     end type exponential_base
     type(exponential_base) :: exponential
-    
+        
+    interface exp
+        module procedure :: exp_var
+    end interface exp
 contains
 
     function forward_exponential(this, input_var) result(output_var)
@@ -22,13 +25,15 @@ contains
         call this%set_activation_type_name("exponential")
 
         ! Operation
+        allocate(output_var%v, source=input_var%v)
         output_var%v = exp(input_var%v)
+        output_var%var = exp(input_var%var)
 
         ! Append 'variables' to Stack
         call set_operation(&
             this, &
             operation_name=this%act_name,   &
-            input_vars=input_var, output_var=output_var)
+            input_vars=input_var, output_var=output_var, dim=-1_8)
     end function forward_exponential
     
     subroutine backward_exponential(this, elm)
@@ -54,4 +59,11 @@ contains
         end if
         ! print*, input_var_ptr%g        
     end subroutine backward_exponential
+
+    function exp_var(input_var) result(output_var)
+        implicit none
+        type(variable_), intent(in) :: input_var
+        type(variable_) :: output_var
+        output_var = exponential%forward(input_var)
+    end function exp_var
 end module mod_exponential

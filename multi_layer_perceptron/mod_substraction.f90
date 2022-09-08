@@ -22,19 +22,19 @@ contains
         class(substraction_base) :: this
         type(variable_) :: input_var1, input_var2, input_vars(2)
         type(variable_) :: output_var
-        integer(kind=8) :: stack_id
+        real(kind=8) :: val
         ! Set up
         call this%set_activation_type_name("substraction")
 
         ! Operation
-        output_var%v = input_var1%v - input_var2%v
-
+        output_var%var = input_var1%var - input_var2%var
+                
         ! Append 'variables' to Stack
         input_vars = [input_var1, input_var2]
         call set_operation(&
             this, &
             operation_name=this%act_name,   &
-            input_var1=input_var1, input_var2=input_var2, output_var=output_var)
+            input_var1=input_var1, input_var2=input_var2, output_var=output_var, dim=-1_8)
     end function forward_substraction
 
     subroutine backward_substraction(this, elm)
@@ -47,24 +47,27 @@ contains
         call get_input_variable_pointer(elm, input_var1_ptr, input_var2_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
 
-        ! print*, '*********************************************************************************************'
-        ! print*, " ---- Substraction Backward"
-        ! print*, "      input_var1_ptr%g: ", allocated(input_var1_ptr%g)
-        ! print*, "      input_var2_ptr%g: ", allocated(input_var2_ptr%g)
+        call debug_print(__FILE__, __LINE__, elm, &
+            input_var1_ptr, input_var2_ptr, output_var_ptr, t_)
 
-        if (allocated(input_var1_ptr%g)) then
-            input_var1_ptr%g = input_var1_ptr%g + output_var_ptr%g
-        else
-            input_var1_ptr%g =                    output_var_ptr%g
+        if (input_var1_ptr%require_grad) then
+            if (input_var1_ptr%grd%dtype==-1) then
+                input_var1_ptr%grd = output_var_ptr%grd
+            else
+                input_var1_ptr%grd = input_var1_ptr%grd + output_var_ptr%grd
+            end if
         end if
-
-        if (allocated(input_var2_ptr%g)) then
-            input_var2_ptr%g = input_var2_ptr%g - output_var_ptr%g
-        else
-            input_var2_ptr%g =                  - output_var_ptr%g
-        end if        
-        ! print*, input_var1_ptr%g        
-        ! print*, input_var2_ptr%g        
+        
+        if (input_var2_ptr%require_grad) then
+            if (input_var2_ptr%grd%dtype==-1) then
+                input_var2_ptr%grd = 0d0 - output_var_ptr%grd
+            else
+                input_var2_ptr%grd = input_var2_ptr%grd + output_var_ptr%grd
+            end if
+        end if
+        
+        call debug_print(__FILE__, __LINE__, elm, &
+            input_var1_ptr, input_var2_ptr, output_var_ptr, f_)
     end subroutine backward_substraction    
 
 

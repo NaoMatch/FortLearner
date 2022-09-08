@@ -2,6 +2,13 @@ module mod_var
     ! use mod_activation_functions2
     implicit none
 
+    type variable_variable
+        real(kind=8)              :: s
+        real(kind=8), allocatable :: v(:)
+        real(kind=8), allocatable :: m(:,:)
+        real(kind=8), allocatable :: t(:,:,:,:)
+    end type variable_variable
+
     type variable
         real(kind=8), allocatable :: v(:,:)
         real(kind=8), allocatable :: g(:,:)

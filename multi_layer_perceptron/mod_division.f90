@@ -23,18 +23,19 @@ contains
         type(variable_) :: input_var1, input_var2, input_vars(2)
         type(variable_) :: output_var
         integer(kind=8) :: stack_id
+        real(kind=8) :: val
         ! Set up
         call this%set_activation_type_name("division")
 
         ! Operation
-        output_var%v = input_var1%v / input_var2%v
-
+        output_var%var = input_var1%var / input_var2%var
+        
         ! Append 'variables' to Stack
         input_vars = [input_var1, input_var2]
         call set_operation(&
             this, &
             operation_name=this%act_name,   &
-            input_var1=input_var1, input_var2=input_var2, output_var=output_var)
+            input_var1=input_var1, input_var2=input_var2, output_var=output_var, dim=-1_8)
     end function forward_division
 
 
@@ -45,27 +46,31 @@ contains
 
         type(variable_), pointer :: input_var1_ptr, input_var2_ptr
         type(variable_), pointer :: output_var_ptr
+        real(kind=8) :: in_var
+        integer(kind=8) :: dim1, dim2, dim_out
         call get_input_variable_pointer(elm, input_var1_ptr, input_var2_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
 
-        ! print*, '*********************************************************************************************'
-        ! print*, " ---- Division Backward"
-        ! print*, "      input_var1_ptr%g: ", allocated(input_var1_ptr%g)
-        ! print*, "      input_var2_ptr%g: ", allocated(input_var2_ptr%g)
+        dim1 = input_var1_ptr%var%dims()
+        dim2 = input_var2_ptr%var%dims()
 
-        if (allocated(input_var1_ptr%g)) then
-            input_var1_ptr%g = input_var1_ptr%g + 1d0/input_var2_ptr%v      * output_var_ptr%g
-        else
-            input_var1_ptr%g =                    1d0/input_var2_ptr%v      * output_var_ptr%g
+        call debug_print(__FILE__, __LINE__, elm, input_var1_ptr, input_var2_ptr, output_var_ptr, t_)
+        if (input_var1_ptr%require_grad) then
+            if (input_var1_ptr%grd%dtype==-1) then
+                input_var1_ptr%grd = 1d0 / input_var2_ptr%var * output_var_ptr%grd
+            else
+                input_var1_ptr%grd = input_var1_ptr%grd + 1d0 / input_var2_ptr%var * output_var_ptr%grd
+            end if
         end if
 
-        if (allocated(input_var2_ptr%g)) then
-            input_var2_ptr%g = input_var2_ptr%g - input_var1_ptr%v/input_var2_ptr%v**2d0 * output_var_ptr%g
-        else
-            input_var2_ptr%g =                  - input_var1_ptr%v/input_var2_ptr%v**2d0 * output_var_ptr%g
+        if (input_var2_ptr%require_grad) then
+            if (input_var2_ptr%grd%dtype==-1) then
+                input_var2_ptr%grd = 0d0 - input_var1_ptr%grd/input_var2_ptr%grd**2_8 * output_var_ptr%grd
+            else
+                input_var2_ptr%grd = input_var2_ptr%grd - input_var1_ptr%grd/input_var2_ptr%grd**2_8 * output_var_ptr%grd
+            end if
         end if
-        ! print*, input_var1_ptr%g        
-        ! print*, input_var2_ptr%g        
+        call debug_print(__FILE__, __LINE__, elm, input_var1_ptr, input_var2_ptr, output_var_ptr, f_)
     end subroutine backward_division    
 
 
@@ -83,7 +88,7 @@ contains
         real(kind=8), intent(in) :: input_scl
         type(variable_) :: output_var
         type(variable_) :: input_var_new
-        input_var_new = variable_(input_scl, stack_id=input_var%stack_id)
+        input_var_new = variable_(input_scl, stack_id=input_var%stack_id, require_grad=.false.)
         output_var = division%forward(input_var, input_var_new)
     end function division_var_scl    
 
@@ -94,7 +99,7 @@ contains
         type(variable_), intent(in) :: input_var
         type(variable_) :: output_var
         type(variable_) :: input_var_new
-        input_var_new = variable_(input_scl, stack_id=input_var%stack_id)
+        input_var_new = variable_(input_scl, stack_id=input_var%stack_id, require_grad=.false.)
         output_var = division%forward(input_var_new, input_var)
     end function division_scl_var    
 

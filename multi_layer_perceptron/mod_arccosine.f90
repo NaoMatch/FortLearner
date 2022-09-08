@@ -23,12 +23,13 @@ contains
 
         ! Operation
         output_var%v = acos(input_var%v)
+        output_var%var = acos(input_var%var)
 
         ! Append 'variables' to Stack
         call set_operation(&
             this, &
             operation_name=this%act_name,   &
-            input_vars=input_var, output_var=output_var)
+            input_vars=input_var, output_var=output_var, dim=-1_8)
     end function forward_arccosine
     
     subroutine backward_arccosine(this, elm)

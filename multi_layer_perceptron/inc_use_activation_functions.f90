@@ -18,3 +18,10 @@ use mod_arctangent
 use mod_exponential
 use mod_log_natural
 
+! User Defined Functions
+use mod_sigmoid
+use mod_relu
+
+! Shape Change functions
+use mod_summation
+use mod_matmul

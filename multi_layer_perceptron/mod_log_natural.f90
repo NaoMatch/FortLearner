@@ -24,12 +24,13 @@ contains
         ! Operation
         if (.not. allocated(output_var%v)) allocate(output_var%v(1,1))
         output_var%v = log(input_var%v)
+        output_var%var = log(input_var%var)
 
         ! Append 'variables' to Stack
         call set_operation(&
             this, &
             operation_name=this%act_name,   &
-            input_vars=input_var, output_var=output_var)
+            input_vars=input_var, output_var=output_var, dim=-1_8)
     end function forward_log_natural
     
     subroutine backward_log_natural(this, elm)

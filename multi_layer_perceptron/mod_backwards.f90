@@ -13,9 +13,12 @@ contains
         integer(kind=8) :: stack_id, var_id
 
         stack_id = var%stack_id
-        var_id = var%var_id
+        ! var_id = var%var_id
+        var_id = get_list_index(var%var_id, stacks(stack_id)%idxs)
+        
         if (.not. allocated(stacks(stack_id)%vars(var_id)%g)) allocate(stacks(stack_id)%vars(var_id)%g(1,1))
         stacks(stack_id)%vars(var_id)%g = 1d0
+        stacks(stack_id)%vars(var_id)%grd = 1d0
     end subroutine set_initial_gradient
 
     subroutine backward(var)
@@ -39,12 +42,15 @@ contains
 
         allocate(elms(0))
 
+        ! print*, '*********************************************************************************************'
+        ! print*, '*********************************************************************************************'
         elm = get_list_element(var%var_id, var%stack_id)
         call backward_activation_functions(elm)
-        ! print*, elm%opr_name
 
         call get_previous_layer_elements(elm, elms)
         do while (size(elms)>0)
+            ! print*, '*********************************************************************************************'
+            ! print*, '*********************************************************************************************'
             allocate(generations(0))
             allocate(indices(0))
 
@@ -54,11 +60,9 @@ contains
                 generations = [generations, elms(e)%generation]
                 indices = [indices, e]
             end do
-            ! print*, generations, " ::: ", indices
             call quick_argsort(generations, indices, n_elms)
             elms = elms(indices)
-            ! print*, n_elms
-            ! print*, generations, indices, n_elms
+            ! print*, "    operation name ::: ", trim(elms(n_elms)%opr_name)
             call backward_activation_functions(elms(n_elms))
 
             ! Get & Remove Last Element
@@ -138,6 +142,14 @@ contains
             call absolute_value%backward(elm)
         elseif (elm%opr_name == "power") then
             call power%backward(elm)
+        elseif (elm%opr_name == "summation") then
+            call summation%backward(elm)
+        elseif (elm%opr_name == "sigmoidal") then
+            call sigmoidal%backward(elm)
+        elseif (elm%opr_name == "matmul") then
+            call matmul_function%backward(elm)
+        elseif (elm%opr_name == "relu") then
+            call relu_function%backward(elm)
         else
             print*, trim(elm%opr_name)
             stop "NotImplementedError!"
@@ -199,12 +211,15 @@ contains
         type(variable_) :: var
 
         integer(kind=8) :: stack_id, v
-
+        
         stack_id = var%stack_id
-
+        stack_id = 1
+        
         do v=1, size(stacks(stack_id)%vars), 1
             if (.not. allocated(stacks(stack_id)%vars(v)%g)) cycle
             stacks(stack_id)%vars(v)%g = 0d0
+            call stacks(stack_id)%vars(v)%var%clear_all()
+            call stacks(stack_id)%vars(v)%grd%clear_all()
         end do
     end subroutine clear_grad
 
