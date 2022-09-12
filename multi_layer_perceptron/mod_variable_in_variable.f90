@@ -363,7 +363,6 @@ contains
         this%dtype=-1
         if (allocated(this%m)) deallocate(this%m)
         if (allocated(this%v)) deallocate(this%v)
-        this%s = 0d0
     end subroutine clear_all
 
     function batch_sizes_viv(this) result(n_batches)

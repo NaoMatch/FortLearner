@@ -40,7 +40,7 @@ contains
         call set_operation(&
             this, &
             operation_name=this%act_name,   &
-            input_vars=input_var, output_var=output_var, dim=dim_set)
+            input_var=input_var, output_var=output_var, dim=dim_set)
     end function forward_summation
 
     subroutine backward_summation(this, elm)

@@ -21,6 +21,7 @@ use mod_log_natural
 ! User Defined Functions
 use mod_sigmoid
 use mod_relu
+use mod_dense
 
 ! Shape Change functions
 use mod_summation

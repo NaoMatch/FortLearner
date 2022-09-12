@@ -114,6 +114,10 @@ contains
                     end if
                 end if
             end if
+
+            if (input_var2_ptr%is_learnable) then
+                input_var2_ptr%var_ptr%var = input_var2_ptr%var_ptr%var - 0.1d0*input_var2_ptr%grd
+            end if
         end if
 
         call debug_print(__FILE__, __LINE__, elm, &

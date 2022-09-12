@@ -22,7 +22,6 @@ contains
         implicit none
         type(variable_), intent(in) :: y_true, y_pred
         type(variable_) :: loss
-        
         loss = sum((y_true-y_pred)**2d0) / dble(y_true%sizes())
     end function mean_squared_error_nn
 

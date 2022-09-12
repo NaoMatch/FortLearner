@@ -220,6 +220,7 @@ contains
             stacks(stack_id)%vars(v)%g = 0d0
             call stacks(stack_id)%vars(v)%var%clear_all()
             call stacks(stack_id)%vars(v)%grd%clear_all()
+            print*, stacks(stack_id)%vars(v)%grd%s
         end do
     end subroutine clear_grad
 

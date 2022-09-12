@@ -54,21 +54,19 @@ contains
             
         if (input_var1_ptr%require_grad) then
             if (input_var1_ptr%grd%dtype==-1) then
-                ! input_var1_ptr%grd = matmul(output_var_ptr%grd, transpose(input_var2_ptr%var))
                 input_var1_ptr%grd = matmul(output_var_ptr%grd, input_var2_ptr%var, f_, t_)
             else
-                ! input_var1_ptr%grd = input_var1_ptr%grd + matmul(output_var_ptr%grd, transpose(input_var2_ptr%var))
                 input_var1_ptr%grd = input_var1_ptr%grd + matmul(output_var_ptr%grd, input_var2_ptr%var, f_, t_)
             end if
         end if
 
         if (input_var2_ptr%require_grad) then
-            ! var1_T%var = transpose(input_var1_ptr%var)
             if (input_var2_ptr%grd%dtype==-1) then
-                ! input_var2_ptr%grd = matmul(transpose(input_var1_ptr%var), output_var_ptr%grd)
                 input_var2_ptr%grd = matmul(input_var1_ptr%var, output_var_ptr%grd, t_, f_)
+                if (input_var2_ptr%is_learnable) then
+                    input_var2_ptr%var_ptr%var = input_var2_ptr%var_ptr%var - 0.1d0*input_var2_ptr%grd
+                end if
             else
-                ! input_var2_ptr%grd = input_var2_ptr%grd + matmul(transpose(input_var1_ptr%var), output_var_ptr%grd)
                 input_var2_ptr%grd = input_var2_ptr%grd + matmul(input_var1_ptr%var, output_var_ptr%grd, t_, f_)
             end if
         end if

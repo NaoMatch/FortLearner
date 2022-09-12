@@ -33,7 +33,7 @@ contains
         call set_operation(&
             this, &
             operation_name=this%act_name,   &
-            input_vars=input_var, output_var=output_var, dim=-1_8)
+            input_var=input_var, output_var=output_var, dim=-1_8)
     end function forward_exponential
     
     subroutine backward_exponential(this, elm)

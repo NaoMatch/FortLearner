@@ -109,6 +109,7 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_sigmoid.out \
 						./mod/mod_matmul.out \
 						./mod/mod_relu.out \
+						./mod/mod_dense.out \
 						./mod/mod_loss_function.out \
 						./mod/mod_backwards.out \
 						./mod/mod_my_mlp.out \
@@ -218,6 +219,7 @@ build:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_sigmoid.f90 -o ./mod/mod_sigmoid.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_matmul.f90 -o ./mod/mod_matmul.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_relu.f90 -o ./mod/mod_relu.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_dense.f90 -o ./mod/mod_dense.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_loss_function.f90 -o ./mod/mod_loss_function.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_backwards.f90 -o ./mod/mod_backwards.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_my_mlp.f90 -o ./mod/mod_my_mlp.out
@@ -267,6 +269,7 @@ build_subset:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_sigmoid.f90 -o ./mod/mod_sigmoid.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_matmul.f90 -o ./mod/mod_matmul.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_relu.f90 -o ./mod/mod_relu.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_dense.f90 -o ./mod/mod_dense.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_loss_function.f90 -o ./mod/mod_loss_function.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_backwards.f90 -o ./mod/mod_backwards.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_my_mlp.f90 -o ./mod/mod_my_mlp.out

@@ -9,13 +9,16 @@ module mod_wengert_list
         type(variable_in_variable) :: grd
         real(kind=8), allocatable  :: v(:,:)
         real(kind=8), allocatable  :: g(:,:)
-        logical(kind=4)            :: is_input=.false.
+        logical(kind=4)            :: is_input=f_
         character(len=256)         :: var_name="None"
         integer(kind=8)            :: var_id
         integer(kind=8)            :: stack_id=-1
         integer(kind=8)            :: generation=0
-        logical(kind=4)            :: require_grad=.true.
+        logical(kind=4)            :: require_grad=t_
         type(variable_), allocatable :: input_vars(:)
+        type(variable_), pointer     :: var_ptr
+        logical(kind=4)              :: is_learnable=f_
+        type(optimizer_), pointer    :: opt_ptr
     contains
         procedure :: sizes
     end type variable_
@@ -40,7 +43,7 @@ module mod_wengert_list
         integer(kind=8), allocatable    :: dim_in1(:)   ! input variable name(s)
         integer(kind=8), allocatable    :: dim_in2(:)   ! input variable name(s)
         integer(kind=8)                 :: stack_id=-1     ! output variable name
-        logical(kind=4)                 :: is_output = .false.
+        logical(kind=4)                 :: is_output = f_
         class(*), pointer               :: opr => null()
         integer(kind=8)                 :: dim
     contains
@@ -73,10 +76,11 @@ module mod_wengert_list
     end type neural_network
         
     type stack
-        integer(kind=8) :: n_ids=1
-        type(element), allocatable :: list(:)
-        type(variable_), allocatable :: vars(:)
-        integer(kind=8), allocatable :: idxs(:)
+        integer(kind=8) :: n_ids=1 !< number of used indices 
+        type(element), allocatable   :: list(:) ! elements of wengert list
+        type(variable_), allocatable :: vars(:) ! input/intermediate/output variables
+        type(variable_), allocatable :: prms(:) ! parameters eg. weights and bias of dense layer
+        integer(kind=8), allocatable :: idxs(:) ! variable index
     contains
         procedure :: print => print_all_elements
         procedure, pass :: assign_var_names
@@ -95,7 +99,7 @@ module mod_wengert_list
     end interface get_input_variable_pointer
 
     type(stack), target :: stacks(MAX_STACK_SIZE)
-    logical(kind=4) :: is_used_stacks(MAX_STACK_SIZE) = .false.
+    logical(kind=4) :: is_used_stacks(MAX_STACK_SIZE) = f_
 
     interface operator (.eq.)
         module procedure compare_element
@@ -208,8 +212,8 @@ contains
         type(element), intent(in) :: elm2
         logical(kind=4) :: ret
     
-        ret = .false.
-        if (elm1%elm_id == elm2%elm_id) ret = .true.
+        ret = f_
+        if (elm1%elm_id == elm2%elm_id) ret = t_
     end function compare_element
     
     function new_optimizer_(learning_rate, alpha)
@@ -290,39 +294,43 @@ contains
     end subroutine assign_var_name
         
 
-    subroutine set_operation_1in_1out(opr, operation_name, input_vars, output_var, dim)
+    subroutine set_operation_1in_1out(opr, operation_name, input_var, output_var, dim)
         implicit none
         class(*), target :: opr
         character(len=*) :: operation_name
-        type(variable_)  :: input_vars
+        type(variable_), target  :: input_var
         type(variable_)  :: output_var
         integer(kind=8)  :: dim
 
         type(element)    :: elm
         integer(kind=8)  :: i, id
 
-        id = input_vars%stack_id
-        call stacks(id)%assign_name(input_vars)
+        id = input_var%stack_id
+        call stacks(id)%assign_name(input_var)
         call stacks(id)%assign_name(output_var)
 
         allocate(elm%opr, mold=opr)
         elm%opr => opr
         elm%elm_id       = size(stacks(id)%list)+1
-        elm%generation   = input_vars%generation
+        elm%generation   = input_var%generation
         elm%var_name_out = output_var%var_name
         elm%var_id_out   = output_var%var_id
         elm%dim_out      = shape(output_var%var)
         elm%opr_name     = operation_name
-        elm%var_names_in = [input_vars%var_name]
-        elm%var_ids_in   = [input_vars%var_id]
-        elm%dim_in1      = shape(input_vars%var)
+        elm%var_names_in = [input_var%var_name]
+        elm%var_ids_in   = [input_var%var_id]
+        elm%dim_in1      = shape(input_var%var)
         elm%stack_id     = id
         elm%dim          = dim
         
         stacks(id)%list = [stacks(id)%list, elm]
-        if (.not. any(input_vars%var_id == stacks(id)%idxs)) then
-            stacks(id)%vars = [stacks(id)%vars, input_vars]
-            stacks(id)%idxs = [stacks(id)%idxs, input_vars%var_id]
+        if (.not. any(input_var%var_id == stacks(id)%idxs)) then
+            stacks(id)%vars = [stacks(id)%vars, input_var]
+            stacks(id)%idxs = [stacks(id)%idxs, input_var%var_id]
+            if (input_var%is_learnable) then
+                allocate(stacks(id)%vars(size(stacks(id)%vars))%var_ptr)
+                stacks(id)%vars(size(stacks(id)%vars))%var_ptr => input_var
+            end if
         end if
 
         output_var%stack_id = id
@@ -337,7 +345,7 @@ contains
         implicit none
         class(*), target :: opr
         character(len=*) :: operation_name
-        type(variable_)  :: input_var1, input_var2
+        type(variable_), target  :: input_var1, input_var2
         type(variable_)  :: output_var
         integer(kind=8)  :: dim
 
@@ -374,11 +382,19 @@ contains
             stacks(id)%vars = [stacks(id)%vars, input_var1]
             stacks(id)%idxs = [stacks(id)%idxs, input_var1%var_id]
             ! print*, "append input", size(stacks(id)%vars)
+            if (input_var1%is_learnable) then
+                allocate(stacks(id)%vars(size(stacks(id)%vars))%var_ptr)
+                stacks(id)%vars(size(stacks(id)%vars))%var_ptr => input_var1
+            end if
         end if
         if (.not. any(input_var2%var_id == stacks(id)%idxs)) then
             stacks(id)%vars = [stacks(id)%vars, input_var2]
             stacks(id)%idxs = [stacks(id)%idxs, input_var2%var_id]
             ! print*, "append input", size(stacks(id)%vars)
+            if (input_var2%is_learnable) then
+                allocate(stacks(id)%vars(size(stacks(id)%vars))%var_ptr)
+                stacks(id)%vars(size(stacks(id)%vars))%var_ptr => input_var2
+            end if
         end if
 
         output_var%stack_id = id
@@ -391,37 +407,43 @@ contains
     end subroutine set_operation_2in_1out
 
     
-    function new_variable_s_(sclr, stack_id, require_grad)
+    function new_variable_s_(sclr, stack_id, require_grad, is_learnable)
         implicit none
         type(variable_) :: new_variable_s_
         integer(kind=8), optional :: stack_id
         logical(kind=4), optional :: require_grad
+        logical(kind=4), optional :: is_learnable
         real(kind=8), intent(in) :: sclr
         new_variable_s_%var = variable_in_variable(sclr)
         if (present(stack_id)) new_variable_s_%stack_id = stack_id
         if (present(require_grad)) new_variable_s_%require_grad = require_grad
+        if (present(is_learnable)) new_variable_s_%is_learnable = is_learnable
     end function new_variable_s_
     
-    function new_variable_v_(vctr, stack_id, require_grad)
+    function new_variable_v_(vctr, stack_id, require_grad, is_learnable)
         implicit none
         type(variable_) :: new_variable_v_
         integer(kind=8), optional :: stack_id
         logical(kind=4), optional :: require_grad
+        logical(kind=4), optional :: is_learnable
         real(kind=8), intent(in) :: vctr(:)
         new_variable_v_%var = variable_in_variable(vctr)
         if (present(stack_id)) new_variable_v_%stack_id = stack_id
         if (present(require_grad)) new_variable_v_%require_grad = require_grad
+        if (present(is_learnable)) new_variable_v_%is_learnable = is_learnable
     end function new_variable_v_
     
-    function new_variable_m_(mtrx, stack_id, require_grad)
+    function new_variable_m_(mtrx, stack_id, require_grad, is_learnable)
         implicit none
         type(variable_) :: new_variable_m_
         integer(kind=8), optional :: stack_id
         logical(kind=4), optional :: require_grad
+        logical(kind=4), optional :: is_learnable
         real(kind=8), intent(in) :: mtrx(:,:)
         new_variable_m_%var = variable_in_variable(mtrx)
         if (present(stack_id)) new_variable_m_%stack_id = stack_id
         if (present(require_grad)) new_variable_m_%require_grad = require_grad
+        if (present(is_learnable)) new_variable_m_%is_learnable = is_learnable
     end function new_variable_m_
 
     function new_variable_()
