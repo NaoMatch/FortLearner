@@ -29,37 +29,6 @@ module mod_var
         module procedure :: new_variable_m
     end interface variable
 
-    ! type activation_function
-    !     integer(kind=4) :: dim=-1
-    !     character(len=256) :: act_name
-    !     real(kind=8), allocatable :: w(:,:)
-    !     real(kind=8), allocatable :: m(:,:) ! mask
-    !     type(variable), pointer :: input_ptr
-    !     type(variable), pointer :: input_ptr2
-    !     type(variable_ptr), allocatable :: input_ptrs(:)
-    ! contains
-    !     ! ! Forward
-    !     ! ! Elementary function
-    !     ! procedure :: square
-    !     ! procedure :: exponential
-    !     ! ! Operations that perform four arithmetic operations
-    !     ! procedure :: addition
-    !     ! procedure :: substraction
-    !     ! procedure :: multiply
-    !     ! procedure :: division
-    !     ! ! Operation to change the shape of the array
-    !     ! procedure :: summation
-    !     ! procedure :: broadcast
-    !     ! ! Othres
-    !     ! procedure :: absolute_value
-    !     ! ! Backward
-    !     ! procedure :: backward => backward_activation_funcion
-    ! end type activation_function
-
-    ! type creator_ptr
-    !     type(activation_function), pointer :: ptr
-    ! end type creator_ptr
-
 contains
 
     function new_variable_s(sclr)

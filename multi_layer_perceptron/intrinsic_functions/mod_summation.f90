@@ -19,8 +19,8 @@ contains
     function forward_summation(this, input_var, dim) result(output_var)
         implicit none
         class(summation_base) :: this
-        type(variable_) :: input_var
-        type(variable_) :: output_var
+        type(variable) :: input_var
+        type(variable) :: output_var
         integer(kind=8), optional :: dim
         integer(kind=8) :: stack_id, dim_set
         integer(kind=4) :: output_shape(2)
@@ -48,8 +48,8 @@ contains
         class(summation_base) :: this
         type(element)      :: elm
 
-        type(variable_), pointer  :: input_var_ptr
-        type(variable_), pointer  :: output_var_ptr
+        type(variable), pointer  :: input_var_ptr
+        type(variable), pointer  :: output_var_ptr
 
         call get_input_variable_pointer(elm, input_var_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
@@ -85,9 +85,9 @@ contains
 
     function sum_var(input_var, dim) result(output_var)
         implicit none
-        type(variable_), intent(in) :: input_var
+        type(variable), intent(in) :: input_var
         integer(kind=8), intent(in), optional :: dim
-        type(variable_) :: output_var
+        type(variable) :: output_var
         output_var = summation%forward(input_var, dim)
     end function sum_var
 

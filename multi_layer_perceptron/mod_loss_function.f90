@@ -1,5 +1,4 @@
 module mod_loss_function
-    use mod_var
     use mod_wengert_list
     use mod_activation_function
     include "./inc_use_activation_functions.f90"
@@ -20,16 +19,16 @@ contains
 
     function mean_squared_error_nn(y_true, y_pred) result(loss)
         implicit none
-        type(variable_), intent(in) :: y_true, y_pred
-        type(variable_) :: loss
+        type(variable), intent(in) :: y_true, y_pred
+        type(variable) :: loss
         loss = sum((y_true-y_pred)**2d0) / dble(y_true%sizes())
     end function mean_squared_error_nn
 
     function mean_absolute_error_nn(y_true, y_pred) result(loss)
         implicit none
-        type(variable_), intent(in) :: y_true, y_pred
-        type(variable_) :: loss
-        loss = sum(abs(y_true-y_pred)) / dble(size(y_true%v, dim=1))
+        type(variable), intent(in) :: y_true, y_pred
+        type(variable) :: loss
+        loss = sum(abs(y_true-y_pred)) / dble(y_true%sizes())
     end function mean_absolute_error_nn
 
 end module mod_loss_function

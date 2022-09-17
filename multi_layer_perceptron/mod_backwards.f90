@@ -8,7 +8,7 @@ contains
 
     subroutine set_initial_gradient(var)
         implicit none
-        type(variable_) :: var
+        type(variable) :: var
 
         integer(kind=8) :: stack_id, var_id
 
@@ -23,7 +23,7 @@ contains
 
     subroutine backward(var)
         implicit none
-        type(variable_) :: var
+        type(variable) :: var
         integer(kind=8) :: n_vars
 
         call set_initial_gradient(var)
@@ -32,10 +32,10 @@ contains
 
     recursive subroutine backward_variable_(var)
         implicit none
-        type(variable_) :: var
+        type(variable) :: var
         type(element)   :: elm
         type(element), allocatable :: elms(:)
-        type(variable_), allocatable :: vars(:)
+        type(variable), allocatable :: vars(:)
         class(*), pointer :: opr
         integer(kind=8) :: n_elms, e
         integer(kind=8), allocatable :: generations(:), indices(:)
@@ -111,7 +111,7 @@ contains
         type(element)   :: elm
 
         if     (elm%opr_name == "square") then
-            call square%backward(elm)
+            call square_func%backward(elm)
         elseif (elm%opr_name == "square_root") then
             call square_root%backward(elm)
         elseif (elm%opr_name == "sinusoid") then
@@ -159,7 +159,7 @@ contains
     subroutine get_input_var_ptr(elm, input_var_ptr)
         implicit none
         type(element) :: elm
-        type(variable_), pointer :: input_var_ptr
+        type(variable), pointer :: input_var_ptr
 
         integer(kind=8) :: var_id
 
@@ -170,7 +170,7 @@ contains
     function get_input_var(elm) result(input_var)
         implicit none
         type(element) :: elm
-        type(variable_) :: input_var
+        type(variable) :: input_var
 
         integer(kind=8) :: var_id
 
@@ -181,7 +181,7 @@ contains
     subroutine get_output_vars(elm, output_var)
         implicit none
         type(element) :: elm
-        type(variable_) :: output_var
+        type(variable) :: output_var
         
         integer(kind=8) :: var_id
 
@@ -208,7 +208,7 @@ contains
 
     subroutine clear_grad(var)
         implicit none
-        type(variable_) :: var
+        type(variable) :: var
 
         integer(kind=8) :: stack_id, v
         

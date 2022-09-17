@@ -19,8 +19,8 @@ contains
     function forward_cosine(this, input_var) result(output_var)
         implicit none
         class(cosine_base) :: this
-        type(variable_) :: input_var
-        type(variable_) :: output_var
+        type(variable) :: input_var
+        type(variable) :: output_var
         integer(kind=8) :: stack_id
         ! Set up
         call this%set_activation_type_name("cosine")
@@ -40,8 +40,8 @@ contains
         class(cosine_base) :: this
         type(element)      :: elm
 
-        type(variable_), pointer :: input_var_ptr
-        type(variable_), pointer :: output_var_ptr
+        type(variable), pointer :: input_var_ptr
+        type(variable), pointer :: output_var_ptr
         call get_input_variable_pointer(elm, input_var_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
 
@@ -54,8 +54,8 @@ contains
 
     function cos_v(input_var) result(output_var)
         implicit none
-        type(variable_) :: input_var
-        type(variable_) :: output_var
+        type(variable) :: input_var
+        type(variable) :: output_var
 
         output_var = cosine%forward(input_var)
     end function cos_v

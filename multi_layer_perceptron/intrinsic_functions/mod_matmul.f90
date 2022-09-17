@@ -19,8 +19,8 @@ contains
     function forward_matmul(this, input_var1, input_var2) result(output_var)
         implicit none
         class(matmul_base) :: this
-        type(variable_) :: input_var1, input_var2
-        type(variable_) :: output_var
+        type(variable) :: input_var1, input_var2
+        type(variable) :: output_var
         integer(kind=8) :: stack_id
         real(kind=8) :: val
         ! Set up
@@ -42,10 +42,10 @@ contains
         class(matmul_base) :: this
         type(element)      :: elm
 
-        type(variable_), pointer :: input_var1_ptr, input_var2_ptr
-        type(variable_), pointer :: output_var_ptr
+        type(variable), pointer :: input_var1_ptr, input_var2_ptr
+        type(variable), pointer :: output_var_ptr
 
-        type(variable_) :: var1_T
+        type(variable) :: var1_T
         call get_input_variable_pointer(elm, input_var1_ptr, input_var2_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
 
@@ -74,8 +74,8 @@ contains
 
     function matmul_var_var(input_var1, input_var2) result(output_var)
         implicit none
-        type(variable_), intent(in) :: input_var1, input_var2
-        type(variable_) :: output_var
+        type(variable), intent(in) :: input_var1, input_var2
+        type(variable) :: output_var
         output_var = matmul_function%forward(input_var1, input_var2)
     end function matmul_var_var
 

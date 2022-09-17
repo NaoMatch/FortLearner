@@ -166,33 +166,31 @@ module mod_variable_in_variable
         module procedure relu_viv
     end interface relu
 
-    interface clip
-        module procedure clip_viv
-    end interface clip
+    interface mask_one
+        module procedure mask_one_viv
+    end interface mask_one
 
 contains
 
-    elemental function clip_elemental(x, clip_val)
+    elemental function mask_one_elemental(x)
         implicit none
         real(kind=8), intent(in) :: x
-        real(kind=8), intent(in) :: clip_val
-        real(kind=8) :: clip_elemental
-        clip_elemental = maxval([0d0, minval([x, clip_val])])
-    end function clip_elemental
+        real(kind=8) :: mask_one_elemental
+        mask_one_elemental = maxval([0d0, x]) / x
+    end function mask_one_elemental
             
-    function clip_viv(viv, clip_val) result(res)
+    function mask_one_viv(viv) result(res)
         implicit none
         type(variable_in_variable), intent(in) :: viv
-        real(kind=8), intent(in) :: clip_val
         type(variable_in_variable) :: res
         if (viv%dtype==2) then
-            res = clip_elemental(viv%m, clip_val)
+            res = mask_one_elemental(viv%m)
         elseif (viv%dtype==1) then
-            res = clip_elemental(viv%v, clip_val)
+            res = mask_one_elemental(viv%v)
         else
-            res = clip_elemental(viv%s, clip_val)
+            res = mask_one_elemental(viv%s)
         end if
-    end function clip_viv
+    end function mask_one_viv
 
     elemental function relu_elemental(x)
         implicit none

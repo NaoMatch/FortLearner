@@ -20,8 +20,8 @@ contains
     function forward_power(this, input_var1, input_var2) result(output_var)
         implicit none
         class(power_base) :: this
-        type(variable_) :: input_var1, input_var2, input_vars(2)
-        type(variable_) :: output_var
+        type(variable) :: input_var1, input_var2, input_vars(2)
+        type(variable) :: output_var
         integer(kind=8) :: stack_id
         ! Set up
         call this%set_activation_type_name("power")
@@ -42,8 +42,8 @@ contains
         class(power_base) :: this
         type(element)      :: elm
 
-        type(variable_), pointer :: input_var1_ptr, input_var2_ptr
-        type(variable_), pointer :: output_var_ptr
+        type(variable), pointer :: input_var1_ptr, input_var2_ptr
+        type(variable), pointer :: output_var_ptr
         integer(kind=8) :: pow_index
         call get_input_variable_pointer(elm, input_var1_ptr, input_var2_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
@@ -64,19 +64,19 @@ contains
 
     function power_var_var(input_var1, input_var2) result(output_var)
         implicit none
-        type(variable_), intent(in) :: input_var1, input_var2
-        type(variable_) :: output_var
+        type(variable), intent(in) :: input_var1, input_var2
+        type(variable) :: output_var
         output_var = power%forward(input_var1, input_var2)
     end function power_var_var
 
 
     function power_var_scl(input_var, input_scl) result(output_var)
         implicit none
-        type(variable_), intent(in) :: input_var
+        type(variable), intent(in) :: input_var
         real(kind=8), intent(in)    :: input_scl
-        type(variable_) :: input_scl_var
-        type(variable_) :: output_var
-        input_scl_var = variable_(input_scl, stack_id=input_var%stack_id, require_grad=.false.)
+        type(variable) :: input_scl_var
+        type(variable) :: output_var
+        input_scl_var = variable(input_scl, stack_id=input_var%stack_id, require_grad=.false.)
         output_var = power%forward(input_var, input_scl_var)
     end function power_var_scl
 

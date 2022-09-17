@@ -20,8 +20,8 @@ contains
     function forward_substraction(this, input_var1, input_var2) result(output_var)
         implicit none
         class(substraction_base) :: this
-        type(variable_) :: input_var1, input_var2, input_vars(2)
-        type(variable_) :: output_var
+        type(variable) :: input_var1, input_var2, input_vars(2)
+        type(variable) :: output_var
         real(kind=8) :: val
         ! Set up
         call this%set_activation_type_name("substraction")
@@ -42,8 +42,8 @@ contains
         class(substraction_base) :: this
         type(element)      :: elm
 
-        type(variable_), pointer :: input_var1_ptr, input_var2_ptr
-        type(variable_), pointer :: output_var_ptr
+        type(variable), pointer :: input_var1_ptr, input_var2_ptr
+        type(variable), pointer :: output_var_ptr
         call get_input_variable_pointer(elm, input_var1_ptr, input_var2_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
 
@@ -124,19 +124,19 @@ contains
 
     function substraction_var_var(input_var1, input_var2) result(output_var)
         implicit none
-        type(variable_), intent(in) :: input_var1, input_var2
-        type(variable_) :: output_var
+        type(variable), intent(in) :: input_var1, input_var2
+        type(variable) :: output_var
         output_var = substraction%forward(input_var1, input_var2)
     end function substraction_var_var    
 
 
     function substraction_var_scl(input_var, input_scl) result(output_var)
         implicit none
-        type(variable_), intent(in) :: input_var
+        type(variable), intent(in) :: input_var
         real(kind=8), intent(in) :: input_scl
-        type(variable_) :: output_var
-        type(variable_) :: input_var_new
-        input_var_new = variable_(input_scl, stack_id=input_var%stack_id)
+        type(variable) :: output_var
+        type(variable) :: input_var_new
+        input_var_new = variable(input_scl, stack_id=input_var%stack_id)
         output_var = substraction%forward(input_var, input_var_new)
     end function substraction_var_scl    
 
@@ -144,10 +144,10 @@ contains
     function substraction_scl_var(input_scl, input_var) result(output_var)
         implicit none
         real(kind=8), intent(in) :: input_scl
-        type(variable_), intent(in) :: input_var
-        type(variable_) :: output_var
-        type(variable_) :: input_var_new
-        input_var_new = variable_(input_scl, stack_id=input_var%stack_id)
+        type(variable), intent(in) :: input_var
+        type(variable) :: output_var
+        type(variable) :: input_var_new
+        input_var_new = variable(input_scl, stack_id=input_var%stack_id)
         output_var = substraction%forward(input_var_new, input_var)
     end function substraction_scl_var    
 end module mod_substraction

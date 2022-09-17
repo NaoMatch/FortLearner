@@ -20,8 +20,8 @@ contains
     function forward_division(this, input_var1, input_var2) result(output_var)
         implicit none
         class(division_base) :: this
-        type(variable_) :: input_var1, input_var2, input_vars(2)
-        type(variable_) :: output_var
+        type(variable) :: input_var1, input_var2, input_vars(2)
+        type(variable) :: output_var
         integer(kind=8) :: stack_id
         real(kind=8) :: val
         ! Set up
@@ -44,8 +44,8 @@ contains
         class(division_base) :: this
         type(element)      :: elm
 
-        type(variable_), pointer :: input_var1_ptr, input_var2_ptr
-        type(variable_), pointer :: output_var_ptr
+        type(variable), pointer :: input_var1_ptr, input_var2_ptr
+        type(variable), pointer :: output_var_ptr
         real(kind=8) :: in_var
         integer(kind=8) :: dim1, dim2, dim_out
         call get_input_variable_pointer(elm, input_var1_ptr, input_var2_ptr)
@@ -78,19 +78,19 @@ contains
 
     function division_var_var(input_var1, input_var2) result(output_var)
         implicit none
-        type(variable_), intent(in) :: input_var1, input_var2
-        type(variable_) :: output_var
+        type(variable), intent(in) :: input_var1, input_var2
+        type(variable) :: output_var
         output_var = division%forward(input_var1, input_var2)
     end function division_var_var    
 
 
     function division_var_scl(input_var, input_scl) result(output_var)
         implicit none
-        type(variable_), intent(in) :: input_var
+        type(variable), intent(in) :: input_var
         real(kind=8), intent(in) :: input_scl
-        type(variable_) :: output_var
-        type(variable_) :: input_var_new
-        input_var_new = variable_(input_scl, stack_id=input_var%stack_id, require_grad=.false.)
+        type(variable) :: output_var
+        type(variable) :: input_var_new
+        input_var_new = variable(input_scl, stack_id=input_var%stack_id, require_grad=.false.)
         output_var = division%forward(input_var, input_var_new)
     end function division_var_scl    
 
@@ -98,10 +98,10 @@ contains
     function division_scl_var(input_scl, input_var) result(output_var)
         implicit none
         real(kind=8), intent(in) :: input_scl
-        type(variable_), intent(in) :: input_var
-        type(variable_) :: output_var
-        type(variable_) :: input_var_new
-        input_var_new = variable_(input_scl, stack_id=input_var%stack_id, require_grad=.false.)
+        type(variable), intent(in) :: input_var
+        type(variable) :: output_var
+        type(variable) :: input_var_new
+        input_var_new = variable(input_scl, stack_id=input_var%stack_id, require_grad=.false.)
         output_var = division%forward(input_var_new, input_var)
     end function division_scl_var    
 
