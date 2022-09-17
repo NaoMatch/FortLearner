@@ -53,8 +53,9 @@ contains
 
         call get_input_variable_pointer(elm, input_var_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
-        call debug_print(__FILE__, __LINE__, elm, input_var_ptr, output_var_ptr, before=t_)
 
+        call debug_print(__FILE__, __LINE__, &
+                elm, input_var_ptr, output_var_ptr, before=t_)
         if (input_var_ptr%grd%dtype==-1) then
             ! Grad is not allocated.
             if (input_var_ptr%var%dtype==2) then
@@ -78,7 +79,8 @@ contains
                 end if
             end if
         end if
-        call debug_print(__FILE__, __LINE__, elm, input_var_ptr, output_var_ptr, before=f_)
+        call debug_print(__FILE__, __LINE__, &
+                elm, input_var_ptr, output_var_ptr, before=f_)
     end subroutine backward_summation
 
     function sum_var(input_var, dim) result(output_var)

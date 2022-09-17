@@ -51,7 +51,7 @@ contains
         call get_output_variable_pointer(elm, output_var_ptr)
 
         call debug_print(__FILE__, __LINE__, elm, input_var_ptr, output_var_ptr, t_)        
-        out_var%var = clip(input_var_ptr%var, 1d0)
+        out_var%var = mask_one(input_var_ptr%var)
         if (input_var_ptr%grd%dtype==-1) then
             input_var_ptr%grd = out_var%var * output_var_ptr%grd
         else

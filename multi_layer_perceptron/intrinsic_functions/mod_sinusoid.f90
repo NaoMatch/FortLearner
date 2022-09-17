@@ -42,10 +42,6 @@ contains
         call get_input_variable_pointer(elm, input_var_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
 
-        ! print*, '*********************************************************************************************'
-        ! print*, " ---- Sinusoid Backward"
-        ! print*, "      input_var_ptr%g:  ", allocated(input_var_ptr%g)
-        ! print*, "      output_var_ptr%g: ", allocated(output_var_ptr%g)
         if (allocated(input_var_ptr%g)) then
             input_var_ptr%g = input_var_ptr%g + cos(input_var_ptr%v) * output_var_ptr%g
         else

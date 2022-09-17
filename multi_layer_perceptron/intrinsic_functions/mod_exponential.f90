@@ -46,18 +46,11 @@ contains
         call get_input_variable_pointer(elm, input_var_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
 
-        ! print*, '*********************************************************************************************'
-        ! print*, " ---- Exponential Backward"
-        ! print*, "      var ids in/out  : ", input_var_ptr%var_id, output_var_ptr%var_id
-        ! print*, "      input_var_ptr%v : ", allocated(input_var_ptr%v)
-        ! print*, "      input_var_ptr%g : ", allocated(input_var_ptr%g)
-        ! print*, "      output_var_ptr%g: ", allocated(output_var_ptr%g)
-        if (allocated(input_var_ptr%g)) then
-            input_var_ptr%g = input_var_ptr%g + exp(input_var_ptr%v) * output_var_ptr%g
+        if (input_var_ptr%grd%dtype==-1) then
+            input_var_ptr%grd = output_var_ptr%grd * exp(input_var_ptr%var)
         else
-            input_var_ptr%g =                   exp(input_var_ptr%v) * output_var_ptr%g
-        end if
-        ! print*, input_var_ptr%g        
+            input_var_ptr%grd = input_var_ptr%grd + output_var_ptr%grd * exp(input_var_ptr%var)
+        end if        
     end subroutine backward_exponential
 
     function exp_var(input_var) result(output_var)

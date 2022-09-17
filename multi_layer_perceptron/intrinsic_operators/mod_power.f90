@@ -48,15 +48,17 @@ contains
         call get_input_variable_pointer(elm, input_var1_ptr, input_var2_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
 
-        call debug_print(__FILE__, __LINE__, elm, input_var1_ptr, input_var2_ptr, output_var_ptr, t_)
+        call debug_print(__FILE__, __LINE__, &
+                elm, input_var1_ptr, input_var2_ptr, output_var_ptr, t_)
         pow_index = input_var2_ptr%var%s
         if (input_var1_ptr%grd%dtype==-1) then
-            input_var1_ptr%grd = (pow_index+0d0) * (input_var1_ptr%var**(pow_index-1)) * output_var_ptr%grd
+            input_var1_ptr%grd = output_var_ptr%grd * (pow_index+0d0) * (input_var1_ptr%var**(pow_index-1))
         else
-            input_var1_ptr%grd = input_var1_ptr%grd + (pow_index+0d0) * (input_var1_ptr%var**(pow_index-1)) * output_var_ptr%grd
-        end if
+            input_var1_ptr%grd = input_var1_ptr%grd + output_var_ptr%grd * (pow_index+0d0) * (input_var1_ptr%var**(pow_index-1))
+        end if        
 
-        call debug_print(__FILE__, __LINE__, elm, input_var1_ptr, input_var2_ptr, output_var_ptr, f_)
+        call debug_print(__FILE__, __LINE__, &
+                elm, input_var1_ptr, input_var2_ptr, output_var_ptr, f_)
     end subroutine backward_power    
 
 

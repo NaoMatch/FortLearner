@@ -1,47 +1,45 @@
-module mod_addition
+module mod_substraction
     use mod_wengert_list
     use mod_activation_function
     implicit none
 
-    type, extends(activation_function_) :: addition_base
+    type, extends(activation_function_) :: substraction_base
     contains
-        procedure :: forward  => forward_addition
-        procedure :: backward => backward_addition
-    end type addition_base
-    type(addition_base) :: addition
+        procedure :: forward  => forward_substraction
+        procedure :: backward => backward_substraction
+    end type substraction_base
+    type(substraction_base) :: substraction
 
-    interface operator(+)
-        module procedure addition_var_var
-        module procedure addition_var_scl
-        module procedure addition_scl_val
-    end interface operator(+)
-    
+    interface operator(-)
+        module procedure substraction_var_var
+        module procedure substraction_var_scl
+        module procedure substraction_scl_var
+    end interface operator(-)
+
 contains
-
-    function forward_addition(this, input_var1, input_var2) result(output_var)
+    function forward_substraction(this, input_var1, input_var2) result(output_var)
         implicit none
-        class(addition_base) :: this
-        type(variable_) :: input_var1, input_var2
+        class(substraction_base) :: this
+        type(variable_) :: input_var1, input_var2, input_vars(2)
         type(variable_) :: output_var
-        integer(kind=8) :: stack_id
         real(kind=8) :: val
         ! Set up
-        call this%set_activation_type_name("addition")
+        call this%set_activation_type_name("substraction")
 
         ! Operation
-        output_var%var = input_var1%var + input_var2%var
-
+        output_var%var = input_var1%var - input_var2%var
+                
         ! Append 'variables' to Stack
+        input_vars = [input_var1, input_var2]
         call set_operation(&
             this, &
             operation_name=this%act_name,   &
             input_var1=input_var1, input_var2=input_var2, output_var=output_var, dim=-1_8)
-    end function forward_addition
+    end function forward_substraction
 
-
-    subroutine backward_addition(this, elm)
+    subroutine backward_substraction(this, elm)
         implicit none
-        class(addition_base) :: this
+        class(substraction_base) :: this
         type(element)      :: elm
 
         type(variable_), pointer :: input_var1_ptr, input_var2_ptr
@@ -51,6 +49,7 @@ contains
 
         call debug_print(__FILE__, __LINE__, elm, &
             input_var1_ptr, input_var2_ptr, output_var_ptr, t_)
+
 
         if (input_var1_ptr%require_grad) then
             if (input_var1_ptr%grd%dtype==-1) then
@@ -88,71 +87,67 @@ contains
             if (input_var2_ptr%grd%dtype==-1) then
                 if (input_var2_ptr%var%dtype==0) then
                     if (output_var_ptr%grd%dtype==2) then
-                        input_var2_ptr%grd = sum(output_var_ptr%grd)
+                        input_var2_ptr%grd = 0d0 - sum(output_var_ptr%grd)
                     end if
                 elseif (input_var2_ptr%var%dtype==1) then
                     if (output_var_ptr%grd%dtype==2) then
-                        input_var2_ptr%grd = sum(output_var_ptr%grd, dim=1_8)
+                        input_var2_ptr%grd = 0d0 - sum(output_var_ptr%grd, dim=1_8)
                     end if
                 elseif (input_var2_ptr%var%dtype==2) then
                     if (output_var_ptr%grd%dtype==2) then
-                        input_var2_ptr%grd = output_var_ptr%grd
+                        input_var2_ptr%grd = 0d0 - output_var_ptr%grd
                     end if
                 end if
             else
                 if (input_var2_ptr%var%dtype==0) then
                     if (output_var_ptr%grd%dtype==2) then
-                        input_var2_ptr%grd = input_var2_ptr%grd + sum(output_var_ptr%grd)
+                        input_var2_ptr%grd = input_var2_ptr%grd - sum(output_var_ptr%grd)
                     end if
                 elseif (input_var2_ptr%var%dtype==1) then
                     if (output_var_ptr%grd%dtype==2) then
-                        input_var2_ptr%grd = input_var2_ptr%grd + sum(output_var_ptr%grd, dim=1_8)
+                        input_var2_ptr%grd = input_var2_ptr%grd - sum(output_var_ptr%grd, dim=1_8)
                     end if
                 elseif (input_var2_ptr%var%dtype==2) then
                     if (output_var_ptr%grd%dtype==2) then
-                        input_var2_ptr%grd = input_var2_ptr%grd + output_var_ptr%grd
+                        input_var2_ptr%grd = input_var2_ptr%grd - output_var_ptr%grd
                     end if
                 end if
             end if
-
-            if (input_var2_ptr%is_learnable) then
-                input_var2_ptr%var_ptr%var = input_var2_ptr%var_ptr%var - 0.1d0*input_var2_ptr%grd
-            end if
         end if
-
+            
         call debug_print(__FILE__, __LINE__, elm, &
             input_var1_ptr, input_var2_ptr, output_var_ptr, f_)
-    end subroutine backward_addition    
+    end subroutine backward_substraction    
 
 
-    function addition_var_var(input_var1, input_var2) result(output_var)
+
+
+    function substraction_var_var(input_var1, input_var2) result(output_var)
         implicit none
         type(variable_), intent(in) :: input_var1, input_var2
         type(variable_) :: output_var
-        output_var = addition%forward(input_var1, input_var2)
-    end function addition_var_var
+        output_var = substraction%forward(input_var1, input_var2)
+    end function substraction_var_var    
 
 
-    function addition_var_scl(input_var, input_scl) result(output_var)
+    function substraction_var_scl(input_var, input_scl) result(output_var)
         implicit none
         type(variable_), intent(in) :: input_var
-        real(kind=8), intent(in)    :: input_scl
-        type(variable_) :: input_scl_var
+        real(kind=8), intent(in) :: input_scl
         type(variable_) :: output_var
-        input_scl_var = variable_(input_scl, stack_id=input_var%stack_id, require_grad=.false.)
-        output_var = addition%forward(input_var, input_scl_var)
-    end function addition_var_scl
+        type(variable_) :: input_var_new
+        input_var_new = variable_(input_scl, stack_id=input_var%stack_id)
+        output_var = substraction%forward(input_var, input_var_new)
+    end function substraction_var_scl    
 
-    
-    function addition_scl_val(input_scl, input_var) result(output_var)
+
+    function substraction_scl_var(input_scl, input_var) result(output_var)
         implicit none
-        real(kind=8), intent(in)    :: input_scl
+        real(kind=8), intent(in) :: input_scl
         type(variable_), intent(in) :: input_var
-        type(variable_) :: input_scl_var
         type(variable_) :: output_var
-        input_scl_var = variable_(input_scl, stack_id=input_var%stack_id, require_grad=.false.)
-        output_var = addition%forward(input_var, input_scl_var)
-    end function addition_scl_val
-
-
-end module mod_addition
+        type(variable_) :: input_var_new
+        input_var_new = variable_(input_scl, stack_id=input_var%stack_id)
+        output_var = substraction%forward(input_var_new, input_var)
+    end function substraction_scl_var    
+end module mod_substraction

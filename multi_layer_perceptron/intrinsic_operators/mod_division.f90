@@ -54,7 +54,8 @@ contains
         dim1 = input_var1_ptr%var%dims()
         dim2 = input_var2_ptr%var%dims()
 
-        call debug_print(__FILE__, __LINE__, elm, input_var1_ptr, input_var2_ptr, output_var_ptr, t_)
+        call debug_print(__FILE__, __LINE__, &
+                elm, input_var1_ptr, input_var2_ptr, output_var_ptr, t_)
         if (input_var1_ptr%require_grad) then
             if (input_var1_ptr%grd%dtype==-1) then
                 input_var1_ptr%grd = 1d0 / input_var2_ptr%var * output_var_ptr%grd
@@ -70,7 +71,8 @@ contains
                 input_var2_ptr%grd = input_var2_ptr%grd - input_var1_ptr%grd/input_var2_ptr%grd**2_8 * output_var_ptr%grd
             end if
         end if
-        call debug_print(__FILE__, __LINE__, elm, input_var1_ptr, input_var2_ptr, output_var_ptr, f_)
+        call debug_print(__FILE__, __LINE__, &
+                elm, input_var1_ptr, input_var2_ptr, output_var_ptr, f_)
     end subroutine backward_division    
 
 

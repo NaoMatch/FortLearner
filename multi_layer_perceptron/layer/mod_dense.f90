@@ -5,12 +5,14 @@ module mod_dense
     use mod_wengert_list
     use mod_matmul
     use mod_addition
+    use mod_multiplication
     implicit none
 
     type dense
         integer(kind=8) :: in_dim, out_dim
-        logical(kind=4) :: bias
+        logical(kind=4) :: bias=t_
         type(variable_) :: w
+        type(variable_) :: g
         type(variable_) :: b
     contains
         procedure :: init => init_dense
@@ -34,8 +36,12 @@ contains
     function act_dense(this, var) result(res)
         implicit none
         class(dense) :: this
-        type(variable_) :: var, res
-        res = matmul(var, this%w) + this%b
+        type(variable_) :: var, res, wg
+        if (this%bias) then
+            res = matmul(var, this%w) + this%b
+        else
+            res = matmul(var, this%w)
+        end if
     end function act_dense
     
 end module mod_dense

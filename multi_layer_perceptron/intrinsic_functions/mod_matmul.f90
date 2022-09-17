@@ -63,9 +63,6 @@ contains
         if (input_var2_ptr%require_grad) then
             if (input_var2_ptr%grd%dtype==-1) then
                 input_var2_ptr%grd = matmul(input_var1_ptr%var, output_var_ptr%grd, t_, f_)
-                if (input_var2_ptr%is_learnable) then
-                    input_var2_ptr%var_ptr%var = input_var2_ptr%var_ptr%var - 0.1d0*input_var2_ptr%grd
-                end if
             else
                 input_var2_ptr%grd = input_var2_ptr%grd + matmul(input_var1_ptr%var, output_var_ptr%grd, t_, f_)
             end if

@@ -9,7 +9,11 @@ module mod_cosine
         procedure :: backward => backward_cosine
     end type cosine_base
     type(cosine_base) :: cosine
-    
+
+    interface cos
+        module procedure :: cos_v
+    end interface cos
+
 contains
 
     function forward_cosine(this, input_var) result(output_var)
@@ -22,7 +26,6 @@ contains
         call this%set_activation_type_name("cosine")
 
         ! Operation
-        output_var%v = sin(input_var%v)
         output_var%var = sin(input_var%var)
 
         ! Append 'variables' to Stack
@@ -42,16 +45,20 @@ contains
         call get_input_variable_pointer(elm, input_var_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
 
-        ! print*, '*********************************************************************************************'
-        ! print*, " ---- Sinusoid Backward"
-        ! print*, "input_var_ptr%g:  ", allocated(input_var_ptr%g)
-        ! print*, "output_var_ptr%g: ", allocated(output_var_ptr%g)
-        ! input_var_ptr%g = -sin(input_var_ptr%v) * output_var_ptr%g
-        if (allocated(input_var_ptr%g)) then
-            input_var_ptr%g = input_var_ptr%g - cos(input_var_ptr%v) * output_var_ptr%g
+        if (input_var_ptr%grd%dtype==-1) then
+            input_var_ptr%grd = 0d0 - output_var_ptr%grd * cos(input_var_ptr%var)
         else
-            input_var_ptr%g =                 - cos(input_var_ptr%v) * output_var_ptr%g
-        end if
+            input_var_ptr%grd = input_var_ptr%grd - output_var_ptr%grd * cos(input_var_ptr%var)
+        end if        
     end subroutine backward_cosine
+
+    function cos_v(input_var) result(output_var)
+        implicit none
+        type(variable_) :: input_var
+        type(variable_) :: output_var
+
+        output_var = cosine%forward(input_var)
+    end function cos_v
+
 
 end module mod_cosine

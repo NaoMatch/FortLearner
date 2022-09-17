@@ -25,8 +25,7 @@ contains
         call this%set_activation_type_name("square_root")
 
         ! Operation
-        call allocate_var(output_var, var_shape=shape(input_var%v))
-        output_var%v = sqrt(input_var%v)
+        output_var%var = sqrt(input_var%var)
 
         ! Append 'variables' to Stack
         call set_operation(&
@@ -45,16 +44,10 @@ contains
         call get_input_variable_pointer(elm, input_var_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
 
-        ! print*, '*********************************************************************************************'
-        ! print*, " ---- Square Backward"
-        ! print*, "      var ids in/out  : ", input_var_ptr%var_id, output_var_ptr%var_id
-        ! print*, "      input_var_ptr%v : ", allocated(input_var_ptr%v)
-        ! print*, "      input_var_ptr%g : ", allocated(input_var_ptr%g)
-        ! print*, "      output_var_ptr%g: ", allocated(output_var_ptr%g)
-        if (allocated(input_var_ptr%g)) then
-            input_var_ptr%g = input_var_ptr%g + .5d0 / sqrt(input_var_ptr%v) * output_var_ptr%g
+        if (input_var_ptr%grd%dtype==-1) then
+            input_var_ptr%grd = output_var_ptr%grd * 0.5d0 / sqrt(input_var_ptr%var)
         else
-            input_var_ptr%g =                 + .5d0 / sqrt(input_var_ptr%v) * output_var_ptr%g
+            input_var_ptr%grd = input_var_ptr%grd + output_var_ptr%grd * 0.5d0 / sqrt(input_var_ptr%var)
         end if
     end subroutine backward_square_root
 

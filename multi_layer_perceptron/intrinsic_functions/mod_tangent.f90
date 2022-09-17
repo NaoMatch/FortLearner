@@ -9,6 +9,10 @@ module mod_tangent
         procedure :: backward => backward_tangent
     end type tangent_base
     type(tangent_base) :: tangent
+
+    interface tan
+        module procedure :: tan_var
+    end interface tan    
     
 contains
 
@@ -22,7 +26,7 @@ contains
         call this%set_activation_type_name("tangent")
 
         ! Operation
-        output_var%v = tan(input_var%v)
+        output_var%var = tan(input_var%var)
 
         ! Append 'variables' to Stack
         call set_operation(&
@@ -41,16 +45,19 @@ contains
         call get_input_variable_pointer(elm, input_var_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
 
-        ! print*, '*********************************************************************************************'
-        ! print*, " ---- Square Backward"
-        ! print*, "      var ids in/out  : ", input_var_ptr%var_id, output_var_ptr%var_id
-        ! print*, "      input_var_ptr%v : ", allocated(input_var_ptr%v)
-        ! print*, "      input_var_ptr%g : ", allocated(input_var_ptr%g)
-        ! print*, "      output_var_ptr%g: ", allocated(output_var_ptr%g)
         if (allocated(input_var_ptr%g)) then
             input_var_ptr%g = input_var_ptr%g + output_var_ptr%g / cos(input_var_ptr%v)**2d0
         else
             input_var_ptr%g = output_var_ptr%g / cos(input_var_ptr%v)**2d0
         end if
     end subroutine backward_tangent
+
+
+    function tan_var(input_var) result(output_var)
+        implicit none
+        type(variable_) :: input_var
+        type(variable_) :: output_var
+        output_var = tangent%forward(input_var)
+    end function tan_var
+
 end module mod_tangent
