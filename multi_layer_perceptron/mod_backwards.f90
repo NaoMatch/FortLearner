@@ -150,6 +150,8 @@ contains
             call matmul_function%backward(elm)
         elseif (elm%opr_name == "relu") then
             call relu_function%backward(elm)
+        elseif (elm%opr_name == "spread") then
+            call spread_func%backward(elm)
         else
             print*, trim(elm%opr_name)
             stop "NotImplementedError!"
