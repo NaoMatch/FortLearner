@@ -15,7 +15,43 @@ module mod_loss_function
         module procedure mean_absolute_error_nn
     end interface mean_absolute_error
 
+    interface cross_entropy_error
+        module procedure cross_entropy_error_nn
+    end interface cross_entropy_error
+
+    interface binary_cross_entropy_error
+        module procedure binary_cross_entropy_error_nn
+    end interface binary_cross_entropy_error
+
 contains
+
+    function cross_entropy_error_nn(y_true, y_pred) result(loss)
+        implicit none
+        type(variable), intent(in) :: y_true, y_pred
+        type(variable) :: loss(2)
+        type(variable) :: h_logq, h_plogq, h_plogq_sum
+
+        h_logq = log(y_pred)
+        h_plogq = 0d0 - y_true * h_logq
+        h_plogq_sum = sum(h_plogq)
+        loss(1) = h_plogq_sum / dble(y_true%sizes())
+        loss(2) = h_plogq
+    end function cross_entropy_error_nn
+
+    function binary_cross_entropy_error_nn(y_true, y_pred) result(loss)
+        implicit none
+        type(variable), intent(in) :: y_true, y_pred
+        type(variable) :: loss
+        type(variable) :: h_logq, h_logq1, h_logq2, h_plogq, h_plogq_sum
+
+        h_logq1 = log(y_pred) * y_true
+        ! h_logq2 = (1d0-y_true) * log(1d0 - y_pred) 
+        h_logq2 = log(1d0 - y_pred) - log(1d0 - y_pred) * y_true
+        h_logq = h_logq1 + h_logq2
+        h_plogq = 0d0 - h_logq
+        h_plogq_sum = sum(h_plogq)
+        loss = h_plogq_sum / dble(y_true%sizes())
+    end function binary_cross_entropy_error_nn
 
     function mean_squared_error_nn(y_true, y_pred) result(loss)
         implicit none
