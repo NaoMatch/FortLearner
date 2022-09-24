@@ -1,7 +1,6 @@
 module mod_my_mlp
     use mod_random
     use mod_const
-    use mod_optimizer
     use mod_wengert_list
     include "./inc_use_activation_functions.f90"
     implicit none
@@ -35,12 +34,15 @@ contains
         type(variable) :: output_var, h
 
         ! Preprocess
-        call this%init(input_var)
+        call this%preprocess(input_var)
 
         h = this%dense1%act(input_var)
         h = sigmoid(h)
         h = square(h)
         output_var = this%dense2%act(h)
+
+        ! Postprocess
+        call this%postprocess()
     end function forward_my_mlp
     
 end module mod_my_mlp
