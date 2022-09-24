@@ -13,13 +13,18 @@ module mod_variable_in_variable
         procedure :: compare_shape
         procedure :: clear_all
         procedure :: allocate_check
+        procedure :: ncolumns_viv
+        procedure :: zeros
     end type variable_in_variable
 
 
     interface variable_in_variable
-        module procedure :: new_variable_in_variable_s
-        module procedure :: new_variable_in_variable_v
-        module procedure :: new_variable_in_variable_m
+        module procedure :: new_variable_in_variable_s_r8
+        module procedure :: new_variable_in_variable_v_r8
+        module procedure :: new_variable_in_variable_m_r8
+        module procedure :: new_variable_in_variable_s_i8
+        module procedure :: new_variable_in_variable_v_i8
+        module procedure :: new_variable_in_variable_m_i8
     end interface variable_in_variable
 
     interface assignment(=)
@@ -172,6 +177,69 @@ module mod_variable_in_variable
 
 contains
 
+    subroutine checknan(var, file_name, line_num)
+        implicit none
+        type(variable_in_variable) :: var
+        character(len=*), intent(in) :: file_name
+        integer(kind=4), intent(in) :: line_num
+        real(kind=8) :: zero=0d0, a
+        integer(kind=8) :: i, j, n_rows, n_cols
+
+        if (var%dtype==2) then
+            n_rows = size(var%m, dim=1)
+            n_cols = size(var%m, dim=2)
+            do j=1, n_cols, 1
+                do i=1, n_rows, 1
+                    a = var%m(i,j)
+                    if(a*zero/=zero)then
+                        print*, "contains NAN!!!!"
+                        print*, file_name, line_num
+                        return
+                    endif
+                end do
+            end do
+        elseif (var%dtype==1) then
+            n_rows = size(var%v)
+            do i=1, n_rows, 1
+                a = var%v(i)
+                if(a*zero/=zero)then
+                    print*, "contains NAN!!!!"
+                    print*, file_name, line_num
+                    return
+                endif
+            end do
+        elseif (var%dtype==0) then
+            a = var%s
+            if(a*zero/=zero)then
+                print*, "contains NAN!!!!"
+                print*, file_name, line_num
+                return
+            endif
+        endif
+    end subroutine
+
+
+    subroutine zeros(this, source)
+        implicit none
+        class(variable_in_variable) :: this
+        type(variable_in_variable) :: source
+        if     (source%dtype==2) then
+            allocate(this%m, source=source%m)
+            this%dtype=2
+            this%m = 0d0
+        elseif (source%dtype==1) then
+            allocate(this%v, source=source%v)
+            this%dtype=1
+            this%v = 0d0
+        elseif (source%dtype==0) then
+            this%dtype=0
+            this%s = 0d0
+        else
+            stop "dtype=-1 is not implemeted for 'call variable%zeros(source=variable)'"
+        end if
+    end subroutine zeros
+
+
     elemental function mask_one_elemental(x)
         implicit none
         real(kind=8), intent(in) :: x
@@ -284,7 +352,7 @@ contains
             res%dtype = viv1%dtype
             res%m = matmul(viv1%m, viv2%m)
         else
-            print '(A)', "Input Shape Mismatch in " // __FILE__ // "."
+            print '(A)', "Input Shape Mismatch in " // __FILE__ // " in." 
             stop 
         end if
     end function matmul_viv_viv
@@ -377,6 +445,19 @@ contains
             stop "Not Implemented Error in batch_sizes_viv."
         end if
     end function batch_sizes_viv
+
+    function ncolumns_viv(this) result(ncolumns)
+        implicit none
+        class(variable_in_variable) :: this
+        integer(kind=8) :: ncolumns
+
+        if (this%dtype==2) then
+            ncolumns = size(this%m(:,:), dim=2)
+        elseif (this%dtype==1) then
+            print*, __FILE__, __LINE__
+            stop "Not Implemented Error in ncolumns_viv."
+        end if
+    end function ncolumns_viv
 
 
     function sum_viv(viv, dim) result(res)
@@ -519,15 +600,26 @@ contains
         end if
     end function log10_viv
 
+
+    elemental function log_safe(x) result(res)
+        implicit none
+        real(kind=8), intent(in) :: x
+        real(kind=8) :: res
+
+        if (x>=0.5d0) then
+            res = log(x + epsilon_for_log)
+        else
+            res = log(x - epsilon_for_log)
+        end if
+    end function log_safe
+
     function log_viv(viv) result(res)
         implicit none
         type(variable_in_variable), intent(in) :: viv
         type(variable_in_variable)  :: res
-
         integer(kind=8) :: dtype_viv
 
         dtype_viv = viv%dtype
-        res%dtype = viv%dtype
         if (dtype_viv==2) then
             allocate(res%m, source=viv%m)
             res%m = log(viv%m)
@@ -537,6 +629,7 @@ contains
         elseif (dtype_viv==0) then
             res%s = log(viv%s)
         end if
+        res%dtype = viv%dtype
     end function log_viv
 
     function exp_viv(viv) result(res)
@@ -745,7 +838,7 @@ contains
 
 
     ! Create Object
-    function new_variable_in_variable_s(s) result(output)
+    function new_variable_in_variable_s_r8(s) result(output)
         implicit none
         real(kind=8), intent(in) :: s
         type(variable_in_variable)  :: output
@@ -753,7 +846,7 @@ contains
         output%dtype = 0
     end function 
 
-    function new_variable_in_variable_v(v) result(output)
+    function new_variable_in_variable_v_r8(v) result(output)
         implicit none
         real(kind=8), intent(in) :: v(:)
         type(variable_in_variable)  :: output
@@ -762,11 +855,37 @@ contains
         output%dtype = 1
     end function 
     
-    function new_variable_in_variable_m(m) result(output)
+    function new_variable_in_variable_m_r8(m) result(output)
         implicit none
         real(kind=8), intent(in) :: m(:,:)
         type(variable_in_variable)  :: output
         allocate(output%m, source=m)
+        output%m = m
+        output%dtype = 2
+    end function 
+
+    function new_variable_in_variable_s_i8(s) result(output)
+        implicit none
+        integer(kind=8), intent(in) :: s
+        type(variable_in_variable)  :: output
+        output%s = s
+        output%dtype = 0
+    end function 
+
+    function new_variable_in_variable_v_i8(v) result(output)
+        implicit none
+        integer(kind=8), intent(in) :: v(:)
+        type(variable_in_variable)  :: output
+        allocate(output%v, source=v+0d0)
+        output%v = v
+        output%dtype = 1
+    end function 
+    
+    function new_variable_in_variable_m_i8(m) result(output)
+        implicit none
+        integer(kind=8), intent(in) :: m(:,:)
+        type(variable_in_variable)  :: output
+        allocate(output%m, source=m+0d0)
         output%m = m
         output%dtype = 2
     end function 
@@ -1262,6 +1381,8 @@ contains
                 end do
             end if
         else
+            print*, "v1: ", shape(v1)
+            print*, "v2: ", shape(v2)
             stop "Shape Mismatch in multiplication."
         end if
     end function multiplication_vv_vv
@@ -1397,6 +1518,8 @@ contains
                 end do
             end if
         else
+            print*, "v1: ", shape(v1)
+            print*, "v2: ", shape(v2)
             print '(A,I0)', "ShapeMissmatchError in " // __FILE__ // " on line ", __LINE__
             stop
         end if
