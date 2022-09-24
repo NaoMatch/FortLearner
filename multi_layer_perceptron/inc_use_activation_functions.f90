@@ -22,6 +22,7 @@ use mod_log_natural
 use mod_sigmoid
 use mod_relu
 use mod_dense
+use mod_softmax
 
 ! Shape Change functions
 use mod_summation
