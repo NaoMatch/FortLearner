@@ -26,10 +26,8 @@ contains
         call this%set_activation_type_name("sigmoidal")
 
         ! Operation
-        ! output_var%var = tanh(input_var%var * 0.5d0) * 0.5d0 + 0.5d0
-        output_var%var = 1d0 / (1d0 + exp(0d0-input_var%var))
+        output_var%var = tanh(input_var%var * 0.5d0) * 0.5d0 + 0.5d0
         
-        ! print*, __FILE__, __LINE__, 4
         ! Append 'variables' to Stack
         call set_operation(&
             this, &
@@ -49,13 +47,15 @@ contains
         call get_output_variable_pointer(elm, output_var_ptr)
 
         call debug_print(__FILE__, __LINE__, &
-                elm, input_var_ptr, output_var_ptr, t_)        
-        out_var%var = 1d0 / (1d0 + exp(0d0-input_var_ptr%var))
+                elm, input_var_ptr, output_var_ptr, t_)
+
+        out_var%var = tanh(input_var_ptr%var * 0.5d0) * 0.5d0 + 0.5d0
         if (input_var_ptr%grd%dtype==-1) then
-            input_var_ptr%grd = out_var%var*(1d0-out_var%var) * output_var_ptr%grd
+            input_var_ptr%grd = out_var%var * output_var_ptr%grd
         else
-            input_var_ptr%grd = input_var_ptr%grd + out_var%var*(1d0-out_var%var) * output_var_ptr%grd
+            input_var_ptr%grd = input_var_ptr%grd + out_var%var * output_var_ptr%grd
         end if
+
         call debug_print(__FILE__, __LINE__, &
                 elm, input_var_ptr, output_var_ptr, f_)        
     end subroutine backward_sigmoidal

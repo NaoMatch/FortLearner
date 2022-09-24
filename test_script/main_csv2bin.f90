@@ -30,6 +30,46 @@ program main_csv2bin
 
     print*, '============================================================='
     print*, '============================================================='
+    file_name_x_train_csv = "../sample_data/mnist_x_train.csv"
+    file_name_y_train_csv = "../sample_data/mnist_y_train.csv"
+    file_name_x_train_bin = "../sample_data/mnist_x_train.bin"
+    file_name_y_train_bin = "../sample_data/mnist_y_train.bin"
+    n_samples_train = 60000
+    n_columns_train = 784
+    skip_header = t_
+    dtype_in  = "i"
+    dtype_out = "r"
+
+    print*, "CSV to Binary"
+    print*, "    x_train"
+    call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
+        n_samples_train, n_columns_train, skip_header, "i", "r")
+    print*, "    y_train"
+    call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
+        n_samples_train, 1_8, skip_header, "i", "i")
+
+    print*, '============================================================='
+    print*, '============================================================='
+    file_name_x_train_csv = "../sample_data/mnist_x_test.csv"
+    file_name_y_train_csv = "../sample_data/mnist_y_test.csv"
+    file_name_x_train_bin = "../sample_data/mnist_x_test.bin"
+    file_name_y_train_bin = "../sample_data/mnist_y_test.bin"
+    n_samples_train = 10000
+    n_columns_train = 784
+    skip_header = t_
+    dtype_in  = "i"
+    dtype_out = "r"
+
+    print*, "CSV to Binary"
+    print*, "    x_train"
+    call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
+        n_samples_train, n_columns_train, skip_header, "i", "r")
+    print*, "    y_train"
+    call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
+        n_samples_train, 1_8, skip_header, "i", "i")
+
+    print*, '============================================================='
+    print*, '============================================================='
     file_name_x_train_csv = "../sample_data/make_regression_X_0000001000x00005.csv"
     file_name_y_train_csv = "../sample_data/make_regression_y_0000001000x00005.csv"
     file_name_x_train_bin = "../sample_data/make_regression_X_0000001000x00005.bin"

@@ -1,12 +1,15 @@
 module mod_wengert_list
     ! use mod_var
     use mod_const
+    use mod_random
+    use mod_sort
     use mod_variable_in_variable
     implicit none
 
     type variable
         type(variable_in_variable) :: var
         type(variable_in_variable) :: grd
+        type(variable_in_variable) :: grd_delta
         real(kind=8), allocatable  :: v(:,:)
         real(kind=8), allocatable  :: g(:,:)
         logical(kind=4)            :: is_input=f_
@@ -17,16 +20,21 @@ module mod_wengert_list
         logical(kind=4)            :: require_grad=t_
         type(variable), allocatable :: input_vars(:)
         type(variable), pointer     :: var_ptr
-        logical(kind=4)              :: is_learnable=f_
+        logical(kind=4)             :: is_learnable=f_
         type(optimizer), pointer    :: opt_ptr
+        logical(kind=4)             :: create_list=t_
     contains
         procedure :: sizes
+        procedure :: ncolumns
     end type variable
 
     interface variable
-        module procedure :: new_variable_s
-        module procedure :: new_variable_v
-        module procedure :: new_variable_m
+        module procedure :: new_variable_s_r8
+        module procedure :: new_variable_v_r8
+        module procedure :: new_variable_m_r8
+        module procedure :: new_variable_s_i8
+        module procedure :: new_variable_v_i8
+        module procedure :: new_variable_m_i8
     end interface variable
     
     !> Element Type of Wengert List
@@ -53,13 +61,16 @@ module mod_wengert_list
     type neural_network
         type(optimizer), pointer :: opt_ptr
         integer(kind=8) :: stack_id=-1
+        logical(kind=4) :: create_list=t_
     contains
         procedure :: select_stack
         procedure :: set_stack_id_single_input
         procedure :: set_stack_id_multi_inputs
-        procedure, pass :: init_single_input
-        procedure, pass :: init_multi_inputs
-        generic :: init => init_single_input, init_multi_inputs
+        procedure, pass :: preprocess_single_input
+        procedure, pass :: preprocess_multi_inputs
+        generic :: preprocess => preprocess_single_input, preprocess_multi_inputs
+        procedure :: postprocess
+        procedure :: no_list
         procedure :: build => build_neural_network
         procedure :: print => print_architecture
         procedure :: compile => compile_neural_network
@@ -69,7 +80,6 @@ module mod_wengert_list
         integer(kind=8) :: n_ids=1 !< number of used indices 
         type(element), allocatable   :: list(:) ! elements of wengert list
         type(variable), allocatable :: vars(:) ! input/intermediate/output variables
-        type(variable), allocatable :: prms(:) ! parameters eg. weights and bias of dense layer
         integer(kind=8), allocatable :: idxs(:) ! variable index
     contains
         procedure :: print => print_all_elements
@@ -89,6 +99,7 @@ module mod_wengert_list
     end interface get_input_variable_pointer
 
     type(stack), target :: stacks(MAX_STACK_SIZE)
+    type(stack), target :: stacks_tmp(MAX_STACK_SIZE_TMP)
     logical(kind=4) :: is_used_stacks(MAX_STACK_SIZE) = f_
 
     interface operator (.eq.)
@@ -113,6 +124,7 @@ module mod_wengert_list
         type(stack), pointer :: stack_ptr
         real(kind=8) :: learning_rate
         real(kind=8) :: momentum
+        real(kind=8) :: top_k
     contains
         procedure :: sgd => sgd_optimizer
         procedure :: update => update_optimizer
@@ -122,25 +134,151 @@ module mod_wengert_list
         module procedure :: new_optimizer
     end interface optimizer
 
+    type batch_idxs_generator
+        integer(kind=8) :: n_samples
+        integer(kind=8) :: n_mini_batch
+        integer(kind=8) :: n_loop
+        logical(kind=4) :: shuffle=t_
+        integer(kind=8), allocatable :: batch_idxs(:)
+    contains
+        procedure :: get_batch_idxs
+    end type batch_idxs_generator
+
+    interface batch_idxs_generator
+        module procedure new_batch_idxs_generator
+    end interface batch_idxs_generator        
+
+
 contains
+
+    function get_batch_idxs(this, loop_index) result(batch_idxs)
+        implicit none
+        class(batch_idxs_generator) :: this
+        integer(kind=8) :: loop_index
+        integer(kind=8), allocatable :: batch_idxs(:)
+        integer(kind=8) :: i, ini, fin
+
+        ini = 1 + this%n_mini_batch*(loop_index-1)
+        fin = 1 + this%n_mini_batch*loop_index-1
+        allocate(batch_idxs(this%n_mini_batch))
+
+        batch_idxs = this%batch_idxs(ini:fin)
+    end function get_batch_idxs
+
+    function new_batch_idxs_generator(n_samples, n_mini_batch, shuffle) result(res)
+        implicit none
+        integer(kind=8), intent(in) :: n_samples
+        integer(kind=8), intent(in) :: n_mini_batch
+        logical(kind=4), optional   :: shuffle
+        type(batch_idxs_generator)  :: res
+        integer(kind=8) :: n
+        res%n_samples = n_samples
+        res%n_mini_batch = n_mini_batch
+        if (present(shuffle)) res%shuffle = shuffle
+        res%n_loop = n_samples / n_mini_batch
+
+        allocate(res%batch_idxs(n_samples))
+        do n=1, n_samples, 1
+            res%batch_idxs(n) = n
+        end do
+        call permutation(res%batch_idxs, n_samples)
+    end function new_batch_idxs_generator
+        
+
+
+
+    subroutine no_list(this)
+        implicit none
+        class(neural_network) :: this
+        this%create_list = f_
+    end subroutine no_list
+
+    subroutine postprocess(this)
+        implicit none
+        class(neural_network) :: this
+        this%create_list = t_
+    end subroutine postprocess
+    
+    subroutine minimal_effort(var_i, k)
+        implicit none
+        type(variable_in_variable) :: var_i
+        real(kind=8), intent(in) :: k
+
+        real(kind=8), allocatable :: grd_vals(:)
+        real(kind=8), allocatable :: mask_m(:), mask_v(:)
+        real(kind=8) :: threshold_val, zero
+        integer(kind=8) :: n_params, n_params_k, n_rows, n_cols, i, j, factor
+
+        if (k==0d0) return
+        if (var_i%dtype<=0) return
+
+        if     (var_i%dtype==2) then
+            n_params = size(var_i%m)
+            allocate(grd_vals(n_params))
+            grd_vals(:) = abs(reshape(var_i%m, shape=[n_params]))
+        elseif (var_i%dtype==1) then
+            n_params = size(var_i%v)
+            allocate(grd_vals(n_params))
+            grd_vals(:) = abs(var_i%v)
+        end if
+
+        call pbucket_sort(grd_vals, n_params)
+        n_params_k = maxval([n_params * (1d0 - k), 1d0])
+        threshold_val = grd_vals(n_params_k)
+
+        if     (var_i%dtype==2) then
+            n_rows = size(var_i%m, dim=1)
+            n_cols = size(var_i%m, dim=2)
+            do j=1, n_cols, 1
+                do i=1, n_rows, 1
+                    factor = abs(var_i%m(i,j)) >= threshold_val
+                    var_i%m(i,j) = var_i%m(i,j) * factor
+                end do
+            end do
+        elseif (var_i%dtype==1) then
+            n_params = size(var_i%v)
+            do i=1, n_params, 1
+                factor = abs(var_i%v(i)) >= threshold_val
+                var_i%v(i) = var_i%v(i) * factor
+            end do
+        end if
+
+    end subroutine minimal_effort
+
 
     subroutine update_optimizer(this)
         implicit none
         class(optimizer) :: this
         integer(kind=8) :: i
+        type(variable) :: sum_var
+        type(variable), pointer :: param_ptr
 
         do i=1, size(this%stack_ptr%vars), 1
             if (this%stack_ptr%vars(i)%is_learnable) then
-                this%stack_ptr%vars(i)%var_ptr%var = &
-                        this%stack_ptr%vars(i)%var_ptr%var & 
-                        - this%learning_rate*this%stack_ptr%vars(i)%grd
+                param_ptr => this%stack_ptr%vars(i)%var_ptr
+
+                call minimal_effort(this%stack_ptr%vars(i)%grd, k=this%top_k)
+                if (this%momentum==0d0) then
+                    param_ptr%var = param_ptr%var - this%learning_rate * this%stack_ptr%vars(i)%grd
+                else
+                    if (param_ptr%grd_delta%dtype==-1) then
+                        call param_ptr%grd_delta%zeros(source=this%stack_ptr%vars(i)%grd)
+                        param_ptr%grd_delta = param_ptr%grd_delta * 0d0
+                    end if
+                    param_ptr%grd_delta = & 
+                          this%momentum      * param_ptr%grd_delta &
+                        - this%learning_rate * this%stack_ptr%vars(i)%grd
+                    param_ptr%var = param_ptr%var + param_ptr%grd_delta
+                end if
             end if
         end do
     end subroutine update_optimizer
 
-    function new_optimizer()
+    function new_optimizer(top_k)
         implicit none
         type(optimizer) :: new_optimizer
+        real(kind=8), optional :: top_k
+        if (present(top_k)) new_optimizer%top_k = top_k
     end function new_optimizer
 
     subroutine sgd_optimizer(this, learning_rate, momentum)
@@ -236,6 +374,13 @@ contains
         integer(kind=8) :: sample_size
         sample_size = this%var%batch_sizes()
     end function sizes
+        
+    function ncolumns(this) result(sample_size)
+        implicit none
+        class(variable) :: this
+        integer(kind=8) :: sample_size
+        sample_size = this%var%ncolumns_viv()
+    end function ncolumns
 
     function compare_element(elm1, elm2) result(ret)
         implicit none
@@ -328,6 +473,8 @@ contains
         integer(kind=8)  :: i, id
 
         id = input_var%stack_id
+        output_var%create_list = input_var%create_list
+        if (.not. input_var%create_list) return
         call stacks(id)%assign_name(input_var)
         call stacks(id)%assign_name(output_var)
 
@@ -375,11 +522,9 @@ contains
         integer(kind=8)  :: i, id, dim_set
 
         id = maxval([input_var1%stack_id, input_var2%stack_id])
-        ! print*, '*********************************************************************************************'
-        ! print*, "operation:  ", trim(operation_name)
-        ! print*, "input_var1: ", input_var1%v
-        ! print*, "input_var2: ", input_var2%stack_id
-        ! print*, "output_var: ", output_var%stack_id
+        output_var%create_list = all([input_var1%create_list, input_var2%create_list])
+        if (.not. input_var1%create_list) return
+        if (.not. input_var2%create_list) return
         call stacks(id)%assign_name(input_var1)
         call stacks(id)%assign_name(input_var2)
         call stacks(id)%assign_name(output_var)
@@ -429,44 +574,84 @@ contains
     end subroutine set_operation_2in_1out
 
     
-    function new_variable_s(sclr, stack_id, require_grad, is_learnable)
+    function new_variable_s_r8(sclr, stack_id, require_grad, is_learnable)
         implicit none
-        type(variable) :: new_variable_s
+        type(variable) :: new_variable_s_r8
         integer(kind=8), optional :: stack_id
         logical(kind=4), optional :: require_grad
         logical(kind=4), optional :: is_learnable
         real(kind=8), intent(in) :: sclr
-        new_variable_s%var = variable_in_variable(sclr)
-        if (present(stack_id)) new_variable_s%stack_id = stack_id
-        if (present(require_grad)) new_variable_s%require_grad = require_grad
-        if (present(is_learnable)) new_variable_s%is_learnable = is_learnable
-    end function new_variable_s
+        new_variable_s_r8%var = variable_in_variable(sclr)
+        if (present(stack_id)) new_variable_s_r8%stack_id = stack_id
+        if (present(require_grad)) new_variable_s_r8%require_grad = require_grad
+        if (present(is_learnable)) new_variable_s_r8%is_learnable = is_learnable
+    end function new_variable_s_r8
     
-    function new_variable_v(vctr, stack_id, require_grad, is_learnable)
+    function new_variable_v_r8(vctr, stack_id, require_grad, is_learnable)
         implicit none
-        type(variable) :: new_variable_v
+        type(variable) :: new_variable_v_r8
         integer(kind=8), optional :: stack_id
         logical(kind=4), optional :: require_grad
         logical(kind=4), optional :: is_learnable
         real(kind=8), intent(in) :: vctr(:)
-        new_variable_v%var = variable_in_variable(vctr)
-        if (present(stack_id)) new_variable_v%stack_id = stack_id
-        if (present(require_grad)) new_variable_v%require_grad = require_grad
-        if (present(is_learnable)) new_variable_v%is_learnable = is_learnable
-    end function new_variable_v
+        new_variable_v_r8%var = variable_in_variable(vctr)
+        if (present(stack_id)) new_variable_v_r8%stack_id = stack_id
+        if (present(require_grad)) new_variable_v_r8%require_grad = require_grad
+        if (present(is_learnable)) new_variable_v_r8%is_learnable = is_learnable
+    end function new_variable_v_r8
     
-    function new_variable_m(mtrx, stack_id, require_grad, is_learnable)
+    function new_variable_m_r8(mtrx, stack_id, require_grad, is_learnable)
         implicit none
-        type(variable) :: new_variable_m
+        type(variable) :: new_variable_m_r8
         integer(kind=8), optional :: stack_id
         logical(kind=4), optional :: require_grad
         logical(kind=4), optional :: is_learnable
         real(kind=8), intent(in) :: mtrx(:,:)
-        new_variable_m%var = variable_in_variable(mtrx)
-        if (present(stack_id)) new_variable_m%stack_id = stack_id
-        if (present(require_grad)) new_variable_m%require_grad = require_grad
-        if (present(is_learnable)) new_variable_m%is_learnable = is_learnable
-    end function new_variable_m
+        new_variable_m_r8%var = variable_in_variable(mtrx)
+        if (present(stack_id)) new_variable_m_r8%stack_id = stack_id
+        if (present(require_grad)) new_variable_m_r8%require_grad = require_grad
+        if (present(is_learnable)) new_variable_m_r8%is_learnable = is_learnable
+    end function new_variable_m_r8
+
+    
+    function new_variable_s_i8(sclr, stack_id, require_grad, is_learnable)
+        implicit none
+        type(variable) :: new_variable_s_i8
+        integer(kind=8), optional :: stack_id
+        logical(kind=4), optional :: require_grad
+        logical(kind=4), optional :: is_learnable
+        integer(kind=8), intent(in) :: sclr
+        new_variable_s_i8%var = variable_in_variable(sclr)
+        if (present(stack_id)) new_variable_s_i8%stack_id = stack_id
+        if (present(require_grad)) new_variable_s_i8%require_grad = require_grad
+        if (present(is_learnable)) new_variable_s_i8%is_learnable = is_learnable
+    end function new_variable_s_i8
+    
+    function new_variable_v_i8(vctr, stack_id, require_grad, is_learnable)
+        implicit none
+        type(variable) :: new_variable_v_i8
+        integer(kind=8), optional :: stack_id
+        logical(kind=4), optional :: require_grad
+        logical(kind=4), optional :: is_learnable
+        integer(kind=8), intent(in) :: vctr(:)
+        new_variable_v_i8%var = variable_in_variable(vctr)
+        if (present(stack_id)) new_variable_v_i8%stack_id = stack_id
+        if (present(require_grad)) new_variable_v_i8%require_grad = require_grad
+        if (present(is_learnable)) new_variable_v_i8%is_learnable = is_learnable
+    end function new_variable_v_i8
+    
+    function new_variable_m_i8(mtrx, stack_id, require_grad, is_learnable)
+        implicit none
+        type(variable) :: new_variable_m_i8
+        integer(kind=8), optional :: stack_id
+        logical(kind=4), optional :: require_grad
+        logical(kind=4), optional :: is_learnable
+        integer(kind=8), intent(in) :: mtrx(:,:)
+        new_variable_m_i8%var = variable_in_variable(mtrx)
+        if (present(stack_id)) new_variable_m_i8%stack_id = stack_id
+        if (present(require_grad)) new_variable_m_i8%require_grad = require_grad
+        if (present(is_learnable)) new_variable_m_i8%is_learnable = is_learnable
+    end function new_variable_m_i8
 
     function new_variable()
         type(variable) :: new_variable
@@ -534,23 +719,23 @@ contains
         input_var%stack_id = this%stack_id
     end subroutine set_stack_id_single_input
 
-    subroutine init_single_input(this, input_var)
+    subroutine preprocess_single_input(this, input_var)
         implicit none
         class(neural_network) :: this
         type(variable) :: input_var
         call this%select_stack()
         call this%set_stack_id_single_input(input_var)
         this%opt_ptr%stack_ptr => stacks(this%stack_id)
-    end subroutine init_single_input
+    end subroutine preprocess_single_input
 
-    subroutine init_multi_inputs(this, input_vars)
+    subroutine preprocess_multi_inputs(this, input_vars)
         implicit none
         class(neural_network) :: this
         type(variable) :: input_vars(:)
         call this%select_stack()
         call this%set_stack_id_multi_inputs(input_vars)
         this%opt_ptr%stack_ptr => stacks(this%stack_id)
-    end subroutine init_multi_inputs
+    end subroutine preprocess_multi_inputs
 
     subroutine compile_neural_network(this)
         implicit none

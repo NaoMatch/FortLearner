@@ -9,7 +9,8 @@ module mod_dense
     implicit none
 
     type dense
-        integer(kind=8) :: in_dim, out_dim
+        integer(kind=8) :: in_dim
+        integer(kind=8) :: out_dim
         logical(kind=4) :: bias=t_
         type(variable) :: w
         type(variable) :: g
@@ -29,6 +30,7 @@ contains
         allocate(b(this%out_dim))
         call rand_normal_2d_r8(w, this%in_dim, this%out_dim)
         b = 0d0
+        w = w / sqrt(this%out_dim+0d0)
         this%w = variable(w, is_learnable=t_)
         this%b = variable(b, is_learnable=t_)
     end subroutine init_dense

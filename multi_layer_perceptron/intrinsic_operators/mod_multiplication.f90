@@ -49,26 +49,26 @@ contains
         call get_input_variable_pointer(elm, input_var1_ptr, input_var2_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
 
-        if (input_var2_ptr%require_grad) then
-            if (allocated(input_var1_ptr%g)) then
-                input_var1_ptr%g = input_var1_ptr%g + input_var2_ptr%v * output_var_ptr%g
+
+        call debug_print(__FILE__, __LINE__, &
+                elm, input_var1_ptr, input_var2_ptr, output_var_ptr, t_)
+        if (input_var1_ptr%require_grad) then
+            if (input_var1_ptr%grd%dtype==-1) then
+                input_var1_ptr%grd = input_var2_ptr%var * output_var_ptr%grd
             else
-                input_var1_ptr%g =                    input_var2_ptr%v * output_var_ptr%g
-            end if
-        else
-            in_var = input_var2_ptr%v(1,1)
-            if (allocated(input_var1_ptr%g)) then
-                input_var1_ptr%g = input_var1_ptr%g + in_var * output_var_ptr%g
-            else
-                input_var1_ptr%g =                    in_var * output_var_ptr%g
+                input_var1_ptr%grd = input_var1_ptr%grd + input_var2_ptr%var * output_var_ptr%grd
             end if
         end if
-        
-        if (allocated(input_var2_ptr%g)) then
-            input_var2_ptr%g = input_var2_ptr%g + input_var1_ptr%v * output_var_ptr%g
-        else
-            input_var2_ptr%g =                    input_var1_ptr%v * output_var_ptr%g
-        end if        
+
+        if (input_var2_ptr%require_grad) then
+            if (input_var2_ptr%grd%dtype==-1) then
+                input_var2_ptr%grd = input_var1_ptr%var * output_var_ptr%grd
+            else
+                input_var2_ptr%grd = input_var2_ptr%grd + input_var1_ptr%var * output_var_ptr%grd
+            end if
+        end if
+        call debug_print(__FILE__, __LINE__, &
+                elm, input_var1_ptr, input_var2_ptr, output_var_ptr, f_)     
     end subroutine backward_multiplication    
 
 

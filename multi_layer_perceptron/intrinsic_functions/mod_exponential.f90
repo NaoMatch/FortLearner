@@ -25,8 +25,6 @@ contains
         call this%set_activation_type_name("exponential")
 
         ! Operation
-        allocate(output_var%v, source=input_var%v)
-        output_var%v = exp(input_var%v)
         output_var%var = exp(input_var%var)
 
         ! Append 'variables' to Stack

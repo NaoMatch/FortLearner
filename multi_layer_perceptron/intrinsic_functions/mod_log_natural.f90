@@ -9,7 +9,7 @@ module mod_log_natural
         procedure :: backward => backward_log_natural
     end type log_natural_base
     type(log_natural_base) :: log_natural
-            
+
     interface log
         module procedure :: log_var
     end interface log
@@ -26,8 +26,6 @@ contains
         call this%set_activation_type_name("log_natural")
 
         ! Operation
-        if (.not. allocated(output_var%v)) allocate(output_var%v(1,1))
-        output_var%v = log(input_var%v)
         output_var%var = log(input_var%var)
 
         ! Append 'variables' to Stack
@@ -47,15 +45,10 @@ contains
         call get_input_variable_pointer(elm, input_var_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
 
-        if (allocated(input_var_ptr%g)) then
-            input_var_ptr%g = input_var_ptr%g + output_var_ptr%g / input_var_ptr%v
-        else
-            input_var_ptr%g = output_var_ptr%g / input_var_ptr%v
-        end if
         if (input_var_ptr%grd%dtype==-1) then
-            input_var_ptr%grd = output_var_ptr%grd / input_var_ptr%var
+            input_var_ptr%grd = output_var_ptr%grd / (input_var_ptr%var)
         else
-            input_var_ptr%grd = input_var_ptr%grd + output_var_ptr%grd / input_var_ptr%var
+            input_var_ptr%grd = input_var_ptr%grd + output_var_ptr%grd / (input_var_ptr%var)
         end if        
     end subroutine backward_log_natural
 
