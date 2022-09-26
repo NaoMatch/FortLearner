@@ -14,7 +14,7 @@ program main_multi_layer_perceptron
 
     type(variable)         :: input_var, output_vars(1), output_var, weight
     type(variable)         :: input_vars(5), y_true, y_pred
-    type(variable)         :: loss_var(1), loss, losses(2)
+    type(variable)         :: loss_var(1), loss, losses(2), tmp
     type(my_mlp)           :: nn_model, nn_model2
     type(mnist_classifier) :: mnist_clf
     type(optimizer)        :: opt
@@ -35,14 +35,6 @@ program main_multi_layer_perceptron
     type(one_hot_encoder)        :: oh_enc
     type(batch_idxs_generator)   :: idx_gen
     real(kind=8) :: dummy
-    
-    ! dummy = 1d0
-    ! do i=1, 1000, 1
-    !     print*, dummy, log(dummy)
-    !     dummy = dummy / 4d0 
-    ! end do
-    ! stop
-
 
     ! Read data
     fn_x_train = "../sample_data/mnist_x_train.bin"
@@ -56,7 +48,7 @@ program main_multi_layer_perceptron
 
     ! Optimizer setup
     opt = optimizer(top_k=0.1d0)
-    call opt%sgd(learning_rate=0.2d0, momentum=0.0d0)
+    call opt%sgd(learning_rate=0.2d0, momentum=0.9d0)
 
     ! Model
     mnist_clf = mnist_classifier(opt=opt)
@@ -96,9 +88,10 @@ program main_multi_layer_perceptron
 
             ! Predict & Loss
             y_pred = mnist_clf%forward(input_var)
-            ! print*, minval(y_pred%var%m), maxval(y_pred%var%m)
-            loss = binary_cross_entropy_error(y_true, y_pred)
-            print*, e, i, loss%var%s, minval(y_pred%var%m), maxval(y_pred%var%m)
+            loss = binary_cross_entropy_error_with_logits(y_true, y_pred)
+            ! call stacks(1)%print()
+            ! stop "hogehoge stop"
+            ! print*, e, i, loss%var%s, minval(y_pred%var%m), maxval(y_pred%var%m)
 
             ! Clear Grad & Backward
             call clear_grad(loss)
