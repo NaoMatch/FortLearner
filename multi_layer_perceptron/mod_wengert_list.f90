@@ -63,7 +63,6 @@ module mod_wengert_list
         integer(kind=8) :: stack_id=-1
         logical(kind=4) :: create_list=t_
     contains
-        procedure :: select_stack
         procedure :: set_stack_id_single_input
         procedure :: set_stack_id_multi_inputs
         procedure, pass :: preprocess_single_input
@@ -671,18 +670,19 @@ contains
         stop "NotImplementedError"
     end subroutine build_neural_network 
 
-    subroutine select_stack(this)
+    function select_stack_id(current_stack_id) result(new_stack_id)
         implicit none
-        class(neural_network) :: this
-        integer(kind=8) :: s
+        integer(kind=8), intent(in) :: current_stack_id
+        integer(kind=8) :: new_stack_id
+        
+        integer(kind=8) :: i, s
 
-        if (this%stack_id /= -1) then
-            stacks(this%stack_id)%n_ids = 1
-            is_used_stacks(this%stack_id) = f_
-            if (allocated(stacks(this%stack_id)%list)) deallocate(stacks(this%stack_id)%list)
-            if (allocated(stacks(this%stack_id)%vars)) deallocate(stacks(this%stack_id)%vars)
-            if (allocated(stacks(this%stack_id)%idxs)) deallocate(stacks(this%stack_id)%idxs)
-            this%stack_id = -1
+        if (current_stack_id /= -1) then
+            stacks(current_stack_id)%n_ids = 1
+            is_used_stacks(current_stack_id) = f_
+            if (allocated(stacks(current_stack_id)%list)) deallocate(stacks(current_stack_id)%list)
+            if (allocated(stacks(current_stack_id)%vars)) deallocate(stacks(current_stack_id)%vars)
+            if (allocated(stacks(current_stack_id)%idxs)) deallocate(stacks(current_stack_id)%idxs)
         end if
         
         do s=1, MAX_STACK_SIZE, 1
@@ -692,12 +692,12 @@ contains
             stop "There is no space. Increase stack size 'MAX_STACK_SIZE'."
         end if
 
-        this%stack_id = s
-        is_used_stacks(this%stack_id) = t_
-        allocate(stacks(this%stack_id)%list(0))
-        allocate(stacks(this%stack_id)%vars(0))
-        allocate(stacks(this%stack_id)%idxs(0))
-    end subroutine select_stack
+        new_stack_id = s
+        is_used_stacks(new_stack_id) = t_
+        allocate(stacks(new_stack_id)%list(0))
+        allocate(stacks(new_stack_id)%vars(0))
+        allocate(stacks(new_stack_id)%idxs(0))
+    end function select_stack_id
 
     subroutine set_stack_id_multi_inputs(this, input_vars)
         implicit none
@@ -723,7 +723,7 @@ contains
         implicit none
         class(neural_network) :: this
         type(variable) :: input_var
-        call this%select_stack()
+        this%stack_id = select_stack_id(this%stack_id)
         call this%set_stack_id_single_input(input_var)
         this%opt_ptr%stack_ptr => stacks(this%stack_id)
     end subroutine preprocess_single_input
@@ -732,7 +732,7 @@ contains
         implicit none
         class(neural_network) :: this
         type(variable) :: input_vars(:)
-        call this%select_stack()
+        this%stack_id = select_stack_id(this%stack_id)
         call this%set_stack_id_multi_inputs(input_vars)
         this%opt_ptr%stack_ptr => stacks(this%stack_id)
     end subroutine preprocess_multi_inputs
