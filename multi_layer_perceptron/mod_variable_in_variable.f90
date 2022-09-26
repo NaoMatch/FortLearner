@@ -44,6 +44,7 @@ module mod_variable_in_variable
     end interface operator(+)
 
     interface operator(-)
+        module procedure :: substraction_none_vv
         module procedure :: substraction_vv_vv
         module procedure :: substraction_vv_m
         module procedure :: substraction_vv_v
@@ -1071,6 +1072,9 @@ contains
                     res%m = v1%m + v2%m
                 end if
             else
+                print*, __FILE__, __LINE__
+                print*, "shape_v1", shape_v1
+                print*, "shape_v2", shape_v2
                 stop "Same Rank but, different input shape."
             end if
 
@@ -1207,6 +1211,7 @@ contains
                     res%m = v1%m - v2%m
                 end if
             else
+                print*, __FILE__, __LINE__
                 stop "Same Rank but, different input shape."
             end if
 
@@ -1249,6 +1254,16 @@ contains
             stop "Shape Mismatch in substraction."
         end if
     end function substraction_vv_vv
+    
+    function substraction_none_vv(v1) result(res)
+        implicit none
+        type(variable_in_variable), intent(in) :: v1
+        type(variable_in_variable) :: res
+        type(variable_in_variable) :: zero
+
+        zero = variable_in_variable(0d0)
+        res = substraction_vv_vv(zero, v1)
+    end function substraction_none_vv
     
     function substraction_vv_m(v1, m) result(res)
         implicit none
@@ -1342,6 +1357,7 @@ contains
                     res%m = v1%m * v2%m
                 end if
             else
+                print*, __FILE__, __LINE__
                 stop "Same Rank but, different input shape."
             end if
 
@@ -1479,6 +1495,7 @@ contains
                     res%m = v1%m / v2%m
                 end if
             else
+                print*, __FILE__, __LINE__
                 stop "Same Rank but, different input shape."
             end if
 

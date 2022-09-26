@@ -11,6 +11,7 @@ module mod_substraction
     type(substraction_base) :: substraction
 
     interface operator(-)
+        module procedure substraction_none_var
         module procedure substraction_var_var
         module procedure substraction_var_scl
         module procedure substraction_scl_var
@@ -129,6 +130,15 @@ contains
         output_var = substraction%forward(input_var1, input_var2)
     end function substraction_var_var    
 
+
+    function substraction_none_var(input_var) result(output_var)
+        implicit none
+        type(variable), intent(in) :: input_var
+        type(variable) :: output_var
+        type(variable) :: zero
+        zero = variable(0d0, stack_id=input_var%stack_id)
+        output_var = substraction%forward(zero, input_var)
+    end function substraction_none_var    
 
     function substraction_var_scl(input_var, input_scl) result(output_var)
         implicit none
