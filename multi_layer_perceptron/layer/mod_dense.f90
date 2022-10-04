@@ -35,11 +35,13 @@ contains
         w = w / sqrt(this%out_dim+0d0)
         this%w = variable(w, is_learnable=t_)
         this%b = variable(b, is_learnable=t_)
+        deallocate(w, b)
         if (this%double_weight) then
             allocate(w_d(this%in_dim, this%out_dim))
             call rand_normal_2d_r8(w_d, this%in_dim, this%out_dim)
             w_d = w_d / sqrt(this%out_dim+0d0)
             this%w_d = variable(w_d, is_learnable=t_)
+            deallocate(w_d)
         end if
     end subroutine init_dense
 
@@ -47,8 +49,14 @@ contains
         implicit none
         class(dense) :: this
         type(variable) :: var, res, wg
+        type(variable_in_variable) :: tmp_1, tmp_2
         if (this%bias) then
             if (this%double_weight) then
+                ! print*, '*********************************************************************************************'
+                ! print*, shape(this%w), " :: ", shape(this%w_d)
+                tmp_1 = sum(this%w%var)
+                tmp_2 = sum(this%w_d%var)
+                ! print*, tmp_1%s, tmp_2%s
                 wg = this%w * this%w_d
                 res = matmul(var, wg) + this%b
             else

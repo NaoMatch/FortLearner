@@ -6,8 +6,8 @@ module mod_mnist_classifier
     implicit none
 
     type, extends(neural_network) :: mnist_classifier
-        type(dense) :: dense1 = dense(784_8, 100_8, bias=t_, double_weight=f_)
-        type(dense) :: dense2 = dense(100_8,  10_8, bias=t_, double_weight=f_)
+        type(dense) :: dense1 = dense(784_8, 100_8, bias=t_, double_weight=t_)
+        type(dense) :: dense2 = dense(100_8,  10_8, bias=t_, double_weight=t_)
     contains
         procedure :: forward => forward_mnist_classifier
     end type mnist_classifier
@@ -41,7 +41,7 @@ contains
         output_var = this%dense2%act(h)
 
         ! Postprocess
-        call this%postprocess()
+        call this%postprocess(output_var)
     end function forward_mnist_classifier
 
 end module mod_mnist_classifier

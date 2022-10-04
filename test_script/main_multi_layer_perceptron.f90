@@ -72,33 +72,42 @@ program main_multi_layer_perceptron
     allocate(y_batch(n_mini_batch, 10))
     
     do e=1, max_epoch, 1
+        ! print*, "epoch: ", e
         idx_gen = batch_idxs_generator(n_samples, n_mini_batch)
         do i=1, idx_gen%n_loop, 1
+            ! print*, "epoch: ", e, " and index: ", i
             ! Batch indices
             idxs = idx_gen%get_batch_idxs(loop_index=i)
             call progress_bar(i, idx_gen%n_loop, 1_8)
 
             ! Batch data
+            ! print*, "Batch data"
             x_batch = x_train(idxs, :)
             y_batch = y_train_ohe(idxs, :)
 
             ! Set variables
+            ! print*, "Set variables"
             input_var = variable(x_batch)
             y_true = variable(y_batch)
 
             ! Predict & Loss
+            ! print*, "Predict & Loss"
             y_pred = mnist_clf%forward(input_var)
             loss = binary_cross_entropy_error_with_logits(y_true, y_pred)
-            ! call stacks(1)%print()
+            ! call mnist_clf%opt_ptr%stack_ptr%print()
+            ! if (i==3) stop "hogehoge stop"
             ! stop "hogehoge stop"
-            ! print*, e, i, loss%var%s, minval(y_pred%var%m), maxval(y_pred%var%m)
+            ! print*, e, i, loss%var%s, minval(y_pred%var%m), maxval(y_pred%var%m), loss%stack_id
 
             ! Clear Grad & Backward
             call clear_grad(loss)
             call backward(loss)
+            ! print*, " done: backward(loss)"
+            ! print*, "mnist_clf%stack_id", mnist_clf%stack_id
 
-            ! Parameter Update
+            ! ! Parameter Update
             call opt%update()
+            ! print*, " done: opt%update()"
         end do
 
         ! Validation

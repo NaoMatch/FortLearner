@@ -44,10 +44,12 @@ module mod_wengert_list
         integer(kind=8)                 :: generation
         character(len=256)              :: var_name_out    ! output variable name
         integer(kind=8)                 :: var_id_out=-1   ! output variable name
+        integer(kind=8)                 :: stack_id_out=-1   ! output variable name
         integer(kind=8), allocatable    :: dim_out(:)   ! input variable name(s)
         character(len=256)              :: opr_name        ! operation name
         character(len=256), allocatable :: var_names_in(:) ! input variable name(s)
         integer(kind=8), allocatable    :: var_ids_in(:)   ! input variable name(s)
+        integer(kind=8), allocatable    :: stack_ids_in(:)   ! input variable name(s)
         integer(kind=8), allocatable    :: dim_in1(:)   ! input variable name(s)
         integer(kind=8), allocatable    :: dim_in2(:)   ! input variable name(s)
         integer(kind=8)                 :: stack_id=-1     ! output variable name
@@ -76,10 +78,12 @@ module mod_wengert_list
     end type neural_network
         
     type stack
+        integer(kind=8) :: stack_id=-1
         integer(kind=8) :: n_ids=1 !< number of used indices 
         type(element), allocatable   :: list(:) ! elements of wengert list
         type(variable), allocatable :: vars(:) ! input/intermediate/output variables
         integer(kind=8), allocatable :: idxs(:) ! variable index
+        integer(kind=8), allocatable :: free_ids(:) ! to free temporary stack, store concatenated stack ids
     contains
         procedure :: print => print_all_elements
         procedure, pass :: assign_var_names
@@ -192,10 +196,17 @@ contains
         this%create_list = f_
     end subroutine no_list
 
-    subroutine postprocess(this)
+    subroutine postprocess(this, output_var)
         implicit none
         class(neural_network) :: this
+        type(variable) :: output_var
+        integer(kind=8) :: e, v
         this%create_list = t_
+        this%opt_ptr%stack_ptr => stacks(output_var%stack_id)
+        this%stack_id = output_var%stack_id
+        do e=1, size(stacks(this%stack_id)%list), 1
+            stacks(this%stack_id)%list(e)%stack_id = this%stack_id
+        end do
     end subroutine postprocess
     
     subroutine minimal_effort(var_i, k)
@@ -261,7 +272,7 @@ contains
                     param_ptr%var = param_ptr%var - this%learning_rate * this%stack_ptr%vars(i)%grd
                 else
                     if (param_ptr%grd_delta%dtype==-1) then
-                        call param_ptr%grd_delta%zeros(source=this%stack_ptr%vars(i)%grd)
+                        call param_ptr%grd_delta%zeros(source=this%stack_ptr%vars(i)%var)
                         param_ptr%grd_delta = param_ptr%grd_delta * 0d0
                     end if
                     param_ptr%grd_delta = & 
@@ -396,9 +407,10 @@ contains
         class(element) :: this
         integer(kind=8) :: i
         print*, '*********************************************************************************************'
-        print*, "elm_id :       ", int(this%elm_id)    ! output variable name
+        print*, "elm_id :       ", int(this%elm_id, kind=8)    ! output variable name
         print*, "var_name_out : ", trim(this%var_name_out), " -> ", int(this%dim_out)    ! output variable name
-        print*, "var_id_out   : ", int(this%var_id_out)      ! output variable name
+        print*, "var_id_out   : ", int(this%var_id_out, kind=8)      ! output variable name
+        print*, "stack_id_out : ", int(this%stack_id_out, kind=8)      ! output variable name
         print*, "opr_name     : ", trim(this%opr_name)       ! operation name
         if (allocated(this%var_names_in)) then
             print*, "var_names_in : ", trim(this%var_names_in(1)), " -> ", int(this%dim_in1)  ! input variable name(s)
@@ -406,7 +418,8 @@ contains
         end if
         if (allocated(this%var_ids_in)) then
             do i=1, size(this%var_ids_in), 1
-                print*, "var_ids_in   : ", int(this%var_ids_in(i)) ! input variable name(s)
+                print*, "var_ids_in   : ", int(this%var_ids_in(i), kind=8) ! input variable name(s)
+                print*, "stack_id_in  : ", int(this%stack_ids_in(i), kind=8)      ! output variable name
             end do
         end if
         print*, "is_output    : ", this%is_output
@@ -450,11 +463,11 @@ contains
         integer(kind=8) :: v
 
         if (var%var_name == "None") then
-            var%var_id = this%n_ids
+            var%var_id = this%n_ids + this%stack_id
             do while (any(var%var_id == this%idxs))
                 var%var_id = var%var_id + 1
             end do
-            write(var%var_name, '("x_", I10.10)') var%var_id
+            write(var%var_name, '("x_", I19.19)') var%var_id
         end if
         this%n_ids = this%n_ids + 1
     end subroutine assign_var_name
@@ -479,14 +492,16 @@ contains
 
         allocate(elm%opr, mold=opr)
         elm%opr => opr
-        elm%elm_id       = size(stacks(id)%list)+1
+        elm%elm_id       = size(stacks(id)%list)+1+(id * 10000000000_8)
         elm%generation   = input_var%generation
         elm%var_name_out = output_var%var_name
+        elm%stack_id_out = output_var%stack_id
         elm%var_id_out   = output_var%var_id
         elm%dim_out      = shape(output_var%var)
         elm%opr_name     = operation_name
         elm%var_names_in = [input_var%var_name]
         elm%var_ids_in   = [input_var%var_id]
+        elm%stack_ids_in = [input_var%stack_id]
         elm%dim_in1      = shape(input_var%var)
         elm%stack_id     = id
         elm%dim          = dim
@@ -509,6 +524,32 @@ contains
         end if
     end subroutine set_operation_1in_1out
 
+    subroutine concat_stacks(id, id_tmp)
+        implicit none
+        integer(kind=8), intent(in) :: id, id_tmp
+        integer(kind=8) :: len_vars, len_vars_tmp, v
+
+        stacks(id)%list = [stacks(id)%list, stacks(id_tmp)%list]
+        len_vars = size(stacks(id)%vars)
+        len_vars_tmp = size(stacks(id_tmp)%vars)
+        stacks(id)%vars = [stacks(id)%vars, stacks(id_tmp)%vars]
+        do v=len_vars+1, len_vars+len_vars_tmp, 1
+            if (associated(stacks(id)%vars(v)%var_ptr)) then
+                stacks(id)%vars(v)%var_ptr => stacks(id_tmp)%vars(v-len_vars)%var_ptr
+            end if
+        end do
+        stacks(id)%idxs = [stacks(id)%idxs, stacks(id_tmp)%idxs]
+        stacks(id)%free_ids = [stacks(id)%free_ids, id, id_tmp]
+        stacks(id_tmp)%free_ids = [stacks(id_tmp)%free_ids, id, id_tmp]
+        ! print*, '*********************************************************************************************'
+        ! print*, '*********************************************************************************************'
+        ! print*, "concating"
+        ! print*, "    -----: id =         ", id
+        ! print*, "    -----: id_tmp =     ", id_tmp
+        ! print*, "    -----: count() =    ", count(is_used_stacks)
+        ! print*, "    -----: to_be_free = ", stacks(id)%free_ids
+    end subroutine concat_stacks
+
     subroutine set_operation_2in_1out(opr, operation_name, input_var1, input_var2, output_var, dim)
         implicit none
         class(*), target :: opr
@@ -518,9 +559,13 @@ contains
         integer(kind=8)  :: dim
 
         type(element)    :: elm
-        integer(kind=8)  :: i, id, dim_set
+        integer(kind=8)  :: i, id, id_min, dim_set
 
         id = maxval([input_var1%stack_id, input_var2%stack_id])
+        id_min = minval([input_var1%stack_id, input_var2%stack_id])
+        if (id==-1) id = select_stack_id(-1_8)
+        if (id /= id_min .and. id_min/=-1) call concat_stacks(id, id_min)
+        
         output_var%create_list = all([input_var1%create_list, input_var2%create_list])
         if (.not. input_var1%create_list) return
         if (.not. input_var2%create_list) return
@@ -530,14 +575,16 @@ contains
 
         allocate(elm%opr, mold=opr)
         elm%opr => opr
-        elm%elm_id       = size(stacks(id)%list)+1
+        elm%elm_id       = size(stacks(id)%list)+1 + (id * 10000000000_8)
         elm%generation   = maxval([input_var1%generation, input_var2%generation])
         elm%var_name_out = output_var%var_name
+        elm%stack_id_out = output_var%stack_id
         elm%var_id_out   = output_var%var_id
         elm%dim_out      = shape(output_var%var)
         elm%opr_name     = operation_name
         elm%var_names_in = [input_var1%var_name, input_var2%var_name]
         elm%var_ids_in   = [input_var1%var_id, input_var2%var_id]
+        elm%stack_ids_in = [input_var1%stack_id, input_var2%stack_id]
         elm%dim_in1      = shape(input_var1%var)
         elm%dim_in2      = shape(input_var2%var)
         elm%stack_id     = id
@@ -670,6 +717,56 @@ contains
         stop "NotImplementedError"
     end subroutine build_neural_network 
 
+    recursive subroutine collect_concatinated_stack_ids(stack_ids, start_stack_id)
+        implicit none
+        integer(kind=8), allocatable, intent(inout) :: stack_ids(:)
+        integer(kind=8), intent(in) :: start_stack_id
+        integer(kind=8) :: s
+        integer(kind=8), allocatable :: tmp_stack_ids(:)
+
+        if (allocated(stacks(start_stack_id)%free_ids)) then
+            stack_ids = [stack_ids, stacks(start_stack_id)%free_ids(:)]
+            tmp_stack_ids = stacks(start_stack_id)%free_ids(:)
+            deallocate(stacks(start_stack_id)%free_ids)
+            do s=1, size(tmp_stack_ids), 1
+                call collect_concatinated_stack_ids(stack_ids, tmp_stack_ids(s))
+            end do
+        end if
+    end subroutine collect_concatinated_stack_ids
+
+    subroutine free_stack(stack_id)
+        implicit none
+        integer(kind=8), intent(in) :: stack_id
+        integer(kind=8) :: s, s_id
+        integer(kind=8), allocatable :: stack_ids(:)
+
+        if (stack_id /= -1) then
+            allocate(stack_ids(0))
+            call collect_concatinated_stack_ids(stack_ids, stack_id)
+            do s=1, size(stack_ids), 1
+                call free_stack_(stack_ids(s))
+            end do
+        end if
+    end subroutine free_stack
+
+    subroutine free_stack_(stack_id)
+        implicit none
+        integer(kind=8), intent(in) :: stack_id
+        integer(kind=8) :: s, s_id
+
+        ! print*, '*********************************************************************************************'
+        ! print*, '*********************************************************************************************'
+        ! print*, "freeing:   "
+        ! print*, "     ----: stack_id =    ", stack_id
+        ! print*, "     ----: count() =     ", count(is_used_stacks)
+        stacks(stack_id)%n_ids = 1
+        is_used_stacks(stack_id) = f_
+        if (allocated(stacks(stack_id)%list)) deallocate(stacks(stack_id)%list)
+        if (allocated(stacks(stack_id)%vars)) deallocate(stacks(stack_id)%vars)
+        if (allocated(stacks(stack_id)%idxs)) deallocate(stacks(stack_id)%idxs)
+        if (allocated(stacks(stack_id)%free_ids)) deallocate(stacks(stack_id)%free_ids)
+    end subroutine free_stack_
+
     function select_stack_id(current_stack_id) result(new_stack_id)
         implicit none
         integer(kind=8), intent(in) :: current_stack_id
@@ -677,13 +774,7 @@ contains
         
         integer(kind=8) :: i, s
 
-        if (current_stack_id /= -1) then
-            stacks(current_stack_id)%n_ids = 1
-            is_used_stacks(current_stack_id) = f_
-            if (allocated(stacks(current_stack_id)%list)) deallocate(stacks(current_stack_id)%list)
-            if (allocated(stacks(current_stack_id)%vars)) deallocate(stacks(current_stack_id)%vars)
-            if (allocated(stacks(current_stack_id)%idxs)) deallocate(stacks(current_stack_id)%idxs)
-        end if
+        call free_stack(current_stack_id)
         
         do s=1, MAX_STACK_SIZE, 1
             if (.not. is_used_stacks(s)) exit 
@@ -694,9 +785,11 @@ contains
 
         new_stack_id = s
         is_used_stacks(new_stack_id) = t_
+        stacks(new_stack_id)%stack_id = new_stack_id * 10000000000_8
         allocate(stacks(new_stack_id)%list(0))
         allocate(stacks(new_stack_id)%vars(0))
         allocate(stacks(new_stack_id)%idxs(0))
+        allocate(stacks(new_stack_id)%free_ids(0))
     end function select_stack_id
 
     subroutine set_stack_id_multi_inputs(this, input_vars)

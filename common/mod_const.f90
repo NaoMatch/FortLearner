@@ -40,7 +40,7 @@ module mod_const
 
     real(kind=8), parameter    :: euler_gamma = 0.577215664901532860606512090082d0
 
-    integer(kind=8), parameter :: MAX_STACK_SIZE = 100 ! Maximum number of stack size
+    integer(kind=8), parameter :: MAX_STACK_SIZE = 10000 ! Maximum number of stack size
     integer(kind=8), parameter :: MAX_STACK_SIZE_TMP = 10000 ! Maximum number of temporary stack size
 
 end module mod_const

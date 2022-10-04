@@ -42,7 +42,7 @@ contains
         output_var = this%dense2%act(h)
 
         ! Postprocess
-        call this%postprocess()
+        call this%postprocess(output_var)
     end function forward_my_mlp
     
 end module mod_my_mlp

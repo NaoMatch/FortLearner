@@ -45,6 +45,7 @@ contains
         ! print*, '*********************************************************************************************'
         ! print*, '*********************************************************************************************'
         elm = get_list_element(var%var_id, var%stack_id)
+        ! print*, "    operation name ::: ", trim(elm%opr_name)
         call backward_activation_functions(elm)
 
         call get_previous_layer_elements(elm, elms)
@@ -63,6 +64,7 @@ contains
             call quick_argsort(generations, indices, n_elms)
             elms = elms(indices)
             ! print*, "    operation name ::: ", trim(elms(n_elms)%opr_name)
+            ! call elms(n_elms)%print()
             call backward_activation_functions(elms(n_elms))
 
             ! Get & Remove Last Element
@@ -70,10 +72,12 @@ contains
             elms = elms(1:n_elms-1)
 
             ! Get Previous Layer
+            ! print*, "    Get Previous Layer"
             call get_previous_layer_elements(elm, elms)
-
+            
             deallocate(generations)
             deallocate(indices)    
+            ! print*, "        done"
         end do
     end subroutine backward_variable_
 
@@ -222,7 +226,7 @@ contains
             stacks(stack_id)%vars(v)%g = 0d0
             call stacks(stack_id)%vars(v)%var%clear_all()
             call stacks(stack_id)%vars(v)%grd%clear_all()
-            print*, stacks(stack_id)%vars(v)%grd%s
+            ! print*, stacks(stack_id)%vars(v)%grd%s
         end do
     end subroutine clear_grad
 
