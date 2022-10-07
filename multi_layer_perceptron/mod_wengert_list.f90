@@ -70,11 +70,12 @@ module mod_wengert_list
         procedure, pass :: preprocess_single_input
         procedure, pass :: preprocess_multi_inputs
         generic :: preprocess => preprocess_single_input, preprocess_multi_inputs
-        procedure :: postprocess
+        procedure, pass :: postprocess_single_input
+        procedure, pass :: postprocess_multi_inputs
+        generic :: postprocess => postprocess_single_input, postprocess_multi_inputs
         procedure :: no_list
         procedure :: build => build_neural_network
         procedure :: print => print_architecture
-        procedure :: compile => compile_neural_network
     end type neural_network
         
     type stack
@@ -108,10 +109,6 @@ module mod_wengert_list
     interface operator (.eq.)
         module procedure compare_element
     end interface operator (.eq.)    
-
-    interface allocate_var
-        module procedure :: allocate_var_rank2
-    end interface allocate_var
 
     interface shape
         module procedure shape_var
@@ -195,19 +192,6 @@ contains
         class(neural_network) :: this
         this%create_list = f_
     end subroutine no_list
-
-    subroutine postprocess(this, output_var)
-        implicit none
-        class(neural_network) :: this
-        type(variable) :: output_var
-        integer(kind=8) :: e, v
-        this%create_list = t_
-        this%opt_ptr%stack_ptr => stacks(output_var%stack_id)
-        this%stack_id = output_var%stack_id
-        do e=1, size(stacks(this%stack_id)%list), 1
-            stacks(this%stack_id)%list(e)%stack_id = this%stack_id
-        end do
-    end subroutine postprocess
     
     subroutine minimal_effort(var_i, k)
         implicit none
@@ -254,7 +238,6 @@ contains
         end if
 
     end subroutine minimal_effort
-
 
     subroutine update_optimizer(this)
         implicit none
@@ -744,28 +727,21 @@ contains
             allocate(stack_ids(0))
             call collect_concatinated_stack_ids(stack_ids, stack_id)
             do s=1, size(stack_ids), 1
-                call free_stack_(stack_ids(s))
+                s_id = stack_ids(s)
+                ! print*, '*********************************************************************************************'
+                ! print*, '*********************************************************************************************'
+                ! print*, "freeing:   "
+                ! print*, "     ----: stack_id =    ", s_id
+                ! print*, "     ----: count() =     ", count(is_used_stacks)
+                stacks(s_id)%n_ids = 1
+                is_used_stacks(s_id) = f_
+                if (allocated(stacks(s_id)%list)) deallocate(stacks(s_id)%list)
+                if (allocated(stacks(s_id)%vars)) deallocate(stacks(s_id)%vars)
+                if (allocated(stacks(s_id)%idxs)) deallocate(stacks(s_id)%idxs)
+                if (allocated(stacks(s_id)%free_ids)) deallocate(stacks(s_id)%free_ids)
             end do
         end if
     end subroutine free_stack
-
-    subroutine free_stack_(stack_id)
-        implicit none
-        integer(kind=8), intent(in) :: stack_id
-        integer(kind=8) :: s, s_id
-
-        ! print*, '*********************************************************************************************'
-        ! print*, '*********************************************************************************************'
-        ! print*, "freeing:   "
-        ! print*, "     ----: stack_id =    ", stack_id
-        ! print*, "     ----: count() =     ", count(is_used_stacks)
-        stacks(stack_id)%n_ids = 1
-        is_used_stacks(stack_id) = f_
-        if (allocated(stacks(stack_id)%list)) deallocate(stacks(stack_id)%list)
-        if (allocated(stacks(stack_id)%vars)) deallocate(stacks(stack_id)%vars)
-        if (allocated(stacks(stack_id)%idxs)) deallocate(stacks(stack_id)%idxs)
-        if (allocated(stacks(stack_id)%free_ids)) deallocate(stacks(stack_id)%free_ids)
-    end subroutine free_stack_
 
     function select_stack_id(current_stack_id) result(new_stack_id)
         implicit none
@@ -830,11 +806,30 @@ contains
         this%opt_ptr%stack_ptr => stacks(this%stack_id)
     end subroutine preprocess_multi_inputs
 
-    subroutine compile_neural_network(this)
+
+    subroutine postprocess_single_input(this, output_var)
         implicit none
         class(neural_network) :: this
-        stop "NotImplementedError."
-    end subroutine compile_neural_network
+        type(variable) :: output_var
+        integer(kind=8) :: e
+        this%create_list = t_
+        this%opt_ptr%stack_ptr => stacks(output_var%stack_id)
+        this%stack_id = output_var%stack_id
+        do e=1, size(stacks(this%stack_id)%list), 1
+            stacks(this%stack_id)%list(e)%stack_id = this%stack_id
+        end do
+    end subroutine postprocess_single_input
+
+    subroutine postprocess_multi_inputs(this, output_vars)
+        implicit none
+        class(neural_network) :: this
+        type(variable) :: output_vars(:)
+        integer(kind=8) :: v
+        do v=1, size(output_vars), 1
+            call this%postprocess_single_input(output_vars(v))
+        end do
+    end subroutine postprocess_multi_inputs
+
 
     subroutine get_output_variable_pointer(elm, output_var_ptr)
         implicit none
@@ -881,13 +876,6 @@ contains
             input_var2_ptr => stacks(stack_id)%vars(input_var_ids(2))
         end if
     end subroutine get_input_variable_pointer_multi
-
-    subroutine allocate_var_rank2(var, var_shape)
-        implicit none
-        type(variable) :: var
-        integer(kind=4) :: var_shape(2)
-        allocate(var%v(var_shape(1), var_shape(2)))
-    end subroutine allocate_var_rank2
 
     function get_list_index(var_id, var_indices) result(list_id)
         implicit none

@@ -1,7 +1,6 @@
 module mod_dense
     use mod_random
     use mod_const
-    ! use mod_var
     use mod_wengert_list
     use mod_matmul
     use mod_addition
@@ -49,14 +48,8 @@ contains
         implicit none
         class(dense) :: this
         type(variable) :: var, res, wg
-        type(variable_in_variable) :: tmp_1, tmp_2
         if (this%bias) then
             if (this%double_weight) then
-                ! print*, '*********************************************************************************************'
-                ! print*, shape(this%w), " :: ", shape(this%w_d)
-                tmp_1 = sum(this%w%var)
-                tmp_2 = sum(this%w_d%var)
-                ! print*, tmp_1%s, tmp_2%s
                 wg = this%w * this%w_d
                 res = matmul(var, wg) + this%b
             else

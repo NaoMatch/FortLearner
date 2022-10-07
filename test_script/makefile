@@ -1,9 +1,8 @@
 compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
-opt              := -O2
-# option           := -cpp -D_x86_64 -fopenmp -fbacktrace -fbounds-check -fdec
-option           := -cpp -D_no -fopenmp -fbacktrace -fbounds-check -fdec
+opt              := -O3
+option           := -cpp -D_x86_64 -fopenmp -fdec
 option_blas      := -lopenblas
 
 asm              := ./mod/inc_sum_up_vector_c.out \
@@ -247,54 +246,6 @@ build:
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../linalg/include/linalg_multi_mat_vec/inc_multi_mat_vec.c -o ./mod/inc_multi_mat_vec.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../linalg/include/linalg_matrix_sqsum_row/inc_matrix_sqsum_row.c -o ./mod/inc_matrix_sqsum_row.out
 
-build_subset:
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_const.f90 -o ./mod/mod_const.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_variable_in_variable.f90 -o ./mod/mod_variable_in_variable.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_wengert_list.f90 -o ./mod/mod_wengert_list.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_activation_function.f90 -o ./mod/mod_activation_function.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_operators/mod_power.f90 -o ./mod/mod_power.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_operators/mod_addition.f90 -o ./mod/mod_addition.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_operators/mod_multiplication.f90 -o ./mod/mod_multiplication.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_operators/mod_substraction.f90 -o ./mod/mod_substraction.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_operators/mod_division.f90 -o ./mod/mod_division.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_functions/mod_summation.f90 -o ./mod/mod_summation.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_functions/mod_spread.f90 -o ./mod/mod_spread.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_functions/mod_absolute_value.f90 -o ./mod/mod_absolute_value.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_functions/mod_square_root.f90 -o ./mod/mod_square_root.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_functions/mod_sinusoid.f90 -o ./mod/mod_sinusoid.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_functions/mod_cosine.f90 -o ./mod/mod_cosine.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_functions/mod_tangent.f90 -o ./mod/mod_tangent.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_functions/mod_arcsinusoid.f90 -o ./mod/mod_arcsinusoid.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_functions/mod_arccosine.f90 -o ./mod/mod_arccosine.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_functions/mod_arctangent.f90 -o ./mod/mod_arctangent.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_functions/mod_exponential.f90 -o ./mod/mod_exponential.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_functions/mod_log_natural.f90 -o ./mod/mod_log_natural.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/intrinsic_functions/mod_matmul.f90 -o ./mod/mod_matmul.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/activation_function/mod_sigmoid.f90 -o ./mod/mod_sigmoid.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/activation_function/mod_square.f90 -o ./mod/mod_square.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/activation_function/mod_relu.f90 -o ./mod/mod_relu.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/activation_function/mod_softmax.f90 -o ./mod/mod_softmax.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/layer/mod_dense.f90 -o ./mod/mod_dense.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_loss_function.f90 -o ./mod/mod_loss_function.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_backwards.f90 -o ./mod/mod_backwards.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_my_mlp.f90 -o ./mod/mod_my_mlp.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_mnist_classifier.f90 -o ./mod/mod_mnist_classifier.out
-
-test_var:
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_const.f90 -o ./mod/mod_const.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_variable_in_variable.f90 -o ./mod/mod_variable_in_variable.out
-	$(compiler_fortran) -w -unroll \
-	./mod/mod_const.out ./mod/mod_variable_in_variable.out \
-	$(option) $(mod) $(opt) \
-	main_variable_in_variable.f90 -o main_variable_in_variable.out \
-	$(option_blas)
-	./main_variable_in_variable.out
-
-test_mlp:
-	make clean -j4
-	make build_subset -j4
-	make main_multi_layer_perceptron -j4
-
 clean:
 	-rm ./*.mod
 	-rm ./*.out
@@ -304,54 +255,54 @@ clean:
 test_all:
 	make clean
 	make build
-	# python create_datasets.py
-	# make main_csv2bin
-	# make main_boosting_tree_gradient_boosting_clouds_regressor
-	# make main_boosting_tree_gradient_boosting_extra_tree_regressor
-	# make main_boosting_tree_gradient_boosting_lawu_regressor
-	# make main_boosting_tree_gradient_boosting_tree_regressor
-	# make main_boosting_tree_gradient_boosting_adaboost_regressor
-	# make main_clustering_breathing_kmeans
-	# make main_clustering_kmeans
-	# make main_clustering_minibatch_kmeans
-	# make main_clustering_dbscan
-	# make main_common_random_weighted_sampling
-	# make main_decision_tree_clouds
-	# make main_decision_tree_decision_tree
-	# make main_decision_tree_extra_tree
-	# make main_decision_tree_isolation_tree
-	# make main_decision_tree_lawu
-	# make main_decision_tree_random_rotation_decision_tree
-	# make main_decision_tree_sliq
-	# make main_decision_tree_oblivious_tree
-	# make main_decomposition_nipals
-	# make main_encoder
-	# make main_forest_random_forest
-	# make main_forest_extra_trees
-	# make main_forest_isolation_forest
-	# make main_hash_table
-	# make main_linalg_ax_plus_y
-	# make main_linear_regression_lasso_regression
-	# make main_linear_regression_linear_regression
-	# make main_linear_regression_ridge_regression
-	# make main_neighbour_brute_force_search
-	# make main_neighbour_balltree
-	# make main_neighbour_kdtree
-	# make main_neighbour_product_quantization
-	# make main_stats_count_and_sum_up_gt
-	# make main_stats_count_and_sum_up_gt_matrix_with_index
-	# make main_stats_covariance_of_vectors
-	# make main_stats_get_minmax
-	# make main_stats_get_matrix_minmax_with_index
-	# make main_stats_get_matrix_minmax_with_index_parallel
-	# make main_stats_mean_matrix
-	# make main_stats_mean_vector
-	# make main_stats_median
-	# make main_stats_weighted_median
-	# make main_stats_sum_up_matrix
-	# make main_stats_sum_up_vector
-	# make main_stats_variance_vector
+	python create_datasets.py
+	make main_csv2bin
+	make main_boosting_tree_gradient_boosting_clouds_regressor
+	make main_boosting_tree_gradient_boosting_extra_tree_regressor
+	make main_boosting_tree_gradient_boosting_lawu_regressor
+	make main_boosting_tree_gradient_boosting_tree_regressor
+	make main_boosting_tree_gradient_boosting_adaboost_regressor
+	make main_clustering_breathing_kmeans
+	make main_clustering_kmeans
+	make main_clustering_minibatch_kmeans
+	make main_clustering_dbscan
+	make main_common_random_weighted_sampling
+	make main_decision_tree_clouds
+	make main_decision_tree_decision_tree
+	make main_decision_tree_extra_tree
+	make main_decision_tree_isolation_tree
+	make main_decision_tree_lawu
+	make main_decision_tree_random_rotation_decision_tree
+	make main_decision_tree_sliq
+	make main_decision_tree_oblivious_tree
+	make main_decomposition_nipals
+	make main_encoder
+	make main_forest_random_forest
+	make main_forest_extra_trees
+	make main_forest_isolation_forest
+	make main_hash_table
+	make main_linalg_ax_plus_y
+	make main_linear_regression_lasso_regression
+	make main_linear_regression_linear_regression
+	make main_linear_regression_ridge_regression
 	make main_multi_layer_perceptron
+	make main_neighbour_brute_force_search
+	make main_neighbour_balltree
+	make main_neighbour_kdtree
+	make main_neighbour_product_quantization
+	make main_stats_count_and_sum_up_gt
+	make main_stats_count_and_sum_up_gt_matrix_with_index
+	make main_stats_covariance_of_vectors
+	make main_stats_get_minmax
+	make main_stats_get_matrix_minmax_with_index
+	make main_stats_get_matrix_minmax_with_index_parallel
+	make main_stats_mean_matrix
+	make main_stats_mean_vector
+	make main_stats_median
+	make main_stats_weighted_median
+	make main_stats_sum_up_matrix
+	make main_stats_sum_up_vector
+	make main_stats_variance_vector
 
 main_csv2bin:
 	$(compiler_fortran) -w -unroll \
