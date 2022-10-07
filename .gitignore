@@ -6,3 +6,4 @@ latex/
 *.bin
 *.csv
 man/
+*.json

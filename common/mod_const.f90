@@ -4,6 +4,7 @@ module mod_const
 
     real(kind=8), parameter :: pi_ = 3.14159265358979323846264338327950288d0
     real(kind=8), parameter :: epsilon_ = 10d-8
+    real(kind=8), parameter :: epsilon_for_log = 10d-8
 
     real(kind=8), parameter    :: max_real64 =  huge(0d0)
     real(kind=8), parameter    :: min_real64 = -huge(0d0)
@@ -38,5 +39,8 @@ module mod_const
     integer(kind=8), parameter :: len_gamma_coefs_ = 8_8
 
     real(kind=8), parameter    :: euler_gamma = 0.577215664901532860606512090082d0
+
+    integer(kind=8), parameter :: MAX_STACK_SIZE = 10000 ! Maximum number of stack size
+    integer(kind=8), parameter :: MAX_STACK_SIZE_TMP = 10000 ! Maximum number of temporary stack size
 
 end module mod_const
