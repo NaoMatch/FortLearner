@@ -6,11 +6,12 @@ cd test_script
 make test  
 
 # WIP:  
-multi layer perceptron  
+DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT
 ~ica~
 
 
 # Update
+2022/10/07: multi layer perceptron (wengert list, reverse mode)  
 2022/07/28: bug fix(kdtree, balltree)  
 2022/07/24: product_quantization  
 2022/06/11: adaboost  
@@ -159,11 +160,13 @@ http://odds.cs.stonybrook.edu/forestcovercovertype-dataset/
   * gradient_boosting_lawu_regressor
 * Dimensionality Reduction:
   * pca
+  * nipals
 * Clustering
   * kmeans
   * minibatch_kmeans
   * breathing_kmeans
   * threshold_tree
+  * dbscan
 * Anomaly Detection
   * isolation_tree
   * isolation_forest
@@ -172,6 +175,9 @@ http://odds.cs.stonybrook.edu/forestcovercovertype-dataset/
   * balltree
   * bruteforce
   * lsh
+  * product_quantization
+* Neural Network
+  * simple mlp
  
 # ToDo
 * Matrix Factorization
@@ -207,4 +213,8 @@ http://odds.cs.stonybrook.edu/forestcovercovertype-dataset/
 * Multi-Layer Perceptron
 * Clustering
   * DBSCAN
-
+* Neural Network
+  * convolution
+* Decomposition
+  * Independent Component Analysis
+ 
