@@ -8,7 +8,7 @@ module mod_clouds
     use mod_stats
     use mod_timer
 
-    use mod_hyperparameter
+    use mod_hyperparameter, only: hparam_decisiontree, fashion_list, strategy_list
     use mod_node
     use mod_woodworking_tools
     use mod_splitter
@@ -68,23 +68,10 @@ contains
         character(len=*), optional :: fashion
         integer(kind=8), optional :: max_features
         character(len=*), optional :: strategy
-        character(len=256) :: fashion_list(5), strategy_list(5)
 
         tmp%is_axis_parallel = t_
         tmp%hparam%algo_name = "clouds_regressor"
         tmp%algo_name = "clouds_regressor"
-
-        fashion_list(1) = "best"
-        fashion_list(2) = "depth"
-        fashion_list(3) = "level"
-        fashion_list(4) = "impurity"
-        fashion_list(5) = "sample"
-
-        strategy_list(1) = "uniform"
-        strategy_list(2) = "quantile"
-        strategy_list(3) = "kmeans"
-        strategy_list(4) = "greedy"
-        strategy_list(5) = "modified_greedy"
 
         if ( present(max_bins) ) tmp%hparam%max_bins = max_bins
         if ( present(max_depth) ) tmp%hparam%max_depth = max_depth
@@ -160,7 +147,7 @@ contains
         hparam%max_bins = extract_max_bins(data_holder_ptr%disc)
         hparam_ptr => hparam
         call this%root_node_axis_ptr%hparam_check(hparam_ptr)
-        call this%induction_stop_check(hparam_ptr, is_stop)
+        is_stop = this%induction_stop_check(hparam_ptr)
         if ( is_stop ) return
 
         ! print*, "start"
@@ -177,7 +164,7 @@ contains
             call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, &
                 this%is_classification, this%is_threshold_tree, this%lr_layer, is_hist=t_)
 
-            call this%induction_stop_check(hparam_ptr, is_stop)
+            is_stop = this%induction_stop_check(hparam_ptr)
             if (is_stop) exit
             depth = depth + 1
         end do
@@ -199,6 +186,9 @@ contains
     end subroutine fit_clouds_regressor
 
 
+    !> A function to predict regression for 'x'.
+    !! \return predicted values
+    !! \param x input
     function predict_clouds_regressor(this, x)
         implicit none
         class(clouds_regressor)    :: this
@@ -208,6 +198,8 @@ contains
     end function predict_clouds_regressor
 
 
+    !> A subroutine to dump trained model.
+    !! \param file_name output file name.
     subroutine dump_clouds_regressor(this, file_name)
         implicit none
         class(clouds_regressor)      :: this
@@ -219,6 +211,8 @@ contains
     end subroutine dump_clouds_regressor
 
 
+    !> A subroutine to load trained model.
+    !! \param file_name load file name.
     subroutine load_clouds_regressor(this, file_name)
         implicit none
         class(clouds_regressor)      :: this

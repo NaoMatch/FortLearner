@@ -35,7 +35,7 @@ program main_decision_tree_extra_tree
 
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, "Train, Test, Dump Trained Model"
-    et = extra_tree_regressor(max_depth=8_8, n_repeats=10_8)
+    et = extra_tree_regressor(max_depth=8_8, n_repeats=1_8)
     call et%fit(dholder_ptr)
     y_train_pred = et%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))

@@ -2,7 +2,29 @@ module mod_hyperparameter
     use mod_const
     use mod_common
     implicit none
+
+    character(len=256) :: fashion_list(5) = [ &
+        "best    ", &
+        "depth   ", &
+        "level   ", &
+        "impurity", &
+        "sample  "  &
+    ]
+
+    character(len=256) :: strategy_list(5) = [ &
+        "uniform        ", &
+        "quantile       ", &
+        "kmeans         ", &
+        "greedy         ", &
+        "modified_greedy"  &
+    ]
+
     
+    
+    
+    
+    
+
     type hparam_base
         character(len=256) :: algo_name
     contains

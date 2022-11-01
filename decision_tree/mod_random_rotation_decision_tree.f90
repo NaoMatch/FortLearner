@@ -7,7 +7,7 @@ module mod_random_rotation_decision_tree
     use mod_stats
     use mod_timer
 
-    use mod_hyperparameter
+    use mod_hyperparameter, only: hparam_decisiontree, fashion_list
     use mod_node
     use mod_woodworking_tools
     use mod_splitter
@@ -43,17 +43,9 @@ contains
         integer(kind=8),  optional :: min_samples_leaf
         character(len=*), optional :: fashion
 
-        character(len=256)         :: fashion_list(5)
-
         tmp%is_axis_parallel = f_
         tmp%hparam%algo_name = "random_rotation_decision_tree_regressor"
         tmp % algo_name = tmp%hparam%algo_name
-
-        fashion_list(1) = "best"
-        fashion_list(2) = "depth"
-        fashion_list(3) = "level"
-        fashion_list(4) = "impurity"
-        fashion_list(5) = "sample"
 
         if ( present(max_depth) ) tmp%hparam%max_depth = max_depth
         if ( present(max_leaf_nodes) ) tmp%hparam%max_leaf_nodes = max_leaf_nodes
@@ -103,7 +95,7 @@ contains
         hparam = this%hparam
         hparam_ptr => hparam
         call this%root_node_oblq_ptr%hparam_check(hparam_ptr)
-        call this%induction_stop_check(hparam_ptr, is_stop)
+        is_stop = this%induction_stop_check(hparam_ptr)
         if ( is_stop ) return
 
         depth = 1
@@ -121,7 +113,7 @@ contains
             call this%adopt_node_ptrs_oblq(selected_node_ptrs, data_holder_ptr, hparam_ptr, this%is_classification, &
                 this%lr_layer)
 
-            call this%induction_stop_check(hparam_ptr, is_stop)
+            is_stop = this%induction_stop_check(hparam_ptr)
             if (is_stop) exit
             depth = depth + 1
         end do
@@ -137,6 +129,10 @@ contains
         this%is_trained = t_
     end subroutine fit_random_rotation_decision_tree_regressor
 
+
+    !> A function to predict regression for 'x'.
+    !! \return predicted values
+    !! \param x input    
     function predict_random_rotation_decision_tree_regressor(this, x)
         implicit none
         class(random_rotation_decision_tree_regressor)    :: this
@@ -147,6 +143,8 @@ contains
     end function predict_random_rotation_decision_tree_regressor
 
 
+    !> A subroutine to dump trained model.
+    !! \param file_name output file name.
     subroutine dump_random_rotation_decision_tree_regressor(this, file_name)
         implicit none
         class(random_rotation_decision_tree_regressor)      :: this
@@ -158,6 +156,8 @@ contains
     end subroutine dump_random_rotation_decision_tree_regressor
 
 
+    !> A subroutine to load trained model.
+    !! \param file_name load file name.
     subroutine load_random_rotation_decision_tree_regressor(this, file_name)
         implicit none
         class(random_rotation_decision_tree_regressor)      :: this

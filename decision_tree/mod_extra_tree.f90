@@ -6,7 +6,7 @@ module mod_extra_tree
     use mod_stats
     use mod_timer
 
-    use mod_hyperparameter
+    use mod_hyperparameter, only: hparam_decisiontree, fashion_list
     use mod_node
     use mod_woodworking_tools
     use mod_splitter
@@ -58,17 +58,10 @@ contains
         integer(kind=8), optional :: max_features
         integer(kind=8), optional :: n_repeats
         integer(kind=8), optional :: n_threads
-        character(len=256) :: fashion_list(5)
 
         tmp%is_axis_parallel = t_
         tmp%hparam%algo_name = "extra_tree_regressor"
         tmp % algo_name = tmp%hparam%algo_name
-
-        fashion_list(1) = "best"
-        fashion_list(2) = "depth"
-        fashion_list(3) = "level"
-        fashion_list(4) = "impurity"
-        fashion_list(5) = "sample"
 
         if ( present(max_depth) ) tmp%hparam%max_depth = max_depth
         if ( present(boot_strap) ) tmp%hparam%boot_strap = boot_strap
@@ -95,6 +88,7 @@ contains
         tmp%is_classification = f_
         new_extra_tree_regressor = tmp
     end function new_extra_tree_regressor
+
 
     !> A subtouine to fit 'extra_tree_regressor'. 
     !! \return returns fitted 'extra_tree_regressor' tree
@@ -136,8 +130,8 @@ contains
         hparam = this%hparam
         hparam_ptr => hparam
         call this%root_node_axis_ptr%hparam_check(hparam_ptr)
-        call this%induction_stop_check(hparam_ptr, is_stop)
-        if ( is_stop ) return
+        is_stop = this%induction_stop_check(hparam_ptr)
+
 
         depth = 1
         do while (t_)
@@ -156,7 +150,7 @@ contains
             call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, this%is_classification, &
                 this%is_threshold_tree, this%lr_layer)
 
-            call this%induction_stop_check(hparam_ptr, is_stop)
+            is_stop = this%induction_stop_check(hparam_ptr)
             if (is_stop) exit
             depth = depth + 1
         end do
@@ -219,8 +213,8 @@ contains
         hparam = this%hparam
         hparam_ptr => hparam
         call this%root_node_axis_ptr%hparam_check(hparam_ptr)
-        call this%induction_stop_check(hparam_ptr, is_stop)
-        if ( is_stop ) return
+        is_stop = this%induction_stop_check(hparam_ptr)
+
 
         depth = 1
         do while (t_)
@@ -240,8 +234,7 @@ contains
             call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, this%is_classification, &
                 this%is_threshold_tree, this%lr_layer)
 
-            call this%induction_stop_check(hparam_ptr, is_stop)
-            if (is_stop) exit
+            is_stop = this%induction_stop_check(hparam_ptr)
             depth = depth + 1
         end do
         call termination_node_ptr_axis(this%root_node_axis_ptr)
@@ -257,6 +250,10 @@ contains
         ! print*, "SplitTime: ", time_splti
     end subroutine fit_extra_tree_regressor_faster
 
+
+    !> A function to predict regression for 'x'.
+    !! \return predicted values
+    !! \param x input
     function predict_extra_tree_regressor(this, x)
         implicit none
         class(extra_tree_regressor)    :: this
@@ -266,6 +263,8 @@ contains
     end function predict_extra_tree_regressor
 
 
+    !> A subroutine to dump trained model.
+    !! \param file_name output file name.
     subroutine dump_extra_tree_regressor(this, file_name)
         implicit none
         class(extra_tree_regressor)      :: this
@@ -277,6 +276,8 @@ contains
     end subroutine dump_extra_tree_regressor
 
 
+    !> A subroutine to load trained model.
+    !! \param file_name load file name.
     subroutine load_extra_tree_regressor(this, file_name)
         implicit none
         class(extra_tree_regressor)      :: this
@@ -287,4 +288,5 @@ contains
         close(newunit)
     end subroutine load_extra_tree_regressor
 
+    
 end module mod_extra_tree

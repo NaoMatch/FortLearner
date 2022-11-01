@@ -9,11 +9,15 @@ module mod_threshold_tree
     use mod_data_holder
     implicit none
 
+    !> Type of 'thresold_tree'
+    !> https://arxiv.org/pdf/2111.03193.pdf
     type, extends(base_tree) :: threshold_tree
         type(kmeans) :: km
     contains
         procedure :: fit     => fit_threshold_tree
         procedure :: predict => predict_threshold_tree
+        procedure :: dump => dump_threshold_tree
+        procedure :: load => load_threshold_tree
     end type threshold_tree
     
     !> An interface to create new 'threshold_tree'
@@ -23,6 +27,8 @@ module mod_threshold_tree
 
 contains
 
+    !> A function to create new 'threshold_tree'.
+    !! \param n_clusters number of clusters. must be greater equal 2
     function new_threshold_tree(n_clusters)
         implicit none
         type(threshold_tree) :: new_threshold_tree
@@ -42,6 +48,10 @@ contains
     end function new_threshold_tree
 
 
+    !> A subtouine to fit 'threshold_tree'. 
+    !! \return returns fitted 'threshold_tree'
+    !! \param x input data
+    !! \param trained_kmeans ***OPTIONAL*** if input, the cluster center is chosen as the initial value.
     subroutine fit_threshold_tree(this, x, trained_kmeans)
         implicit none
         class(threshold_tree)    :: this
@@ -92,7 +102,7 @@ contains
         hparam = this%hparam
         hparam_ptr => hparam
         call this%root_node_axis_ptr%hparam_check(hparam_ptr)
-        call this%induction_stop_check(hparam_ptr, is_stop)
+        is_stop = this%induction_stop_check(hparam_ptr)
         if ( is_stop ) return
 
         depth = 0_8
@@ -108,7 +118,7 @@ contains
                 this%is_classification, this%is_threshold_tree, &
                 this%lr_layer)
 
-            call this%induction_stop_check(hparam_ptr, is_stop)
+                is_stop = this%induction_stop_check(hparam_ptr)
             if (is_stop) exit
 
             depth = depth + 1
@@ -126,6 +136,9 @@ contains
     end subroutine fit_threshold_tree
 
 
+    !> A function to predict class for 'x'.
+    !! \return predicted class
+    !! \param x input
     function predict_threshold_tree(this, x)
         implicit none
         class(threshold_tree)    :: this
@@ -134,4 +147,25 @@ contains
         predict_threshold_tree = this%predict_labels(x)
     end function predict_threshold_tree
 
+
+    !> A subroutine to dump trained model.
+    !! \param file_name output file name.
+    subroutine dump_threshold_tree(this, file_name)
+        implicit none
+        class(threshold_tree)      :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit
+        stop "NotImplementedError: 'dump_threshold_tree' is not implemented." 
+    end subroutine dump_threshold_tree
+
+
+    !> A subroutine to load trained model.
+    !! \param file_name load file name.
+    subroutine load_threshold_tree(this, file_name)
+        implicit none
+        class(threshold_tree)      :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit
+        stop "NotImplementedError: 'load_threshold_tree' is not implemented." 
+    end subroutine load_threshold_tree  
 end module mod_threshold_tree

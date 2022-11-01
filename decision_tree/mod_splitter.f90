@@ -475,7 +475,8 @@ contains
 
 
 
-
+    !> A subroutine to split node by 'Threshold Tree'.
+    !> https://arxiv.org/pdf/2002.12538.pdf
     subroutine split_threshold_tree(this, node_ptrs, data_holder_ptr, hparam_ptr, & 
         n_columns, n_clusters, cluster_centers)
         implicit none
@@ -499,6 +500,7 @@ contains
         end if
     end subroutine split_threshold_tree
 
+    !> A subroutine to split node by 'Threshold Tree'.
     subroutine split_threshold_tree_indivisuals(this, node_ptr, data_holder_ptr, hparam_ptr, &
         n_columns, n_clusters, cluster_centers)
         implicit none
@@ -771,6 +773,8 @@ contains
     end subroutine split_threshold_tree_indivisuals
 
 
+    !> A subroutine to split node by 'Isolation Tree'.
+    !> https://cs.nju.edu.cn/zhouzh/zhouzh.files/publication/icdm08b.pdf
     subroutine split_isolation_tree(this, node_ptrs, data_holder_ptr, hparam_ptr, & 
         n_columns)
         implicit none
@@ -792,6 +796,7 @@ contains
         end if
     end subroutine split_isolation_tree
 
+    !> A subroutine to split node by 'Isolation Tree'.
     subroutine split_isolation_tree_indivisuals(this, node_ptr, data_holder_ptr, hparam_ptr, &
         n_columns)
         implicit none
@@ -1075,8 +1080,8 @@ contains
 
     !------------------------------------------------------------------------------------------------------------------------------------------ 
     !------------------------------------------------------------------------------------------------------------------------------------------ 
-    !> A subroutine to split node by very tradisional way.
-    !> L. Breiman, J. Friedman, R. Olshen, and C. Stone, “Classification and Regression Trees”, Wadsworth, Belmont, CA, 1984.
+    !> A subroutine to split node by 'SLIQ'.
+    !> https://sci2s.ugr.es/keel/pdf/algorithm/congreso/SLIQ.pdf
     subroutine split_sliq_regressor(this, node_ptrs, data_holder_ptr, hparam_ptr, & 
         n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
         implicit none
@@ -1108,6 +1113,7 @@ contains
         end if
     end subroutine split_sliq_regressor
 
+    !> A subroutine to split node by 'SLIQ'.
     subroutine split_sliq_regressor_all(this, node_ptrs, data_holder_ptr, hparam_ptr, n_columns, &
             feature_indices, feature_indices_scanning_range, is_permute_per_node)
         implicit none
@@ -1304,8 +1310,8 @@ contains
     end subroutine split_sliq_regressor_all
 
 
-    !> A subroutine to split node by very tradisional way.
-    !> L. Breiman, J. Friedman, R. Olshen, and C. Stone, “Classification and Regression Trees”, Wadsworth, Belmont, CA, 1984.
+    !> A subroutine to split node by 'SLIQ'.
+    !> This is very slower than 'split_sliq_regressor_all'. DO NOT USE.
     subroutine split_sliq_regressor_indivisuals(this, node_ptr, data_holder_ptr, hparam_ptr, &
         n_columns, feature_indices, feature_indices_scanning_range, is_permute_per_node)
         implicit none

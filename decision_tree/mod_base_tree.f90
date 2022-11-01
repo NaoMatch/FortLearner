@@ -1,3 +1,4 @@
+!> A module for various decision tree algorithms.
 module mod_base_tree
     use mod_const
     use mod_common
@@ -10,44 +11,46 @@ module mod_base_tree
     use mod_stats
     implicit none
     
-    !> A type of base tree for various decision tree algorithms
+    !> A type of base tree for various decision tree algorithms. 
+    !> This is inherited by all decision tree algorithms.
     type base_tree
-        logical(kind=4)                  :: is_classification = f_
-        logical(kind=4)                  :: is_threshold_tree = f_
+        logical(kind=4)                  :: is_classification = f_ !< Classification or not. If false, regressor.
+        logical(kind=4)                  :: is_threshold_tree = f_ !< Threshold_tree or not. Threshold tree is used for clustering.
 
-        character(len=256)               :: algo_name              !< algorithm name
-        logical(kind=4)                  :: is_trained = f_        !< is trained or not. If not, cannot predict and dump.
-        logical(kind=4)                  :: is_axis_parallel = t_  !< is axis paralle split or not.
-        logical(kind=4)                  :: is_hist=f_             !< use binned array or not.
-        logical(kind=4)                  :: is_layer_wise_sum=f_   !< performs response summation for each layer, instead of returning only the response of the terminal node. **'lawu_regressor' only**
-        type(hparam_decisiontree)        :: hparam                 !< hyperparameter of decision tree.
+        character(len=256)               :: algo_name              !< Algorithm name.
+        logical(kind=4)                  :: is_trained = f_        !< Trained or not. If not, model cannot predict, and cannot save results.
+        logical(kind=4)                  :: is_axis_parallel = t_  !< Axis paralle split or not. If not, oblique split.
+        logical(kind=4)                  :: is_hist=f_             !< Use binned array or not. If not, model use raw data.
+        logical(kind=4)                  :: is_layer_wise_sum=f_   !< Whether model performs response summation for each layer, instead of returning only the response of the terminal node. **'lawu_regressor' only**
+        type(hparam_decisiontree)        :: hparam                 !< Hyperparameter of decision tree.
         ! Axis-Parallel
-        type(node_axis), pointer         :: root_node_axis_ptr     !< pointer to root node with axis-parallel split.
-        integer(kind=8), allocatable     :: split_features_(:)     !< indices of split features (#nodes). In internal node, 1-#columns. In terminal node, set to be -2.
+        type(node_axis), pointer         :: root_node_axis_ptr     !< axis-parallel: Pointer to root node with axis-parallel split.
+        integer(kind=8), allocatable     :: split_features_(:)     !< axis-parallel (#nodes): Indices of split features. In internal node, 1-#columns. In terminal node, set to be -2.
         ! Oblique
-        type(node_oblq), pointer         :: root_node_oblq_ptr     !< pointer to root node with oblique split.
-        real(kind=8), allocatable        :: coefs_(:,:)            !< splitting coefficients (#nodes, #samples)
-        real(kind=8), allocatable        :: intercepts_(:)         !< splitting intercepts (#nodes)
+        type(node_oblq), pointer         :: root_node_oblq_ptr     !< oblique: Pointer to root node with oblique split.
+        real(kind=8), allocatable        :: coefs_(:,:)            !< oblique (#nodes, #columns): Splitting coefficients. In terminla node, all values are huge(0d0).
+        real(kind=8), allocatable        :: intercepts_(:)         !< oblique (#nodes): Splitting intercepts. In terminla node, all values are huge(0d0).
         ! Common
-        real(kind=8), allocatable        :: split_thresholds_(:)   !< splitting thresholds (#nodes)
-        logical(kind=4), allocatable     :: is_terminals_(:)       !< boolean array of terminal or not (#nodes)
+        real(kind=8), allocatable        :: split_thresholds_(:)   !< common (#nodes): Splitting threshold values. 
+        logical(kind=4), allocatable     :: is_terminals_(:)       !< common (#nodes): Boolean array of terminal node or not. 
         ! Classification and Regression
-        real(kind=8), allocatable        :: responses_(:,:)        !< output response of all nodes. calculated by sample mean.
-        integer(kind=8), allocatable     :: labels_(:)        !< output response of all nodes. calculated by sample mean.
+        real(kind=8), allocatable        :: responses_(:,:)        !< common (#nodes, #outputs): output response of all nodes. this array is used in classifier and regressor. Calculated by sample mean.
+        integer(kind=8), allocatable     :: labels_(:)             !< common (#nodes, #labels): output labels of all nodes. Calculated by maxval(response_, dim=2).
         ! Anomaly Detection
-        logical(kind=4)                  :: is_isolation_tree = f_ !< is isolation tree or not.
+        logical(kind=4)                  :: is_isolation_tree = f_ !< Isolation tree or not. Isolation tree is used for anomaly detection.
 
-        ! 
-        type(train_results)              :: results                !< training results
+        ! Training results.
+        type(train_results)              :: results                !< training results. 'split_features_', 'coefs_', 'intercepts_', 'is_terminals_', 'responses_', and 'labels_'.
         real(kind=8), allocatable        :: mean_y(:)              !< mean of objective variable during training.
-        real(kind=8)                     :: lr_layer               !< learinng rate per layer
 
-        integer(kind=8) :: n_samples_                              !< number of samples in training
-        integer(kind=8) :: n_columns_                              !< number of columns
-        integer(kind=8) :: n_clusters_ = 0_8                       !< number of columns
-        integer(kind=8) :: n_outputs_                              !< number of output dimension of objective variable
-        integer(kind=8) :: n_labels_                               !< number of output dimension of objective variable
-        integer(kind=8) :: n_leaf_nodes_                           !< number of leaf node
+        ! Temporary value
+        real(kind=8)                     :: lr_layer               !< learinng rate per layer, used in lawu_regressor only.
+        integer(kind=8)                  :: n_samples_             !< number of samples of training data.
+        integer(kind=8)                  :: n_columns_             !< number of columns.
+        integer(kind=8)                  :: n_clusters_ = 0_8      !< number of clusters, used in threshold tree only.
+        integer(kind=8)                  :: n_outputs_             !< number of output dimension of objective variable, for classifier (label probability) and regressor.
+        integer(kind=8)                  :: n_labels_              !< number of output dimension of objective variable, for classifier (one hot encoded label).
+        integer(kind=8)                  :: n_leaf_nodes_          !< number of leaf node
     contains
         procedure :: init => init_base_tree
         procedure :: induction_stop_check
@@ -72,48 +75,49 @@ module mod_base_tree
 contains
 
     !> A function to calculate average depth of binary search tree.
-    !! \return returns average depth of binary search tree
-    !! \param n_samples number of samples
+    !> This is used for Isolation tree only to calculate anomaly score.
+    !! \return avg_depth average depth of binary search tree with 'n_samples' samples.
+    !! \param n_samples number of samples.
     function avg_depth(n_samples)
         implicit none
         real(kind=8) :: avg_depth
         integer(kind=8), intent(in) :: n_samples
         if (n_samples .eq. 1_8) then
             avg_depth = 0_8
-            return 
         elseif ( n_samples .eq. 2_8 ) then
             avg_depth = 1_8
-            return 
+        else
+            avg_depth = 2d0*harmonic_number_approx(n_samples-1) - 2d0*(n_samples-1d0)/n_samples
         end if
-        avg_depth = 2d0*harmonic_number_approx(n_samples-1) - 2d0*(n_samples-1d0)/n_samples
     end function avg_depth
 
 
     !> A subroutine to dump fitted 'base_tree' object or its extended objects
-    !> If not fitted, cannot dump training results.
-    !! \param file_name output file name
+    !> If not fitted, cannot dump.
+    !! \param unit output unit number.
     subroutine dump_base_tree(this, unit)
         implicit none
         class(base_tree) :: this
         integer(kind=8), intent(in)  :: unit
         integer(kind=8)  :: n_nodes, n_feature_fractions
         integer(kind=8)  :: dummy
-        ! open(unit, file=file_name, form="unformatted", status="replace")
         if (.not. this % is_trained) then
             print*, trim(this % algo_name),  " is not trained. Cannot dump model."
             write(unit) f_ ! dump fail
             close(unit)
             stop
         end if
-        write(unit) t_ ! dump fail
+
+        ! Basic Informations
+        write(unit) t_ ! dump success
         write(unit) this%is_classification
         write(unit) this%is_threshold_tree
         write(unit) this%algo_name
         write(unit) this%is_axis_parallel
         write(unit) this%is_hist
         write(unit) this%is_layer_wise_sum
-        ! 
-        ! 
+
+        ! Hyperparameters
         dummy = allocated(this%hparam%feature_fractions)
         n_feature_fractions = size(this%hparam%feature_fractions) * dummy
         write(unit) n_feature_fractions
@@ -170,6 +174,7 @@ contains
         write(unit) this%hparam%strategy
         write(unit) this%hparam%fashion
         
+        ! Training Results
         n_nodes = size(this%results%split_features_)
         write(unit) n_nodes
         write(unit) this%results%n_columns_
@@ -182,43 +187,40 @@ contains
         write(unit) this%results%split_thresholds_
         write(unit) this%results%is_terminals_
         write(unit) this%results%responses_
-
         if (this%is_layer_wise_sum) then
             write(unit) this%mean_y
         else
             write(unit) 0_8
         end if
         write(unit) this%lr_layer
-        ! print*, "Dump Success!, ", trim(this % algo_name)
-        ! close(unit)
     end subroutine dump_base_tree
 
 
     !> A subroutine to load 'base_tree' object or its extended objects
     !> If not fitted, cannot load.
-    !! \param file_name loading file name
+    !! \param unit output unit number.
     subroutine load_base_tree(this, unit)
         implicit none
         class(base_tree) :: this
         integer(kind=8), intent(in)  :: unit
         logical(kind=4)  :: is_dump_successed, is_allocated_feature_fractions
         integer(kind=8)  :: n_nodes, n_feature_fractions, dummy, n_columns_, n_outputs_
-        ! open(unit, file=file_name, form="unformatted")
         read(unit) is_dump_successed
         if (.not. is_dump_successed) then
             print*, trim(this % algo_name),  " failed dump of the model."
             stop
         end if
 
-        this%is_trained = is_dump_successed
+        ! Basic Informations
+        this%is_trained = t_
         read(unit) this%is_classification
         read(unit) this%is_threshold_tree
         read(unit) this%algo_name
         read(unit) this%is_axis_parallel
         read(unit) this%is_hist
         read(unit) this%is_layer_wise_sum
-        ! 
-        ! 
+
+        ! Hyperparameters
         read(unit) n_feature_fractions
         read(unit) this%hparam%n_estimators
         read(unit) this%hparam%criterion_int
@@ -274,6 +276,7 @@ contains
         read(unit) this%hparam%strategy
         read(unit) this%hparam%fashion
 
+        ! Training Results
         read(unit) n_nodes
         read(unit) this%results % n_columns_
         read(unit) this%results % n_outputs_
@@ -292,7 +295,6 @@ contains
         read(unit) this%results % split_thresholds_
         read(unit) this%results % is_terminals_
         read(unit) this%results % responses_
-
         if (this%is_layer_wise_sum) then
             allocate(this%mean_y(this%n_outputs_))
             read(unit) this%mean_y
@@ -300,8 +302,6 @@ contains
             read(unit) dummy
         end if
         read(unit) this%lr_layer
-        ! print*, "Load Success!, ", trim(this % algo_name)
-        ! close(unit); return
     end subroutine load_base_tree
 
 
@@ -312,7 +312,6 @@ contains
         class(base_tree) :: this
         type(node_axis), pointer :: root_node_ptr_axis
         type(node_axis), pointer :: node_l_ptr_axis, node_r_ptr_axis
-        print*, "print"
         call root_node_ptr_axis%print_node_info_axis()
         if ( allocated(root_node_ptr_axis%node_l) ) then
             node_l_ptr_axis => root_node_ptr_axis%node_l
@@ -330,7 +329,6 @@ contains
         class(base_tree) :: this
         type(node_oblq), pointer :: root_node_ptr_oblq
         type(node_oblq), pointer :: node_l_ptr_oblq, node_r_ptr_oblq
-        print*, "print"
         call root_node_ptr_oblq%print_node_info_oblq()
         if ( allocated(root_node_ptr_oblq%node_l) ) then
             node_l_ptr_oblq => root_node_ptr_oblq%node_l
@@ -341,19 +339,18 @@ contains
     end subroutine print_info_oblq
 
 
-    !> A subtouine to check if a 'base_tree' object or its extended objects can grow. 
-    !! \return returns tree can grow or not
+    !> A function to check if a 'base_tree' object or its extended objects can grow. 
+    !> - number of leaf nodes is greater than 'max_leaf_nodes'
+    !! \return is_stop tree can grow or not.
     !! \param hparam_ptr pointer to hyperparameter of decision_tree.
-    !! \param is_stop tree can grow or not
-    subroutine induction_stop_check(this, hparam_ptr, is_stop)
+    function induction_stop_check(this, hparam_ptr) result(is_stop)
         implicit none
         class(base_tree) :: this
         type(hparam_decisiontree), pointer :: hparam_ptr
-        logical(kind=4), intent(inout) :: is_stop
+        logical(kind=4) :: is_stop
         integer(kind=8) :: n_leaf_nodes
         logical(kind=4) :: exist_splittable_leaf
         is_stop = f_
-
 
         ! Max Leaf Node
         if (associated(this%root_node_axis_ptr)) then
@@ -381,10 +378,10 @@ contains
             is_stop = t_
             return
         end if
-    end subroutine induction_stop_check
+    end function induction_stop_check
 
 
-    !> A subroutine to initialize tree, nullify pointers dellocate arrays.
+    !> A subroutine to initialize tree, nullify pointers, and dellocate arrays.
     !! \param data_holder_ptr pointer to 'data_holder'
     subroutine init_base_tree(this, data_holder_ptr)
         implicit none
@@ -415,9 +412,10 @@ contains
 
 
     !> A subroutine to initialize root node pointer (axis-parallel and oblique).
-    !! \return returns tree with initialized root node
-    !! \param data_holder_ptr pointer to 'data_holder'
-    !! \param is_classification classification tree or not
+    !! \return returns tree with initialized root node.
+    !! \param data_holder_ptr pointer to 'data_holder'.
+    !! \param is_classification classification tree or not.
+    !! \param sample_indices **optional** sample indices. You can use the data at the specified index if you set.
     subroutine init_root_node(this, data_holder_ptr, is_classification, sample_indices)
         implicit none
         class(base_tree)           :: this
