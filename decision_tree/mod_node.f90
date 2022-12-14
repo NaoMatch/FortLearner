@@ -101,6 +101,8 @@ module mod_node
 
 contains
 
+    !> A function to compute mean squared error.
+    !! \param coefficients coefficients of split.
     function loss_mse(this, coefficients)
         class(node_oblq)         :: this
         real(kind=8), intent(in) :: coefficients(:)
@@ -132,6 +134,7 @@ contains
         loss_mse = - tmp_cnt_l * tmp_cnt_r / dble(this%tot_cnt) * (tmp_avg_l - tmp_avg_r)**2d0
         if (tmp_cnt_l * tmp_cnt_r .eq. 0_8) loss_mse = 0d0
     end function loss_mse
+
 
     !> A subroutine to check stop growinng or not.
     !> 1. Pure Node, only one class or no variance.
@@ -201,6 +204,7 @@ contains
         print*, "Allocate R:       ", allocated(this%node_r)
     end subroutine print_node_info_axis
 
+    !> A subroutine to print node informations
     subroutine print_node_info_oblq(this)
         implicit none
         class(node_oblq) :: this

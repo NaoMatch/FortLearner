@@ -7,7 +7,7 @@ module mod_sadt
     use mod_stats
     use mod_timer
 
-    use mod_hyperparameter
+    use mod_hyperparameter, only: hparam_decisiontree, fashion_list
     use mod_node
     use mod_woodworking_tools
     use mod_splitter
@@ -19,6 +19,8 @@ module mod_sadt
     contains
         procedure :: fit => fit_sadt_regressor
         procedure :: predict => predict_sadt_regressor
+        procedure :: dump => dump_sadt_regressor
+        procedure :: load => load_sadt_regressor
     end type sadt_regressor
 
     !> An interface to create new 'sadt_regressor'
@@ -57,17 +59,9 @@ contains
         integer(kind=8),  optional :: max_epoch
         real(kind=8),     optional :: cooling_rate
 
-        character(len=256)         :: fashion_list(5)
-
         tmp%is_axis_parallel = f_
         tmp%hparam%algo_name = "sadt_regressor"
         tmp % algo_name = tmp%hparam%algo_name
-
-        fashion_list(1) = "best"
-        fashion_list(2) = "depth"
-        fashion_list(3) = "level"
-        fashion_list(4) = "impurity"
-        fashion_list(5) = "sample"
 
         if ( present(max_depth) ) tmp%hparam%max_depth = max_depth
         if ( present(boot_strap) ) tmp%hparam%boot_strap = boot_strap
@@ -131,7 +125,7 @@ contains
         hparam = this%hparam
         hparam_ptr => hparam
         call this%root_node_oblq_ptr%hparam_check(hparam_ptr)
-        call this%induction_stop_check(hparam_ptr, is_stop)
+        is_stop = this%induction_stop_check(hparam_ptr)
         if ( is_stop ) return
 
         depth = 1
@@ -149,7 +143,7 @@ contains
             call this%adopt_node_ptrs_oblq(selected_node_ptrs, data_holder_ptr, hparam_ptr, this%is_classification, &
                 this%lr_layer)
 
-            call this%induction_stop_check(hparam_ptr, is_stop)
+            is_stop = this%induction_stop_check(hparam_ptr)
             if (is_stop) exit
             depth = depth + 1
         end do
@@ -166,6 +160,9 @@ contains
     end subroutine fit_sadt_regressor
 
 
+    !> A function to predict regression for 'x'.
+    !! \return predicted values
+    !! \param x input
     function predict_sadt_regressor(this, x)
         implicit none
         class(sadt_regressor)    :: this
@@ -173,4 +170,28 @@ contains
         integer(kind=8), ALLOCATABLE :: predict_sadt_regressor(:,:)
         predict_sadt_regressor = this%predict_response(x)
     end function predict_sadt_regressor
+
+
+    !> A subroutine to dump trained model.
+    !! \param file_name output file name.
+    subroutine dump_sadt_regressor(this, file_name)
+        implicit none
+        class(sadt_regressor)      :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit
+        stop "NotImplementedError: 'dump_sadt_regressor' is not implemented." 
+    end subroutine dump_sadt_regressor
+
+
+    !> A subroutine to load trained model.
+    !! \param file_name load file name.
+    subroutine load_sadt_regressor(this, file_name)
+        implicit none
+        class(sadt_regressor)      :: this
+        character(len=*), intent(in) :: file_name
+        integer(kind=8)              :: newunit
+        stop "NotImplementedError: 'load_sadt_regressor' is not implemented." 
+    end subroutine load_sadt_regressor    
+
+
 end module mod_sadt

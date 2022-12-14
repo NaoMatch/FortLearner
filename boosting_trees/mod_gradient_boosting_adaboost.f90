@@ -198,6 +198,8 @@ contains
     end function predict_adaboost_regressor
 
 
+    !> A subroutine to dump trained model.
+    !! \param file_name output file name.
     subroutine dump_adaboost_regressor(this, file_name)
         implicit none
         class(adaboost_regressor) :: this
@@ -213,6 +215,8 @@ contains
     end subroutine dump_adaboost_regressor
 
 
+    !> A subroutine to load trained model.
+    !! \param file_name load file name.
     subroutine load_adaboost_regressor(this, file_name)
         implicit none
         class(adaboost_regressor) :: this

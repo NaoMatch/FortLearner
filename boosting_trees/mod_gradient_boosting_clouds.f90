@@ -208,6 +208,8 @@ contains
     end function predict_gradient_boosting_clouds_regressor
 
 
+    !> A subroutine to dump trained model.
+    !! \param file_name output file name.
     subroutine dump_gradient_boosting_clouds_regressor(this, file_name)
         implicit none
         class(gradient_boosting_clouds_regressor) :: this
@@ -224,6 +226,8 @@ contains
     end subroutine dump_gradient_boosting_clouds_regressor
 
 
+    !> A subroutine to load trained model.
+    !! \param file_name load file name.
     subroutine load_gradient_boosting_clouds_regressor(this, file_name)
         implicit none
         class(gradient_boosting_clouds_regressor) :: this

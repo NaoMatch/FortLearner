@@ -20,11 +20,13 @@ module mod_woodworking_tools
         procedure :: alloc
     end type train_results
 
+    !> An interface to extract training results of decision tree algorithms.
     interface extract_train_resutls
         module procedure :: extract_train_results_axis
         module procedure :: extract_train_results_oblq
     end interface extract_train_resutls
 
+    !> An interface to extract best unsplit nodes.
     interface extract_best_split_node
         module procedure :: extract_best_split_node_axis
         module procedure :: extract_best_split_node_oblq
@@ -35,26 +37,31 @@ module mod_woodworking_tools
     !     module procedure :: extract_most_left_unsplit_node_oblq
     ! end interface extract_most_left_unsplit_node
 
+    !> An interface to count number of leaf nodes.
     interface count_leaf_nodes
         module procedure :: count_leaf_nodes_axis
         module procedure :: count_leaf_nodes_oblq
     end interface count_leaf_nodes
 
+    !> An interface to check for the existence of splittable nodes.
     interface check_splittable_leaf
         module procedure :: check_splittable_leaf_axis
         module procedure :: check_splittable_leaf_oblq
     end interface check_splittable_leaf
 
+    !> An interface to count number of nodes (root + internal + leaf).
     interface count_all_nodes
         module procedure :: count_all_nodes_axis
         module procedure :: count_all_nodes_oblq
     end interface count_all_nodes
 
+    !> An interface to create child nodes.
     interface adopting_twins
         module procedure :: adopting_twins_axis
         module procedure :: adopting_twins_oblq
     end interface adopting_twins
 
+    !> An interface to change the state of a node from internal to leaf.
     interface termination_node_ptr
         module procedure :: termination_node_ptr_axis
         module procedure :: termination_node_ptr_oblq
@@ -62,6 +69,9 @@ module mod_woodworking_tools
 
 contains
 
+    !> A function to compute average path length of the node containing 'n' samples
+    !! \return average_path_length average path length
+    !! \param n sample size
     function average_path_length(n)
         implicit none
         real(kind=8) :: average_path_length
@@ -104,7 +114,7 @@ contains
     end subroutine alloc
 
 
-    !> A subroutine to extract training results from 'node_axis' to 'train_results'.
+    !> A subroutine to extract training results from 'node_axis' to 'train_results' for axis-parallel trees.
     !! \return returns 
     !! \param root_node_ptr root node pointer
     !! \param results training results
@@ -142,6 +152,14 @@ contains
         end if
     end subroutine extract_train_results_axis
 
+
+    !> A subroutine to extract training results from 'node_oblq' to 'train_results'.
+    !! \return returns 
+    !! \param root_node_ptr root node pointer
+    !! \param results training results
+    !! \param node_id current node id
+    !! \param is_classification classification task or not
+    !! \param is_root is root node or not
     recursive subroutine extract_train_results_oblq(root_node_ptr, results, node_id, is_classification, is_root)
         implicit none
         type(node_oblq), pointer, intent(in) :: root_node_ptr
@@ -169,7 +187,7 @@ contains
     end subroutine extract_train_results_oblq
 
 
-    !> A subtoutine to count leaf(terminal) axis-parallel split node.
+    !> A subtoutine to count leaf(terminal) axis-parallel split node for axis-parallel trees.
     !! \return returns number of leaf nodes
     !! \param root_node_ptr root node pointer
     !! \param n_leaf_nodes number of leaf nodes
@@ -190,6 +208,7 @@ contains
             return
         end if
     end subroutine count_leaf_nodes_axis
+
 
     !> A subtoutine to count leaf(terminal) oblique split node.
     !! \return returns number of leaf nodes
@@ -214,7 +233,7 @@ contains
     end subroutine count_leaf_nodes_oblq
 
 
-    !> A subtoutine to check existence of splittable axis-parallel node
+    !> A subtoutine to check existence of splittable axis-parallel node.
     !! \return returns exist splittable node or not
     !! \param root_node_ptr root node pointer
     !! \param exist_splittable_leaf exist splittable node or not
@@ -234,6 +253,7 @@ contains
             end if
         end if
     end subroutine check_splittable_leaf_axis
+
 
     !> A subtoutine to check existence of splittable oblique node
     !! \return returns exist splittable node or not
@@ -255,7 +275,7 @@ contains
     end subroutine check_splittable_leaf_oblq
 
 
-    !> A subtoutine to count all(root, internal, leaf) nodes.
+    !> A subtoutine to count all(root, internal, leaf) nodes for axis-parallel trees.
     !! \return returns n_samplesber of leaf nodes
     !! \param root_node_ptr root node pointer
     !! \param n_nodes n_samplesber of all nodes
@@ -274,6 +294,12 @@ contains
         end if
     end subroutine count_all_nodes_axis
 
+
+    !> A subtoutine to count all(root, internal, leaf) nodes for axis-parallel trees.
+    !! \return returns n_samplesber of leaf nodes
+    !! \param root_node_ptr root node pointer
+    !! \param n_nodes n_samplesber of all nodes
+    !! \param is_root is root node or not
     recursive subroutine count_all_nodes_oblq(root_node_ptr, n_nodes, is_root)
         implicit none
         type(node_oblq), pointer, intent(in) :: root_node_ptr
@@ -289,7 +315,7 @@ contains
     end subroutine count_all_nodes_oblq
 
 
-    !> A subroutine to adopting child nodes to 'node_ptr'.
+    !> A subroutine to adopting child nodes to 'node_ptr' for axis-parallel trees.
     !! \return returns adopted node pointer
     !! \param node_ptr node pointer
     !! \param data_holder_ptr data_holder pointer
@@ -648,6 +674,13 @@ contains
         node_ptr%node_r = node_axis_r
     end subroutine adopting_twins_axis
 
+
+    !> A subroutine to adopting child nodes to 'node_ptr' for isolation tree only.
+    !! \return returns adopted node pointer
+    !! \param node_ptr node pointer
+    !! \param data_holder_ptr data_holder pointer
+    !! \param hparam_ptr decision tree hyperparameter pointer
+    !! \param is_classification classification task or not
     subroutine adopting_twins_axis_for_isolation_tree(node_ptr, data_holder_ptr, hparam_ptr)
         implicit none
         type(node_axis), pointer :: node_ptr
@@ -720,6 +753,12 @@ contains
     end subroutine adopting_twins_axis_for_isolation_tree
 
 
+    !> A subroutine to adopting child nodes to 'node_ptr' for oblique trees.
+    !! \return returns adopted node pointer
+    !! \param node_ptr node pointer
+    !! \param data_holder_ptr data_holder pointer
+    !! \param hparam_ptr decision tree hyperparameter pointer
+    !! \param is_classification classification task or not
     subroutine adopting_twins_oblq(node_ptr, data_holder_ptr, hparam_ptr, is_classification, lr_layer, is_hist)
         implicit none
         type(node_oblq), pointer :: node_ptr
@@ -813,7 +852,7 @@ contains
     end subroutine adopting_twins_oblq
 
 
-    !> A subtoutine to extract maximum gain node (already split and not terminal).
+    !> A subtoutine to extract maximum gain node (already split and not terminal) for axis-parallel trees.
     !! \return returns maximum gain split node pointer
     !! \param root_node_ptr root node pointer
     !! \param best_split_node_ptr maximum gain split node pointer
@@ -838,6 +877,10 @@ contains
     end subroutine extract_best_split_node_axis
 
 
+    !> A subtoutine to extract maximum gain node (already split and not terminal) for oblique trees.
+    !! \return returns maximum gain split node pointer
+    !! \param root_node_ptr root node pointer
+    !! \param best_split_node_ptr maximum gain split node pointer
     recursive subroutine extract_best_split_node_oblq(root_node_ptr, best_split_node_ptr)
         implicit none
         type(node_oblq), pointer, intent(in)    :: root_node_ptr
@@ -859,7 +902,7 @@ contains
     end subroutine extract_best_split_node_oblq
 
 
-    !> A subroutine to extract all unsplit node pointers, for best-first fashion.
+    !> A subroutine to extract all unsplit node pointers, for best-first fashion for axis-parallel trees.
     !! \return returns all unsplit node pointers
     !! \param root_node_ptr root node pointer
     !! \param unsplit_node_ptrs all unsplit node pointers
@@ -880,7 +923,7 @@ contains
     end subroutine extract_unsplit_node_ptrs_axis
 
 
-    !> A subroutine to extract all unsplit node pointers, for best-first fashion.
+    !> A subroutine to extract all unsplit node pointers, for best-first fashion,  for oblique trees.
     !! \return returns all unsplit node pointers
     !! \param root_node_ptr root node pointer
     !! \param unsplit_node_ptrs all unsplit node pointers
@@ -901,7 +944,7 @@ contains
     end subroutine extract_unsplit_node_ptrs_oblq
 
 
-    !> A subroutine to extract most left node pointer, for depth-first fashion.
+    !> A subroutine to extract most left node pointer, for depth-first fashion, for axis-parallel trees.
     !! \return returns most left node pointer
     !! \param root_node_ptr root node pointer
     !! \param most_left_node_ptr most left node pointer
@@ -925,7 +968,7 @@ contains
     end subroutine extract_most_left_unsplit_node_ptr_axis
 
 
-    !> A subroutine to extract most left node pointer, for depth-first fashion.
+    !> A subroutine to extract most left node pointer, for depth-first fashion,  for oblique trees.
     !! \return returns most left node pointer
     !! \param root_node_ptr root node pointer
     !! \param most_left_node_ptr most left node pointer
@@ -949,7 +992,7 @@ contains
     end subroutine extract_most_left_unsplit_node_ptr_oblq
 
 
-    !> A subroutine to extract specific depht node pointers, for level-wise fashion.
+    !> A subroutine to extract specific depht node pointers, for level-wise fashion, for axis-parallel trees.
     !! \return returns most left node pointer
     !! \param root_node_ptr root node pointer
     !! \param most_left_node_ptr most left node pointer
@@ -995,7 +1038,7 @@ contains
     end subroutine extract_specific_depth_node_ptrs_oblq
 
 
-    !> A subroutine to extract largest impurity node pointer, for impurity-first fashion.
+    !> A subroutine to extract largest impurity node pointer, for impurity-first fashion, for axis-parallel trees.
     !! \return returns largest impurity node pointer
     !! \param root_node_ptr root node pointer
     !! \param most_left_node_ptr most left node pointer
@@ -1025,6 +1068,10 @@ contains
     end subroutine extract_largetst_impurity_node_ptr_axis
 
 
+    !> A subroutine to extract largest impurity node pointer, for impurity-first fashion, for oblique trees.
+    !! \return returns largest impurity node pointer
+    !! \param root_node_ptr root node pointer
+    !! \param most_left_node_ptr most left node pointer
     recursive subroutine extract_largetst_impurity_node_ptr_oblq(root_node_ptr, largest_impurity_node_ptrs)
         implicit none
         type(node_oblq), pointer, intent(in)    :: root_node_ptr
@@ -1051,7 +1098,7 @@ contains
     end subroutine extract_largetst_impurity_node_ptr_oblq
 
 
-    !> A subroutine to extract largest sample node pointer, for sample-first fashion.
+    !> A subroutine to extract largest sample node pointer, for sample-first fashion, for axis-parallel trees.
     !! \return returns largest sample node pointer
     !! \param root_node_ptr root node pointer
     !! \param most_left_node_ptr most left node pointer
@@ -1081,6 +1128,10 @@ contains
     end subroutine extract_largetst_sample_node_ptr_axis
 
 
+    !> A subroutine to extract largest sample node pointer, for sample-first fashion, for oblique trees.
+    !! \return returns largest sample node pointer
+    !! \param root_node_ptr root node pointer
+    !! \param most_left_node_ptr most left node pointer
     recursive subroutine extract_largetst_sample_node_ptr_oblq(root_node_ptr, largest_sample_node_ptrs)
         implicit none
         type(node_oblq), pointer, intent(in)    :: root_node_ptr
@@ -1107,7 +1158,7 @@ contains
     end subroutine extract_largetst_sample_node_ptr_oblq
 
 
-    !> A subroutine that replaces information to become a leaf node
+    !> A subroutine that replaces information to become a leaf node for axis-parallel trees.
     !! \param root_node_ptr root node pointer
     recursive subroutine termination_node_ptr_axis(root_node_ptr)
         implicit none
@@ -1128,7 +1179,8 @@ contains
         end if
     end subroutine termination_node_ptr_axis
 
-    !> A subroutine that replaces information to become a leaf node
+
+    !> A subroutine that replaces information to become a leaf node for oblique trees.
     !! \param root_node_ptr root node pointer
     recursive subroutine termination_node_ptr_oblq(root_node_ptr)
         implicit none
@@ -1186,5 +1238,6 @@ contains
             thresholds(i) = disc%column_discretizers(feature_idx)%thresholds_(threshold_idx)
         end do
     end subroutine 
+
 
 end module mod_woodworking_tools

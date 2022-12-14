@@ -98,7 +98,7 @@ contains
         hparam = this%hparam
         hparam_ptr => hparam
         call this%root_node_axis_ptr%hparam_check(hparam_ptr)
-        call this%induction_stop_check(hparam_ptr, is_stop)
+        is_stop = this%induction_stop_check(hparam_ptr)
         if ( is_stop ) return
 
         depth = 1
@@ -112,7 +112,7 @@ contains
             call splitter%split_isolation_tree(selected_node_ptrs, data_holder_ptr, hparam_ptr, &
                 n_columns)
             call this%adopt_node_ptrs_axis_for_isolation_tree(selected_node_ptrs, data_holder_ptr, hparam_ptr)
-            call this%induction_stop_check(hparam_ptr, is_stop)
+            is_stop = this%induction_stop_check(hparam_ptr)
             ! print*, "is_stop: ", is_stop
             if (is_stop) exit
             depth = depth + 1
@@ -133,6 +133,9 @@ contains
     end subroutine fit_isolation_tree
 
 
+    !> A function to predict anomaly score for 'x'.
+    !! \return predicted values
+    !! \param x input
     function predict_isolation_tree(this, x, return_depth)
         implicit none
         class(isolation_tree)    :: this
@@ -147,6 +150,8 @@ contains
     end function predict_isolation_tree
 
 
+    !> A subroutine to dump trained model.
+    !! \param file_name output file name.
     subroutine dump_isolation_tree(this, file_name)
         implicit none
         class(isolation_tree)      :: this
@@ -158,6 +163,8 @@ contains
     end subroutine dump_isolation_tree
 
 
+    !> A subroutine to load trained model.
+    !! \param file_name load file name.
     subroutine load_isolation_tree(this, file_name)
         implicit none
         class(isolation_tree)      :: this
