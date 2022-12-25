@@ -39,6 +39,16 @@ module mod_hyperparameter
         ! procedure :: false_only
     end type
 
+    type, extends(hparam_base) :: hparam_linear_svm_classifier
+        real(kind=8)    :: c=1d0
+    end type hparam_linear_svm_classifier
+
+    type, extends(hparam_base) :: hparam_kernel_svm_classifier
+        real(kind=8)    :: c=1d0
+        real(kind=8)    :: sigma=1d0
+        integer(kind=8) :: degree=3_8
+    end type hparam_kernel_svm_classifier
+
     type, extends(hparam_base) :: hparam_nipals
         integer(kind=8) :: n_components=5_8
         integer(kind=8) :: max_iteration=100_8

@@ -1,176 +1,61 @@
 program main_csv2bin
     use mod_common
     implicit none
+    intrinsic :: command_argument_count, get_command_argument
 
-    integer(kind=8) :: date_value1(8), date_value2(8), time_dt, time_et, time_cl, time_lw
+    integer(kind=4) :: status, length, i, n_args, idx_arg
+    character(:), allocatable :: d_sep, n_rows_char, n_cols_char, file_csv, file_bin, dtype_in, dtype_out
+    integer(kind=8) :: n_rows, n_cols
 
-    integer(kind=8)    :: n_samples_trains(5), n_columns_trains(5)
 
-    integer(kind=8)    :: n_samples_train, n_columns_train 
-    integer(kind=8)    :: n_samples_test, n_columns_test
-    logical(kind=4)    :: skip_header
-    CHARACTER(len=1)   :: dtype_in, dtype_out
-    CHARACTER(len=256) :: file_name_x_train_csv, file_name_y_train_csv
-    CHARACTER(len=256) :: file_name_x_train_bin, file_name_y_train_bin
+    n_args = command_argument_count()
+    print*, "#Args: ", n_args
+
+    ! Train/Valid/Test
+    idx_arg = 1
+    call get_command_argument(idx_arg, length = length, status = status)
+    allocate (character(length) :: d_sep); call get_command_argument(idx_arg, d_sep, status = status)
+    print*, d_sep
     
-    integer(kind=8)    :: n_samples_x, n_columns_x
-    integer(kind=8)    :: n_samples_q, n_columns_q
-    CHARACTER(len=256) :: file_name_x_csv, file_name_x_bin
-    CHARACTER(len=256) :: file_name_q_csv, file_name_q_bin
-        
-    integer(kind=8)    :: n_samples_d, n_columns_d
-    integer(kind=8)    :: n_samples_i, n_columns_i
-    CHARACTER(len=256) :: file_name_d_csv, file_name_d_bin
-    CHARACTER(len=256) :: file_name_i_csv, file_name_i_bin
-
-    real(kind=8), ALLOCATABLE :: x_train(:,:)
-    real(kind=8), ALLOCATABLE :: y_train(:,:)
-    real(kind=8), ALLOCATABLE :: y_train_pred(:,:)
-    integer(kind=8), ALLOCATABLE :: feature_indices(:), feature_indices_scanning_range(:)
-
-    print*, '============================================================='
-    print*, '============================================================='
-    file_name_x_train_csv = "../sample_data/mnist_x_train.csv"
-    file_name_y_train_csv = "../sample_data/mnist_y_train.csv"
-    file_name_x_train_bin = "../sample_data/mnist_x_train.bin"
-    file_name_y_train_bin = "../sample_data/mnist_y_train.bin"
-    n_samples_train = 60000
-    n_columns_train = 784
-    skip_header = t_
-    dtype_in  = "i"
-    dtype_out = "r"
-
-    print*, "CSV to Binary"
-    print*, "    x_train"
-    call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
-        n_samples_train, n_columns_train, skip_header, "i", "r")
-    print*, "    y_train"
-    call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
-        n_samples_train, 1_8, skip_header, "i", "i")
-
-    print*, '============================================================='
-    print*, '============================================================='
-    file_name_x_train_csv = "../sample_data/mnist_x_test.csv"
-    file_name_y_train_csv = "../sample_data/mnist_y_test.csv"
-    file_name_x_train_bin = "../sample_data/mnist_x_test.bin"
-    file_name_y_train_bin = "../sample_data/mnist_y_test.bin"
-    n_samples_train = 10000
-    n_columns_train = 784
-    skip_header = t_
-    dtype_in  = "i"
-    dtype_out = "r"
-
-    print*, "CSV to Binary"
-    print*, "    x_train"
-    call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
-        n_samples_train, n_columns_train, skip_header, "i", "r")
-    print*, "    y_train"
-    call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
-        n_samples_train, 1_8, skip_header, "i", "i")
-
-    print*, '============================================================='
-    print*, '============================================================='
-    file_name_x_train_csv = "../sample_data/make_regression_X_0000001000x00005.csv"
-    file_name_y_train_csv = "../sample_data/make_regression_y_0000001000x00005.csv"
-    file_name_x_train_bin = "../sample_data/make_regression_X_0000001000x00005.bin"
-    file_name_y_train_bin = "../sample_data/make_regression_y_0000001000x00005.bin"
-    n_samples_train = 1000
-    n_columns_train = 5
-    skip_header = t_
-    dtype_in  = "r"
-    dtype_out = "r"
-
-    print*, "CSV to Binary"
-    print*, "    x_train"
-    call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
-        n_samples_train, n_columns_train, skip_header, dtype_in, dtype_out)
-    print*, "    y_train"
-    call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
-        n_samples_train, 1_8, skip_header, dtype_in, dtype_out)
-
-    print*, '============================================================='
-    print*, '============================================================='
-    file_name_x_train_csv = "../sample_data/make_regression_X_0000100000x00100.csv"
-    file_name_y_train_csv = "../sample_data/make_regression_y_0000100000x00100.csv"
-    file_name_x_train_bin = "../sample_data/make_regression_X_0000100000x00100.bin"
-    file_name_y_train_bin = "../sample_data/make_regression_y_0000100000x00100.bin"
-    n_samples_train = 100000
-    n_columns_train = 100
-    skip_header = t_
-    dtype_in  = "r"
-    dtype_out = "r"
-
-    print*, "CSV to Binary"
-    print*, "    x_train"
-    call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
-        n_samples_train, n_columns_train, skip_header, dtype_in, dtype_out)
-    print*, "    y_train"
-    call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
-        n_samples_train, 1_8, skip_header, dtype_in, dtype_out)
-
-    print*, '============================================================='
-    print*, '============================================================='
-    file_name_x_csv = "../sample_data/nnsearch_X_0000100000x00100.csv"
-    file_name_q_csv = "../sample_data/nnsearch_Q_0000000100x00100.csv"
-    file_name_x_bin = "../sample_data/nnsearch_X_0000100000x00100.bin"
-    file_name_q_bin = "../sample_data/nnsearch_Q_0000000100x00100.bin"
-    n_samples_x = 100000
-    n_columns_x = 100
-    n_samples_q = 100
-    n_columns_q = 100
-    skip_header = t_
-    dtype_in  = "r"
-    dtype_out = "r"
-
-    print*, "CSV to Binary"
-    print*, "    x"
-    call read2bin_2d(file_name_x_csv, file_name_x_bin, &
-        n_samples_x, n_columns_x, skip_header, dtype_in, dtype_out)
-    print*, "    q"
-    call read2bin_2d(file_name_q_csv, file_name_q_bin, &
-        n_samples_q, n_columns_q, skip_header, dtype_in, dtype_out)
-
-
-    print*, '============================================================='
-    print*, '============================================================='
-    file_name_d_csv = "../sample_data/nnsearch_D_0000000100x100000.csv"
-    file_name_i_csv = "../sample_data/nnsearch_I_0000000100x100000.csv"
-    file_name_d_bin = "../sample_data/nnsearch_D_0000000100x100000.bin"
-    file_name_i_bin = "../sample_data/nnsearch_I_0000000100x100000.bin"
-    n_samples_d = 100
-    n_columns_d = 100000
-    n_samples_i = 100
-    n_columns_i = 100000
-    skip_header = t_
-    dtype_in  = "r"
-    dtype_out = "r"
-
-    print*, "CSV to Binary"
-    print*, "    x_train"
-    call read2bin_2d(file_name_d_csv, file_name_d_bin, &
-        n_samples_d, n_columns_d, skip_header, dtype_in, dtype_out)
-    print*, "    y_train"
-    call read2bin_2d(file_name_i_csv, file_name_i_bin, &
-        n_samples_i, n_columns_i, skip_header, "i", "i")
-
-    print*, '============================================================='
-    print*, '============================================================='
-    file_name_x_train_csv = "../sample_data/make_brobs_X_750x2.csv"
-    file_name_y_train_csv = "../sample_data/make_brobs_DBSCAN_750x2.csv"
-    file_name_x_train_bin = "../sample_data/make_brobs_X_750x2.bin"
-    file_name_y_train_bin = "../sample_data/make_brobs_DBSCAN_750x2.bin"
-    n_samples_train = 750
-    n_columns_train = 2
-    skip_header = t_
-    dtype_in  = "r"
-    dtype_out = "r"
-
-    print*, "CSV to Binary"
-    print*, "    x_train"
-    call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
-        n_samples_train, n_columns_train, skip_header, dtype_in, dtype_out)
-    print*, "    y_train"
-    call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
-        n_samples_train, 1_8, skip_header, "i", "i")
+    ! Number of samples
+    idx_arg = 2
+    call get_command_argument(idx_arg, length = length, status = status)
+    allocate (character(length) :: n_rows_char); call get_command_argument(idx_arg, n_rows_char, status = status)
+    read(n_rows_char,*) n_rows
+    print*, n_rows
     
+    ! Number of columns
+    idx_arg = 3
+    call get_command_argument(idx_arg, length = length, status = status)
+    allocate (character(length) :: n_cols_char); call get_command_argument(idx_arg, n_cols_char, status = status)
+    read(n_cols_char,*) n_cols
+    print*, n_cols
+    
+    ! Input CSV File Name
+    idx_arg = 4
+    call get_command_argument(idx_arg, length = length, status = status)
+    allocate (character(length) :: file_csv); call get_command_argument(idx_arg, file_csv, status = status)
+    print*, file_csv, " :: ", length, " :: ", len_trim(file_csv)
+    
+    ! Input Binary File Name
+    idx_arg = 5
+    call get_command_argument(idx_arg, length = length, status = status)
+    allocate (character(length) :: file_bin); call get_command_argument(idx_arg, file_bin, status = status)
+    print*, file_bin
+    
+    ! Input Data Type
+    idx_arg = 6
+    call get_command_argument(idx_arg, length = length, status = status)
+    allocate (character(length) :: dtype_in); call get_command_argument(idx_arg, dtype_in, status = status)
+    print*, dtype_in
+
+    ! Input Binary File Name
+    idx_arg = 7
+    call get_command_argument(idx_arg, length = length, status = status)
+    allocate (character(length) :: dtype_out); call get_command_argument(idx_arg, dtype_out, status = status)
+    print*, dtype_out
+    
+    call read2bin_2d(file_csv, file_bin, n_rows, n_cols, t_, dtype_in, dtype_out)
+
+    deallocate(d_sep, file_csv, file_bin, n_rows_char, n_cols_char, dtype_in, dtype_out)
 end program main_csv2bin
