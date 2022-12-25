@@ -1,6 +1,6 @@
 subroutine read_bin_2d_i4(file_name, matrix)
     implicit none
-    character(len=256), intent(in)              :: file_name
+    character(len=*), intent(in)              :: file_name
     integer(kind=4), allocatable, intent(inout) :: matrix(:,:)
     integer(kind=4)                             :: n_samples, n_columns
     integer(kind=4)                             :: bit_size, bit_size_file
@@ -14,7 +14,7 @@ end subroutine read_bin_2d_i4
 
 subroutine read_bin_2d_r8(file_name, matrix)
     implicit none
-    character(len=256), intent(in)           :: file_name
+    character(len=*), intent(in)           :: file_name
     real(kind=8), allocatable, intent(inout) :: matrix(:,:)
     integer(kind=8)                          :: n_samples, n_columns
     integer(kind=4)                          :: bit_size, bit_size_file
@@ -28,7 +28,7 @@ end subroutine read_bin_2d_r8
 
 subroutine read_bin_2d_i8(file_name, matrix)
     implicit none
-    character(len=256), intent(in)              :: file_name
+    character(len=*), intent(in)              :: file_name
     integer(kind=8), allocatable, intent(inout) :: matrix(:,:)
     integer(kind=8)                             :: n_samples, n_columns
     integer(kind=4)                             :: bit_size, bit_size_file

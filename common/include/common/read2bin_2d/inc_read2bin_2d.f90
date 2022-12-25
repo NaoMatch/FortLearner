@@ -1,7 +1,7 @@
 subroutine read2bin_2d_64bit(input_file_name, output_file_name, &
     n_samples, n_columns, skip_header, input_dtype, output_dtype)
     implicit none
-    character(len=256), intent(in)  :: input_file_name, output_file_name
+    character(len=*), intent(in)  :: input_file_name, output_file_name
     integer(kind=8), intent(in)     :: n_samples, n_columns
     logical(kind=4), intent(in)     :: skip_header
     character(len=1), intent(in)    :: input_dtype, output_dtype
