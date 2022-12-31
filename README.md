@@ -6,11 +6,12 @@ cd test_script
 make test  
 
 # WIP:  
-DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT, DOCUMENT
+Hash Map  
 ~ica~
 
 
 # Update
+2022/12/25: svm (not so optimized)  
 2022/10/07: multi layer perceptron (wengert list, reverse mode)  
 2022/07/28: bug fix(kdtree, balltree)  
 2022/07/24: product_quantization  
@@ -178,6 +179,8 @@ http://odds.cs.stonybrook.edu/forestcovercovertype-dataset/
   * product_quantization
 * Neural Network
   * simple mlp
+* Support Vector Machine
+  * support vector classifier
  
 # ToDo
 * Matrix Factorization
@@ -204,15 +207,12 @@ http://odds.cs.stonybrook.edu/forestcovercovertype-dataset/
     * WildWood
 * Gradient Boosting Decision Tree
   * Axis-Parallel
-    * AdaBoost
     * Xgboost
     * LightGBM
     * CatBoost
     * SCORE: Selective Cascade of Residual ExtraTrees
     * NGBoost
 * Multi-Layer Perceptron
-* Clustering
-  * DBSCAN
 * Neural Network
   * convolution
 * Decomposition
