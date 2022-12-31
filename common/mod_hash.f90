@@ -31,10 +31,10 @@ contains
         one_at_a_time_hash_i8 = hash
     end function one_at_a_time_hash_i8
 
-    function one_at_a_time_hash_vec_i8(vector, n_samples)
+    function one_at_a_time_hash_vec_i8(vector, n_elements)
         implicit none
-        integer(kind=8), intent(in) :: vector(n_samples)
-        integer(kind=8), intent(in) :: n_samples
+        integer(kind=8), intent(in) :: vector(n_elements)
+        integer(kind=8), intent(in) :: n_elements
         integer(kind=8) :: one_at_a_time_hash_vec_i8
 
         integer(kind=8) :: hash
@@ -42,7 +42,7 @@ contains
 
         hash = 0_8
 
-        do i=1, n_samples, 1
+        do i=1, n_elements, 1
             hash = hash + vector(i)
             hash = hash + ishft(hash, 10_8)
             hash = xor(hash, ishft(hash, -6_8))
@@ -54,10 +54,10 @@ contains
         one_at_a_time_hash_vec_i8 = hash
     end function one_at_a_time_hash_vec_i8
 
-    function one_at_a_time_hash_mat_i8(matrix, n_samples, n_columns)
+    function one_at_a_time_hash_mat_i8(matrix, n_samples, n_elements)
         implicit none
-        integer(kind=8), intent(in)  :: matrix(n_samples, n_columns)
-        integer(kind=8), intent(in)  :: n_samples, n_columns
+        integer(kind=8), intent(in)  :: matrix(n_samples, n_elements)
+        integer(kind=8), intent(in)  :: n_samples, n_elements
         integer(kind=8), ALLOCATABLE, target :: one_at_a_time_hash_mat_i8(:)
         integer(kind=8), pointer :: res_ptr(:)
 
@@ -70,7 +70,7 @@ contains
 
         res_ptr => one_at_a_time_hash_mat_i8
 
-        do j=1, n_columns, 1
+        do j=1, n_elements, 1
             do i=1, n_samples, 1
                 hash = one_at_a_time_hash_mat_i8(i)
                 hash = hash + matrix(i,j)
