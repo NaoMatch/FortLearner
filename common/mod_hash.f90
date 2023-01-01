@@ -7,6 +7,11 @@ module mod_hash
         module procedure :: one_at_a_time_hash_vec_i8
         module procedure :: one_at_a_time_hash_mat_i8
     end interface one_at_a_time_hash
+    
+    interface xorshift64_hash
+        module procedure :: xorshift64_hash_i8
+        module procedure :: xorshift64_hash_vec_i8
+    end interface xorshift64_hash
 
 contains
 
@@ -31,10 +36,10 @@ contains
         one_at_a_time_hash_i8 = hash
     end function one_at_a_time_hash_i8
 
-    function one_at_a_time_hash_vec_i8(vector, n_samples)
+    function one_at_a_time_hash_vec_i8(vector, n_elements)
         implicit none
-        integer(kind=8), intent(in) :: vector(n_samples)
-        integer(kind=8), intent(in) :: n_samples
+        integer(kind=8), intent(in) :: vector(n_elements)
+        integer(kind=8), intent(in) :: n_elements
         integer(kind=8) :: one_at_a_time_hash_vec_i8
 
         integer(kind=8) :: hash
@@ -42,7 +47,7 @@ contains
 
         hash = 0_8
 
-        do i=1, n_samples, 1
+        do i=1, n_elements, 1
             hash = hash + vector(i)
             hash = hash + ishft(hash, 10_8)
             hash = xor(hash, ishft(hash, -6_8))
@@ -54,10 +59,10 @@ contains
         one_at_a_time_hash_vec_i8 = hash
     end function one_at_a_time_hash_vec_i8
 
-    function one_at_a_time_hash_mat_i8(matrix, n_samples, n_columns)
+    function one_at_a_time_hash_mat_i8(matrix, n_samples, n_elements)
         implicit none
-        integer(kind=8), intent(in)  :: matrix(n_samples, n_columns)
-        integer(kind=8), intent(in)  :: n_samples, n_columns
+        integer(kind=8), intent(in)  :: matrix(n_samples, n_elements)
+        integer(kind=8), intent(in)  :: n_samples, n_elements
         integer(kind=8), ALLOCATABLE, target :: one_at_a_time_hash_mat_i8(:)
         integer(kind=8), pointer :: res_ptr(:)
 
@@ -70,7 +75,7 @@ contains
 
         res_ptr => one_at_a_time_hash_mat_i8
 
-        do j=1, n_columns, 1
+        do j=1, n_elements, 1
             do i=1, n_samples, 1
                 hash = one_at_a_time_hash_mat_i8(i)
                 hash = hash + matrix(i,j)
@@ -88,5 +93,32 @@ contains
             one_at_a_time_hash_mat_i8(i) = hash
         end do
     end function one_at_a_time_hash_mat_i8
+
+
+    function xorshift64_hash_i8(key)
+        implicit none
+        integer(kind=8), intent(in) :: key
+        integer(kind=8) :: xorshift64_hash_i8
+        xorshift64_hash_i8 = key
+
+        xorshift64_hash_i8 = ieor(xorshift64_hash_i8, ishft(xorshift64_hash_i8, 13))
+        xorshift64_hash_i8 = ieor(xorshift64_hash_i8, ishft(xorshift64_hash_i8, -7))
+        xorshift64_hash_i8 = ieor(xorshift64_hash_i8, ishft(xorshift64_hash_i8, 17))
+    end function xorshift64_hash_i8
+
+
+    function xorshift64_hash_vec_i8(keys, n_elements)
+        implicit none
+        integer(kind=8), intent(in) :: keys(n_elements)
+        integer(kind=8) :: xorshift64_hash_vec_i8, n_elements, k
+        xorshift64_hash_vec_i8 = 0
+
+        do k=1, n_elements, 1
+            xorshift64_hash_vec_i8 = xorshift64_hash_vec_i8 + keys(k)    
+            xorshift64_hash_vec_i8 = ieor(xorshift64_hash_vec_i8, ishft(xorshift64_hash_vec_i8, 13))
+            xorshift64_hash_vec_i8 = ieor(xorshift64_hash_vec_i8, ishft(xorshift64_hash_vec_i8, -7))
+            xorshift64_hash_vec_i8 = ieor(xorshift64_hash_vec_i8, ishft(xorshift64_hash_vec_i8, 17))
+        end do
+    end function xorshift64_hash_vec_i8
 
 end module mod_hash

@@ -1,7 +1,7 @@
 compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
-opt              := -O3
+opt              := -O2
 option           := -cpp -D_x86_64 -fopenmp -fdec -fbounds-check
 option_blas      := -lopenblas
 
@@ -29,6 +29,7 @@ common           := 	./mod/mod_const.out \
 						\
 						./mod/mod_hash.out \
 						./mod/mod_hash_table.out \
+						./mod/mod_hash_map.out \
 						./mod/mod_sort.out \
 						./mod/mod_math.out \
 						./mod/mod_stats.out \
@@ -127,13 +128,13 @@ clean:
 	rm ./*.mod
 
 build:
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_const.f90 -o ./mod/mod_const.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_common.f90 -o ./mod/mod_common.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_const.f90 -o ./mod/mod_const.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_common.f90 -o ./mod/mod_common.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_common_type.f90 -o ./mod/mod_common_type.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_timer.f90 -o ./mod/mod_timer.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../error/mod_error.f90 -o ./mod/mod_error.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_random.f90 -o ./mod/mod_random.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_hash.f90 -o ./mod/mod_hash.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_hash.f90 -o ./mod/mod_hash.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_sort.f90 -o ./mod/mod_sort.out
 	# \
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../math/mod_math.f90 -o ./mod/mod_math.out
@@ -147,8 +148,9 @@ build:
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../optimization/mod_optimization.f90 -o ./mod/mod_optimization.out
 	# \
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
-	\
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hash_table/mod_hash_table.f90 -o ./mod/mod_hash_table.out
+	# \
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hash_table/mod_hash_table.f90 -o ./mod/mod_hash_table.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hash_table/mod_hash_map.f90 -o ./mod/mod_hash_map.out
 	# \
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decomposition/mod_pca.f90 -o ./mod/mod_pca.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decomposition/mod_nipals.f90 -o ./mod/mod_nipals.out
@@ -231,11 +233,11 @@ build:
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_backwards.f90 -o ./mod/mod_backwards.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_my_mlp.f90 -o ./mod/mod_my_mlp.out
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_mnist_classifier.f90 -o ./mod/mod_mnist_classifier.out
-	\
+	# \
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_kernel.f90 -o ./mod/mod_kernel.out	
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_linear_svm.f90 -o ./mod/mod_linear_svm.out	
 	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_kernel_svm.f90 -o ./mod/mod_kernel_svm.out	
-	\
+	# \
 	# $(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/sum_up/inc_sum_up_vector.c -o ./mod/inc_sum_up_vector_c.out
 	# $(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/sum_up/inc_sum_up_matrix.c -o ./mod/inc_sum_up_matrix_c.out ./mod/inc_sum_up_vector_c.out
 	# $(compiler_clang)   $(mod) $(opt) $(option) -c    ../math/include/stats/sum_up_gt/inc_sum_up_gt.c -o ./mod/inc_sum_up_gt_c.out
@@ -257,14 +259,19 @@ build:
 clean:
 	-rm ./*.mod
 	-rm ./*.out
-	-rm ../multi_layer_perceptron/*.mod
-	-rm ../multi_layer_perceptron/*.out
+
+build_subset:
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_random.f90 -o ./mod/mod_random.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_hash.f90 -o ./mod/mod_hash.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hash_table/mod_hash_table.f90 -o ./mod/mod_hash_table.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hash_table/mod_hash_map.f90 -o ./mod/mod_hash_map.out
 
 test_all:
 	make clean
-	make build
+	# make build
+	make build_subset
 	# python create_datasets.py
-	make main_csv2bin
+	# make main_csv2bin
 	# make main_boosting_tree_gradient_boosting_clouds_regressor
 	# make main_boosting_tree_gradient_boosting_extra_tree_regressor
 	# make main_boosting_tree_gradient_boosting_lawu_regressor
@@ -312,7 +319,16 @@ test_all:
 	# make main_stats_sum_up_vector
 	# make main_stats_variance_vector
 	# make main_svm_linear_svm
-	make main_svm_kernel_svm
+	# make main_svm_kernel_svm
+	make main_hash_hash_map
+
+main_hash_hash_map:
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main_hash_hash_map.f90 -o main_hash_hash_map.out \
+	$(option_blas)
+	./main_hash_hash_map.out
 
 main_svm_kernel_svm:
 	$(compiler_fortran) -w -unroll \
