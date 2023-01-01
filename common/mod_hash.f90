@@ -7,6 +7,11 @@ module mod_hash
         module procedure :: one_at_a_time_hash_vec_i8
         module procedure :: one_at_a_time_hash_mat_i8
     end interface one_at_a_time_hash
+    
+    interface xorshift64_hash
+        module procedure :: xorshift64_hash_i8
+        module procedure :: xorshift64_hash_vec_i8
+    end interface xorshift64_hash
 
 contains
 
@@ -88,5 +93,32 @@ contains
             one_at_a_time_hash_mat_i8(i) = hash
         end do
     end function one_at_a_time_hash_mat_i8
+
+
+    function xorshift64_hash_i8(key)
+        implicit none
+        integer(kind=8), intent(in) :: key
+        integer(kind=8) :: xorshift64_hash_i8
+        xorshift64_hash_i8 = key
+
+        xorshift64_hash_i8 = ieor(xorshift64_hash_i8, ishft(xorshift64_hash_i8, 13))
+        xorshift64_hash_i8 = ieor(xorshift64_hash_i8, ishft(xorshift64_hash_i8, -7))
+        xorshift64_hash_i8 = ieor(xorshift64_hash_i8, ishft(xorshift64_hash_i8, 17))
+    end function xorshift64_hash_i8
+
+
+    function xorshift64_hash_vec_i8(keys, n_elements)
+        implicit none
+        integer(kind=8), intent(in) :: keys(n_elements)
+        integer(kind=8) :: xorshift64_hash_vec_i8, n_elements, k
+        xorshift64_hash_vec_i8 = 0
+
+        do k=1, n_elements, 1
+            xorshift64_hash_vec_i8 = xorshift64_hash_vec_i8 + keys(k)    
+            xorshift64_hash_vec_i8 = ieor(xorshift64_hash_vec_i8, ishft(xorshift64_hash_vec_i8, 13))
+            xorshift64_hash_vec_i8 = ieor(xorshift64_hash_vec_i8, ishft(xorshift64_hash_vec_i8, -7))
+            xorshift64_hash_vec_i8 = ieor(xorshift64_hash_vec_i8, ishft(xorshift64_hash_vec_i8, 17))
+        end do
+    end function xorshift64_hash_vec_i8
 
 end module mod_hash
