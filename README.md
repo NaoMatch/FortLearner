@@ -6,11 +6,12 @@ cd test_script
 make test  
 
 # WIP:  
-Hash Map  
+Optimize SVM  
 ~ica~
 
 
 # Update
+2023/01/01: hash_map without delete  
 2022/12/25: svm (not so optimized)  
 2022/10/07: multi layer perceptron (wengert list, reverse mode)  
 2022/07/28: bug fix(kdtree, balltree)  
