@@ -513,10 +513,12 @@ contains
     !! \return returns data as vector
     !! \param file_name file name to be read
     !! \param vector read data
-    subroutine read_bin_1d_r4(file_name, vector)
+    subroutine read_bin_1d_r4(file_name, vector, print_log)
         implicit none
         character(len=256), intent(in) :: file_name
         real(kind=4), allocatable      :: vector(:)
+        logical(kind=4), optional      :: print_log
+        logical(kind=4)                :: print_log_opt
         integer(kind=4)                :: n_samples
         integer(kind=4)                :: bit_size, bit_size_file
         character(len=1)               :: dtype, dtype_set
@@ -533,9 +535,11 @@ contains
     !! \return returns data as matrix
     !! \param file_name file name to be read
     !! \param matrix read data
-    subroutine read_bin_2d_r4(file_name, matrix)
+    subroutine read_bin_2d_r4(file_name, matrix, print_log)
         implicit none
         real(kind=4), allocatable, intent(inout) :: matrix(:,:)
+        logical(kind=4), optional                :: print_log
+        logical(kind=4)                          :: print_log_opt
         integer(kind=4)                          :: n_samples, n_columns
         integer(kind=4)                          :: bit_size, bit_size_file
         character(len=1)                         :: dtype, dtype_set

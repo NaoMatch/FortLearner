@@ -1,7 +1,9 @@
-subroutine read_bin_2d_i4(file_name, matrix)
+subroutine read_bin_2d_i4(file_name, matrix, print_log)
     implicit none
     character(len=*), intent(in)              :: file_name
     integer(kind=4), allocatable, intent(inout) :: matrix(:,:)
+    logical(kind=4), optional                   :: print_log    
+    logical(kind=4)                             :: print_log_opt
     integer(kind=4)                             :: n_samples, n_columns
     integer(kind=4)                             :: bit_size, bit_size_file
     character(len=1)                            :: dtype, dtype_set
@@ -12,10 +14,12 @@ subroutine read_bin_2d_i4(file_name, matrix)
     include "./include/common/read_bin_2d/inc_read_bin_2d_detail.f90"
 end subroutine read_bin_2d_i4
 
-subroutine read_bin_2d_r8(file_name, matrix)
+subroutine read_bin_2d_r8(file_name, matrix, print_log)
     implicit none
     character(len=*), intent(in)           :: file_name
     real(kind=8), allocatable, intent(inout) :: matrix(:,:)
+    logical(kind=4), optional                :: print_log    
+    logical(kind=4)                          :: print_log_opt
     integer(kind=8)                          :: n_samples, n_columns
     integer(kind=4)                          :: bit_size, bit_size_file
     character(len=1)                         :: dtype, dtype_set
@@ -26,10 +30,12 @@ subroutine read_bin_2d_r8(file_name, matrix)
     include "./include/common/read_bin_2d/inc_read_bin_2d_detail.f90"
 end subroutine read_bin_2d_r8
 
-subroutine read_bin_2d_i8(file_name, matrix)
+subroutine read_bin_2d_i8(file_name, matrix, print_log)
     implicit none
     character(len=*), intent(in)              :: file_name
     integer(kind=8), allocatable, intent(inout) :: matrix(:,:)
+    logical(kind=4), optional                   :: print_log    
+    logical(kind=4)                             :: print_log_opt
     integer(kind=8)                             :: n_samples, n_columns
     integer(kind=4)                             :: bit_size, bit_size_file
     character(len=1)                            :: dtype, dtype_set
