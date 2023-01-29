@@ -1,8 +1,8 @@
 compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
-opt              := -O2
-option           := -cpp -D_x86_64 -fopenmp -fdec -fbounds-check
+opt              := -O3
+option           := -cpp -D_x86_64 -fopenmp -fdec
 option_blas      := -lopenblas
 
 asm              := ./mod/inc_sum_up_vector_c.out \
@@ -260,66 +260,61 @@ clean:
 	-rm ./*.mod
 	-rm ./*.out
 
-build_subset:
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_kernel.f90 -o ./mod/mod_kernel.out	
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_linear_svm.f90 -o ./mod/mod_linear_svm.out	
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_kernel_svm.f90 -o ./mod/mod_kernel_svm.out	
 
 test_all:
 	make clean
-	# make build
-	make build_subset
-	# python create_datasets.py
-	# make main_csv2bin
-	# make main_boosting_tree_gradient_boosting_clouds_regressor
-	# make main_boosting_tree_gradient_boosting_extra_tree_regressor
-	# make main_boosting_tree_gradient_boosting_lawu_regressor
-	# make main_boosting_tree_gradient_boosting_tree_regressor
-	# make main_boosting_tree_gradient_boosting_adaboost_regressor
-	# make main_clustering_breathing_kmeans
-	# make main_clustering_kmeans
-	# make main_clustering_minibatch_kmeans
-	# make main_clustering_dbscan
-	# make main_common_random_weighted_sampling
-	# make main_decision_tree_clouds
-	# make main_decision_tree_decision_tree
-	# make main_decision_tree_extra_tree
-	# make main_decision_tree_isolation_tree
-	# make main_decision_tree_lawu
-	# make main_decision_tree_random_rotation_decision_tree
-	# make main_decision_tree_sliq
-	# make main_decision_tree_oblivious_tree
-	# make main_decomposition_nipals
-	# make main_encoder
-	# make main_forest_random_forest
-	# make main_forest_extra_trees
-	# make main_forest_isolation_forest
-	# make main_hash_table
-	# make main_linalg_ax_plus_y
-	# make main_linear_regression_lasso_regression
-	# make main_linear_regression_linear_regression
-	# make main_linear_regression_ridge_regression
-	# make main_multi_layer_perceptron
-	# make main_neighbour_brute_force_search
-	# make main_neighbour_balltree
-	# make main_neighbour_kdtree
-	# make main_neighbour_product_quantization
-	# make main_stats_count_and_sum_up_gt
-	# make main_stats_count_and_sum_up_gt_matrix_with_index
-	# make main_stats_covariance_of_vectors
-	# make main_stats_get_minmax
-	# make main_stats_get_matrix_minmax_with_index
-	# make main_stats_get_matrix_minmax_with_index_parallel
-	# make main_stats_mean_matrix
-	# make main_stats_mean_vector
-	# make main_stats_median
-	# make main_stats_weighted_median
-	# make main_stats_sum_up_matrix
-	# make main_stats_sum_up_vector
-	# make main_stats_variance_vector
+	make build
+	python create_datasets.py
+	make main_csv2bin
+	make main_boosting_tree_gradient_boosting_clouds_regressor
+	make main_boosting_tree_gradient_boosting_extra_tree_regressor
+	make main_boosting_tree_gradient_boosting_lawu_regressor
+	make main_boosting_tree_gradient_boosting_tree_regressor
+	make main_boosting_tree_gradient_boosting_adaboost_regressor
+	make main_clustering_breathing_kmeans
+	make main_clustering_kmeans
+	make main_clustering_minibatch_kmeans
+	make main_clustering_dbscan
+	make main_common_random_weighted_sampling
+	make main_decision_tree_clouds
+	make main_decision_tree_decision_tree
+	make main_decision_tree_extra_tree
+	make main_decision_tree_isolation_tree
+	make main_decision_tree_lawu
+	make main_decision_tree_random_rotation_decision_tree
+	make main_decision_tree_sliq
+	make main_decision_tree_oblivious_tree
+	make main_decomposition_nipals
+	make main_encoder
+	make main_forest_random_forest
+	make main_forest_extra_trees
+	make main_forest_isolation_forest
+	make main_hash_table
+	make main_linalg_ax_plus_y
+	make main_linear_regression_lasso_regression
+	make main_linear_regression_linear_regression
+	make main_linear_regression_ridge_regression
+	make main_multi_layer_perceptron
+	make main_neighbour_brute_force_search
+	make main_neighbour_balltree
+	make main_neighbour_kdtree
+	make main_neighbour_product_quantization
+	make main_stats_count_and_sum_up_gt
+	make main_stats_count_and_sum_up_gt_matrix_with_index
+	make main_stats_covariance_of_vectors
+	make main_stats_get_minmax
+	make main_stats_get_matrix_minmax_with_index
+	make main_stats_get_matrix_minmax_with_index_parallel
+	make main_stats_mean_matrix
+	make main_stats_mean_vector
+	make main_stats_median
+	make main_stats_weighted_median
+	make main_stats_sum_up_matrix
+	make main_stats_sum_up_vector
+	make main_stats_variance_vector
 	make main_svm_linear_svm
-	# make main_svm_kernel_svm
-	# make main_hash_hash_map
+	make main_svm_kernel_svm
+	make main_hash_hash_map
 
 main_hash_hash_map:
 	$(compiler_fortran) -w -unroll \
