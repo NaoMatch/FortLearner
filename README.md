@@ -6,12 +6,13 @@ cd test_script
 make test  
 
 # WIP:  
-Naive Bayes  
-~ica~
+Optimize Kernel (poly, gauss, sigmoid) SVC,   
+Implement Linear/Kernel SVR  
+~One-Class SVM, ica~
 
 
 # Update
-2023/01/30: optimize support vector machine classifier  
+2023/01/30: optimize 'linear' support vector machine classifier  
 2023/01/01: hash_map without delete  
 2022/12/25: svm (not so optimized)  
 2022/10/07: multi layer perceptron (wengert list, reverse mode)  
