@@ -1,5 +1,12 @@
 if ( allocated(vector) ) deallocate(vector)
-print*, "Input File Name is", trim(file_name)
+print_log_opt = t_
+if (present(print_log)) then
+    print_log_opt = print_log
+end if
+
+if (print_log_opt) then
+    print*, "Input File Name is", trim(file_name)
+end if
 open(10, file=file_name, form='unformatted')
 
 read(10) nd_file
@@ -12,8 +19,10 @@ read(10) n_samples
 read(10) bit_size_file
 if (bit_size .ne. bit_size_file) goto 333
 
-print*, "Load Data ..."
-print*, "         ", trim(file_name)
+if (print_log_opt) then
+    print*, "Load Data ..."
+    print*, "         ", trim(file_name)
+end if
 allocate(vector(n_samples))
 read(10) vector
 close(10)

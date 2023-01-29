@@ -41,10 +41,16 @@ module mod_hyperparameter
 
     type, extends(hparam_base) :: hparam_linear_svm_classifier
         real(kind=8)    :: c=1d0
+        real(kind=8)    :: tolerance=1d-4
+        integer(kind=8) :: cache_size=200_8
+        integer(kind=8) :: num_threads=2_8
     end type hparam_linear_svm_classifier
 
     type, extends(hparam_base) :: hparam_kernel_svm_classifier
         real(kind=8)    :: c=1d0
+        real(kind=8)    :: tolerance=1d-4
+        integer(kind=8) :: cache_size=200_8
+        integer(kind=8) :: num_threads=2_8
         real(kind=8)    :: sigma=1d0
         integer(kind=8) :: degree=3_8
     end type hparam_kernel_svm_classifier
