@@ -356,7 +356,7 @@ contains
         end do
 
         1000 continue
-        a(indices_) = a_
+        
         if (allocated(this%w_)) deallocate(this%w_)
         allocate(this%w_(n_columns))
 
