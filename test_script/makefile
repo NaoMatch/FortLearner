@@ -1,7 +1,7 @@
 compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
-opt              := -O3
+opt              := -O2
 option           := -cpp -D_x86_64 -fopenmp -fdec
 option_blas      := -lopenblas
 
@@ -118,6 +118,7 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_mnist_classifier.out \
 						\
 						./mod/mod_kernel.out \
+						./mod/mod_svm_cache.out \
 						./mod/mod_linear_svm.out \
 						./mod/mod_kernel_svm.out \
 
@@ -127,7 +128,7 @@ clean:
 	rm ./*.out
 	rm ./*.mod
 
-build:
+build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_const.f90 -o ./mod/mod_const.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_common.f90 -o ./mod/mod_common.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_common_type.f90 -o ./mod/mod_common_type.out
@@ -235,6 +236,7 @@ build:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_mnist_classifier.f90 -o ./mod/mod_mnist_classifier.out
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_kernel.f90 -o ./mod/mod_kernel.out	
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_svm_cache.f90 -o ./mod/mod_svm_cache.out	
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_linear_svm.f90 -o ./mod/mod_linear_svm.out	
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_kernel_svm.f90 -o ./mod/mod_kernel_svm.out	
 	\
@@ -260,12 +262,26 @@ clean:
 	-rm ./*.mod
 	-rm ./*.out
 
+build:
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_kernel.f90 -o ./mod/mod_kernel.out	
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_svm_cache.f90 -o ./mod/mod_svm_cache.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_linear_svm.f90 -o ./mod/mod_linear_svm.out	
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_kernel_svm.f90 -o ./mod/mod_kernel_svm.out	
+
+test:
+	make clean
+	make build_all
+	# python create_datasets.py
+	# make main_csv2bin
+	make main_svm_kernel_svm
+	# make main_svm_kernel_svm_rbf
 
 test_all:
 	make clean
-	make build
-	python create_datasets.py
+	make build_all
 	make main_csv2bin
+	python create_datasets.py
 	make main_boosting_tree_gradient_boosting_clouds_regressor
 	make main_boosting_tree_gradient_boosting_extra_tree_regressor
 	make main_boosting_tree_gradient_boosting_lawu_regressor
@@ -323,6 +339,14 @@ main_hash_hash_map:
 	main_hash_hash_map.f90 -o main_hash_hash_map.out \
 	$(option_blas)
 	./main_hash_hash_map.out
+
+main_svm_kernel_svm_rbf:
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main_svm_kernel_svm_rbf.f90 -o main_svm_kernel_svm_rbf.out \
+	$(option_blas)
+	./main_svm_kernel_svm_rbf.out
 
 main_svm_kernel_svm:
 	$(compiler_fortran) -w -unroll \
