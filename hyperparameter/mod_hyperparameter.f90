@@ -44,6 +44,7 @@ module mod_hyperparameter
         real(kind=8)    :: tolerance=1d-4
         integer(kind=8) :: cache_size=200_8
         integer(kind=8) :: num_threads=2_8
+        logical(kind=4) :: shrinking = t_
     end type hparam_linear_svm_classifier
 
     type, extends(hparam_base) :: hparam_kernel_svm_classifier
@@ -53,9 +54,9 @@ module mod_hyperparameter
         integer(kind=8) :: num_threads=2_8
         character(len=7) :: kernel="rbf"
         integer(kind=8) :: kernel_int=4_8
-        real(kind=8)    :: sigma=1d0
         integer(kind=8) :: degree=3_8
         real(kind=8)    :: w0=0d0
+        logical(kind=4) :: shrinking = t_
     end type hparam_kernel_svm_classifier
 
     type, extends(hparam_base) :: hparam_nipals
