@@ -29,30 +29,9 @@ program main_decision_tree_sadt
     type(data_holder), pointer    :: dholder_ptr
     type(minmax_scaler)           :: mmscaler
 
-    file_name_x_train_csv = "../sample_data/make_regression_X_0000100000x00100.csv"
-    file_name_y_train_csv = "../sample_data/make_regression_y_0000100000x00100.csv"
-    file_name_x_train_bin = "../sample_data/make_regression_X_0000100000x00100.bin"
-    file_name_y_train_bin = "../sample_data/make_regression_y_0000100000x00100.bin"
-    n_samples_train = 100000
-    n_columns_train = 100
-    skip_header = t_
-    dtype_in  = "r"
-    dtype_out = "r"
-
-    print*, '============================================================='
-    print*, "CSV to Binary"
-    print*, "    x_train"
-    call read2bin_2d(file_name_x_train_csv, file_name_x_train_bin, &
-        n_samples_train, n_columns_train, skip_header, dtype_in, dtype_out)
-    print*, "    y_train"
-    call read2bin_2d(file_name_y_train_csv, file_name_y_train_bin, &
-        n_samples_train, 1_8, skip_header, dtype_in, dtype_out)
-
-    print*, '============================================================='
-    print*, "Read Binary"
-    print*, "    x_train"
+    file_name_x_train_bin = "../sample_data/make_regression_X_train_0000100000x00100.bin"
+    file_name_y_train_bin = "../sample_data/make_regression_y_train_0000100000x00100.bin"
     call read_bin_2d(file_name_x_train_bin, x_train)
-    print*, "    y_train"
     call read_bin_2d(file_name_y_train_bin, y_train)
 
     mmscaler = minmax_scaler(min_val=-1d0, max_val=1d0)

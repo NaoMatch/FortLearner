@@ -26,7 +26,7 @@ program main_neighbour_product_quantization
     type(product_quantization) :: pq
     type(neighbor_indices) :: res_pq
 
-    file_name_x = "../sample_data/make_regression_X_0000100000x00100.bin"
+    file_name_x = "../sample_data/make_regression_X_train_0000100000x00100.bin"
     call read_bin_2d(file_name_x, x)
 
     allocate(q(100, 100))

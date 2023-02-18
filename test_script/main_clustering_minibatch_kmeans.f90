@@ -23,7 +23,7 @@ program main_clustering_minibatch_kmeans
     type(minibatch_kmeans) :: mbkm, mbkm2
     type(kmeans) :: km, km2
 
-    file_name_x_train_bin = "../sample_data/make_regression_X_0000100000x00100.bin"
+    file_name_x_train_bin = "../sample_data/make_regression_X_train_0000010000x00100.bin"
     call read_bin_2d(file_name_x_train_bin, x_train)
     
     print*, '============================================================='

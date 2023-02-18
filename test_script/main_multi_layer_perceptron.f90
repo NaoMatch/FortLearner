@@ -37,9 +37,9 @@ program main_multi_layer_perceptron
     real(kind=8) :: dummy
 
     ! Read data
-    fn_x_train = "../sample_data/mnist_x_train.bin"
+    fn_x_train = "../sample_data/mnist_X_train.bin"
     fn_y_train = "../sample_data/mnist_y_train.bin"
-    fn_x_test  = "../sample_data/mnist_x_test.bin"
+    fn_x_test  = "../sample_data/mnist_X_test.bin"
     fn_y_test  = "../sample_data/mnist_y_test.bin"
     call read_bin_2d(fn_x_train, x_train)
     call read_bin_2d(fn_y_train, y_train)
@@ -62,9 +62,9 @@ program main_multi_layer_perceptron
     y_train_ohe = oh_enc%transform(y_train)
 
     ! Training setup
-    max_epoch = 50
+    max_epoch = 2
     n_samples = size(x_train, dim=1)
-    n_mini_batch = 100
+    n_mini_batch = 1000
 
     ! Allocate Minibatches
     allocate(idxs(n_mini_batch))

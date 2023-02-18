@@ -27,8 +27,8 @@ program main_boosting_tree_gradient_boosting_adaboost_regressor
     ! call read_bin_2d(file_name_x_train_bin, x_train)
     ! call read_bin_2d(file_name_y_train_bin, y_train)
 
-    file_name_x_train_bin = "../sample_data/make_regression_X_0000100000x00100.bin"
-    file_name_y_train_bin = "../sample_data/make_regression_y_0000100000x00100.bin"
+    file_name_x_train_bin = "../sample_data/make_regression_X_train_0000100000x00100.bin"
+    file_name_y_train_bin = "../sample_data/make_regression_y_train_0000100000x00100.bin"
     call read_bin_2d(file_name_x_train_bin, x_train)
     call read_bin_2d(file_name_y_train_bin, y_train)
 
