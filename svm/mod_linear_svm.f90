@@ -1,3 +1,4 @@
+!> A module for linear svm
 module mod_linear_svm
     use mod_const
     use mod_common
@@ -12,10 +13,10 @@ module mod_linear_svm
 
     !> Linear SVM Classifier, Not yet optimized.
     type linear_svm_classifier
-        type(hparam_linear_svm_classifier) :: hparam
-        real(kind=8), allocatable :: w_(:)
-        real(kind=8), allocatable :: w0_
-        integer(kind=8), allocatable :: n_iter_
+        type(hparam_linear_svm_classifier) :: hparam !> hyper parameter 
+        real(kind=8), allocatable :: w_(:) !> coefficient. training result
+        real(kind=8), allocatable :: w0_ !> intercept. training result
+        integer(kind=8), allocatable :: n_iter_ !> number of iteration. training result
     contains
         procedure :: fit => fit_linear_svm_classifier
         procedure :: fit_linear_svm_classifier_hard
@@ -34,18 +35,24 @@ contains
 
     !> A function to create new 'linear_svm_classifier'.
     !! \param c regularization parameter
-    function new_linear_svm_classifier(c, tolerance, cache_size, num_threads)
+    !! \param tolerance stopping criterion. Smaller is more accurate, but takes longer.
+    !! \param cache_size kernel cache size. 
+    !! \param num_threads number of threads of 'dgemv' 
+    !! \param shrinking use shrinking strategy or not. 
+    function new_linear_svm_classifier(c, tolerance, cache_size, num_threads, shrinking)
         implicit none
         type(linear_svm_classifier) :: new_linear_svm_classifier
         real(kind=8), optional      :: c
         real(kind=8), optional      :: tolerance
         integer(kind=8), optional   :: cache_size
         integer(kind=8), optional   :: num_threads
+        logical(kind=4), optional   :: shrinking
 
         if (present(c)) new_linear_svm_classifier%hparam%c = c
         if (present(tolerance)) new_linear_svm_classifier%hparam%tolerance = tolerance
         if (present(cache_size)) new_linear_svm_classifier%hparam%cache_size = cache_size
         if (present(num_threads)) new_linear_svm_classifier%hparam%num_threads = num_threads
+        if (present(shrinking)) new_linear_svm_classifier%hparam%shrinking = shrinking
     end function new_linear_svm_classifier
 
     
@@ -383,7 +390,8 @@ contains
         ! print*, "Cache Available Count: ", cache%n_avail
     end subroutine fit_linear_svm_classifier
 
-    !> Fit linear_svm_classifier. binary classification only. hard margin
+    
+    !> Fit linear_svm_classifier. binary classification only. hard margin. do not use.
     !! \param x input data
     !! \param y labels
     subroutine fit_linear_svm_classifier_hard(this, x, y)

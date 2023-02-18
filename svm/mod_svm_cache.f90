@@ -19,6 +19,8 @@ module mod_svm_cache
         procedure :: update => update_svm_cache
         procedure :: comput_cache_size => comput_cache_size_svm_cache
         procedure :: get_available_cache_count => get_available_cache_count_svm_cache
+
+        procedure :: query_with_indices => query_svm_cache_with_indices
     end type svm_cache
 
     interface svm_cache
@@ -44,6 +46,55 @@ contains
 
         allocate(new_svm_cache%kernels(n_caches))
     end function new_svm_cache
+
+    subroutine query_svm_cache_with_indices(this, key, idx_hash, values_, n_samples_, indices_, &
+        loop_count, status, drop_existing_rows, compute_non_overlapping, idx_hash_old)
+        implicit none
+        class(svm_cache) :: this
+        integer(kind=8), intent(in) :: key
+        integer(kind=8), intent(in) :: idx_hash
+        real(kind=8), intent(inout) :: values_(n_samples_)
+        integer(kind=8), intent(in) :: n_samples_
+        integer(kind=8), intent(in) :: indices_(n_samples_)
+        integer(kind=8), intent(in) :: loop_count
+        integer(kind=8), intent(inout) :: status
+        logical(kind=4), intent(in) :: drop_existing_rows
+        logical(kind=4), intent(in) :: compute_non_overlapping
+        integer(kind=8), intent(in) :: idx_hash_old
+
+        integer(kind=8) :: i, idx
+
+        ! Is used or not.
+        if ( this%is_used(key) ) then
+            ! Kernel is already computed
+            if (this%kernels(key)%idx_hash == idx_hash) then
+                status = 0
+                do i=1, n_samples_, 1
+                    idx = indices_(i)
+                    values_(i) = this%kernels(key)%values(idx)
+                end do
+                this%recency(key) = loop_count
+            elseif (drop_existing_rows .and. this%kernels(key)%idx_hash == idx_hash_old) then
+                status = 0
+                do i=1, n_samples_, 1
+                    idx = indices_(i)
+                    values_(i) = this%kernels(key)%values(idx)
+                end do
+                this%recency(key) = loop_count
+            elseif (compute_non_overlapping .and. this%kernels(key)%idx_hash == idx_hash_old) then
+                status = 2
+                do i=1, n_samples_, 1
+                    values_(i) = this%kernels(key)%values(i)
+                end do
+                this%recency(key) = loop_count
+            else
+                status = 1
+            end if
+        else
+            ! No results
+            status = 1
+        end if
+    end subroutine query_svm_cache_with_indices
 
     !> Extract key-th row of Q matrix. 
     !! \param key row index of Q matrix to be extracted.
