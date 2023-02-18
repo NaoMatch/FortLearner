@@ -6,12 +6,12 @@ cd test_script
 make test  
 
 # WIP:  
-Optimize Kernel (poly, gauss, sigmoid) SVC,   
-Implement Linear/Kernel SVR  
-~One-Class SVM, ica~
+KNN classifier/regressor  
+~Implement Linear/Kernel SVR, One-Class SVM, ica~
 
 
 # Update
+2023/02/18: Implement and Optimize Kernel SVC (linear, poly, sigmoid, rbf) and add benchmark    
 2023/01/30: optimize 'linear' support vector machine classifier  
 2023/01/01: hash_map without delete  
 2022/12/25: svm (not so optimized)  
@@ -64,6 +64,38 @@ make
 graphviz
 
 # Benchmark
+
+|Metric|Accuracy|Accuracy|Accuracy|Accuracy|Time|Time|
+|:----|:----|:----|:----|:----|----:|----:|
+|Library|FL|SK|FL|SK|FL|SK|
+|Dataset|Train|Train|Test|Test|Train|Train|
+|sklearn.datasets.make_regression: (100, 5)|0.940|0.950|1.000|1.000|0.00013|0.00073|
+|sklearn.datasets.make_regression: (100, 10)|0.970|0.980|0.900|0.750|0.00011|0.00090|
+|sklearn.datasets.make_regression: (100, 50)|0.990|1.000|0.750|0.750|0.00024|0.00110|
+|sklearn.datasets.make_regression: (100, 100)|1.000|1.000|0.700|0.850|0.00113|0.00123|
+|sklearn.datasets.make_regression: (100, 200)|1.000|1.000|0.550|0.650|0.00132|0.00130|
+|sklearn.datasets.make_regression: (100, 400)|1.000|1.000|0.750|0.650|0.00197|0.00164|
+|sklearn.datasets.make_regression: (1000, 5)|0.872|0.926|0.855|0.900|0.00457|0.01122|
+|sklearn.datasets.make_regression: (1000, 10)|0.957|0.962|0.940|0.965|0.00675|0.01199|
+|sklearn.datasets.make_regression: (1000, 50)|0.931|0.961|0.810|0.880|0.02272|0.03760|
+|sklearn.datasets.make_regression: (1000, 100)|0.878|0.970|0.685|0.745|0.03542|0.04781|
+|sklearn.datasets.make_regression: (1000, 200)|0.995|0.997|0.950|0.965|0.04629|0.07057|
+|sklearn.datasets.make_regression: (1000, 400)|0.994|0.998|0.810|0.870|0.09561|0.10084|
+|sklearn.datasets.make_regression: (10000, 5)|0.894|0.894|0.903|0.901|1.25263|1.57138|
+|sklearn.datasets.make_regression: (10000, 10)|0.932|0.935|0.923|0.926|0.94122|1.31254|
+|sklearn.datasets.make_regression: (10000, 50)|0.956|0.959|0.918|0.922|1.46329|2.76745|
+|sklearn.datasets.make_regression: (10000, 100)|0.960|0.974|0.905|0.925|1.69233|3.57061|
+|sklearn.datasets.make_regression: (10000, 200)|0.959|0.979|0.878|0.913|3.35433|8.65822|
+|sklearn.datasets.make_regression: (10000, 400)|0.969|0.968|0.869|0.867|8.48600|19.53811|
+|sklearn.datasets.make_regression: (100000, 5)|0.932|0.944|0.933|0.946|91.43300|94.09670|
+|sklearn.datasets.make_regression: (100000, 10)|0.886|0.914|0.882|0.910|268.21300|157.08460|
+|sklearn.datasets.make_regression: (100000, 50)|0.842|0.892|0.813|0.844|467.38100|864.29674|
+|sklearn.datasets.make_regression: (100000, 100)|0.971|0.977|0.952|0.956|188.23800|474.92779|
+|sklearn.datasets.make_regression: (100000, 200)|0.928|0.937|0.888|0.893|451.82700|2611.47660|
+|sklearn.datasets.make_regression: (100000, 400)|0.989|0.985|0.959|0.963|277.82000|2312.59334|
+
+
+
 ## XXXX_tree_regressor(second)
 n_tree=1 and max_leaf_nodes=100, others are default.  
 SK = scikit-learn  
