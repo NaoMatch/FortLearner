@@ -1,5 +1,6 @@
 # FortLearner
 Machine learning scripts for Fortranner.  
+https://qiita.com/advent-calendar/2022/fortlearner
 
 ## how to run
 cd test_script  
