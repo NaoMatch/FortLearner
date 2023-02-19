@@ -26,18 +26,20 @@ module mod_k_nearest_neighbor
 
 contains
 
-    function new_k_nearest_neighbor_regressor(n_neighbors, weight, algorithm, min_samples_in_leaf) result(knn)
+    function new_k_nearest_neighbor_regressor(n_neighbors, weight, algorithm, min_samples_in_leaf, split_algo) result(knn)
         implicit none
         type(k_nearest_neighbor_regressor) :: knn
         integer(kind=8), optional  :: n_neighbors
         character(len=*), optional :: weight
         character(len=*), optional :: algorithm
         integer(kind=8), optional  :: min_samples_in_leaf
+        character(len=*), optional :: split_algo
                 
-        if (present(n_neighbors))          knn%hparam%n_neighbors = n_neighbors
+        if (present(n_neighbors))         knn%hparam%n_neighbors = n_neighbors
         if (present(weight))              knn%hparam%weight = weight
         if (present(algorithm))           knn%hparam%algorithm = algorithm
         if (present(min_samples_in_leaf)) knn%hparam%min_samples_in_leaf = min_samples_in_leaf
+        if (present(split_algo))          knn%hparam%split_algo = split_algo
     end function 
 
 

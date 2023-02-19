@@ -198,7 +198,7 @@ for n_samples in n_samples_list:
         subprocess.run(f"./main_csv2bin.out {'None'} {100000} {100} {file_name_x_out} {file_name_x_out.replace('.csv', '.bin')} r r", shell=True, check=True)
 
         file_name_x_out = "../sample_data/nnsearch_Q_{0:0=10}x{1:0=5}.csv".format(len(X[-100:,:]), n_columns)
-        pd.DataFrame(X[:-100,:]).to_csv(file_name_x_out, index=False)
+        pd.DataFrame(X[-100:,:]).to_csv(file_name_x_out, index=False)
         subprocess.run(f"./main_csv2bin.out {'None'} {100} {100} {file_name_x_out} {file_name_x_out.replace('.csv', '.bin')} r r", shell=True, check=True)
 
         tree = KDTree(X[:-100,:], leaf_size=32)

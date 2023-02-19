@@ -369,6 +369,7 @@ contains
             node_ptr%is_leaf = t_
 
             node_ptr%indices_ = [node_ptr%indices, split_indices]
+            if (any(node_ptr%indices_ == 82033_8)) print*, "isin 82033", node_ptr%idx
             node_ptr%n_samples_ = size(node_ptr%indices_)
             allocate(node_ptr%x_(node_ptr%n_samples_,this%n_columns))
             node_ptr%x_(:,:) = x_ptr(node_ptr%indices_,:)
@@ -393,7 +394,8 @@ contains
         med_idx = node_ptr%n_samples / 2_8
 
         ! argsort
-        call quick_argselect(f_tmp, node_ptr%indices, node_ptr%n_samples, med_idx)
+        ! call quick_argselect(f_tmp, node_ptr%indices, node_ptr%n_samples, med_idx)
+        call quick_argsort(f_tmp, node_ptr%indices, node_ptr%n_samples)
         node_ptr%split_val = f_tmp(med_idx)
 
         call node_ptr%adopting_twins_in_kdtree(med_idx)
@@ -405,7 +407,6 @@ contains
 
         node_idx = node_idx + 1
         allocate(split_indices_r(0))
-        ! split_indices_r = []
         call this%build_rec(node_ptr%node_r_ptr, x_ptr, node_idx, split_indices_r)
     end subroutine build_rec
 
@@ -508,7 +509,7 @@ contains
             do while (t_)
                 fid = node_ptr%node_p_ptr%split_fid
                 val = node_ptr%node_p_ptr%split_val
-                max_radius = minval(nearest_dsts)
+                max_radius = maxval(nearest_dsts)
 
                 if ( (q_vals(fid)-val)**2d0 < max_radius ) then
                     if (node_ptr%is_left) then
@@ -645,7 +646,8 @@ contains
                 end do
                 n = count(XxQ <= radius_sq)
                 if ( n > 0) then
-                    call quick_argselect(XxQ, indices, size(XxQ)+0_8, n)
+                    ! call quick_argselect(XxQ, indices, size(XxQ)+0_8, n)
+                    call quick_argsort(XxQ, indices, size(XxQ, kind=8))
                     nearest_dsts = [nearest_dsts, XxQ(1:n)]
                     nearest_idxs = [nearest_idxs, indices(1:n)]
                 end if
@@ -657,7 +659,7 @@ contains
             val_x = subtree_root_node_ptr%split_val
             val_q = q(fid)
             dist_from_q_to_plane = (val_q-val_x)**2d0
-            max_radius = minval(nearest_dsts)
+            max_radius = maxval(nearest_dsts)
 
             if (max_radius < dist_from_q_to_plane) then
                 if (val_q <= val_x) then
@@ -739,7 +741,7 @@ contains
             do while (t_)
                 fid = node_ptr%node_p_ptr%split_fid
                 val = node_ptr%node_p_ptr%split_val
-                max_radius = minval(nearest_dsts)
+                max_radius = maxval(nearest_dsts)
 
                 if ( (q_vals(fid)-val)**2d0 < max_radius ) then
                     if (node_ptr%is_left) then
@@ -793,24 +795,24 @@ contains
 
         if (root_node_ptr%is_leaf) then
             ! Search Closest Point from Leaf Node
-            allocate(XxQ(root_node_ptr%n_samples_))
-            allocate(indices(root_node_ptr%n_samples_))
             leaf_ptr => root_node_ptr
-            call multi_mat_vec(root_node_ptr%x_, q, XxQ, &
-                root_node_ptr%n_samples_, n_columns, f_)
-            XxQ(:) = q_sq + root_node_ptr%x_sq_(:) - 2d0*XxQ(:)
+            allocate(XxQ(leaf_ptr%n_samples_))
+            allocate(indices(leaf_ptr%n_samples_))
+            call multi_mat_vec(leaf_ptr%x_, q, XxQ, &
+                leaf_ptr%n_samples_, n_columns, f_)
+            XxQ(:) = q_sq + leaf_ptr%x_sq_(:) - 2d0*XxQ(:)
             if ( maxval(nearest_dsts) < minval(XxQ) ) then
                 !  skip
             else
-                do i=1, root_node_ptr%n_samples_
-                    indices(i) = root_node_ptr%indices_(i)
+                do i=1, leaf_ptr%n_samples_
+                    indices(i) = leaf_ptr%indices_(i)
                 end do
-                check_dup = check_duplication(root_node_ptr%indices_(:), root_node_ptr%n_samples_)
+                ! check_dup = check_duplication(root_node_ptr%indices_(:), root_node_ptr%n_samples_)
                 ! print*, "left node index duplication: ", check_dup
                 tmp_d = [XxQ, nearest_dsts]
                 tmp_i = [indices, nearest_idxs]
                 n = minval((/size(tmp_d)+0_8, n_neighbors/))
-                call quick_argsort(tmp_d, tmp_i, size(tmp_d)+0_8)
+                call quick_argsort(tmp_d, tmp_i, size(tmp_d, kind=8_8))
                 nearest_dsts(1:n) = tmp_d(1:n)
                 nearest_idxs(1:n) = tmp_i(1:n)
             end if
@@ -880,8 +882,8 @@ contains
                 tmp_d = [XxQ, nearest_dsts]
                 tmp_i = [indices, nearest_idxs]
                 n = minval((/size(tmp_d)+0_8, n_neighbors/))
-                call quick_argsort(tmp_d, tmp_i, size(tmp_d)+0_8)
-                check_dup = check_duplication(tmp_i, size(tmp_i)+0_8)
+                call quick_argsort(tmp_d, tmp_i, size(tmp_d, kind=8))
+                ! check_dup = check_duplication(tmp_i, size(tmp_i, kind=8))
                 ! print*, "other leaf node duplication check: ", check_dup
                 nearest_dsts(1:n) = tmp_d(1:n)
                 nearest_idxs(1:n) = tmp_i(1:n)
