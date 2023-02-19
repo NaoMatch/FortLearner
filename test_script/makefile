@@ -2,7 +2,7 @@ compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
 opt              := -O2
-option           := -cpp -D_x86_64 -fopenmp -fdec
+option           := -cpp -D_x86_64 -fopenmp -fdec -fbounds-check
 option_blas      := -lopenblas
 
 asm              := ./mod/inc_sum_up_vector_c.out \
@@ -82,6 +82,7 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_brute_force_search.out \
 						./mod/mod_kdtree.out \
 						./mod/mod_product_quantization.out \
+						./mod/mod_k_nearest_neighbor.out \
 						\
 						./mod/mod_pca.out \
 						./mod/mod_nipals.out \
@@ -160,6 +161,7 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_brute_force_search.f90 -o ./mod/mod_brute_force_search.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_kdtree.f90 -o ./mod/mod_kdtree.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_balltree.f90 -o ./mod/mod_balltree.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor.f90 -o ./mod/mod_k_nearest_neighbor.out
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_base_kmeans.f90 -o ./mod/mod_base_kmeans.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_kmeans.f90 -o ./mod/mod_kmeans.out
@@ -264,18 +266,18 @@ clean:
 
 build:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_kernel.f90 -o ./mod/mod_kernel.out	
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_svm_cache.f90 -o ./mod/mod_svm_cache.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_linear_svm.f90 -o ./mod/mod_linear_svm.out	
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_kernel_svm.f90 -o ./mod/mod_kernel_svm.out	
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_nearest_neighbour.f90 -o ./mod/mod_nearest_neighbour.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_brute_force_search.f90 -o ./mod/mod_brute_force_search.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_kdtree.f90 -o ./mod/mod_kdtree.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_balltree.f90 -o ./mod/mod_balltree.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor.f90 -o ./mod/mod_k_nearest_neighbor.out
 
 test:
 	make clean
-	make build_all
+	make build
 	# python create_datasets.py
 	# make main_csv2bin
-	make main_svm_kernel_svm
-	# make main_svm_kernel_svm_rbf
+	make main_neighbour_k_nearest_neighbor
 
 test_all:
 	make clean
@@ -314,6 +316,7 @@ test_all:
 	make main_neighbour_brute_force_search
 	make main_neighbour_balltree
 	make main_neighbour_kdtree
+	make main_neighbour_k_nearest_neighbor
 	make main_neighbour_product_quantization
 	make main_stats_count_and_sum_up_gt
 	make main_stats_count_and_sum_up_gt_matrix_with_index
@@ -626,6 +629,14 @@ main_neighbour_kdtree:
 	main_neighbour_kdtree.f90 -o main_neighbour_kdtree.out \
 	$(option_blas)
 	./main_neighbour_kdtree.out
+
+main_neighbour_k_nearest_neighbor:
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main_neighbour_k_nearest_neighbor.f90 -o main_neighbour_k_nearest_neighbor.out \
+	$(option_blas)
+	./main_neighbour_k_nearest_neighbor.out
 
 main_neighbour_product_quantization:
 	$(compiler_fortran) -w -unroll \
