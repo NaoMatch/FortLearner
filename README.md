@@ -4,14 +4,15 @@ https://qiita.com/advent-calendar/2022/fortlearner
 
 ## how to run
 cd test_script  
-make test  
+make test_all  
 
 # WIP:  
-KNN classifier/regressor  
+Naive Bayse  
 ~Implement Linear/Kernel SVR, One-Class SVM, ica~
 
 
 # Update
+2023/02/20: KNN classifier/regressor  
 2023/02/18: Implement and Optimize Kernel SVC (linear, poly, sigmoid, rbf) and add benchmark    
 2023/01/30: optimize 'linear' support vector machine classifier  
 2023/01/01: hash_map without delete  
