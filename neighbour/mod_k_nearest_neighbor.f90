@@ -74,9 +74,11 @@ contains
         real(kind=8), allocatable :: pred(:,:)
 
         type(neighbor_results) :: neighbors
-        integer(kind=8) :: n, n_samples
+        integer(kind=8) :: n, n_samples, i, idx
         integer(kind=8), allocatable :: idxs(:)
         real(kind=8) :: mean_scale
+        real(kind=8), allocatable :: tmp_pred(:)
+        real(kind=8), allocatable :: dsts(:)
 
         if (this%hparam%algorithm == "brute_force") then
             neighbors = this%bf%query(q=x, n_neighbors=this%hparam%n_neighbors)
@@ -90,11 +92,32 @@ contains
 
         n_samples = size(x, dim=1)
         allocate(pred(n_samples, this%n_outputs))
+        allocate(idxs(this%hparam%n_neighbors))
         mean_scale = 1d0 / dble(this%hparam%n_neighbors)
         if (this%hparam%weight == "uniform") then
             do n=1, n_samples, 1
                 idxs = neighbors%indices(n)%idx(1:this%hparam%n_neighbors)
                 pred(n,:) = sum(this%y(idxs,:), dim=1) * mean_scale
+            end do
+        elseif (this%hparam%weight == "distance") then
+            allocate(tmp_pred(this%n_outputs))
+            allocate(dsts(this%hparam%n_neighbors))
+            do n=1, n_samples, 1
+                idxs = neighbors%indices(n)%idx(1:this%hparam%n_neighbors)
+                dsts = neighbors%distances(n)%dst(1:this%hparam%n_neighbors)
+                if (minval(dsts) <= 0d0) then
+                    dsts = 0d0
+                    dsts(1) = 1d0
+                else
+                    dsts = 1d0 / abs(neighbors%distances(n)%dst(1:this%hparam%n_neighbors))
+                    dsts = dsts / sum(dsts)
+                end if
+                tmp_pred = 0d0
+                do i=1, this%hparam%n_neighbors, 1
+                    idx = idxs(i)
+                    tmp_pred(:) = tmp_pred(:) + this%y(idx,:) * dsts(i)
+                end do
+                pred(n,:) = tmp_pred(:)
             end do
         end if
     end function predict_k_nearest_neighbor_regressor

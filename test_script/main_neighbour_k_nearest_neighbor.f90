@@ -28,7 +28,7 @@ program main_neighbour_k_nearest_neighbor
 
     print*, "  "
     print*, "  "
-    print*, " **************** brute_force"
+    print*, " **************** brute_force, weight=uniform"
     knn_reg = k_nearest_neighbor_regressor(algorithm="brute_force")
     call knn_reg%fit(x_train, y_train)
     pred_train = knn_reg%predict(x_train)
@@ -38,7 +38,7 @@ program main_neighbour_k_nearest_neighbor
 
     print*, "  "
     print*, "  "
-    print*, " **************** kd_tree"
+    print*, " **************** kd_tree, weight=uniform"
     knn_reg = k_nearest_neighbor_regressor(algorithm="kd_tree")
     call knn_reg%fit(x_train, y_train)
     pred_train = knn_reg%predict(x_train)
@@ -48,12 +48,43 @@ program main_neighbour_k_nearest_neighbor
 
     print*, "  "
     print*, "  "
-    print*, " **************** ball_tree"
+    print*, " **************** ball_tree, weight=uniform"
     knn_reg = k_nearest_neighbor_regressor(algorithm="ball_tree", split_algo="most_spread")
     call knn_reg%fit(x_train, y_train)
     pred_train = knn_reg%predict(x_train)
     pred_test = knn_reg%predict(x_test)
     print*, metric%mean_square_error(y_train(:,1), pred_train(:,1))
     print*, metric%mean_square_error(y_test(:,1), pred_test(:,1))
+
+    print*, "  "
+    print*, "  "
+    print*, " **************** brute_force, weight=distance"
+    knn_reg = k_nearest_neighbor_regressor(algorithm="brute_force", weight="distance")
+    call knn_reg%fit(x_train, y_train)
+    pred_train = knn_reg%predict(x_train)
+    pred_test = knn_reg%predict(x_test)
+    print*, metric%mean_square_error(y_train(:,1), pred_train(:,1))
+    print*, metric%mean_square_error(y_test(:,1), pred_test(:,1))
+    
+    print*, "  "
+    print*, "  "
+    print*, " **************** kd_tree, weight=distance"
+    knn_reg = k_nearest_neighbor_regressor(algorithm="kd_tree", weight="distance")
+    call knn_reg%fit(x_train, y_train)
+    pred_train = knn_reg%predict(x_train)
+    pred_test = knn_reg%predict(x_test)
+    print*, metric%mean_square_error(y_train(:,1), pred_train(:,1))
+    print*, metric%mean_square_error(y_test(:,1), pred_test(:,1))
+    
+    print*, "  "
+    print*, "  "
+    print*, " **************** ball_tree, weight=distance"
+    knn_reg = k_nearest_neighbor_regressor(algorithm="ball_tree", split_algo="most_spread", weight="distance")
+    call knn_reg%fit(x_train, y_train)
+    pred_train = knn_reg%predict(x_train)
+    pred_test = knn_reg%predict(x_test)
+    print*, metric%mean_square_error(y_train(:,1), pred_train(:,1))
+    print*, metric%mean_square_error(y_test(:,1), pred_test(:,1))
+    stop
 
 end program main_neighbour_k_nearest_neighbor
