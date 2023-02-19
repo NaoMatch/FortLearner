@@ -335,7 +335,7 @@ contains
                 q_sq_sum = sum( q_i(:)**2d0 )
                 call this%query_balltree_n_neighbors_rec(distances, indices, &
                     this%root_ball_ptr, q_i, q_sq_sum, n_samples, n_columns, n_neighbors)
-                query_balltree%distances(n)%dst = sqrt(distances(:))
+                query_balltree%distances(n)%dst = sqrt(abs(distances(:)))
                 query_balltree%indices(n)%idx = indices(:)
                 deallocate( distances, indices )
             end do
@@ -350,22 +350,22 @@ contains
             end do
 
             allocate(q_i(n_columns))
-            !!$omp parallel num_threads(4)
-            !!$omp do private(n, distances, indices, q_i, q_sq_sum)
+            !$omp parallel num_threads(4)
+            !$omp do private(n, distances, indices, q_i, q_sq_sum)
             do n=1, n_samples, 1
                 allocate( distances(0), indices(0) )
                 q_i(:) = q_ptr(n,:)
                 q_sq_sum = sum( q_i(:)**2d0 )
                 call this%query_balltree_radius_rec(distances, indices, &
                     this%root_ball_ptr, q_i, q_sq_sum, n_samples, n_columns, radius_sq)
-                query_balltree%distances(n)%dst = [query_balltree%distances(n)%dst, sqrt(distances(:))]
+                query_balltree%distances(n)%dst = [query_balltree%distances(n)%dst, sqrt(abs(distances(:)))]
                 query_balltree%indices(n)%idx   = [query_balltree%indices(n)%idx, indices(:)]
                 call quick_argsort(query_balltree%distances(n)%dst, query_balltree%indices(n)%idx, &
                         size(query_balltree%indices(n)%idx)+0_8)
                 deallocate( distances, indices )
             end do
-            !!$omp end do
-            !!$omp end parallel
+            !$omp end do
+            !$omp end parallel
         end if
     end function query_balltree
 
