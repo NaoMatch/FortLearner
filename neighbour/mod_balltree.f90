@@ -330,6 +330,7 @@ contains
             do n=1, n_samples, 1
                 allocate( distances(n_neighbors), indices(n_neighbors) )
                 distances(:) = huge(0d0)
+                indices(:) = -2_8
                 q_i(:) = q_ptr(n,:)
                 q_sq_sum = sum( q_i(:)**2d0 )
                 call this%query_balltree_n_neighbors_rec(distances, indices, &
@@ -390,9 +391,9 @@ contains
         integer(kind=8) :: i, n
 
 
-        distance_q_and_c = sum( (q_i(:) - root_ball_ptr%center(:))**2d0 )
+        distance_q_and_c = sum( (q_i(:) - root_ball_ptr%center(:))**2d0 ) 
 
-        if ( distance_q_and_c - root_ball_ptr%radius .gt. maxval(distances(:)) ) then
+        if ( distance_q_and_c .gt. root_ball_ptr%radius_sq + maxval(distances(:)) ) then
             return
         elseif ( root_ball_ptr%is_leaf ) then
             allocate( distance_q_and_s(root_ball_ptr%n_samples) )
