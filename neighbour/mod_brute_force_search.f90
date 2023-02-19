@@ -152,7 +152,7 @@ contains
             do c=1, n_samples, 1
                 idx = min_locs(c)
                 res%indices(c)%idx = idx
-                res%distances(c)%dst = distance_matrix(idx,c)
+                res%distances(c)%dst = sqrt(abs(distance_matrix(idx,c)))
             end do
             !$omp end do
             !$omp end parallel
@@ -170,7 +170,7 @@ contains
 
                 call quick_argsort(tmp(1:n_neighbors), indices(1:n_neighbors), n_neighbors)
                 res%indices(c)%idx(:) = indices(1:n_neighbors)
-                res%distances(c)%dst(:) = sqrt(tmp(1:n_neighbors))
+                res%distances(c)%dst(:) = sqrt(abs(tmp(1:n_neighbors)))
             end do
             !$omp end do
             !$omp end parallel

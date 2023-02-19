@@ -529,7 +529,7 @@ contains
             allocate(query_nearest_radius%indices(i)%idx(n_size))
             allocate(query_nearest_radius%distances(i)%dst(n_size))
             query_nearest_radius%indices(i)%idx = nearest_idxs(1:n_size)
-            query_nearest_radius%distances(i)%dst = sqrt(relu(nearest_dsts(1:n_size)))
+            query_nearest_radius%distances(i)%dst = sqrt(abs(nearest_dsts(1:n_size)))
             deallocate(nearest_dsts)
             deallocate(nearest_idxs)
         end do
