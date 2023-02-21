@@ -280,6 +280,7 @@ test:
 	make build
 	# python create_datasets.py
 	make main_neighbour_k_nearest_neighbor_classifier
+	make main_neighbour_k_nearest_neighbor_regressor
 
 test_all:
 	make clean
