@@ -7,8 +7,8 @@ cd test_script
 make test_all  
 
 # WIP:  
-Benchmark nearest neighbor search algrithms   
-~Naive Bayse, Implement Linear/Kernel SVR, One-Class SVM, ica~
+Naive Bayse  
+~Implement Linear/Kernel SVR, One-Class SVM, ica~
 
 
 # Update
