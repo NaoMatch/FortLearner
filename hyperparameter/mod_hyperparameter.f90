@@ -44,8 +44,18 @@ module mod_hyperparameter
         character(len=8) :: weight = "uniform" !< uniform or distance
         character(len=16) :: algorithm = "kd_tree" !< brute_force, kd_tree, ball_tree
         character(len=16) :: split_algo = "farthest_two" !< brute_force, kd_tree, ball_tree
+        character(len=16) :: kernel = "linear" !< linear, exponential
         integer(kind=8)  :: min_samples_in_leaf = 128_8
     end type hparam_k_nearest_neighbor_regressor
+
+    type, extends(hparam_base) :: hparam_k_nearest_neighbor_classifier
+        integer(kind=8)  :: n_neighbors = 8_8
+        character(len=8) :: weight = "uniform" !< uniform or distance
+        character(len=16) :: algorithm = "kd_tree" !< brute_force, kd_tree, ball_tree
+        character(len=16) :: split_algo = "farthest_two" !< brute_force, kd_tree, ball_tree
+        character(len=16) :: kernel = "linear" !< linear, exponential
+        integer(kind=8)  :: min_samples_in_leaf = 128_8
+    end type hparam_k_nearest_neighbor_classifier
 
     type, extends(hparam_base) :: hparam_linear_svm_classifier
         real(kind=8)    :: c=1d0

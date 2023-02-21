@@ -82,7 +82,8 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_brute_force_search.out \
 						./mod/mod_kdtree.out \
 						./mod/mod_product_quantization.out \
-						./mod/mod_k_nearest_neighbor.out \
+						./mod/mod_k_nearest_neighbor_regressor.out \
+						./mod/mod_k_nearest_neighbor_classifier.out \
 						\
 						./mod/mod_pca.out \
 						./mod/mod_nipals.out \
@@ -161,7 +162,8 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_brute_force_search.f90 -o ./mod/mod_brute_force_search.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_kdtree.f90 -o ./mod/mod_kdtree.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_balltree.f90 -o ./mod/mod_balltree.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor.f90 -o ./mod/mod_k_nearest_neighbor.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_classifier.f90 -o ./mod/mod_k_nearest_neighbor_classifier.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_regressor.f90 -o ./mod/mod_k_nearest_neighbor_regressor.out
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_base_kmeans.f90 -o ./mod/mod_base_kmeans.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_kmeans.f90 -o ./mod/mod_kmeans.out
@@ -265,11 +267,20 @@ clean:
 	-rm ./*.out
 
 build:
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_nearest_neighbour.f90 -o ./mod/mod_nearest_neighbour.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_brute_force_search.f90 -o ./mod/mod_brute_force_search.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_kdtree.f90 -o ./mod/mod_kdtree.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_balltree.f90 -o ./mod/mod_balltree.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_classifier.f90 -o ./mod/mod_k_nearest_neighbor_classifier.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_regressor.f90 -o ./mod/mod_k_nearest_neighbor_regressor.out
 
 test:
 	make clean
 	make build
 	# python create_datasets.py
+	make main_neighbour_k_nearest_neighbor_classifier
+	make main_neighbour_k_nearest_neighbor_regressor
 
 test_all:
 	make clean
@@ -308,7 +319,8 @@ test_all:
 	make main_neighbour_brute_force_search
 	make main_neighbour_balltree
 	make main_neighbour_kdtree
-	make main_neighbour_k_nearest_neighbor
+	make main_neighbour_k_nearest_neighbor_classifier
+	make main_neighbour_k_nearest_neighbor_regressor
 	make main_neighbour_product_quantization
 	make main_stats_count_and_sum_up_gt
 	make main_stats_count_and_sum_up_gt_matrix_with_index
@@ -622,13 +634,21 @@ main_neighbour_kdtree:
 	$(option_blas)
 	./main_neighbour_kdtree.out
 
-main_neighbour_k_nearest_neighbor:
+main_neighbour_k_nearest_neighbor_classifier:
 	$(compiler_fortran) -w -unroll \
 	$(common) \
 	$(asm) $(option) $(mod) $(opt) \
-	main_neighbour_k_nearest_neighbor.f90 -o main_neighbour_k_nearest_neighbor.out \
+	main_neighbour_k_nearest_neighbor_classifier.f90 -o main_neighbour_k_nearest_neighbor_classifier.out \
 	$(option_blas)
-	./main_neighbour_k_nearest_neighbor.out
+	./main_neighbour_k_nearest_neighbor_classifier.out
+
+main_neighbour_k_nearest_neighbor_regressor:
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main_neighbour_k_nearest_neighbor_regressor.f90 -o main_neighbour_k_nearest_neighbor_regressor.out \
+	$(option_blas)
+	./main_neighbour_k_nearest_neighbor_regressor.out
 
 main_neighbour_product_quantization:
 	$(compiler_fortran) -w -unroll \

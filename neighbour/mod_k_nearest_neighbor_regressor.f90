@@ -1,9 +1,10 @@
-module mod_k_nearest_neighbor
+module mod_k_nearest_neighbor_regressor
     use mod_hyperparameter
     use mod_brute_force_search
     use mod_kdtree
     use mod_balltree
     use mod_nearest_neighbour, only: neighbor_results
+    use mod_const
     implicit none
 
     type k_nearest_neighbor_regressor
@@ -26,7 +27,8 @@ module mod_k_nearest_neighbor
 
 contains
 
-    function new_k_nearest_neighbor_regressor(n_neighbors, weight, algorithm, min_samples_in_leaf, split_algo) result(knn)
+    function new_k_nearest_neighbor_regressor(n_neighbors, weight, algorithm, min_samples_in_leaf, split_algo, &
+                kernel) result(knn)
         implicit none
         type(k_nearest_neighbor_regressor) :: knn
         integer(kind=8), optional  :: n_neighbors
@@ -34,12 +36,14 @@ contains
         character(len=*), optional :: algorithm
         integer(kind=8), optional  :: min_samples_in_leaf
         character(len=*), optional :: split_algo
+        character(len=*), optional :: kernel
                 
         if (present(n_neighbors))         knn%hparam%n_neighbors = n_neighbors
         if (present(weight))              knn%hparam%weight = weight
         if (present(algorithm))           knn%hparam%algorithm = algorithm
         if (present(min_samples_in_leaf)) knn%hparam%min_samples_in_leaf = min_samples_in_leaf
         if (present(split_algo))          knn%hparam%split_algo = split_algo
+        if (present(kernel))          knn%hparam%kernel = kernel
     end function 
 
 
@@ -76,7 +80,7 @@ contains
         type(neighbor_results) :: neighbors
         integer(kind=8) :: n, n_samples, i, idx
         integer(kind=8), allocatable :: idxs(:)
-        real(kind=8) :: mean_scale
+        real(kind=8) :: mean_scale, coef_
         real(kind=8), allocatable :: tmp_pred(:)
         real(kind=8), allocatable :: dsts(:)
 
@@ -91,6 +95,24 @@ contains
         end if
 
         n_samples = size(x, dim=1)
+        if (this%hparam%kernel=="linear") then
+            ! skip
+        elseif (this%hparam%kernel=="exponential") then
+            coef_ = 1d0 / sqrt(2d0 * pi_)
+            do n=1, n_samples, 1
+                neighbors%distances(n)%dst = 2d0 * coef_ * ( exp(0.5d0) - exp(0.5d0 - neighbors%distances(n)%dst) )
+            end do
+        elseif (this%hparam%kernel=="epanechnikov") then
+            coef_ = 3d0 / 4d0
+            do n=1, n_samples, 1
+                neighbors%distances(n)%dst = 2d0 * coef_ * ( 1d0 - (1d0 - neighbors%distances(n)%dst**2d0) )
+            end do
+        elseif (this%hparam%kernel=="tricubic") then
+            coef_ = 71d0 / 80d0
+            do n=1, n_samples, 1
+                neighbors%distances(n)%dst = 2d0 * coef_ * ( 1d0 - (1d0 - neighbors%distances(n)%dst**3d0)**3d0 )
+            end do
+        end if
         allocate(pred(n_samples, this%n_outputs))
         allocate(idxs(this%hparam%n_neighbors))
         mean_scale = 1d0 / dble(this%hparam%n_neighbors)
@@ -129,4 +151,4 @@ contains
 
 
 
-end module mod_k_nearest_neighbor
+end module mod_k_nearest_neighbor_regressor
