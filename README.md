@@ -7,11 +7,12 @@ cd test_script
 make test_all  
 
 # WIP:  
-KNN classifier  
+Benchmark nearest neighbor search algrithms   
 ~Naive Bayse, Implement Linear/Kernel SVR, One-Class SVM, ica~
 
 
 # Update
+2023/02/21: KNN classifier  
 2023/02/20: KNN regressor  
 2023/02/18: Implement and Optimize Kernel SVC (linear, poly, sigmoid, rbf) and add benchmark    
 2023/01/30: optimize 'linear' support vector machine classifier  
