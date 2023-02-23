@@ -7,8 +7,8 @@ cd test_script
 make test_all  
 
 # WIP:  
-Naive Bayse  
-~Implement Linear/Kernel SVR, One-Class SVM, ica~
+Benchmark and Optimize KDTree  
+~Naive Bayse, Implement Linear/Kernel SVR, One-Class SVM, ica~
 
 
 # Update
