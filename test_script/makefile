@@ -1,8 +1,8 @@
 compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
-opt              := -O2
-option           := -cpp -D_x86_64 -fopenmp -fdec -fbounds-check
+opt              := -O3
+option           := -cpp -D_x86_64 -fopenmp -fdec
 option_blas      := -lopenblas
 
 asm              := ./mod/inc_sum_up_vector_c.out \
@@ -267,20 +267,21 @@ clean:
 	-rm ./*.out
 
 build:
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_nearest_neighbour.f90 -o ./mod/mod_nearest_neighbour.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_brute_force_search.f90 -o ./mod/mod_brute_force_search.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_nearest_neighbour.f90 -o ./mod/mod_nearest_neighbour.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_brute_force_search.f90 -o ./mod/mod_brute_force_search.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_kdtree.f90 -o ./mod/mod_kdtree.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_balltree.f90 -o ./mod/mod_balltree.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_classifier.f90 -o ./mod/mod_k_nearest_neighbor_classifier.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_regressor.f90 -o ./mod/mod_k_nearest_neighbor_regressor.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_balltree.f90 -o ./mod/mod_balltree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_classifier.f90 -o ./mod/mod_k_nearest_neighbor_classifier.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_regressor.f90 -o ./mod/mod_k_nearest_neighbor_regressor.out
 
 test:
 	make clean
 	make build
 	# python create_datasets.py
-	make main_neighbour_k_nearest_neighbor_classifier
-	make main_neighbour_k_nearest_neighbor_regressor
+	make main_neighbour_kdtree
+	# make main_neighbour_k_nearest_neighbor_classifier
+	# make main_neighbour_k_nearest_neighbor_regressor
 
 test_all:
 	make clean

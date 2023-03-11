@@ -44,7 +44,7 @@ subprocess.run(f"./main_csv2bin.out train {N_TEST} {1}          {file_name_y_out
 
 
 n_samples_list = [100, 1000, 10000, 100000, 1000000]
-n_columns_list = [5, 10, 50, 100, 200, 400]
+n_columns_list = [5, 10, 50, 100, 200, 400, 800]
 ratio_test  = 0.2
 ratio_valid = 0.2
 
@@ -54,6 +54,7 @@ for n_samples_train in n_samples_list:
     n_samples_valid = int(n_samples_train*ratio_valid)
     n_samples_test  = int(n_samples_train*ratio_test)
     for n_columns in n_columns_list:
+        if n_columns<500: continue
         print("Creating Regression Datasets ***************************************************************************************")
         print("     Tarin: #Samples={}, #Columns={}".format(n_samples_train, n_columns))
         print("     Valid: #Samples={}, #Columns={}".format(n_samples_valid, n_columns))
@@ -75,7 +76,7 @@ for n_samples_train in n_samples_list:
             subprocess.run(f"./main_csv2bin.out {d_sep} {n_sam} {n_columns} {file_name_x_out} {file_name_x_out.replace('.csv', '.bin')} {dtype_in} {dtype_out}", shell=True, check=True)
             subprocess.run(f"./main_csv2bin.out {d_sep} {n_sam} {1}         {file_name_y_out} {file_name_y_out.replace('.csv', '.bin')} {dtype_in} {dtype_out}", shell=True, check=True)
             n_s = n_e
-
+sys.exit()
 
 
 n_classes = 2
