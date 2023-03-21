@@ -1,5 +1,6 @@
 idx = n_samples
 call random_number(rand)
+rand = rand * sum(vector)
 cumsum = real(0.0, kind=kind(cumsum))
 if (reverse) then
     do i=n_samples, 1, -1
