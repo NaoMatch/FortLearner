@@ -1,8 +1,9 @@
 compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
-opt              := -O3
-option           := -cpp -D_x86_64 -fopenmp -fdec
+opt              := -O2
+option           := -cpp -D_x86_64 -fopenmp -fbounds-check
+option_degug     := -fdec -fbounds-check -Wall  -Wuninitialized -ffpe-trap=invalid,zero,overflow -fbacktrace -g 
 option_blas      := -lopenblas
 
 asm              := ./mod/inc_sum_up_vector_c.out \
@@ -61,6 +62,7 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_extra_tree.out \
 						./mod/mod_lawu.out \
 						./mod/mod_isolation_tree.out \
+						./mod/mod_extended_isolation_tree.out \
 						./mod/mod_random_rotation_decision_tree.out \
 						./mod/mod_sadt.out \
 						./mod/mod_sliq.out \
@@ -187,6 +189,7 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_lawu.f90 -o ./mod/mod_lawu.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_sadt.f90 -o ./mod/mod_sadt.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_isolation_tree.f90 -o ./mod/mod_isolation_tree.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_extended_isolation_tree.f90 -o ./mod/mod_extended_isolation_tree.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_random_rotation_decision_tree.f90 -o ./mod/mod_random_rotation_decision_tree.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_sliq.f90 -o ./mod/mod_sliq.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_oblivious_tree.f90 -o ./mod/mod_oblivious_tree.out
@@ -267,21 +270,13 @@ clean:
 	-rm ./*.out
 
 build:
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_nearest_neighbour.f90 -o ./mod/mod_nearest_neighbour.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_brute_force_search.f90 -o ./mod/mod_brute_force_search.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_kdtree.f90 -o ./mod/mod_kdtree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_balltree.f90 -o ./mod/mod_balltree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_classifier.f90 -o ./mod/mod_k_nearest_neighbor_classifier.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_regressor.f90 -o ./mod/mod_k_nearest_neighbor_regressor.out
+	
 
 test:
 	make clean
-	make build
-	# python create_datasets.py
-	make main_neighbour_kdtree
-	# make main_neighbour_k_nearest_neighbor_classifier
-	# make main_neighbour_k_nearest_neighbor_regressor
+	# make build
+	# make build_all
+	python create_datasets.py
 
 test_all:
 	make clean
