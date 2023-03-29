@@ -4,9 +4,105 @@ from sklearn.datasets import make_regression, make_classification, make_blobs, f
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import DBSCAN
 from sklearn.neighbors import KDTree
+from sklearn.model_selection import StratifiedKFold
 import subprocess
+import glob
+import mat73
+import scipy.io
+
+import sys
+sys.path.append("./sample_data_preprocessing")
+from kdd99 import *
 
 subprocess.run("make main_csv2bin", shell=True, check=True)
+
+fn_kdd_10_percent = download_kdd99_10_percent("../sample_data/")
+fn_kdd_full = download_kdd99("../sample_data/")
+
+fn_kdd_10_percent_label_enc, fn_kdd_10_percent_one_hot_enc = preprocessing_kdd99(fn_kdd_10_percent)
+fn_kdd_full_label_enc, fn_kdd_full_one_hot_enc = preprocessing_kdd99(fn_kdd_full)
+
+split_train_valid_test_kdd99()
+
+# sys.exit()
+
+mat_fns = glob.glob("../sample_data/*.mat") + ["../sample_data/"]
+# mat_fns = ["../sample_data/creditcard.csv"]
+for fn in mat_fns:
+    FILE_NAME = fn
+    if (FILE_NAME.endswith(".mat")):
+        try:
+            data_dict = mat73.loadmat(FILE_NAME)
+        except:
+            data_dict = scipy.io.loadmat(FILE_NAME)
+        x = pd.DataFrame(data_dict["X"])
+        y = pd.DataFrame(data_dict["y"])
+        ext = ".mat"
+    else:
+        xy = pd.read_csv(FILE_NAME)
+        x = xy.iloc[:,:-1]
+        y = xy.iloc[:,-1:].astype(int)
+        ext = ".csv"
+
+    sum_flags = [0,0,0]
+
+    while (0 in sum_flags):
+        random_idx = np.random.permutation(list(range(len(x))))
+        x = x.iloc[random_idx,:]
+        y = y.iloc[random_idx,:]
+        
+        skf = StratifiedKFold(n_splits=5)
+        all_indices = None
+        for train_index, test_index in skf.split(x, y):
+            all_indices = list(train_index) + list(test_index)
+            n_test = len(list(test_index))
+            break
+        test_idxs = all_indices[-n_test:]
+        valid_idxs = all_indices[-2*n_test:-n_test]
+        train_idxs = all_indices[:-2*n_test]
+        sum_flags = []
+        for idxs in [train_idxs, valid_idxs, test_idxs]:
+            sum_flags.append(y.iloc[idxs].sum()[0])
+    x_train = x.iloc[train_idxs,:]    
+    x_valid = x.iloc[valid_idxs,:]    
+    x_test  = x.iloc[test_idxs,:]
+    x_train.to_csv(FILE_NAME.replace(ext, "_X_train.csv"), index=False)
+    x_valid.to_csv(FILE_NAME.replace(ext, "_X_valid.csv"), index=False)
+    x_test.to_csv(FILE_NAME.replace(ext, "_X_test.csv"), index=False)
+
+    N_TRAIN, N_FEATURES = x_train.shape
+    file_name_x_out = FILE_NAME.replace(ext, "_X_train.csv")
+    subprocess.run(f"./main_csv2bin.out train {N_TRAIN} {N_FEATURES} {file_name_x_out} {file_name_x_out.replace('.csv', '.bin')} r r", shell=True, check=True)
+
+    N_VALID, N_FEATURES = x_valid.shape
+    file_name_x_out = FILE_NAME.replace(ext, "_X_valid.csv")
+    subprocess.run(f"./main_csv2bin.out valid {N_VALID} {N_FEATURES} {file_name_x_out} {file_name_x_out.replace('.csv', '.bin')} r r", shell=True, check=True)
+
+    N_TEST, N_FEATURES = x_test.shape
+    file_name_x_out = FILE_NAME.replace(ext, "_X_test.csv")
+    subprocess.run(f"./main_csv2bin.out test  {N_TEST}  {N_FEATURES} {file_name_x_out} {file_name_x_out.replace('.csv', '.bin')} r r", shell=True, check=True)
+
+    y_train = y.iloc[train_idxs,:].astype(int)
+    y_valid = y.iloc[valid_idxs,:].astype(int)    
+    y_test  = y.iloc[test_idxs,:].astype(int)
+    y_train.to_csv(FILE_NAME.replace(ext, "_y_train.csv"), index=False)
+    y_valid.to_csv(FILE_NAME.replace(ext, "_y_valid.csv"), index=False)
+    y_test.to_csv(FILE_NAME.replace(ext, "_y_test.csv"), index=False)
+
+    N_TRAIN, N_FEATURES = y_train.shape
+    file_name_y_out = FILE_NAME.replace(ext, "_y_train.csv")
+    subprocess.run(f"./main_csv2bin.out train {N_TRAIN} {N_FEATURES} {file_name_y_out} {file_name_y_out.replace('.csv', '.bin')} i i", shell=True, check=True)
+
+    N_VALID, N_FEATURES = y_valid.shape
+    file_name_y_out = FILE_NAME.replace(ext, "_y_valid.csv")
+    subprocess.run(f"./main_csv2bin.out valid {N_VALID} {N_FEATURES} {file_name_y_out} {file_name_y_out.replace('.csv', '.bin')} i i", shell=True, check=True)
+
+    N_TEST, N_FEATURES = y_test.shape
+    file_name_y_out = FILE_NAME.replace(ext, "_y_test.csv")
+    subprocess.run(f"./main_csv2bin.out test  {N_TEST}  {N_FEATURES} {file_name_y_out} {file_name_y_out.replace('.csv', '.bin')} i i", shell=True, check=True)
+
+
+sys.exit()
 
 print("Download MNIST dataset")
 mnist_X, mnist_y = fetch_openml('mnist_784', version=1, data_home=".", return_X_y=True)

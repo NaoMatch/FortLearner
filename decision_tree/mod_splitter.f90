@@ -36,6 +36,9 @@ module mod_splitter
         procedure :: split_isolation_tree
         procedure :: split_isolation_tree_indivisuals
 
+        procedure :: split_extended_isolation_tree
+        procedure :: split_extended_isolation_tree_indivisuals
+
         procedure :: split_threshold_tree
         procedure :: split_threshold_tree_indivisuals
 
@@ -809,30 +812,112 @@ contains
         real(kind=8)    :: dummy
         integer(kind=8) :: fid, min_fid_val, max_fid_val
         real(kind=8) :: min_val, max_val, val, split_val
-        integer(kind=8) :: n, idx, factor
+        integer(kind=8) :: n, idx, factor, n_zero_cols
         integer(kind=8) :: n_samples_l, n_samples_r
-        real(kind=8), allocatable :: tmp_f(:)
+        real(kind=8), allocatable :: tmp_f(:), weights(:)
+        real(kind=8), allocatable :: tmp_x(:,:)
+        integer(kind=8), allocatable :: idxs(:)
 
-        ! print*, "Select Random Feature ID"
-        call random_number(dummy)
-        max_fid_val = data_holder_ptr%n_columns
-        min_fid_val = 0_8
-        fid = (max_fid_val-min_fid_val)*dummy + min_fid_val + 1
+        real(kind=8) :: sum_p,        sqsum_p,          var_p
+        real(kind=8) :: sum_l, sum_r, sqsum_l, sqsum_r, var_l, var_r
+        real(kind=8) :: gain, gain_max
 
-        ! print*, "Collect Data & Get Minimum and Maximum Value  ", fid
+        if (hparam_ptr%feature_selection_int == 1_8) then
+            call random_number(dummy)
+            max_fid_val = data_holder_ptr%n_columns
+            min_fid_val = 0_8
+            fid = (max_fid_val-min_fid_val)*dummy + min_fid_val + 1
+        else
+            allocate(tmp_x(node_ptr%n_samples, data_holder_ptr%n_columns))
+            do n=1, node_ptr%n_samples, 1
+                idx = node_ptr%indices(n)
+                tmp_x(n,:) = data_holder_ptr%x_ptr%x_r8_ptr(idx,:)
+            end do
+            allocate(idxs(data_holder_ptr%n_columns))
+            do fid=1, data_holder_ptr%n_columns, 1
+                idxs(fid) = fid
+            end do
+            if (hparam_ptr%feature_selection_int==2_8) weights = variance(tmp_x, node_ptr%n_samples, data_holder_ptr%n_columns)
+            if (hparam_ptr%feature_selection_int==3_8) weights = kurtosis(tmp_x, node_ptr%n_samples, data_holder_ptr%n_columns)
+            weights = weights - minval(weights)
+            call quick_argsort(weights, idxs, data_holder_ptr%n_columns)
+
+            n_zero_cols = data_holder_ptr%n_columns - hparam_ptr%max_features
+            weights(1:n_zero_cols) = 0d0
+            call quick_argsort(idxs, weights, data_holder_ptr%n_columns)
+            fid = roulette_selection(weights, data_holder_ptr%n_columns, reverse=f_)
+        end if
+
         ! allocate(tmp_f(node_ptr%n_samples))
         call random_number(dummy)
         min_val = huge(0d0)
         max_val = -huge(0d0)
-        do n=1, node_ptr%n_samples, 1
-            idx = node_ptr%indices(n)
-            val = data_holder_ptr%x_ptr%x_r8_ptr(idx,fid)
-            min_val = minval( (/val, min_val/) )
-            max_val = maxval( (/val, max_val/) )
-        end do
-        split_val = (max_val-min_val)*dummy + min_val
+        if (hparam_ptr%split_selection_int==1_8) then
+            do n=1, node_ptr%n_samples, 1
+                idx = node_ptr%indices(n)
+                val = data_holder_ptr%x_ptr%x_r8_ptr(idx,fid)
+                min_val = minval( (/val, min_val/) )
+                max_val = maxval( (/val, max_val/) )
+            end do
+            split_val = (max_val-min_val)*dummy + min_val
+        elseif (hparam_ptr%split_selection_int==2_8) then
+            do n=1, node_ptr%n_samples, 1
+                idx = node_ptr%indices(n)
+                val = data_holder_ptr%x_ptr%x_r8_ptr(idx,fid)
+                sum_p = sum_p + val
+                sqsum_p = sqsum_p + val**2d0
+            end do
+            var_p = sqsum_p / node_ptr%n_samples - (sum_p / node_ptr%n_samples)**2d0
 
-        ! print*, "Count Left & Right #samples"
+            gain_max = -huge(0d0)
+            split_val = huge(0d0)
+            sum_l = 0d0
+            sqsum_l = 0d0
+            do n=1, node_ptr%n_samples-1, 1
+                idx = node_ptr%indices(n)
+                val = data_holder_ptr%x_ptr%x_r8_ptr(idx,fid)
+                sum_l = sum_l + val
+                sqsum_l = sqsum_l + val**2d0
+                var_l = sqsum_l / n - (sum_l / n)**2d0
+                var_r = sqsum_r / (node_ptr%n_samples-n) - (sum_r / (node_ptr%n_samples-n))**2d0
+                gain = (var_p - 0.5d0*(var_l+var_r)) / var_p
+                if (gain >= gain_max) then
+                    gain_max = gain
+                    split_val = (val + data_holder_ptr%x_ptr%x_r8_ptr(node_ptr%indices(n+1),fid)) * 0.5d0
+                end if
+            end do
+        elseif (hparam_ptr%split_selection_int==3_8) then
+            do n=1, node_ptr%n_samples, 1
+                idx = node_ptr%indices(n)
+                val = data_holder_ptr%x_ptr%x_r8_ptr(idx,fid)
+                sum_p = sum_p + val
+                sqsum_p = sqsum_p + val**2d0
+            end do
+            var_p = sqsum_p / node_ptr%n_samples - (sum_p / node_ptr%n_samples)**2d0
+
+            gain_max = -huge(0d0)
+            split_val = huge(0d0)
+            sum_l = 0d0
+            sqsum_l = 0d0
+            do n=1, node_ptr%n_samples-1, 1
+                idx = node_ptr%indices(n)
+                val = data_holder_ptr%x_ptr%x_r8_ptr(idx,fid)
+                sum_l = sum_l + val
+                sqsum_l = sqsum_l + val**2d0
+                var_l = sqsum_l / n - (sum_l / n)**2d0
+
+                sum_r   = sum_p   - sum_l
+                sqsum_r = sqsum_p - sqsum_l
+
+                var_r = sqsum_r / (node_ptr%n_samples-n) - (sum_r / (node_ptr%n_samples-n))**2d0
+                gain = (var_p - (n*var_l+(node_ptr%n_samples-n)*var_r) /node_ptr%n_samples ) / var_p
+                if (gain >= gain_max) then
+                    gain_max = gain
+                    split_val = (val + data_holder_ptr%x_ptr%x_r8_ptr(node_ptr%indices(n+1),fid)) * 0.5d0
+                end if
+            end do
+        end if
+
         n_samples_l = 0
         do n=1, node_ptr%n_samples, 1
             idx = node_ptr%indices(n)
@@ -844,13 +929,12 @@ contains
 
 
         ! Collect Train Results
-        ! print*, "Collect Train Results", n_samples_l, n_samples_r
         node_ptr%is_trained = t_
         node_ptr%eval_counter = 1
         node_ptr%gain_best   = huge(0d0)
         node_ptr%gain_best_w = huge(0d0)
 
-        if ( min_val .eq. max_val ) then
+        if ( min_val .eq. max_val .or. (n_samples_r==0_8 .or. n_samples_l==0_8) ) then
             node_ptr%is_terminal = t_
             call node_ptr%hparam_check(hparam_ptr)
             return
@@ -879,6 +963,121 @@ contains
         node_ptr%impurity = huge(0d0)
         call node_ptr%hparam_check(hparam_ptr)
     end subroutine split_isolation_tree_indivisuals
+
+    subroutine split_extended_isolation_tree(this, node_ptrs, data_holder_ptr, hparam_ptr, & 
+        n_columns)
+        implicit none
+        class(node_splitter)               :: this
+        type(node_oblq_ptr), intent(inout) :: node_ptrs(:)
+        type(data_holder), pointer         :: data_holder_ptr
+        type(hparam_decisiontree), pointer :: hparam_ptr
+        integer(kind=8), intent(in)        :: n_columns
+        integer(kind=8) :: n
+
+        if ( size(node_ptrs) .eq. 1 ) then
+            call this%split_extended_isolation_tree_indivisuals(node_ptrs(1)%node_ptr, data_holder_ptr, hparam_ptr, &
+                n_columns)
+        else
+            do n=1, size(node_ptrs), 1
+                call this%split_extended_isolation_tree_indivisuals(node_ptrs(n)%node_ptr, data_holder_ptr, hparam_ptr, &
+                    n_columns)
+            end do
+        end if
+    end subroutine split_extended_isolation_tree
+
+    subroutine split_extended_isolation_tree_indivisuals(this, node_ptr, data_holder_ptr, hparam_ptr, &
+        n_columns)
+        implicit none
+        class(node_splitter)         :: this
+        type(node_oblq), pointer     :: node_ptr
+        type(data_holder), pointer   :: data_holder_ptr
+        type(hparam_decisiontree), pointer   :: hparam_ptr
+        integer(kind=8), intent(in)  :: n_columns
+
+        real(kind=8)    :: dummy
+        integer(kind=8) :: fid, min_fid_val, max_fid_val
+        real(kind=8) :: min_val, max_val, val, split_val, intcpt
+        integer(kind=8) :: n, idx, factor, n_zero_cols
+        integer(kind=8) :: n_samples_l, n_samples_r
+        real(kind=8), allocatable :: tmp_f(:), coef_(:), intcpts_(:)
+        real(kind=8), allocatable :: tmp_x(:,:), min_vals(:), max_vals(:)
+        integer(kind=8), allocatable :: idxs(:)
+
+        ! print*, "Select Random Feature ID"
+        allocate(tmp_f(node_ptr%n_samples))
+        allocate(tmp_x(node_ptr%n_samples, data_holder_ptr%n_columns))
+        allocate(coef_(data_holder_ptr%n_columns))
+        allocate(intcpts_(data_holder_ptr%n_columns))
+        allocate(min_vals(data_holder_ptr%n_columns), max_vals(data_holder_ptr%n_columns))
+        do n=1, node_ptr%n_samples, 1
+            idx = node_ptr%indices(n)
+            tmp_x(n,:) = data_holder_ptr%x_ptr%x_r8_ptr(idx,:)
+        end do
+
+        ! compute (x-p) n
+        ! - x n
+        tmp_f = 0d0
+        call rand_normal(coef_, data_holder_ptr%n_columns)
+        call multi_mat_vec(tmp_x, coef_, tmp_f, node_ptr%n_samples, data_holder_ptr%n_columns)
+        
+        ! - p n
+        min_vals = minval(tmp_x, dim=1)
+        max_vals = maxval(tmp_x, dim=1)
+        do while (t_)
+            call random_number(intcpts_)
+            intcpts_ = (max_vals-min_vals)*intcpts_ + min_vals
+            intcpt = dot_product(coef_, intcpts_)
+
+            tmp_f = tmp_f - intcpt
+            if (count(tmp_f<=0d0)>=1 .and. count(tmp_f>0d0)>=1) exit
+        end do
+        stop "hoge2"
+
+        ! print*, "Count Left & Right #samples"
+        n_samples_l = 0
+        do n=1, node_ptr%n_samples, 1
+            val = tmp_f(n)
+            factor = val .le. 0d0
+            n_samples_l = n_samples_l + factor
+        end do
+        n_samples_r = node_ptr%n_samples - n_samples_l
+        stop "hoge3"
+
+
+        ! Collect Train Results
+        ! print*, "Collect Train Results", n_samples_l, n_samples_r
+        node_ptr%is_trained = t_
+        node_ptr%eval_counter = 1
+        node_ptr%gain_best   = huge(0d0)
+        node_ptr%gain_best_w = huge(0d0)
+        stop "hoge4"
+
+        node_ptr%coef_ = coef_
+        node_ptr%intercept_ = intcpt
+        node_ptr%threshold_  = 0d0
+        print*, count(tmp_f<=0d0)
+        stop "hoge5"
+
+        ! if (allocated(node_ptr%sum_l))      deallocate(node_ptr%sum_l)
+        ! if (allocated(node_ptr%sum_r))      deallocate(node_ptr%sum_r)
+        ! if (allocated(node_ptr%response_l)) deallocate(node_ptr%response_l)
+        ! if (allocated(node_ptr%response_r)) deallocate(node_ptr%response_r)
+
+        ! allocate(node_ptr%sum_l(node_ptr%n_outputs))
+        ! allocate(node_ptr%sum_r(node_ptr%n_outputs))
+        ! allocate(node_ptr%response_l(node_ptr%n_outputs))
+        ! allocate(node_ptr%response_r(node_ptr%n_outputs))
+
+        ! node_ptr%sum_l = 0d0
+        ! node_ptr%sum_r = 0d0
+        ! node_ptr%n_samples_l = n_samples_l
+        ! node_ptr%n_samples_r = n_samples_r
+        ! node_ptr%response_l = (/node_ptr%depth+1/)
+        ! node_ptr%response_r = (/node_ptr%depth+1/)
+
+        ! node_ptr%impurity = huge(0d0)
+        ! call node_ptr%hparam_check(hparam_ptr)
+    end subroutine split_extended_isolation_tree_indivisuals
 
 
     !------------------------------------------------------------------------------------------------------------------------------------------ 

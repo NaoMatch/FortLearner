@@ -474,34 +474,47 @@ contains
             this%root_node_axis_ptr%n_columns = this%n_columns_
             this%root_node_axis_ptr%n_samples = this%hparam%max_samples
         else
-            allocate(this%root_node_oblq_ptr%indices(this%n_samples_))
+            if ( .not. this%is_isolation_tree ) this%hparam%max_samples = this%n_samples_
+            allocate(this%root_node_oblq_ptr%indices(this%hparam%max_samples))
             allocate(this%root_node_oblq_ptr%is_used(this%n_columns_))
             allocate(this%root_node_oblq_ptr%is_useless(this%n_columns_))
+            allocate(this%root_node_oblq_ptr%is_useless_center(this%n_clusters_))
             allocate(this%root_node_oblq_ptr%sum_p(this%n_outputs_))
-            this%root_node_oblq_ptr%is_used = f_
-            this%root_node_oblq_ptr%is_useless = f_
-            allocate(this%root_node_oblq_ptr%coef_(this%n_columns_))
+            this%root_node_oblq_ptr%is_used(:) = f_
+            this%root_node_oblq_ptr%is_useless(:) = f_
+            this%root_node_oblq_ptr%is_useless_center(:) = f_
+            this%root_node_oblq_ptr%n_clusters = this%n_clusters_
+            this%root_node_oblq_ptr%is_hist = this%is_hist
 
-            if ( this%hparam%boot_strap ) then
-                call rand_integer(1_8, this%n_samples_, this%root_node_oblq_ptr%indices, this%n_samples_)
-                call quick_sort(this%root_node_oblq_ptr%indices, this%n_samples_)
+            if ( present(sample_indices) ) then
+                do i=1, this%n_samples_, 1
+                    this%root_node_oblq_ptr%indices(i) = sample_indices(i)
+                end do
+            elseif ( this%hparam%boot_strap ) then
+                call rand_integer(1_8, this%n_samples_, this%root_node_oblq_ptr%indices, this%hparam%max_samples)
+                call quick_sort(this%root_node_oblq_ptr%indices, this%hparam%max_samples)
             else
                 do i=1, this%n_samples_, 1
                     this%root_node_oblq_ptr%indices(i) = i
                 end do
             end if
 
+
             if (is_classification) then
                 stop "Classification Tree Not Implemented!"
-            else
+            elseif ( this%is_isolation_tree ) then
+                this%root_node_oblq_ptr%sum_p    = (/0d0/)
+                this%root_node_oblq_ptr%response = (/0d0/)
+                this%root_node_oblq_ptr%impurity = huge(0d0)
+            else ! regression
                 this%root_node_oblq_ptr%sum_p = sum(data_holder_ptr%y_ptr%y_r8_ptr, dim=1)
                 this%root_node_oblq_ptr%response = mean(data_holder_ptr%y_ptr%y_r8_ptr, this%n_samples_, this%n_outputs_)
                 this%root_node_oblq_ptr%impurity = sum(variance(data_holder_ptr%y_ptr%y_r8_ptr, this%n_samples_, this%n_outputs_, &
-                                                            this%root_node_oblq_ptr%response)) / dble(this%n_outputs_)
+                                                        this%root_node_oblq_ptr%response)) / dble(this%n_outputs_)
             end if
             this%root_node_oblq_ptr%depth = 0_8 
             this%root_node_oblq_ptr%n_columns = this%n_columns_
-            this%root_node_oblq_ptr%n_samples = this%n_samples_
+            this%root_node_oblq_ptr%n_samples = this%hparam%max_samples
         end if
     end subroutine init_root_node
 
@@ -975,6 +988,94 @@ contains
             is_isolation_tree=is_isolation_tree)
         ! deallocate(indices_l, indices_r, tmp_f, lt_thresholds)
     end subroutine predict_response_axis
+
+    subroutine predict_response_axis_non_recursive(result, x_ptr, indices, responses, n_samples, n_outputs, &
+        is_root, is_layer_wise_sum, lr_layer, is_isolation_tree)
+        implicit none
+        type(train_results)   :: result
+        real(kind=8), pointer :: x_ptr(:,:)
+        integer(kind=8)       :: indices(n_samples)
+        real(kind=8)          :: responses(:,:)
+        integer(kind=8)       :: n_samples, n_outputs
+        logical(kind=4)       :: is_root
+        logical(kind=4)       :: is_layer_wise_sum
+        real(kind=8)          :: lr_layer
+        logical(kind=4)       :: is_isolation_tree
+
+        integer(kind=8), save        :: node_id
+        integer(kind=8)              :: idx, i, fid
+        integer(kind=8)              :: count_l, count_r, factor
+        real(kind=8)                 :: threshold
+        real(kind=8), allocatable    :: res(:), tmp_f(:)
+        logical(kind=4), allocatable :: lt_thresholds(:)
+        integer(kind=8), allocatable :: indices_l(:), indices_r(:)
+
+        if (is_root) node_id = 0_8
+        node_id = node_id + 1_8
+        
+        ! print*, size(result%is_terminals_), node_id
+        if (n_samples .eq. 0 .and. result%is_terminals_(node_id)) return
+        if (n_samples .eq. 0) goto 999
+
+        if (is_layer_wise_sum) then
+            allocate(res(result%n_outputs_))
+            res = lr_layer * result%responses_(node_id,:)
+            do i=1, n_samples
+                idx = indices(i)
+                responses(idx,:) = responses(idx,:) + res
+            end do
+            if (result%is_terminals_(node_id)) return
+        else
+            if ( result%is_terminals_(node_id) ) then
+                allocate(res(result%n_outputs_))
+                res = result%responses_(node_id,:)
+                if (is_isolation_tree) res = res + avg_depth(n_samples)
+                do i=1, n_samples
+                    idx = indices(i)
+                    responses(idx,:) = res
+                end do
+                return
+            end if
+        end if
+
+        allocate(tmp_f(n_samples))
+        fid = result%split_features_(node_id)
+        do i=1, n_samples, 1
+            idx = indices(i)
+            tmp_f(i) = x_ptr(idx, fid)
+        end do
+        threshold = result%split_thresholds_(node_id)
+
+        allocate(lt_thresholds(n_samples))
+        lt_thresholds = tmp_f .le. threshold
+        count_l = count(lt_thresholds)
+        count_r = n_samples - count_l
+        allocate(indices_l(count_l))
+        allocate(indices_r(count_r))
+        indices_l = -1_8
+        indices_r = -1_8
+        count_l = 1_8
+        count_r = 1_8
+        do i=1, n_samples, 1
+            idx = indices(i)
+            if (lt_thresholds(i)) then
+                indices_l(count_l) = idx
+                count_l = count_l + 1_8
+            else
+                indices_r(count_r) = idx
+                count_r = count_r + 1_8
+            end if
+        end do
+
+
+        999 continue
+        if ( .not. allocated(indices_l) .and. .not. allocated(indices_r)) then
+            count_l = 1_8
+            count_r = 1_8
+            allocate(indices_l(0_8))
+            allocate(indices_r(0_8))
+        end if
+    end subroutine predict_response_axis_non_recursive
 
 
     !> A subroutine to predict responses for tree with 'obluque' node.

@@ -194,7 +194,67 @@ module mod_stats
         module procedure get_minmax_vector2vector_r8
     end interface get_minmax_vector2vector
 
+    interface kurtosis
+        module procedure kurtosis_vector
+        module procedure kurtosis_matrix
+    end interface kurtosis
+
 contains
+
+    function kurtosis_vector(vector, n_samples) result(kurtosis)
+        implicit none
+        real(kind=8), intent(in) :: vector(n_samples)
+        integer(kind=8), intent(in) :: n_samples
+        real(kind=8) :: kurtosis
+
+        real(kind=8) :: sum_0, sum_1, sum_2, sum_3, sum_4
+        real(kind=8) :: tmp, tmp_
+        real(kind=8) :: mu, var
+        real(kind=8) :: sum_v, sum_sq_v
+        integer(kind=8) :: n
+
+        sum_v = 0d0
+        sum_sq_v = 0d0
+        do n=1, n_samples, 1
+            tmp = vector(n)
+            sum_v = sum_v + tmp
+            sum_sq_v = sum_sq_v + tmp**2d0
+        end do
+        
+        mu = sum_v / dble(n_samples)
+        var = sum_sq_v / dble(n_samples) - mu**2d0
+        tmp_ = 0d0
+        do n=1, n_samples, 1
+            tmp = vector(n)
+            tmp_ = tmp_ + (tmp-mu)**4d0 / var**2d0
+        end do
+        n = n_samples
+        if (var==0d0) then
+            kurtosis = 0d0
+        else
+            kurtosis = sum((vector - mu)**4) &
+                / (n * var**2d0) - 3.0
+        end if
+    end function kurtosis_vector
+
+    function kurtosis_matrix(matrix, n_samples, n_columns) result(kurtosis)
+        implicit none
+        real(kind=8), intent(in) :: matrix(n_samples, n_columns)
+        integer(kind=8), intent(in) :: n_samples, n_columns
+        real(kind=8), allocatable :: kurtosis(:)
+
+        integer(kind=8) :: f
+
+        allocate(kurtosis(n_columns))
+        do f=1, n_columns, 1
+            kurtosis(f) = kurtosis_vector(matrix(:,f), n_samples)
+        end do
+    end function kurtosis_matrix
+
+
+
+
+
 
     include "./include/stats/get_minmax_vector2vector/inc_get_minmax_vector2vector.f90"
     subroutine get_minmax_vector2vector_r8(vals, min_vals, max_vals, n)

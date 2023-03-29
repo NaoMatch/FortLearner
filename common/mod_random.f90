@@ -62,7 +62,7 @@ module mod_random
 contains
 
     !> A function to roulette selection from 'vector'
-    !> 'vector' must be normalized, sum(vector) P== 1.
+    !> 'vector' must not be normalized, sum(vector) P== 1.
     !! \return returns selected vector index
     !! \param vector normalized vector
     !! \param n_samples number of samples
