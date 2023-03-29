@@ -7,11 +7,12 @@ cd test_script
 make test_all  
 
 # WIP:  
-Benchmark and Optimize KDTree  
-~Naive Bayse, Implement Linear/Kernel SVR, One-Class SVM, ica~
+Implement parallel predict function for tree-type estimators  
+~Benchmark and Optimize KDTree, Naive Bayse, Implement Linear/Kernel SVR, One-Class SVM, ica~
 
 
 # Update
+2023/03/29: Thinnnig (isolation_forest)  
 2023/02/21: KNN classifier  
 2023/02/20: KNN regressor  
 2023/02/18: Implement and Optimize Kernel SVC (linear, poly, sigmoid, rbf) and add benchmark    
