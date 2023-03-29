@@ -16,6 +16,8 @@ module mod_woodworking_tools
 
         real(kind=8), allocatable :: responses_(:,:)
         integer(kind=8), allocatable :: labels_(:)
+
+        integer(kind=8), allocatable :: child_node_ids_(:,:)
     contains
         procedure :: alloc
     end type train_results
@@ -99,12 +101,15 @@ contains
         if (allocated(this%is_terminals_)) deallocate(this%is_terminals_)
         if (allocated(this%responses_)) deallocate(this%responses_)
         if (allocated(this%labels_)) deallocate(this%labels_)
+        if (allocated(this%child_node_ids_)) deallocate(this%child_node_ids_)
 
         allocate(this%split_features_(n_nodes))
         allocate(this%coefs_(n_nodes, n_features))
         allocate(this%split_thresholds_(n_nodes))
         allocate(this%intercepts_(n_nodes))
         allocate(this%is_terminals_(n_nodes))
+        allocate(this%child_node_ids_(n_nodes,2))
+        this%child_node_ids_ = -2
 
         if (is_classification) then
             allocate(this%labels_(n_nodes))
@@ -127,6 +132,7 @@ contains
         type(train_results) :: results
         integer(kind=8), intent(inout) :: node_id
         logical(kind=4), intent(in) :: is_classification, is_root
+        integer(kind=8) :: node_id_
 
         if (is_root) node_id=0_8
         node_id = node_id + 1_8
@@ -136,13 +142,15 @@ contains
         ! print*, "               ", root_node_ptr%threshold_
         ! print*, "               ", root_node_ptr%is_terminal
         ! print*, "               ", allocated(root_node_ptr%response), size(root_node_ptr%response)
-        results%split_features_(node_id) = root_node_ptr%feature_id_
-        results%split_thresholds_(node_id) = root_node_ptr%threshold_
-        results%is_terminals_(node_id) = root_node_ptr%is_terminal
+        node_id_ = node_id
+        root_node_ptr%id = node_id_
+        results%split_features_(node_id_) = root_node_ptr%feature_id_
+        results%split_thresholds_(node_id_) = root_node_ptr%threshold_
+        results%is_terminals_(node_id_) = root_node_ptr%is_terminal
         if (is_classification) then
-            results%labels_(node_id) = root_node_ptr%label_
+            results%labels_(node_id_) = root_node_ptr%label_
         else
-            results%responses_(node_id,:) = root_node_ptr%response
+            results%responses_(node_id_,:) = root_node_ptr%response
         end if
         ! print*, "   goto Next?"
         if (.not. root_node_ptr%is_terminal) then
