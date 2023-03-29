@@ -10,6 +10,7 @@ module mod_node
 
     type node_original
         ! Basic Information
+        integer(kind=8)              :: id
         logical(kind=4)              :: is_trained        = f_
         logical(kind=4)              :: is_terminal       = f_
         logical(kind=4)              :: is_hist
