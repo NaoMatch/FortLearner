@@ -11,6 +11,23 @@ module mod_hyperparameter
         "sample  "  &
     ]
 
+    character(len=256) :: depth_list(2) = [ &
+        "log2     ", &
+        "isolation"  &
+    ]
+
+    character(len=256) :: feature_selection_list(3) = [ &
+        "uniform ", &
+        "variance", &
+        "kurtosis"  &
+    ]
+
+    character(len=256) :: split_selection_list(3) = [ &
+        "uniform     ", &
+        "average_gain", &
+        "pooled_gain "  &
+    ]
+
     character(len=256) :: strategy_list(5) = [ &
         "uniform        ", &
         "quantile       ", &
@@ -159,7 +176,10 @@ module mod_hyperparameter
         integer(kind=8) :: max_features             = huge(0_8) ! c
         integer(kind=8) :: max_feature_use          = huge(0_8)
         integer(kind=8) :: max_leaf_nodes           = huge(0_8) ! c
-        integer(kind=8) :: fashion_int              = 10_8
+        integer(kind=8) :: fashion_int              = 1_8
+        integer(kind=8) :: feature_selection_int    = 1_8
+        integer(kind=8) :: split_selection_int      = 1_8
+        integer(kind=8) :: depth_int                = 1_8
         integer(kind=8) :: print_mod                = 1
         integer(kind=8) :: num_threads_in_node      = 4
         integer(kind=8) :: num_threads_in_forest    = 4
@@ -187,13 +207,18 @@ module mod_hyperparameter
         real(kind=8)    :: minimum_temperature      = 0.0001d0
         real(kind=8)    :: cooling_rate             = 0.99d0
         real(kind=8)    :: contamination            = 0.1d0
+        real(kind=8)    :: thinning_rate            = 0.0d0
         logical(kind=4) :: skip_used_features       = f_
         logical(kind=4) :: boot_strap               = f_
         logical(kind=4) :: random_splitter          = f_
         character(len=256) :: criterion             = "mse" !> mse, mae
         character(len=256) :: strategy              = "quantile" !> uniform, quantile, k-means
         character(len=256) :: fashion               = "best" !> best, depth, level, impurity, sample
+        character(len=256) :: feature_selection     = "uniform" !> uniform, best 
+        character(len=256) :: split_selection       = "uniform" !> uniform, best 
+        character(len=256) :: depth                 = "log2" !> uniform, best 
         integer(kind=8) :: n_clusters               = 10_8
+        integer(kind=8) :: num_threads              = 1_8
     end type hparam_decisiontree
 
     type, extends(hparam_base) :: hparam_sgd_estimator
