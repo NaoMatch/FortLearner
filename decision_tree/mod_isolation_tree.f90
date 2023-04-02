@@ -148,17 +148,23 @@ contains
     !> A function to predict anomaly score for 'x'.
     !! \return predicted values
     !! \param x input
-    function predict_isolation_tree(this, x, return_depth)
+    function predict_isolation_tree(this, x, return_depth, parallel)
         implicit none
         class(isolation_tree)    :: this
         real(kind=8), intent(in) :: x(:,:)
         real(kind=8), ALLOCATABLE :: predict_isolation_tree(:,:)
         logical(kind=4), optional :: return_depth
-        if (present(return_depth)) then
-            predict_isolation_tree = this%predict_response(x, return_depth=return_depth)
-        else
-            predict_isolation_tree = this%predict_response(x)
-        end if
+        logical(kind=4) :: return_depth_opt
+        logical(kind=4), optional :: parallel
+        logical(kind=4) :: parallel_opt
+
+        return_depth_opt = f_
+        if (present(return_depth)) return_depth_opt = return_depth
+
+        parallel_opt = f_
+        if (present(parallel)) parallel_opt = parallel
+
+        predict_isolation_tree = this%predict_response(x, return_depth=return_depth_opt, parallel=parallel_opt)
     end function predict_isolation_tree
 
 
