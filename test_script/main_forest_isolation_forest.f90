@@ -341,12 +341,12 @@ contains
             time_pred = time_pred + time_diff(date_value1, date_value2)
             
             auc_score_train = metric%auc(y_train(:,1), y_train_pred(:,1))
-            auc_score_test  = metric%auc(y_test(:,1), y_test_pred(:,1))
+            auc_score_test  = metric%auc(y_test(:,1),  y_test_pred(:,1))
             auc_train(iter) = auc_score_train
             auc_test(iter) = auc_score_test
                         
-            avgp_score_train = average_precision(y_train(:,1), y_train_pred(:,1))
-            avgp_score_test  = average_precision(y_test(:,1), y_test_pred(:,1))
+            avgp_score_train = metric%average_precision(y_train(:,1), y_train_pred(:,1))
+            avgp_score_test  = metric%average_precision(y_test(:,1),  y_test_pred(:,1))
             avgp_train(iter) = avgp_score_train
             avgp_test(iter) = avgp_score_test
         end do
@@ -409,43 +409,5 @@ contains
 
         precision = dble(tp) / dble(tp+fp)
     end function precision_i8
-
-
-    function average_precision(y_true, y_pred) result(score)
-        implicit none
-        integer(kind=8), intent(in) :: y_true(:)
-        real(kind=8), intent(in)    :: y_pred(:)
-        real(kind=8) :: score
-
-        integer(kind=8), allocatable :: y_true_copy(:)
-        real(kind=8), allocatable :: y_pred_copy(:)
-        integer(kind=8) :: n, i, label
-        integer(kind=8) :: n_tp, n_fp, n_true
-        real(kind=8) :: p, r_old, r_new
-
-        n = size(y_true)
-        allocate(y_true_copy, source=y_true)
-        allocate(y_pred_copy, source=y_pred)
-
-        call quick_argsort(y_pred_copy, y_true_copy, n)
-
-        n_true = sum(y_true)
-
-        score = 0d0
-        r_old = 0d0
-        n_tp = 0
-        n_fp = 0
-        do i=n, 1, -1
-            label = y_true_copy(i)
-            n_tp = n_tp + label
-            n_fp = n_fp + 1_8-label
-
-            p = n_tp / dble(n_tp + n_fp)
-            r_new = n_tp / dble(n_true)
-
-            score = score + (r_new-r_old)*p
-            r_old = r_new
-        end do
-    end function average_precision
 
 end program main_forest_isolation_forest
