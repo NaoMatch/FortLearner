@@ -7,11 +7,12 @@ cd test_script
 make test_all  
 
 # WIP:  
-Implement parallel predict function for tree-type estimators  
+Average Precision  
 ~Benchmark and Optimize KDTree, Naive Bayse, Implement Linear/Kernel SVR, One-Class SVM, ica~
 
 
 # Update
+2023/04/02: apply openmp for FOREST%predict(x, parallel=.true.)  
 2023/03/29: Thinnnig (isolation_forest)  
 2023/02/21: KNN classifier  
 2023/02/20: KNN regressor  
