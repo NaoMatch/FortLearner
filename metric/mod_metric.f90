@@ -13,6 +13,10 @@ module mod_metric
         procedure, pass :: auc_i8
         generic   :: auc => auc_i4, auc_i8
 
+        procedure, pass :: average_precision_i4
+        procedure, pass :: average_precision_i8
+        generic   :: average_precision => average_precision_i4, average_precision_i8
+
         procedure, pass :: logloss_i4
         procedure, pass :: logloss_i8
         generic   :: logloss => logloss_i4, logloss_i8
@@ -93,6 +97,90 @@ contains
         auc_i4 = tmp
     end function auc_i4
     include "./include/auc/inc_auc.f90"
+
+
+    !> A function to compute average precision
+    !! \param y_true ground-truth values
+    !! \param y_pred predicted values
+    function average_precision_i4(this, y_true, y_pred) result(score)
+        implicit none
+        class(metrics) :: this
+        integer(kind=4), intent(in) :: y_true(:)
+        real(kind=4), intent(in)    :: y_pred(:)
+        real(kind=4) :: score
+
+        integer(kind=4), allocatable :: y_true_copy(:)
+        real(kind=4), allocatable :: y_pred_copy(:)
+        integer(kind=4) :: n, i, label
+        integer(kind=4) :: n_tp, n_fp, n_true
+        real(kind=4) :: p, r_old, r_new
+
+        n = size(y_true)
+        allocate(y_true_copy, source=y_true)
+        allocate(y_pred_copy, source=y_pred)
+
+        call quick_argsort(y_pred_copy, y_true_copy, n)
+
+        n_true = sum(y_true)
+
+        score = 0.0
+        r_old = 0.0
+        n_tp = 0
+        n_fp = 0
+        do i=n, 1, -1
+            label = y_true_copy(i)
+            n_tp = n_tp + label
+            n_fp = n_fp + 1_8-label
+
+            p = n_tp / dble(n_tp + n_fp)
+            r_new = n_tp / dble(n_true)
+
+            score = score + (r_new-r_old)*p
+            r_old = r_new
+        end do
+    end function average_precision_i4
+
+
+    !> A function to compute average precision
+    !! \param y_true ground-truth values
+    !! \param y_pred predicted values
+    function average_precision_i8(this, y_true, y_pred) result(score)
+        implicit none
+        class(metrics) :: this
+        integer(kind=8), intent(in) :: y_true(:)
+        real(kind=8), intent(in)    :: y_pred(:)
+        real(kind=8) :: score
+
+        integer(kind=8), allocatable :: y_true_copy(:)
+        real(kind=8), allocatable :: y_pred_copy(:)
+        integer(kind=8) :: n, i, label
+        integer(kind=8) :: n_tp, n_fp, n_true
+        real(kind=8) :: p, r_old, r_new
+
+        n = size(y_true)
+        allocate(y_true_copy, source=y_true)
+        allocate(y_pred_copy, source=y_pred)
+
+        call quick_argsort(y_pred_copy, y_true_copy, n)
+
+        n_true = sum(y_true)
+
+        score = 0d0
+        r_old = 0d0
+        n_tp = 0
+        n_fp = 0
+        do i=n, 1, -1
+            label = y_true_copy(i)
+            n_tp = n_tp + label
+            n_fp = n_fp + 1_8-label
+
+            p = n_tp / dble(n_tp + n_fp)
+            r_new = n_tp / dble(n_true)
+
+            score = score + (r_new-r_old)*p
+            r_old = r_new
+        end do
+    end function average_precision_i8
 
 
     !> A function to compute logloss
