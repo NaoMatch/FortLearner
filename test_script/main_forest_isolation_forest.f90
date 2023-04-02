@@ -335,16 +335,16 @@ contains
             if (thin) call iforest%thinning(x_train)
 
             call date_and_time(values=date_value1)
-            y_train_pred = iforest%predict(x_train)
-            y_test_pred = iforest%predict(x_test)
+            y_train_pred = iforest%predict(x_train, parallel=t_)
+            y_test_pred = iforest%predict(x_test, parallel=t_)
             call date_and_time(values=date_value2)
             time_pred = time_pred + time_diff(date_value1, date_value2)
-
+            
             auc_score_train = metric%auc(y_train(:,1), y_train_pred(:,1))
             auc_score_test  = metric%auc(y_test(:,1), y_test_pred(:,1))
             auc_train(iter) = auc_score_train
             auc_test(iter) = auc_score_test
-
+                        
             avgp_score_train = average_precision(y_train(:,1), y_train_pred(:,1))
             avgp_score_test  = average_precision(y_test(:,1), y_test_pred(:,1))
             avgp_train(iter) = avgp_score_train
