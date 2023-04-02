@@ -7,7 +7,7 @@ cd test_script
 make test_all  
 
 # WIP:  
-Average Precision  
+Local Outlier Factor    
 ~Benchmark and Optimize KDTree, Naive Bayse, Implement Linear/Kernel SVR, One-Class SVM, ica~
 
 
