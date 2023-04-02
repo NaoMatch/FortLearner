@@ -2,7 +2,7 @@ compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
 opt              := -O2
-option           := -cpp -D_x86_64 -fopenmp -fbounds-check
+option           := -cpp -D_x86_64 -fopenmp
 option_degug     := -fdec -fbounds-check -Wall  -Wuninitialized -ffpe-trap=invalid,zero,overflow -fbacktrace -g 
 option_blas      := -lopenblas
 
@@ -24,6 +24,8 @@ asm              := ./mod/inc_sum_up_vector_c.out \
 
 common           := 	./mod/mod_const.out \
 						./mod/mod_common.out \
+						./mod/mod_common_type.out \
+						./mod/mod_heap.out \
 						./mod/mod_timer.out \
 						./mod/mod_error.out \
 						./mod/mod_random.out \
@@ -136,6 +138,7 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_const.f90 -o ./mod/mod_const.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_common.f90 -o ./mod/mod_common.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_common_type.f90 -o ./mod/mod_common_type.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_heap.f90 -o ./mod/mod_heap.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_timer.f90 -o ./mod/mod_timer.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../error/mod_error.f90 -o ./mod/mod_error.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_random.f90 -o ./mod/mod_random.out
@@ -270,13 +273,37 @@ clean:
 	-rm ./*.out
 
 build:
-	
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_node.f90 -o ./mod/mod_node.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_splitter.f90 -o ./mod/mod_splitter.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_woodworking_tools.f90 -o ./mod/mod_woodworking_tools.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_base_tree.f90 -o ./mod/mod_base_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_decision_tree.f90 -o ./mod/mod_decision_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_extra_tree.f90 -o ./mod/mod_extra_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_clouds.f90 -o ./mod/mod_clouds.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_lawu.f90 -o ./mod/mod_lawu.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_sadt.f90 -o ./mod/mod_sadt.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_isolation_tree.f90 -o ./mod/mod_isolation_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_extended_isolation_tree.f90 -o ./mod/mod_extended_isolation_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_random_rotation_decision_tree.f90 -o ./mod/mod_random_rotation_decision_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_sliq.f90 -o ./mod/mod_sliq.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_oblivious_tree.f90 -o ./mod/mod_oblivious_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_threshold_tree.f90 -o ./mod/mod_threshold_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_clouds.f90 -o ./mod/mod_gradient_boosting_clouds.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_extra_tree.f90 -o ./mod/mod_gradient_boosting_extra_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_lawu.f90 -o ./mod/mod_gradient_boosting_lawu.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_tree.f90 -o ./mod/mod_gradient_boosting_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_adaboost.f90 -o ./mod/mod_gradient_boosting_adaboost.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_random_forest.f90 -o ./mod/mod_random_forest.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_extra_trees.f90 -o ./mod/mod_extra_trees.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_isolation_forest.f90 -o ./mod/mod_isolation_forest.out
 
 test:
 	make clean
 	# make build
-	# make build_all
-	python create_datasets.py
+	make build_all
+	# python create_datasets.py
+	make main_forest_isolation_forest
 
 test_all:
 	make clean

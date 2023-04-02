@@ -2,6 +2,7 @@
 module mod_base_tree
     use mod_const
     use mod_common
+    use mod_heap
     use mod_math
     use mod_node
     use mod_hyperparameter
@@ -687,18 +688,22 @@ contains
     !> If regression tree, returns responses.
     !! \param x explanatory array
     !! \param return_depth **optional** return sample depth. If terminal node contains multiple instances, add 'avg_depth(n_samples in node)'. Use isolation_tree and isolation_forest only.
-    function predict_response(this, x, return_depth)
+    function predict_response(this, x, return_depth, parallel)
         implicit none
         class(base_tree)                  :: this
         real(kind=8), target, intent(in)  :: x(:,:)
         real(kind=8), allocatable         :: predict_response(:,:)
         logical(kind=4), optional         :: return_depth
+        logical(kind=4), optional         :: parallel
 
         real(kind=8), pointer        :: x_ptr(:,:)
         integer(kind=8), allocatable :: indices(:)
         integer(kind=8)              :: x_shape(2), n_samples, n_columns, i
         logical(kind=4)              :: return_depth_opt
+        logical(kind=4)              :: parallel_opt
 
+        parallel_opt = f_
+        if (present(parallel)) parallel_opt = parallel
 
         x_shape = shape(x)
         n_samples  = x_shape(1)
@@ -720,15 +725,26 @@ contains
             end do
         end if
         if (this%is_axis_parallel) then
-            call predict_response_axis(this%results, x_ptr, indices, & 
-                predict_response, n_samples, this%n_outputs_, is_root=t_, & 
-                is_layer_wise_sum=this%is_layer_wise_sum, &
-                lr_layer=this%lr_layer, is_isolation_tree=this%is_isolation_tree)
+            if (parallel_opt) then
+                call predict_response_parallel_axis(this%results, x_ptr, indices, & 
+                    predict_response, n_samples, this%n_outputs_, is_root=t_, & 
+                    is_layer_wise_sum=this%is_layer_wise_sum, &
+                    lr_layer=this%lr_layer, is_isolation_tree=this%is_isolation_tree)
+            else
+                call predict_response_axis(this%results, x_ptr, indices, & 
+                    predict_response, n_samples, this%n_outputs_, is_root=t_, & 
+                    is_layer_wise_sum=this%is_layer_wise_sum, &
+                    lr_layer=this%lr_layer, is_isolation_tree=this%is_isolation_tree)
+            end if
         else
-            call predict_response_oblq(this%results, x_ptr, indices, & 
-                predict_response, n_samples, this%n_outputs_, is_root=t_, & 
-                is_layer_wise_sum=this%is_layer_wise_sum, &
-                lr_layer=this%lr_layer)
+            if (parallel_opt) then
+                stop "parallel=.true. for 'predict_response for oblique decision tree'  is not implemented yet"
+            else
+                call predict_response_oblq(this%results, x_ptr, indices, & 
+                    predict_response, n_samples, this%n_outputs_, is_root=t_, & 
+                    is_layer_wise_sum=this%is_layer_wise_sum, &
+                    lr_layer=this%lr_layer)
+            end if
         end if
 
         if (this%is_isolation_tree) then
@@ -750,17 +766,23 @@ contains
     !> If regression tree, returns responses.
     !! \param x explanatory array
     !! \param return_depth **optional** return sample depth. If terminal node contains multiple instances, add 'avg_depth(n_samples in node)'. Use isolation_tree and isolation_forest only.
-    function predict_labels(this, x, return_depth)
+    function predict_labels(this, x, return_depth, parallel)
         implicit none
         class(base_tree)                  :: this
         real(kind=8), target, intent(in)  :: x(:,:)
         integer(kind=8), allocatable         :: predict_labels(:,:)
         logical(kind=4), optional         :: return_depth
+        logical(kind=4), optional         :: parallel
 
         real(kind=8), pointer        :: x_ptr(:,:)
         integer(kind=8), allocatable :: indices(:)
         integer(kind=8)              :: x_shape(2), n_samples, n_columns, i
         logical(kind=4)              :: return_depth_opt
+        logical(kind=4)              :: parallel_opt
+
+        if (present(return_depth)) print*, "optional argment 'return_depth' is ignored."
+        parallel_opt = f_
+        if (present(parallel)) parallel_opt = parallel
 
         x_shape = shape(x)
         n_samples  = x_shape(1)
@@ -782,8 +804,12 @@ contains
             end do
         end if
         if (this%is_axis_parallel) then
-            call predict_labels_axis(this%results, x_ptr, indices, & 
-                predict_labels, n_samples, this%n_labels_, is_root=t_)
+            if (parallel_opt) then
+                stop "parallel=.true. for 'predict_response for axis-parallel decision tree'  is not implemented yet"
+            else
+                call predict_labels_axis(this%results, x_ptr, indices, & 
+                    predict_labels, n_samples, this%n_labels_, is_root=t_)
+            end if
         else
             stop "Predict Labels for Oblique Tree is Not Implemented."
         end if
@@ -989,7 +1015,7 @@ contains
         ! deallocate(indices_l, indices_r, tmp_f, lt_thresholds)
     end subroutine predict_response_axis
 
-    subroutine predict_response_axis_non_recursive(result, x_ptr, indices, responses, n_samples, n_outputs, &
+    subroutine predict_response_parallel_axis(result, x_ptr, indices, responses, n_samples, n_outputs, &
         is_root, is_layer_wise_sum, lr_layer, is_isolation_tree)
         implicit none
         type(train_results)   :: result
@@ -1002,80 +1028,84 @@ contains
         real(kind=8)          :: lr_layer
         logical(kind=4)       :: is_isolation_tree
 
-        integer(kind=8), save        :: node_id
+        integer(kind=8)              :: node_id
         integer(kind=8)              :: idx, i, fid
         integer(kind=8)              :: count_l, count_r, factor
         real(kind=8)                 :: threshold
         real(kind=8), allocatable    :: res(:), tmp_f(:)
         logical(kind=4), allocatable :: lt_thresholds(:)
         integer(kind=8), allocatable :: indices_l(:), indices_r(:)
+        integer(kind=8) :: n_leaves, n_idxs
+        integer(kind=8), allocatable :: idxs(:)
+        type(heap) :: hp
 
-        if (is_root) node_id = 0_8
-        node_id = node_id + 1_8
-        
-        ! print*, size(result%is_terminals_), node_id
-        if (n_samples .eq. 0 .and. result%is_terminals_(node_id)) return
-        if (n_samples .eq. 0) goto 999
+        n_leaves = size(result%responses_, dim=1)
 
-        if (is_layer_wise_sum) then
-            allocate(res(result%n_outputs_))
-            res = lr_layer * result%responses_(node_id,:)
-            do i=1, n_samples
-                idx = indices(i)
-                responses(idx,:) = responses(idx,:) + res
-            end do
-            if (result%is_terminals_(node_id)) return
-        else
+        idxs=indices
+        hp = heap(n_samples, 100_8)
+        do node_id=1, n_leaves, 1
+            if (allocated(res)) deallocate(res)
+            n_idxs = size(idxs)
+
+            if (is_layer_wise_sum) then
+                allocate(res(result%n_outputs_))
+                res = lr_layer * result%responses_(node_id,:)
+                do i=1, n_idxs
+                    idx = idxs(i)
+                    responses(idx,:) = responses(idx,:) + res
+                end do
+                if (result%is_terminals_(node_id)) then
+                    idxs = hp%pop()
+                    cycle
+                end if
+            end if
+
             if ( result%is_terminals_(node_id) ) then
                 allocate(res(result%n_outputs_))
                 res = result%responses_(node_id,:)
-                if (is_isolation_tree) res = res + avg_depth(n_samples)
-                do i=1, n_samples
-                    idx = indices(i)
+                if (is_isolation_tree) res = res + avg_depth(n_idxs)
+                do i=1, n_idxs
+                    idx = idxs(i)
                     responses(idx,:) = res
                 end do
-                return
+                idxs = hp%pop()
+                cycle
             end if
-        end if
+    
+            allocate(tmp_f(n_idxs))
+            fid = result%split_features_(node_id)
+            threshold = result%split_thresholds_(node_id)
+            do i=1, n_idxs, 1
+                idx = idxs(i)
+                tmp_f(i) = x_ptr(idx, fid)
+            end do
 
-        allocate(tmp_f(n_samples))
-        fid = result%split_features_(node_id)
-        do i=1, n_samples, 1
-            idx = indices(i)
-            tmp_f(i) = x_ptr(idx, fid)
-        end do
-        threshold = result%split_thresholds_(node_id)
-
-        allocate(lt_thresholds(n_samples))
-        lt_thresholds = tmp_f .le. threshold
-        count_l = count(lt_thresholds)
-        count_r = n_samples - count_l
-        allocate(indices_l(count_l))
-        allocate(indices_r(count_r))
-        indices_l = -1_8
-        indices_r = -1_8
-        count_l = 1_8
-        count_r = 1_8
-        do i=1, n_samples, 1
-            idx = indices(i)
-            if (lt_thresholds(i)) then
-                indices_l(count_l) = idx
-                count_l = count_l + 1_8
-            else
-                indices_r(count_r) = idx
-                count_r = count_r + 1_8
-            end if
-        end do
-
-
-        999 continue
-        if ( .not. allocated(indices_l) .and. .not. allocated(indices_r)) then
+            allocate(lt_thresholds(n_idxs))
+            lt_thresholds = tmp_f .le. threshold
+            count_l = count(lt_thresholds)
+            count_r = n_idxs - count_l
+            allocate(indices_l(count_l))
+            allocate(indices_r(count_r))
+            indices_l = -1_8
+            indices_r = -1_8
             count_l = 1_8
             count_r = 1_8
-            allocate(indices_l(0_8))
-            allocate(indices_r(0_8))
-        end if
-    end subroutine predict_response_axis_non_recursive
+            do i=1, n_idxs, 1
+                idx = idxs(i)
+                if (lt_thresholds(i)) then
+                    indices_l(count_l) = idx
+                    count_l = count_l + 1_8
+                else
+                    indices_r(count_r) = idx
+                    count_r = count_r + 1_8
+                end if
+            end do
+    
+            idxs = indices_l
+            call hp%add(indices_r, count_r-1)
+            deallocate(tmp_f, lt_thresholds, indices_l, indices_r)
+        end do
+    end subroutine predict_response_parallel_axis
 
 
     !> A subroutine to predict responses for tree with 'obluque' node.

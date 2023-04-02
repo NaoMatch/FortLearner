@@ -109,31 +109,54 @@ contains
     end subroutine fit_isolation_forest
 
 
-    !> A subroutine to fit 'isolation_forest'
+    !> A function to predict anomaly score by fitted 'isolation_forest'
     !! \param x an input explanatory variable to be predicted
-    function predict_isolation_forest(this, x)
+    function predict_isolation_forest(this, x, parallel)
         implicit none
         class(isolation_forest)          :: this
         real(kind=8), target, intent(in) :: x(:,:)
+        logical(kind=4), optional :: parallel
+        logical(kind=4) :: parallel_opt
+
         real(kind=8), allocatable        :: predict_isolation_forest(:,:)
-        integer(kind=8) :: shape_x(2), n_samples, n, i, j
+        real(kind=8), allocatable        :: probas(:,:), tmp_proba(:,:)
+        integer(kind=8) :: shape_x(2), n_samples, e, n, i, j, thread_id
 
         type(isolation_tree) :: itree
         integer(kind=8), allocatable :: indices(:)
         real(kind=8), pointer :: x_ptr(:,:)
 
+        parallel_opt = f_
+        if (present(parallel)) parallel_opt = parallel
+
         x_ptr => x
         shape_x = shape(x)
         n_samples = shape_x(1)
 
-        allocate(predict_isolation_forest(n_samples, 1))
-        predict_isolation_forest = 0d0
-
-        do n=1, this%n_estimators_, 1
-            predict_isolation_forest = &
-                predict_isolation_forest & 
-                + this%trees(n)%predict(x, return_depth=t_)
-        end do
+        allocate(predict_isolation_forest(n_samples, 1)); predict_isolation_forest=0d0
+        
+        if (parallel_opt) then
+            allocate(probas(n_samples, 1))
+            probas(:,:) = 0d0
+            allocate(tmp_proba(n_samples, 1))
+            CALL OMP_SET_NUM_THREADS(this%hparam%num_threads)
+            !$omp parallel shared(this, x_ptr, probas)
+            !$omp do private(e, itree) reduction(+:probas)
+            do e=1, this%n_estimators_, 1
+                thread_id = omp_get_thread_num()+1
+                itree = this%trees(e)
+                probas(:,:) = probas(:,:) + itree%predict(x_ptr, return_depth=t_, parallel=t_)
+            end do
+            !$omp end do
+            !$omp end parallel
+            predict_isolation_forest(:,:) = probas
+        else
+            do n=1, this%n_estimators_, 1
+                predict_isolation_forest = &
+                    predict_isolation_forest & 
+                    + this%trees(n)%predict(x, return_depth=t_, parallel=f_)
+            end do
+        end if
         
         predict_isolation_forest = predict_isolation_forest / dble(this%n_estimators_)
         predict_isolation_forest(:,1) = 2d0**(-predict_isolation_forest(:,1)/avg_depth(n_samples))
