@@ -2,7 +2,7 @@ compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
 opt              := -O2
-option           := -cpp -D_x86_64 -fopenmp
+option           := -cpp -D_x86_64 -fopenmp -fbounds-check
 option_degug     := -fdec -fbounds-check -Wall  -Wuninitialized -ffpe-trap=invalid,zero,overflow -fbacktrace -g 
 option_blas      := -lopenblas
 
@@ -88,6 +88,7 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_product_quantization.out \
 						./mod/mod_k_nearest_neighbor_regressor.out \
 						./mod/mod_k_nearest_neighbor_classifier.out \
+						./mod/mod_local_outlier_factor.out \
 						\
 						./mod/mod_pca.out \
 						./mod/mod_nipals.out \
@@ -169,6 +170,7 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_balltree.f90 -o ./mod/mod_balltree.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_classifier.f90 -o ./mod/mod_k_nearest_neighbor_classifier.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_regressor.f90 -o ./mod/mod_k_nearest_neighbor_regressor.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_local_outlier_factor.f90 -o ./mod/mod_local_outlier_factor.out
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_base_kmeans.f90 -o ./mod/mod_base_kmeans.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_kmeans.f90 -o ./mod/mod_kmeans.out
@@ -273,37 +275,20 @@ clean:
 	-rm ./*.out
 
 build:
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_node.f90 -o ./mod/mod_node.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_splitter.f90 -o ./mod/mod_splitter.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_woodworking_tools.f90 -o ./mod/mod_woodworking_tools.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_base_tree.f90 -o ./mod/mod_base_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_decision_tree.f90 -o ./mod/mod_decision_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_extra_tree.f90 -o ./mod/mod_extra_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_clouds.f90 -o ./mod/mod_clouds.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_lawu.f90 -o ./mod/mod_lawu.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_sadt.f90 -o ./mod/mod_sadt.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_isolation_tree.f90 -o ./mod/mod_isolation_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_extended_isolation_tree.f90 -o ./mod/mod_extended_isolation_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_random_rotation_decision_tree.f90 -o ./mod/mod_random_rotation_decision_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_sliq.f90 -o ./mod/mod_sliq.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_oblivious_tree.f90 -o ./mod/mod_oblivious_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_threshold_tree.f90 -o ./mod/mod_threshold_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_clouds.f90 -o ./mod/mod_gradient_boosting_clouds.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_extra_tree.f90 -o ./mod/mod_gradient_boosting_extra_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_lawu.f90 -o ./mod/mod_gradient_boosting_lawu.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_tree.f90 -o ./mod/mod_gradient_boosting_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_adaboost.f90 -o ./mod/mod_gradient_boosting_adaboost.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_random_forest.f90 -o ./mod/mod_random_forest.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_extra_trees.f90 -o ./mod/mod_extra_trees.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_isolation_forest.f90 -o ./mod/mod_isolation_forest.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_nearest_neighbour.f90 -o ./mod/mod_nearest_neighbour.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_brute_force_search.f90 -o ./mod/mod_brute_force_search.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_kdtree.f90 -o ./mod/mod_kdtree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_balltree.f90 -o ./mod/mod_balltree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_classifier.f90 -o ./mod/mod_k_nearest_neighbor_classifier.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_regressor.f90 -o ./mod/mod_k_nearest_neighbor_regressor.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_local_outlier_factor.f90 -o ./mod/mod_local_outlier_factor.out
 
 test:
 	make clean
 	# make build
 	make build_all
-	# python create_datasets.py
-	make main_forest_isolation_forest
+	make main_neighbor_local_outlier_factor
 
 test_all:
 	make clean
@@ -345,6 +330,7 @@ test_all:
 	make main_neighbour_k_nearest_neighbor_classifier
 	make main_neighbour_k_nearest_neighbor_regressor
 	make main_neighbour_product_quantization
+	make main_neighbor_local_outlier_factor
 	make main_stats_count_and_sum_up_gt
 	make main_stats_count_and_sum_up_gt_matrix_with_index
 	make main_stats_covariance_of_vectors
@@ -680,6 +666,14 @@ main_neighbour_product_quantization:
 	main_neighbour_product_quantization.f90 -o main_neighbour_product_quantization.out \
 	$(option_blas)
 	./main_neighbour_product_quantization.out
+
+main_neighbor_local_outlier_factor:
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main_neighbor_local_outlier_factor.f90 -o main_neighbor_local_outlier_factor.out \
+	$(option_blas)
+	./main_neighbor_local_outlier_factor.out
 
 main_stats_count_and_sum_up_gt:
 	$(compiler_fortran) -w -unroll \
