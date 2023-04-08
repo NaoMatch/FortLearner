@@ -36,9 +36,18 @@ module mod_hyperparameter
         "modified_greedy"  &
     ]
 
+    character(len=256) :: neighbor_algorithm_list(3) = [ &
+        "kd_tree    ", &
+        "ball_tree  ", &
+        "brute_force"  &
+    ]
     
-    
-    
+    character(len=256) :: kernel_list(4) = [ &
+        "linear      ", &
+        "exponential ", &
+        "epanechnikov", &
+        "tricubic    " &
+    ]    
     
     
 
@@ -55,6 +64,14 @@ module mod_hyperparameter
         ! procedure :: true_only
         ! procedure :: false_only
     end type
+
+    type, extends(hparam_base) :: hparam_local_outlier_factor
+        integer(kind=8)  :: n_neighbors = 8_8
+        character(len=256) :: algorithm = "kd_tree" !< brute_force, kd_tree, ball_tree
+        character(len=256) :: kernel = "linear" !< brute_force, kd_tree, ball_tree
+        integer(kind=8)  :: algorithm_int = 1_8
+        integer(kind=8)  :: min_samples_in_leaf = 128_8
+    end type hparam_local_outlier_factor
 
     type, extends(hparam_base) :: hparam_k_nearest_neighbor_regressor
         integer(kind=8)  :: n_neighbors = 8_8
