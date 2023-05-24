@@ -40,6 +40,7 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_linalg.out \
 						./mod/mod_eig.out \
 						./mod/mod_optimization.out \
+						./mod/mod_union_find.out \
 						\
 						./mod/mod_hyperparameter.out \
 						./mod/mod_discretizer.out \
@@ -155,6 +156,8 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../linalg/mod_eig.f90 -o ./mod/mod_eig.out
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../optimization/mod_optimization.f90 -o ./mod/mod_optimization.out
+	\
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../data_structure/mod_union_find.f90 -o ./mod/mod_union_find.out
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
 	\
@@ -275,20 +278,13 @@ clean:
 	-rm ./*.out
 
 build:
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_nearest_neighbour.f90 -o ./mod/mod_nearest_neighbour.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_brute_force_search.f90 -o ./mod/mod_brute_force_search.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_kdtree.f90 -o ./mod/mod_kdtree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_balltree.f90 -o ./mod/mod_balltree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_classifier.f90 -o ./mod/mod_k_nearest_neighbor_classifier.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_k_nearest_neighbor_regressor.f90 -o ./mod/mod_k_nearest_neighbor_regressor.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_local_outlier_factor.f90 -o ./mod/mod_local_outlier_factor.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../data_structure/mod_union_find.f90 -o ./mod/mod_union_find.out
 
 test:
 	make clean
-	# make build
-	make build_all
-	make main_neighbor_local_outlier_factor
+	make build
+	# make build_all
+	make main_data_structure_union_find
 
 test_all:
 	make clean
@@ -347,6 +343,15 @@ test_all:
 	make main_svm_linear_svm
 	make main_svm_kernel_svm
 	make main_hash_hash_map
+	make main_data_structure_union_find
+
+main_data_structure_union_find:
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main_data_structure_union_find.f90 -o main_data_structure_union_find.out \
+	$(option_blas)
+	./main_data_structure_union_find.out
 
 main_hash_hash_map:
 	$(compiler_fortran) -w -unroll \
