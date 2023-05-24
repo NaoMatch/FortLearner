@@ -3,6 +3,8 @@ module mod_union_find
 
     type union_find
         integer(kind=8) :: n_samples
+        integer(kind=8) :: next_label
+        integer(kind=8), allocatable :: labels(:)
         integer(kind=8), allocatable :: parents(:)
     contains
         procedure :: reset => reset_union_find
@@ -24,16 +26,22 @@ contains
         type(union_find) :: obj
 
         obj%n_samples = n_samples
+        obj%next_label = n_samples+1
+
         allocate(obj%parents(n_samples))
+        allocate(obj%labels(n_samples))
 
         obj%parents(:) = -1_8
+        obj%labels(:) = -1_8
     end function new_union_find
 
 
     subroutine reset_union_find(this)
         implicit none
         class(union_find) :: this
+        this%next_label = this%n_samples+1
         this%parents = -1
+        this%labels = -1
     end subroutine reset_union_find
 
 
