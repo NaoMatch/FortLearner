@@ -1,7 +1,74 @@
 !> A module for common functions.
 module mod_common
+    use iso_c_binding
     use mod_const
     implicit none
+
+    interface
+        function dlopen(filename,mode) bind(c,name="dlopen")
+            ! void *dlopen(const char *filename, int mode);
+            use iso_c_binding
+            implicit none
+            type(c_ptr) :: dlopen
+            character(c_char), intent(in) :: filename(*)
+            integer(c_int), value :: mode
+        end function
+
+        function dlsym(handle,name) bind(c,name="dlsym")
+            ! void *dlsym(void *handle, const char *name);
+            use iso_c_binding
+            implicit none
+            type(c_funptr) :: dlsym
+            type(c_ptr), value :: handle
+            character(c_char), intent(in) :: name(*)
+        end function
+
+        function dlclose(handle) bind(c,name="dlclose")
+            ! int dlclose(void *handle);
+            use iso_c_binding
+            implicit none
+            integer(c_int) :: dlclose
+            type(c_ptr), value :: handle
+        end function
+    end interface
+
+    abstract interface
+        subroutine called_branched_predict (event, res) bind(c)
+            use, intrinsic :: iso_c_binding
+            real(c_double), intent(in) :: event(:)
+            real(c_double), intent(out) :: res(:)
+        end subroutine called_branched_predict
+    end interface
+
+    abstract interface
+        subroutine called_branchless_predict (event, features, thresholds, responses, res) bind(c)
+            use, intrinsic :: iso_c_binding
+            real(c_double), intent(in) :: event(:)
+            integer(c_long), intent(in) :: features(:)
+            real(c_double), intent(in) :: thresholds(:)
+            real(c_double), intent(in) :: responses(:,:)
+            real(c_double), intent(out) :: res(:)
+        end subroutine called_branchless_predict
+    end interface
+
+    abstract interface
+        subroutine called_branched_batch_predict(events, reses) bind(c)
+            use, intrinsic :: iso_c_binding
+            real(c_double), intent(in) :: events(:,:)
+            real(c_double), intent(out) :: reses(:,:)
+        end subroutine called_branched_batch_predict
+    end interface
+
+    abstract interface
+        subroutine called_branchless_batch_predict (events, features, thresholds, responses, reses) bind(c)
+            use, intrinsic :: iso_c_binding
+            real(c_double), intent(in) :: events(:,:)
+            integer(c_long), intent(in) :: features(:)
+            real(c_double), intent(in) :: thresholds(:)
+            real(c_double), intent(in) :: responses(:,:)
+            real(c_double), intent(out) :: reses(:,:)
+        end subroutine called_branchless_batch_predict
+    end interface
 
     !> An interface to binary search from left
     interface binary_search_left
@@ -78,6 +145,11 @@ module mod_common
         module procedure get_int_digit_i8       
     end interface get_int_digit
 
+    !> An interface to get digit of input integer
+    interface get_real_digit
+        module procedure get_real_digit_r8
+    end interface get_real_digit
+
     !> An interface to initialize allocated square matrix to identity matrix
     interface identity
         module procedure identity_r4
@@ -93,7 +165,6 @@ module mod_common
         module procedure ifdealloc_vec_i4
         module procedure ifdealloc_vec_i8
         module procedure ifdealloc_mat_r4
-        module procedure ifdealloc_mat_r8
         module procedure ifdealloc_mat_i4
         module procedure ifdealloc_mat_i8
     end interface ifdealloc
@@ -390,6 +461,32 @@ contains
     include "./include/common/get_int_digit/inc_get_int_digit.f90"
 
 
+    function get_real_digit_r8(num) result(num_digit)
+        implicit none
+        real(kind=8),intent(in) :: num
+        integer(kind=8) :: num_digit
+        real(kind=8) :: num_copy
+        integer(kind=8) :: counter
+        
+        if (num>=1d0) then
+            if (num .lt. real(0d0, kind=kind(num))) then
+                num_digit = int(log10(dble(abs(num)))) + 1
+                num_digit = num_digit + 1
+            else
+                num_digit = int(log10(dble(num))) + 1
+            end if
+        else
+            counter = 0
+            num_copy = num
+            do while(num_copy<=1d0)
+                counter = counter + 1
+                num_copy = num_copy * 10d0
+            end do
+            num_digit = -counter
+        end if
+    end function get_real_digit_r8
+
+
     !> A subroutine to initialize allocated square matrix to identity matrix.
     !! \return returns identity matrix
     !! \param matrix already allocated square matrix
@@ -489,6 +586,34 @@ contains
         write (num2char_r4, '(E10.3e2)') num
     end function num2char_r4
     include "./include/common/num2char/inc_num2char.f90"
+
+    function array2char(arr) result(char)
+        implicit none
+        real(kind=8), intent(in) :: arr(:)
+        character(:), allocatable :: char
+        character(:), allocatable :: tmp
+        integer(kind=8) :: i
+
+        char = "["
+        do i=1, size(arr), 1
+            tmp = num2char(arr(i))
+            char = char // tmp // ", "
+        end do
+        char = char(1:len(char)-2) // "]"
+    end function array2char
+
+    function create_indent_spaces(depth) result(spaces)
+        implicit none
+        integer(kind=8) :: depth
+        character(len=4*depth) :: spaces
+
+        integer(kind=8) :: i
+
+        spaces = ""
+        do i=1, depth, 1
+            spaces = "    " // spaces
+        end do
+    end function create_indent_spaces
 
 
     !> A subroutine to print progress bar. 
