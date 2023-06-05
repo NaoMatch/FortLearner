@@ -71,6 +71,35 @@ module mod_woodworking_tools
 
 contains
 
+    recursive subroutine extract_specific_depth_node_ptrs_axis_for_jit(root_node_ptr, specific_depth, specific_depth_node_ptrs)
+        implicit none
+        type(node_axis), pointer, intent(in)            :: root_node_ptr
+        integer(kind=8), intent(in)                     :: specific_depth
+        type(node_axis_ptr), allocatable, intent(inout) :: specific_depth_node_ptrs(:)
+        type(node_axis_ptr)                             :: node_ptr
+
+        if (root_node_ptr%depth .eq. specific_depth) then
+            node_ptr%node_ptr => root_node_ptr
+            specific_depth_node_ptrs = [specific_depth_node_ptrs, node_ptr]
+        end if
+
+        if ( allocated(root_node_ptr%node_l) ) then
+            call extract_specific_depth_node_ptrs_axis_for_jit(root_node_ptr%node_l, specific_depth, specific_depth_node_ptrs)
+            call extract_specific_depth_node_ptrs_axis_for_jit(root_node_ptr%node_r, specific_depth, specific_depth_node_ptrs)
+        end if
+    end subroutine extract_specific_depth_node_ptrs_axis_for_jit
+
+    recursive subroutine check_max_depth(node, max_depth)
+        implicit none
+        type(node_axis) :: node
+        integer(kind=8) :: max_depth
+
+        max_depth = maxval([max_depth, node%depth])
+        if (node%is_terminal) return
+        call check_max_depth(node%node_l, max_depth)
+        call check_max_depth(node%node_r, max_depth)
+    end subroutine check_max_depth
+
     !> A function to compute average path length of the node containing 'n' samples
     !! \return average_path_length average path length
     !! \param n sample size

@@ -1,7 +1,9 @@
 !> A module for various decision tree algorithms.
 module mod_base_tree
+    use iso_c_binding
     use mod_const
     use mod_common
+    use mod_hash
     use mod_heap
     use mod_math
     use mod_node
@@ -11,7 +13,8 @@ module mod_base_tree
     use mod_woodworking_tools
     use mod_stats
     implicit none
-    
+
+
     !> A type of base tree for various decision tree algorithms. 
     !> This is inherited by all decision tree algorithms.
     type base_tree
@@ -52,6 +55,15 @@ module mod_base_tree
         integer(kind=8)                  :: n_outputs_             !< number of output dimension of objective variable, for classifier (label probability) and regressor.
         integer(kind=8)                  :: n_labels_              !< number of output dimension of objective variable, for classifier (one hot encoded label).
         integer(kind=8)                  :: n_leaf_nodes_          !< number of leaf node
+        type(c_funptr) :: proc_addr_branched = C_NULL_FUNPTR
+        type(c_funptr) :: proc_addr_branchless = C_NULL_FUNPTR
+        type(c_ptr) :: handle
+
+        integer(kind=8), allocatable :: features(:)
+        real(kind=8), allocatable :: thresholds(:)
+        real(kind=8), allocatable :: responses(:,:)
+        integer(kind=8), allocatable :: used_features(:)
+        
     contains
         procedure :: init => init_base_tree
         procedure :: induction_stop_check
@@ -71,9 +83,322 @@ module mod_base_tree
         procedure, pass :: print_info_axis
         procedure, pass :: print_info_oblq
         generic :: print_info => print_info_axis, print_info_oblq
+
+        procedure :: branched_jit
+        procedure :: branchless_jit
     end type base_tree
 
 contains
+
+    subroutine extract_and_add_children(root_node, filename, features, thresholds, responses)
+        implicit none
+        type(node_axis), target :: root_node
+        type(node_axis), pointer :: root_node_ptr
+        character(len=*), intent(in)    :: filename
+
+        integer(kind=8) :: n_nodes, max_depth, n_max_nodes
+        type(node_axis_ptr), allocatable :: selected_node_ptrs(:)
+
+        integer(kind=8), allocatable :: features(:)
+        real(kind=8), allocatable :: thresholds(:)
+        real(kind=8), allocatable :: responses(:,:)
+
+        integer(kind=8) :: i, d, n, unit
+
+        
+        root_node_ptr => root_node
+        n_nodes = 0; max_depth=0
+        call count_all_nodes(root_node_ptr, n_nodes, is_root=t_)
+        call check_max_depth(root_node, max_depth)
+
+        ! print*, "n_nodes, max_depth: ", n_nodes, max_depth
+        n_max_nodes = 2**(max_depth+1)-1
+
+        if (allocated(features)) deallocate(features)
+        if (allocated(thresholds)) deallocate(thresholds)
+        if (allocated(responses)) deallocate(responses)
+
+        allocate(features(0))
+        allocate(thresholds(0))
+        allocate(responses(n_max_nodes, 1))
+
+        features = [features, root_node%feature_id_]
+        thresholds = [thresholds, root_node%threshold_]
+        responses(1,:) = root_node%response
+
+        i=2
+        do d=1, max_depth, 1
+            allocate(selected_node_ptrs(0))
+            call extract_specific_depth_node_ptrs_axis_for_jit(root_node_ptr, d, selected_node_ptrs)
+            do n=1, size(selected_node_ptrs), 1
+                if (.not. allocated(selected_node_ptrs(n)%node_ptr%node_l)) then
+                    call clone_nodes(selected_node_ptrs(n)%node_ptr)
+                end if
+                features = [features, selected_node_ptrs(n)%node_ptr%feature_id_]
+                thresholds = [thresholds, selected_node_ptrs(n)%node_ptr%threshold_]
+                responses(i,:) = selected_node_ptrs(n)%node_ptr%response(:)
+                i = i + 1
+            end do
+            deallocate(selected_node_ptrs)
+        end do
+
+        open(newunit = unit, file = filename//".f90", status = 'replace')
+        write(unit,"(a)") "module "//filename
+        write(unit,"(a)") "    use, intrinsic :: iso_c_binding"
+        write(unit,"(a)") "contains"
+
+        write(unit,"(a)") "    subroutine predict_(event, features, thresholds, responses, res) bind(c, name='predict_')"
+        write(unit,"(a)") "        implicit none"
+        write(unit,"(a)") "        real(kind=8), intent(in) :: event(:)"
+        write(unit,"(a)") "        integer(kind=8), intent(in) :: features(:)"
+        write(unit,"(a)") "        real(kind=8), intent(in) :: thresholds(:)"
+        write(unit,"(a)") "        real(kind=8), intent(in) :: responses(:,:)"
+        write(unit,"(a)") "        real(kind=8), intent(out) :: res(:)"
+        write(unit,"(a)") "        integer(kind=8) :: idx, flg"
+
+        write(unit,"(a)") "        idx = 1"    
+        do i=1, max_depth, 1
+            write(unit,"(a)") "        idx = 2_8*idx + merge(1_8, 0_8, event(features(idx)) > thresholds(idx))"
+        end do
+        write(unit,"(a)") "        res = responses(idx,:)"    
+        write(unit,"(a)") "    end subroutine predict_"
+        write(unit,"(a)") "end module "//filename
+        close(unit)    
+    end subroutine extract_and_add_children
+
+    subroutine clone_nodes(node_ptr)
+        implicit none
+        type(node_axis), pointer :: node_ptr
+        type(node_axis), target :: node_l, node_r
+
+        allocate(node_ptr%node_l)
+        allocate(node_ptr%node_r)
+
+        node_ptr%is_terminal = f_
+        node_ptr%feature_id_ = 1
+        node_ptr%threshold_ = huge(0d0)
+
+        node_ptr%node_l%is_terminal = f_
+        node_ptr%node_l%feature_id_ = 1
+        node_ptr%node_l%threshold_  = huge(0d0)
+        node_ptr%node_l%response    = node_ptr%response
+        node_ptr%node_l%depth       = node_ptr%depth+1
+
+        node_ptr%node_r%is_terminal = f_
+        node_ptr%node_r%feature_id_ = 1
+        node_ptr%node_r%threshold_  = huge(0d0)
+        node_ptr%node_r%response    = node_ptr%response
+        node_ptr%node_r%depth       = node_ptr%depth+1
+    end subroutine clone_nodes
+
+    recursive subroutine reconstruct_tree(root_node, results, node_idx, depth)
+        implicit none
+        type(train_results) :: results
+        type(node_axis) :: root_node
+        integer(kind=8) :: node_idx
+        integer(kind=8), optional :: depth
+        integer(kind=8) :: idx, depth_
+
+        type(node_axis), target :: node_axis_l, node_axis_r
+
+        node_idx = node_idx+1
+
+        root_node%is_terminal = results%is_terminals_(node_idx)
+        root_node%feature_id_ = results%split_features_(node_idx)
+        root_node%threshold_ = results%split_thresholds_(node_idx)
+        root_node%response = results%responses_(node_idx,:)
+        root_node%depth = depth
+        
+        ! print*, "node_idx, root_node%feature_id_, root_node%threshold_, root_node%response:         ", &
+        !     node_idx, depth, root_node%feature_id_, root_node%threshold_, root_node%response
+
+        if (root_node%is_terminal) return
+        allocate(root_node%node_l)
+        allocate(root_node%node_r)
+        root_node%node_l = node_axis_l
+        root_node%node_r = node_axis_r
+        depth_ = depth + 1
+        call reconstruct_tree(root_node%node_l, results, node_idx, depth=depth_)
+        call reconstruct_tree(root_node%node_r, results, node_idx, depth=depth_)
+    end subroutine reconstruct_tree
+
+    subroutine create_branched_inference_file(results, filename, funcname)
+        implicit none 
+        type(train_results), intent(in) :: results
+        character(len=*), intent(in)    :: filename
+        character(len=*), intent(in)    :: funcname
+
+        integer(kind=8) :: unit, start=0, nest_depth=2
+
+        ! print*, "split_features_:   ", results%split_features_
+        ! print*, "split_thresholds_: ", results%split_thresholds_
+        ! print*, "is_terminals_:     ", results%is_terminals_
+        ! print*, "responses_:        ", results%responses_
+        ! print*, "n_columns_:        ", results%n_columns_
+    
+        open(newunit = unit, file = filename//".f90", status = 'replace')
+        ! print*, "Creating...", unit
+        write(unit,"(a)") "module " // filename
+        write(unit,"(a)") "    use, intrinsic :: iso_c_binding"
+        write(unit,"(a)") "contains"
+
+        write(unit,"(a)") "    subroutine "//funcname//"(vec, res) bind(c, name='"//funcname//"')"
+        write(unit,"(a)") "        implicit none"
+        write(unit,"(a)") "        real(kind=8), intent(in) :: vec(:)"
+        write(unit,"(a)") "        real(kind=8), intent(out) :: res(:)"
+        start=0
+        nest_depth=2
+        call branched(unit, results%split_features_, results%is_terminals_, results%split_thresholds_, &
+            results%responses_, &
+            start=start, nest_depth=nest_depth)
+        write(unit,"(a)") "    end subroutine " // funcname
+        write(unit,"(a)") "end module " // filename
+        close(unit)
+    end subroutine create_branched_inference_file
+
+
+    recursive subroutine branched(unit, split_features_, is_terminals_, split_thresholds_, responses_, start, nest_depth)
+        implicit none
+        integer(kind=8), intent(in) :: unit
+        integer(kind=8), intent(in) :: split_features_(:)
+        logical(kind=4), intent(in) :: is_terminals_(:)
+        real(kind=8), intent(in) :: split_thresholds_(:)
+        real(kind=8), intent(in) :: responses_(:,:)
+        integer(kind=8) :: start, start_next
+        integer(kind=8), intent(in) :: nest_depth
+
+        character(:),allocatable :: indent_spaces
+        character(:),allocatable :: f_idx
+        character(:),allocatable :: s_val
+
+
+        start = start + 1
+        if (start>size(split_features_)) return
+        indent_spaces = create_indent_spaces(nest_depth)
+
+        if (is_terminals_(start)) then
+            write(unit,"(a)") indent_spaces // "res(:) = " // array2char(responses_(start,:))
+        else
+            f_idx = num2char_i8(split_features_(start))
+            s_val = num2char_r8(split_thresholds_(start))
+            write(unit,"(a)") indent_spaces // "if (vec("//f_idx//")<="//s_val//") then"
+            call branched(unit, split_features_, is_terminals_, split_thresholds_, responses_, &
+                start=start, nest_depth=nest_depth+1)
+            write(unit,"(a)") indent_spaces // "else"
+            call branched(unit, split_features_, is_terminals_, split_thresholds_, responses_, &
+                start=start, nest_depth=nest_depth+1)
+            write(unit,"(a)") indent_spaces // "end if"
+        end if
+    end subroutine branched
+
+
+    subroutine branched_jit(this)
+        implicit none
+        class(base_tree) :: this
+
+        integer(kind=8) :: id, n_nodes
+        character(:), allocatable :: file_name, cmd, func_name
+
+        integer(c_int), parameter :: rtld_lazy=1 ! value extracte from the C header file
+
+        this%proc_addr_branched = C_NULL_FUNPTR
+        this%proc_addr_branchless = C_NULL_FUNPTR
+
+        n_nodes = size(this%results%split_features_)
+        id = abs(one_at_a_time_hash(this%results%split_features_+10_8, n_nodes))
+        file_name = trim(this%algo_name) // "_" //num2char(id)
+        ! print*, "branched_jit: ", file_name
+
+        func_name = "predict_"
+        call create_branched_inference_file(this%results, file_name, func_name)
+        cmd = "gfortran -O2 -c  -fbounds-check " // file_name // ".f90"
+        call system(cmd)
+        cmd = "gfortran -O2 -shared  -fbounds-check -o " // file_name // ".so " // file_name // ".o"
+        call system(cmd)
+
+        this%handle=dlopen("./"// file_name //".so"//c_null_char, RTLD_LAZY)
+        if (.not. c_associated(this%handle))then
+            print*, 'Unable to load DLL ./'// file_name // ".f90"
+            stop
+        end if
+
+        this%proc_addr_branched=dlsym(this%handle, func_name//c_null_char)
+        if (.not. c_associated(this%proc_addr_branched))then
+            write(*,*) 'Unable to load the procedure '//func_name
+            stop
+        end if
+    end subroutine branched_jit
+
+
+
+    subroutine branchless_jit(this)
+        implicit none
+        class(base_tree) :: this
+
+        integer(kind=8) :: id, n_nodes, node_idx=0, depth=0
+        character(:), allocatable :: fname, cmd
+        type(node_axis) :: root_node
+
+        integer(c_int), parameter :: rtld_lazy=1 ! value extracte from the C header file
+
+        this%proc_addr_branched = C_NULL_FUNPTR
+        this%proc_addr_branchless = C_NULL_FUNPTR
+
+        n_nodes = size(this%results%split_features_)
+        id = abs(one_at_a_time_hash(this%results%split_features_+1_8, n_nodes))
+        fname = trim(this%algo_name) // "_" //num2char(id)
+        print*, "fname: ", fname, allocated(root_node%node_l), n_nodes
+
+        node_idx=0
+        depth=0
+        call reconstruct_tree(root_node, this%results, node_idx=node_idx, depth=depth)
+        call extract_and_add_children(root_node, fname, this%features, this%thresholds, this%responses)
+    
+        cmd = "gfortran -O2 -c  -fbounds-check " // fname // ".f90"
+        call system(cmd)
+        cmd = "gfortran -O2 -shared  -fbounds-check -o " // fname // ".so " // fname // ".o"
+        call system(cmd)
+
+        this%handle=dlopen("./"// fname //".so"//c_null_char, RTLD_LAZY)
+        if (.not. c_associated(this%handle))then
+            print*, 'Unable to load DLL ./hoge.so'
+            stop
+        end if
+
+        this%proc_addr_branchless=dlsym(this%handle, "predict_"//c_null_char)
+        if (.not. c_associated(this%proc_addr_branchless))then
+            write(*,*) 'Unable to load the procedure predict_'
+            stop
+        end if
+    end subroutine branchless_jit
+
+
+    subroutine convert_original_feature_id_to_used_feature_id(features, used_features)
+        implicit none
+        integer(kind=8), intent(inout) :: features(:)
+        integer(kind=8), intent(in) :: used_features(:)
+
+        integer(kind=8), allocatable :: converter(:)
+
+        integer(kind=8) :: max_id, i, id
+
+        max_id = maxval(used_features)
+
+        allocate(converter(max_id)); converter=-2
+
+        do i=1, size(used_features), 1
+            id = used_features(i)
+            converter(id) = i
+        end do
+
+        do i=1, size(features), 1
+            if (features(i)<1) cycle
+            id = converter(features(i))
+            features(i) = id
+        end do
+    end subroutine convert_original_feature_id_to_used_feature_id
+
+
 
     !> A function to calculate average depth of binary search tree.
     !> This is used for Isolation tree only to calculate anomaly score.
@@ -303,6 +628,7 @@ contains
             read(unit) dummy
         end if
         read(unit) this%lr_layer
+        this%proc_addr_branched = C_NULL_FUNPTR
     end subroutine load_base_tree
 
 
@@ -409,6 +735,8 @@ contains
         this%n_samples_ = data_holder_ptr%n_samples
         this%n_columns_ = data_holder_ptr%n_columns
         this%n_outputs_ = data_holder_ptr%n_outputs
+        this%proc_addr_branched = C_NULL_FUNPTR
+        this%proc_addr_branchless = C_NULL_FUNPTR
     end subroutine init_base_tree
 
 
@@ -697,10 +1025,16 @@ contains
         logical(kind=4), optional         :: parallel
 
         real(kind=8), pointer        :: x_ptr(:,:)
+        real(kind=8), allocatable    :: x_copy(:,:)
         integer(kind=8), allocatable :: indices(:)
-        integer(kind=8)              :: x_shape(2), n_samples, n_columns, i
+        integer(kind=8)              :: x_shape(2), n_samples, n_columns, i, j
+        integer(kind=8)              :: n_batch, n_unroll, n_remain
         logical(kind=4)              :: return_depth_opt
         logical(kind=4)              :: parallel_opt
+        procedure(called_branched_predict), bind(c), pointer :: proc_branched
+        procedure(called_branchless_predict), bind(c), pointer :: proc_branchless
+        procedure(called_branched_batch_predict), bind(c), pointer :: proc_branched_batch
+        procedure(called_branchless_predict), bind(c), pointer :: proc_branchless_subset
 
         parallel_opt = f_
         if (present(parallel)) parallel_opt = parallel
@@ -708,10 +1042,36 @@ contains
         x_shape = shape(x)
         n_samples  = x_shape(1)
         n_columns  = x_shape(2)
+        n_batch = 10_8
 
         if ( n_columns .ne. this%n_columns_ ) goto 990
 
-        allocate(predict_response(n_samples, this%n_outputs_))
+        allocate(predict_response(n_samples, this%n_outputs_)); predict_response=0d0
+        if (c_associated(this%proc_addr_branchless)) then
+            call c_f_procpointer( this%proc_addr_branchless, proc_branchless )
+            print*, "this%features: ", shape(this%features), shape(this%thresholds), shape(this%responses), &
+                associated(proc_branchless)
+            do i=1, n_samples, 1
+                call proc_branchless(x(i,:), this%features, this%thresholds, this%responses, &
+                    predict_response(i,:))
+            end do
+            print*, "predict done"
+            return
+        elseif (c_associated(this%proc_addr_branched)) then
+            call c_f_procpointer( this%proc_addr_branched, proc_branched )
+            n_batch = minval([n_samples, n_batch])
+            n_unroll = int(n_samples/n_batch) * n_batch
+            ! print*, n_samples, n_unroll, n_batch
+            do i=1, n_unroll, n_batch
+                do j=0, n_batch-1, 1
+                    call proc_branched(x(i+j,:), predict_response(i+j,:))
+                end do
+            end do
+            do i=n_unroll+1, n_samples, 1
+                call proc_branched(x(i,:), predict_response(i,:))
+            end do
+            return
+        end if
         allocate(indices(n_samples))
         do i=1, n_samples, 1
             indices(i) = i

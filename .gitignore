@@ -2,9 +2,11 @@ html/
 latex/
 *.out
 *.o
+*.so
 *.mod
 *.bin
 *.csv
 man/
 *.json
 test_script/openml/*
+test_script/decision_tree_regressor_[0-9]*.f90

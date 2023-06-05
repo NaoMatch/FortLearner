@@ -3,8 +3,8 @@ compiler_clang   := gcc
 mod              := -J mod/
 opt              := -O2
 option           := -cpp -D_x86_64 -fopenmp -fbounds-check
-option_degug     := -fdec -fbounds-check -Wall  -Wuninitialized -ffpe-trap=invalid,zero,overflow -fbacktrace -g 
-option_blas      := -lopenblas
+option_degug     := -fdec -fbounds-check -Wall  -Wuninitialized -ffpe-trap=invalid,zero,overflow -fbacktrace -g
+option_blas      := -lopenblas -ldl
 
 asm              := ./mod/inc_sum_up_vector_c.out \
 					./mod/inc_sum_up_matrix_c.out \
