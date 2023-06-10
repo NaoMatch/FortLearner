@@ -61,6 +61,53 @@ module mod_random
 
 contains
 
+    !> A function to generate random 32-bit integers.
+    !> Marsaglia, G. & Tsang, W.W. (2000) `The ziggurat method for generating random variables', J. Statist. Software, v5(8).
+    !> Original implementation taken from https://fortran-lang.discourse.group/t/reproducible-use-of-random-number-with-a-single-integer-seed/3593.
+    pure elemental subroutine random_int_32_scalar(jsr,iran)
+        integer(kind=8), intent(in out) :: jsr  ! state of RNG
+        integer, intent(out)    :: iran ! random integer
+        integer                 :: jz
+        jz   = jsr
+        jsr  = ieor(jsr, ishft(jsr,  13))
+        jsr  = ieor(jsr, ishft(jsr, -17))
+        jsr  = ieor(jsr, ishft(jsr,   5))
+        iran = jz + jsr
+    end subroutine random_int_32_scalar
+
+
+    !> A function to fix random seed.
+    !> given an integer seed, generate the remaining seeds needed for call random_seed(put=seeds)
+    !> Original implementation taken from https://fortran-lang.discourse.group/t/reproducible-use-of-random-number-with-a-single-integer-seed/3593.
+    subroutine fix_random_seed(iseed)
+        integer(kind=8), intent(in)  :: iseed
+        integer              :: nseeds
+        integer(kind=8)              :: i, jseed
+        integer, allocatable :: seeds(:)
+        jseed = iseed
+        call random_seed(size=nseeds)
+        allocate (seeds(nseeds))
+        do i=1,nseeds
+            call random_int_32_scalar(jseed,seeds(i))
+        end do
+        call random_seed(put=seeds)
+    end subroutine fix_random_seed
+
+    !> A function to release random seed.
+    subroutine release_random_seed()
+        integer              :: nseeds
+        integer(kind=8)              :: i, jseed
+        integer, allocatable :: seeds(:)
+        call get_datetime(jseed)
+        call random_seed(size=nseeds)
+        allocate (seeds(nseeds))
+        do i=1,nseeds
+            call random_int_32_scalar(jseed,seeds(i))
+        end do
+        call random_seed(put=seeds)
+    end subroutine release_random_seed
+
+
     !> A function to roulette selection from 'vector'
     !> 'vector' must not be normalized, sum(vector) P== 1.
     !! \return returns selected vector index
