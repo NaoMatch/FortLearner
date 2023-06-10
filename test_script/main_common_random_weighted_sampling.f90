@@ -19,6 +19,7 @@ program main_common_random_weighted_sampling
         weights(i) = i
     end do
 
+    call fix_random_seed(1_8)
     allocate(new_indices(n_samples))
     call weighted_sampling(new_indices, n_samples, weights, n_weights)
     counter(:) = 0
@@ -30,6 +31,7 @@ program main_common_random_weighted_sampling
     print*, '*********************************************************************************************'
     print*, real(counter / dble(maxval(counter))*n_weights)
 
+    call release_random_seed()
     call preprocess_for_weighted_sampling(thresholds_, candicates_, weights, n_weights)
     call weighted_sampling(new_indices, n_samples, thresholds_, candicates_, n_weights)
     counter(:) = 0
@@ -41,4 +43,8 @@ program main_common_random_weighted_sampling
     print*, '*********************************************************************************************'
     print*, real(counter / dble(maxval(counter))*n_weights)
     
+
+contains
+
+
 end program main_common_random_weighted_sampling

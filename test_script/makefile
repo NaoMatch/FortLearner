@@ -282,21 +282,14 @@ clean:
 	-rm ./*.out
 
 build:
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_node.f90 -o ./mod/mod_node.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_splitter.f90 -o ./mod/mod_splitter.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_woodworking_tools.f90 -o ./mod/mod_woodworking_tools.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_base_tree.f90 -o ./mod/mod_base_tree.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_decision_tree.f90 -o ./mod/mod_decision_tree.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_forest_jitter.f90 -o ./mod/mod_forest_jitter.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_forest_packing.f90 -o ./mod/mod_forest_packing.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_forest_packing_.f90 -o ./mod/mod_forest_packing_.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_random_forest.f90 -o ./mod/mod_random_forest.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_common.f90 -o ./mod/mod_common.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_random.f90 -o ./mod/mod_random.out
 
 test:
 	# make clean
 	make build
 	# make build_all
-	make main_forest_random_forest
+	make main_common_random_weighted_sampling
 
 test_all:
 	make clean

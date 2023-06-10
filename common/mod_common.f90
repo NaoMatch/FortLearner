@@ -253,6 +253,20 @@ module mod_common
 
 contains
 
+    subroutine get_datetime(time)
+        implicit none
+        integer(kind=8), intent(inout) :: time
+        integer(kind=8) :: date_value(8)
+        call date_and_time(values=date_value)
+        time = date_value(1) * 10_8**13    & ! year
+                + date_value(2) * 10_8**11 & ! month
+                + date_value(3) * 10_8**9  & ! day
+                + date_value(5) * 10_8**7  & ! hour 
+                + date_value(6) * 10_8**5  & ! minute
+                + date_value(7) * 10_8**3  & ! second
+                + date_value(8) * 10_8       ! milisecond
+    end subroutine get_datetime
+
     subroutine ifnullify_i8(ptr)
         implicit none
         integer(kind=8), pointer :: ptr
