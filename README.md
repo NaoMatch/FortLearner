@@ -12,6 +12,7 @@ make test_all
 
 
 # Update
+2023/06/10: fix and release random seed    
 2023/06/10: [Forest Packing](https://arxiv.org/abs/1806.07300) like implementation, 2x faster than naive implementation  
 2023/06/05: Fast Ingerence Engine for Decision Trees (https://cds.cern.ch/record/2688585/files/AA_main.pdf)
 2023/04/08: Local Outlier Factor  
