@@ -95,7 +95,7 @@ contains
         integer(kind=8) :: max_depth
 
         max_depth = maxval([max_depth, node%depth])
-        if (node%is_terminal) return
+        if (.not. allocated(node%node_l)) return
         call check_max_depth(node%node_l, max_depth)
         call check_max_depth(node%node_r, max_depth)
     end subroutine check_max_depth
