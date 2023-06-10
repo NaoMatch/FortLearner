@@ -2,8 +2,8 @@ compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
 opt              := -O2
-option           := -cpp -D_x86_64 -fopenmp -fbounds-check
-option_degug     := -fdec -fbounds-check -Wall  -Wuninitialized -ffpe-trap=invalid,zero,overflow -fbacktrace -g
+option           := -cpp -D_x86_64 -fopenmp
+option_degug     := 
 option_blas      := -lopenblas -ldl
 
 asm              := ./mod/inc_sum_up_vector_c.out \
@@ -78,6 +78,8 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_gradient_boosting_tree.out \
 						./mod/mod_gradient_boosting_adaboost.out \
 						\
+						./mod/mod_forest_jitter.out \
+						./mod/mod_forest_packing_.out \
 						./mod/mod_extra_trees.out \
 						./mod/mod_random_forest.out \
 						./mod/mod_isolation_forest.out \
@@ -213,6 +215,8 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_tree.f90 -o ./mod/mod_gradient_boosting_tree.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_adaboost.f90 -o ./mod/mod_gradient_boosting_adaboost.out
 	\
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_forest_jitter.f90 -o ./mod/mod_forest_jitter.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_forest_packing.f90 -o ./mod/mod_forest_packing.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_random_forest.f90 -o ./mod/mod_random_forest.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_extra_trees.f90 -o ./mod/mod_extra_trees.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_isolation_forest.f90 -o ./mod/mod_isolation_forest.out
@@ -278,13 +282,21 @@ clean:
 	-rm ./*.out
 
 build:
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../data_structure/mod_union_find.f90 -o ./mod/mod_union_find.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_node.f90 -o ./mod/mod_node.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_splitter.f90 -o ./mod/mod_splitter.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_woodworking_tools.f90 -o ./mod/mod_woodworking_tools.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_base_tree.f90 -o ./mod/mod_base_tree.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_decision_tree.f90 -o ./mod/mod_decision_tree.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_forest_jitter.f90 -o ./mod/mod_forest_jitter.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_forest_packing.f90 -o ./mod/mod_forest_packing.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_forest_packing_.f90 -o ./mod/mod_forest_packing_.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_random_forest.f90 -o ./mod/mod_random_forest.out
 
 test:
-	make clean
+	# make clean
 	make build
 	# make build_all
-	make main_data_structure_union_find
+	make main_forest_random_forest
 
 test_all:
 	make clean

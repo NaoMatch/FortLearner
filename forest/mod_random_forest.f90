@@ -1,6 +1,11 @@
 module mod_random_forest
     !$ use omp_lib
+    use iso_c_binding
     use mod_const
+    use mod_common
+    use mod_forest_jitter
+    use mod_forest_packing_
+    ! use mod_forest_packing
     use mod_decision_tree
     implicit none
 
@@ -12,6 +17,10 @@ module mod_random_forest
         integer(kind=8) :: n_outputs_                          !< number of dimension of objective variable
         type(hparam_decisiontree) :: hparam                    !< decision tree hyperparameter
         type(decision_tree_regressor), allocatable :: trees(:) !< array of 'decision_tree_regressor'
+
+        type(forest_jitter) :: jitter
+        type(c_ptr) :: handle
+        type(forest_packing) :: packer
     contains
         procedure :: fit => fit_random_forest_regressor
         procedure :: predict => predict_random_forest_regressor
@@ -38,7 +47,8 @@ contains
     !! \param max_features maximum number of features in node split phase. must be greater equal 1
     function new_random_forest_regressor(&
         n_estimators, &
-        max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features &
+        max_depth, boot_strap, max_leaf_nodes, min_samples_leaf, fashion, max_features, &
+        num_threads&
         )
         implicit none
         type(random_forest_regressor) :: new_random_forest_regressor
@@ -50,6 +60,7 @@ contains
         integer(kind=8), optional :: min_samples_leaf
         character(len=*), optional :: fashion
         integer(kind=8), optional :: max_features
+        integer(kind=8), optional :: num_threads
         character(len=256) :: fashion_list(5)
 
         tmp%is_axis_parallel = t_
@@ -71,6 +82,7 @@ contains
         if ( present(min_samples_leaf) ) tmp%hparam%min_samples_leaf = min_samples_leaf
         if ( present(fashion) ) tmp%hparam%fashion = fashion
         if ( present(max_features) ) tmp%hparam%max_features = max_features
+        if ( present(num_threads) ) tmp%hparam%num_threads = num_threads
 
         call tmp%hparam%validate_int_range("n_estimators",     tmp%hparam%n_estimators,     1_8, huge(1_8))
         call tmp%hparam%validate_int_range("max_depth",        tmp%hparam%max_depth,        1_8, huge(1_8))
@@ -78,6 +90,7 @@ contains
         call tmp%hparam%validate_int_range("min_samples_leaf", tmp%hparam%min_samples_leaf, 1_8, huge(1_8))
         call tmp%hparam%validate_char_list("fashion",          tmp%hparam%fashion,          fashion_list)
         call tmp%hparam%validate_int_range("max_features",     tmp%hparam%max_features,     1_8, huge(1_8), exception=-1_8)
+        call tmp%hparam%validate_int_range("num_threads",     tmp%hparam%num_threads,     1_8, huge(1_8), exception=-1_8)
 
         tmp%hparam%fashion_int = tmp%hparam%convert_char_to_int(tmp%hparam%fashion, fashion_list)
         new_random_forest_regressor = tmp
@@ -113,6 +126,7 @@ contains
 
         this%n_estimators_ = this%hparam%n_estimators
         this%n_outputs_ = data_holder_ptr%n_outputs
+        CALL OMP_SET_NUM_THREADS(this%hparam%num_threads)
         !$omp parallel private(n, dt) shared(this, data_holder_ptr)
         !$omp do 
         do n=1, this%hparam%n_estimators, 1
@@ -138,24 +152,46 @@ contains
     !> A function to predict fitted 'random_forest_regressor'.
     !! \return returns predict average response per samples (#samples, 1)
     !! \param x input explanatory array
-    function predict_random_forest_regressor(this, x)
+    function predict_random_forest_regressor(this, x) result(response)
         implicit none
         class(random_forest_regressor) :: this
         real(kind=8), intent(in)       :: x(:,:)
-        real(kind=8), allocatable      :: predict_random_forest_regressor(:,:)
-        integer(kind=8) :: shape_x(2), n_samples, n
+        real(kind=8), allocatable      :: response(:,:)
+        integer(kind=8) :: shape_x(2), n_samples, n, i
+        procedure(called_branchless_predict), bind(c), pointer :: proc_branchless
+        type(decision_tree_regressor) :: tree
+        logical(kind=4) :: parallel
 
         shape_x = shape(x)
         n_samples = shape_x(1)
 
-        allocate(predict_random_forest_regressor(n_samples, this%n_outputs_))
-        predict_random_forest_regressor = 0d0
-        do n=1, this%n_estimators_, 1
-            predict_random_forest_regressor = &
-                predict_random_forest_regressor & 
-                + this%trees(n)%predict(x)
-        end do
-        predict_random_forest_regressor = predict_random_forest_regressor / dble(this%n_estimators_)
+        allocate(response(n_samples, this%n_outputs_))
+        response = 0d0
+        if (this%packer%is_packed) then
+            CALL OMP_SET_NUM_THREADS(this%hparam%num_threads)
+            !$omp parallel private(i)
+            !$omp do 
+            do i=1, n_samples, 1
+                call this%packer%predict_(x(i,:), &
+                    this%packer%features_pack, this%packer%thresholds_pack, this%packer%responses_pack, &
+                    response(i,:))
+            end do
+            !$omp end do
+            !$omp end parallel
+        else
+            CALL OMP_SET_NUM_THREADS(this%hparam%num_threads)
+            parallel = f_
+            if (this%hparam%num_threads>1_8) parallel = t_
+            !$omp parallel
+            !$omp do private(n, tree) reduction(+:response)
+            do n=1, this%n_estimators_, 1
+                tree = this%trees(n)
+                response = response + tree%predict(x, parallel=parallel)
+            end do    
+            !$omp end do
+            !$omp end parallel
+        end if
+        response = response / dble(this%n_estimators_)
     end function predict_random_forest_regressor
 
 
@@ -180,7 +216,9 @@ contains
         character(len=*), intent(in) :: file_name
         integer(kind=8)              :: newunit, i
         open(newunit=newunit, file=file_name, form="unformatted")
-        read(newunit) this%n_estimators_; allocate(this%trees(this%n_estimators_))
+
+        read(newunit) this%n_estimators_
+        allocate(this%trees(this%n_estimators_))
         read(newunit) this%n_outputs_
         do i=1, size(this%trees(:)), 1
             call this%trees(i)%load_base_tree(newunit)

@@ -217,10 +217,42 @@ contains
         allocate(root_node%node_r)
         root_node%node_l = node_axis_l
         root_node%node_r = node_axis_r
+        root_node%node_l%depth = depth + 1
+        root_node%node_r%depth = depth + 1
         depth_ = depth + 1
         call reconstruct_tree(root_node%node_l, results, node_idx, depth=depth_)
         call reconstruct_tree(root_node%node_r, results, node_idx, depth=depth_)
     end subroutine reconstruct_tree
+
+    recursive subroutine reconstruct_tree_(root_node, results, node_idx)
+        implicit none
+        type(train_results) :: results
+        type(node_axis) :: root_node
+        integer(kind=8) :: node_idx
+        integer(kind=8) :: idx, depth_
+
+        type(node_axis), target :: node_axis_l, node_axis_r
+
+        node_idx = node_idx+1
+
+        root_node%is_terminal = results%is_terminals_(node_idx)
+        root_node%feature_id_ = results%split_features_(node_idx)
+        root_node%threshold_ = results%split_thresholds_(node_idx)
+        root_node%response = results%responses_(node_idx,:)
+        
+        print*, "node_idx, depth, root_node%feature_id_, root_node%threshold_, root_node%response:         ", &
+            node_idx, root_node%depth, root_node%feature_id_, root_node%threshold_, root_node%response
+
+        if (root_node%is_terminal) return
+        allocate(root_node%node_l)
+        allocate(root_node%node_r)
+        root_node%node_l = node_axis_l
+        root_node%node_r = node_axis_r
+        root_node%node_l%depth = root_node%depth + 1
+        root_node%node_r%depth = root_node%depth + 1
+        call reconstruct_tree_(root_node%node_l, results, node_idx)
+        call reconstruct_tree_(root_node%node_r, results, node_idx)
+    end subroutine reconstruct_tree_
 
     subroutine create_branched_inference_file(results, filename, funcname)
         implicit none 
@@ -311,9 +343,9 @@ contains
 
         func_name = "predict_"
         call create_branched_inference_file(this%results, file_name, func_name)
-        cmd = "gfortran -O2 -c  -fbounds-check " // file_name // ".f90"
+        cmd = "gfortran -O2 -c   " // file_name // ".f90"
         call system(cmd)
-        cmd = "gfortran -O2 -shared  -fbounds-check -o " // file_name // ".so " // file_name // ".o"
+        cmd = "gfortran -O2 -shared   -o " // file_name // ".so " // file_name // ".o"
         call system(cmd)
 
         this%handle=dlopen("./"// file_name //".so"//c_null_char, RTLD_LAZY)
@@ -354,9 +386,9 @@ contains
         call reconstruct_tree(root_node, this%results, node_idx=node_idx, depth=depth)
         call extract_and_add_children(root_node, fname, this%features, this%thresholds, this%responses)
     
-        cmd = "gfortran -O2 -c  -fbounds-check " // fname // ".f90"
+        cmd = "gfortran -O2 -c   " // fname // ".f90"
         call system(cmd)
-        cmd = "gfortran -O2 -shared  -fbounds-check -o " // fname // ".so " // fname // ".o"
+        cmd = "gfortran -O2 -shared   -o " // fname // ".so " // fname // ".o"
         call system(cmd)
 
         this%handle=dlopen("./"// fname //".so"//c_null_char, RTLD_LAZY)
@@ -461,6 +493,7 @@ contains
         write(unit) this%hparam%max_bins
         write(unit) this%hparam%strategy_int
         write(unit) this%hparam%max_depth
+        write(unit) this%hparam%num_threads
         write(unit) this%hparam%min_samples_split
         write(unit) this%hparam%min_samples_leaf
         write(unit) this%hparam%max_features
@@ -562,6 +595,7 @@ contains
         read(unit) this%hparam%max_bins
         read(unit) this%hparam%strategy_int
         read(unit) this%hparam%max_depth
+        read(unit) this%hparam%num_threads
         read(unit) this%hparam%min_samples_split
         read(unit) this%hparam%min_samples_leaf
         read(unit) this%hparam%max_features
@@ -1049,13 +1083,13 @@ contains
         allocate(predict_response(n_samples, this%n_outputs_)); predict_response=0d0
         if (c_associated(this%proc_addr_branchless)) then
             call c_f_procpointer( this%proc_addr_branchless, proc_branchless )
-            print*, "this%features: ", shape(this%features), shape(this%thresholds), shape(this%responses), &
-                associated(proc_branchless)
+            ! print*, "this%features: ", shape(this%features), shape(this%thresholds), shape(this%responses), &
+            !     associated(proc_branchless)
             do i=1, n_samples, 1
                 call proc_branchless(x(i,:), this%features, this%thresholds, this%responses, &
                     predict_response(i,:))
             end do
-            print*, "predict done"
+            ! print*, "predict done"
             return
         elseif (c_associated(this%proc_addr_branched)) then
             call c_f_procpointer( this%proc_addr_branched, proc_branched )
