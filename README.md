@@ -7,11 +7,12 @@ cd test_script
 make test_all  
 
 # WIP:  
-[Forest Packing](https://arxiv.org/abs/1806.07300) like implementation   
+[Forest Packing](https://arxiv.org/abs/1806.07300) like implementation for Python  
 ~Benchmark and Optimize KDTree, Naive Bayse, Implement Linear/Kernel SVR, One-Class SVM, ica, HDBSCAN(not accelarated one)~
 
 
 # Update
+2023/06/10: [Forest Packing](https://arxiv.org/abs/1806.07300) like implementation, 2x faster than naive implementation  
 2023/06/05: Fast Ingerence Engine for Decision Trees (https://cds.cern.ch/record/2688585/files/AA_main.pdf)
 2023/04/08: Local Outlier Factor  
 2023/04/02: apply openmp for FOREST%predict(x, parallel=.true.)  
