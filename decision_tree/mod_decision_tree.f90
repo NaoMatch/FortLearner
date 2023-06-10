@@ -158,12 +158,16 @@ contains
     !> A function to predict regression for 'x'.
     !! \return predicted values
     !! \param x input
-    function predict_decision_tree_regressor(this, x)
+    function predict_decision_tree_regressor(this, x, parallel)
         implicit none
         class(decision_tree_regressor)    :: this
         real(kind=8), intent(in) :: x(:,:)
         real(kind=8), ALLOCATABLE :: predict_decision_tree_regressor(:,:)
-        predict_decision_tree_regressor = this%predict_response(x)
+        logical(kind=4), optional :: parallel
+        logical(kind=4) :: parallel_opt
+        parallel_opt = f_
+        if (present(parallel)) parallel_opt = parallel
+        predict_decision_tree_regressor = this%predict_response(x, parallel=parallel_opt)
     end function predict_decision_tree_regressor
 
 
