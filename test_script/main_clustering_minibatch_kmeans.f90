@@ -23,14 +23,16 @@ program main_clustering_minibatch_kmeans
     type(minibatch_kmeans) :: mbkm, mbkm2
     type(kmeans) :: km, km2
 
-    file_name_x_train_bin = "../sample_data/make_regression_X_train_0000010000x00100.bin"
+    file_name_x_train_bin = "../sample_data/make_regression_X_train_0000100000x00100.bin"
     call read_bin_2d(file_name_x_train_bin, x_train)
     
     print*, '============================================================='
     print*, "Train: Minibatch-Kmeans"
-    mbkm = minibatch_kmeans(n_clusters=10_8, max_iter=1000_8, max_samples=512_8)
+    mbkm = minibatch_kmeans(n_clusters=10_8, max_iter=1000_8, max_samples=1024_8, random_state=42_8)
+    call date_and_time(values=date_value1)
     call mbkm%fit(x_train)
-    print*, mbkm%score(x_train)
+    call date_and_time(values=date_value2)
+    print*, mbkm%score(x_train), time_diff(date_value1, date_value2)
 
     print*, '============================================================='
     print*, "Dump: "

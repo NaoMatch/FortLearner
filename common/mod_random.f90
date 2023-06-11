@@ -98,7 +98,7 @@ contains
         integer              :: nseeds
         integer(kind=8)              :: i, jseed
         integer, allocatable :: seeds(:)
-        call get_datetime(jseed)
+        jseed = get_datetime()
         call random_seed(size=nseeds)
         allocate (seeds(nseeds))
         do i=1,nseeds

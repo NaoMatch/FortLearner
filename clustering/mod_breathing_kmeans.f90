@@ -14,6 +14,8 @@ module mod_breathing_kmeans
         type(kmeans) :: km
         integer(kind=8) :: n_samples, n_columns
         type(hparam_breathing_kmeans) :: hparam
+
+        logical(kind=4) :: fix_seed
     contains
         procedure :: fit => fit_breathing_kmeans
         procedure :: predict => predict_breathing_kmeans
@@ -51,15 +53,21 @@ contains
     end subroutine load_breathing_kmeans
 
 
-    function new_breathing_kmeans(n_clusters, n_clusters_breathing_in)
+    function new_breathing_kmeans(n_clusters, n_clusters_breathing_in, random_state)
         implicit none
         type(breathing_kmeans)    :: new_breathing_kmeans
         integer(kind=8), optional :: n_clusters
         integer(kind=8), optional :: n_clusters_breathing_in
+        integer(kind=8), optional :: random_state
 
+        new_breathing_kmeans%fix_seed = f_
         new_breathing_kmeans%hparam%algo_name = "breathing_kmeans"
         if (present(n_clusters))              new_breathing_kmeans%hparam%n_clusters              = n_clusters
         if (present(n_clusters_breathing_in)) new_breathing_kmeans%hparam%n_clusters_breathing_in = n_clusters_breathing_in
+        if (present(random_state)) then
+            new_breathing_kmeans%fix_seed = t_
+            new_breathing_kmeans%hparam%random_state = random_state
+        end if
     end function new_breathing_kmeans
 
 
@@ -76,6 +84,7 @@ contains
         real(kind=8), ALLOCATABLE :: centers_best_(:,:)
         real(kind=8), ALLOCATABLE :: new_cluster_centers(:,:)
 
+        if (this%fix_seed) call fix_random_seed(this%hparam%random_state)
         x_shape(:) = shape(x)
         this%n_samples = x_shape(1)
         this%n_columns = x_shape(2)
@@ -107,6 +116,7 @@ contains
             end if
         end do
         this%km%cluster_centers = centers_best_
+        if (this%fix_seed) call release_random_seed
     end subroutine fit_breathing_kmeans
 
 

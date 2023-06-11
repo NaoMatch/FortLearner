@@ -21,14 +21,32 @@ program main_clustering_kmeans
 
     type(kmeans) :: km, km2
 
-    file_name_x_train_bin = "../sample_data/make_regression_X_train_0000010000x00100.bin"
+    file_name_x_train_bin = "../sample_data/make_regression_X_train_0000100000x00100.bin"
     call read_bin_2d(file_name_x_train_bin, x_train)
+    x_train = x_train(:,:10)
     
     print*, '============================================================='
     print*, "Train: "
-    km = kmeans(n_clusters=10_8)
+    km = kmeans(n_clusters=10_8, random_state=42_8)
+    call date_and_time(values=date_value1)
     call km%fit(x_train)
-    print*, km%score(x_train)
+    call date_and_time(values=date_value2)
+    print*, "fit:       ", km%score(x_train), time_diff(date_value1, date_value2)
+
+    call date_and_time(values=date_value1)
+    call km%fit_dgemm(x_train)
+    call date_and_time(values=date_value2)
+    print*, "fit_dgemm: ", km%score(x_train), time_diff(date_value1, date_value2)
+    
+    call date_and_time(values=date_value1)
+    call km%fit_dgemv(x_train)
+    call date_and_time(values=date_value2)
+    print*, "fit_dgemv: ", km%score(x_train), time_diff(date_value1, date_value2)
+    
+    call date_and_time(values=date_value1)
+    call km%fit_elkan(x_train)
+    call date_and_time(values=date_value2)
+    print*, "fit_elkan: ", km%score(x_train), time_diff(date_value1, date_value2), ", Not consistent with the above results."
     
     print*, '============================================================='
     print*, "Dump: "

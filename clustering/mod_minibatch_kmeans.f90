@@ -21,20 +21,26 @@ contains
     !! \param n_cluster number of clusters. must be greater equal 2
     !! \param max_iter maximum number of iteration. must be greater equal 2
     !! \param tolerance maximum tolerance
-    function new_minibatch_kmeans(n_clusters, max_iter, tolerance, max_samples)
+    function new_minibatch_kmeans(n_clusters, max_iter, tolerance, max_samples, random_state)
         implicit none
         integer(kind=8), optional :: n_clusters
         integer(kind=8), optional :: max_iter
         real(kind=8), optional    :: tolerance
         integer(kind=8), optional :: max_samples
+        integer(kind=8), optional :: random_state
         type(minibatch_kmeans)    :: new_minibatch_kmeans, tmp
 
+        tmp%fix_seed = f_
         tmp%algo_name = "minibatch_kmeans"
         tmp%hparam%algo_name = "minibatch_kmeans"
         if ( present(n_clusters) ) tmp%hparam%n_clusters = n_clusters
         if ( present(max_iter) )   tmp%hparam%max_iter   = max_iter
         if ( present(tolerance) )  tmp%hparam%tolerance  = tolerance
         if ( present(max_samples) )  tmp%hparam%max_samples  = max_samples
+        if ( present(random_state) )   then
+            tmp%hparam%random_state = random_state
+            tmp%fix_seed = t_
+        end if
 
         call tmp%hparam%validate_int_range("n_clusters", tmp%hparam%n_clusters, 2_8, huge(1_8))
         call tmp%hparam%validate_int_range("max_iter",   tmp%hparam%max_iter,   2_8, huge(1_8))
@@ -58,6 +64,7 @@ contains
         integer(kind=8), allocatable :: counter(:), indices(:), cluster_labels(:)
         integer(kind=8)              :: label
         real(kind=8)                 :: eta
+        if (this%fix_seed) call fix_random_seed(this%hparam%random_state)
 
         x_shape = shape(x)
         this % n_samples = x_shape(1)
@@ -108,6 +115,7 @@ contains
             c_sq_sum_row(:) = sum(this%cluster_centers**2d0, dim=1)
         end do
         this % is_trained = t_
+        if (this%fix_seed) call release_random_seed()
     end subroutine fit_minibatch_kmeans
 
 end module mod_minibatch_kmeans

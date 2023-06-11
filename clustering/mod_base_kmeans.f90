@@ -26,6 +26,8 @@ module mod_base_kmeans
         real(kind=8), allocatable    :: cluster_centers_t(:,:)       !< training results. transposed coordinates of cluster centroids. dimension=(#centroids, #columns)
 
         real(kind=8), allocatable :: distance_table(:,:)
+
+        logical(kind=4) :: fix_seed = f_
     contains
         procedure :: score    => score_base_kmeans
         procedure :: dump     => dump_base_kmeans
@@ -111,7 +113,7 @@ contains
             cluster_idx = [cluster_idx, idx]
             idx = roulette_selection(probas, this%n_samples, f_)
             this%cluster_centers(:,c) = x(idx,:)
-            call calculate_distance_from_center(x, x_sq_sum_row, this%cluster_centers(:,c), distance, &
+            call calculate_distance_from_center_dgemv(x, x_sq_sum_row, this%cluster_centers(:,c), distance, &
                     this%n_samples, this%n_columns)
         end do
 
@@ -237,35 +239,6 @@ contains
         end do
     end subroutine calculate_distance_from_center_slow
 
-    !> A subroutine to calculate the distance of 'x' from the centroid.
-    !> Expanding (x-y)^2 and calculating only x x y will speed up the process. 
-    !> (Since x is a data point, x^2 only needs to be computed once, 
-    !> and y is a cluster and is very few in number compared to the data points and the number of features, 
-    !> the amount of computation is negligible.)
-    !! \param x data points (#samples, #columns)
-    !! \param center coordinates of centroid (#columns)
-    !! \param distance distance from the centroid (#samples)
-    !! \param n_samples number of samples
-    !! \param n_columns number of columns
-    subroutine calculate_distance_from_center(x, x_sq_sum_row, center, distance, n_samples, n_columns)
-        real(kind=8), intent(in)    :: x(n_samples, n_columns)
-        real(kind=8), intent(in)    :: x_sq_sum_row(n_samples)
-        real(kind=8), intent(in)    :: center(n_columns)
-        real(kind=8), intent(inout) :: distance(n_samples)
-        integer(kind=8), intent(in) :: n_samples, n_columns
-
-        real(kind=8) :: center_sq_sum
-        integer(kind=8) :: i, j
-
-        center_sq_sum = sum(center**2d0)
-        distance(:) = 0d0
-        call multi_mat_vec_r8(x, center, distance, n_samples, n_columns)
-        ! call multi_mat_vec_parallel_r8(x, center, distance, n_samples, n_columns)
-        do i=1, n_samples, 1
-            distance(i) = maxval((/-2d0*distance(i) + x_sq_sum_row(i) + center_sq_sum, 0d0/))
-        end do
-    end subroutine calculate_distance_from_center
-
     !> A subroutine to calculate the distance of 'x' from the centroid with dgemv.
     !> Expanding (x-y)^2 and calculating only x x y will speed up the process. 
     !> (Since x is a data point, x^2 only needs to be computed once, 
@@ -287,14 +260,28 @@ contains
         integer(kind=8) :: i, j
 
         center_sq_sum = sum(center**2d0)
-        ! distance(:) = 0d0
-        ! call multi_mat_vec_r8(x, center, distance, n_samples, n_columns)
         call dgemv("N", n_samples, n_columns, 1d0, x, n_samples, center, 1_8, 0d0, distance, 1_8)
-        ! call multi_mat_vec_parallel_r8(x, center, distance, n_samples, n_columns)
         do i=1, n_samples, 1
-            distance(i) = maxval((/-2d0*distance(i) + x_sq_sum_row(i) + center_sq_sum, 0d0/))
+            distance(i) = -2d0*distance(i) + center_sq_sum
         end do
     end subroutine calculate_distance_from_center_dgemv
+
+    subroutine calculate_distance_from_center_dgemv_use_sqsum(x, x_sq_sum_row, center, distance, n_samples, n_columns)
+        real(kind=8), intent(in)    :: x(n_samples, n_columns)
+        real(kind=8), intent(in)    :: x_sq_sum_row(n_samples)
+        real(kind=8), intent(in)    :: center(n_columns)
+        real(kind=8), intent(inout) :: distance(n_samples)
+        integer(kind=8), intent(in) :: n_samples, n_columns
+
+        real(kind=8) :: center_sq_sum
+        integer(kind=8) :: i, j
+
+        center_sq_sum = sum(center**2d0)
+        call dgemv("N", n_samples, n_columns, 1d0, x, n_samples, center, 1_8, 0d0, distance, 1_8)
+        do i=1, n_samples, 1
+            distance(i) = -2d0*distance(i) + center_sq_sum + x_sq_sum_row(i)
+        end do
+    end subroutine calculate_distance_from_center_dgemv_use_sqsum
 
     !> A subroutine to get nearest distance. 
     !> Compare two distances('nearest_distance', 'distance') and take out the smallest value.

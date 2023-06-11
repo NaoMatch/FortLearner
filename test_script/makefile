@@ -216,7 +216,7 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_adaboost.f90 -o ./mod/mod_gradient_boosting_adaboost.out
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_forest_jitter.f90 -o ./mod/mod_forest_jitter.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_forest_packing.f90 -o ./mod/mod_forest_packing.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_forest_packing_.f90 -o ./mod/mod_forest_packing_.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_random_forest.f90 -o ./mod/mod_random_forest.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_extra_trees.f90 -o ./mod/mod_extra_trees.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_isolation_forest.f90 -o ./mod/mod_isolation_forest.out
@@ -283,13 +283,19 @@ clean:
 
 build:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_common.f90 -o ./mod/mod_common.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_random.f90 -o ./mod/mod_random.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_base_kmeans.f90 -o ./mod/mod_base_kmeans.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_kmeans.f90 -o ./mod/mod_kmeans.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_minibatch_kmeans.f90 -o ./mod/mod_minibatch_kmeans.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_breathing_kmeans.f90 -o ./mod/mod_breathing_kmeans.out
 
 test:
 	# make clean
 	make build
 	# make build_all
-	make main_common_random_weighted_sampling
+	# make main_clustering_kmeans
+	# make main_clustering_minibatch_kmeans
+	make main_clustering_breathing_kmeans
 
 test_all:
 	make clean
