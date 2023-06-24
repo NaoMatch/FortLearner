@@ -109,16 +109,17 @@ contains
     !! \param print_node ***OPTIONAL*** if True, print node informations
     !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
     !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
-    subroutine fit_lawu_regressor(this, data_holder_ptr, print_node, &
+    subroutine fit_lawu_regressor(this, dholder, print_node, &
         feature_indices, feature_indices_scanning_range)
         implicit none
 
         class(lawu_regressor) :: this
-        type(data_holder), pointer     :: data_holder_ptr
+        type(data_holder), target     :: dholder
         logical(kind=4), OPTIONAL      :: print_node
         integer(kind=8), optional      :: feature_indices(:)
         integer(kind=8), optional      :: feature_indices_scanning_range(2)
-
+        
+        type(data_holder), pointer     :: data_holder_ptr
         type(node_axis), target            :: root_node
         type(hparam_decisiontree), target  :: hparam
         type(hparam_decisiontree), pointer :: hparam_ptr
@@ -133,11 +134,12 @@ contains
         real(kind=8), allocatable, target :: y_copy(:,:), y_current_pred(:,:), mean_y(:), y_target(:,:), res_y(:), sum_y(:)
         real(kind=8), allocatable :: y_pred(:,:)
 
+        data_holder_ptr => dholder
         ! print*, "feature"
         include "./include/set_feature_indices_and_scanning_range.f90"
 
         ! print*, "preprocess", this%hparam%max_bins, this%hparam%strategy
-        call data_holder_ptr % preprocess_hist(this%hparam%max_bins, this%hparam%strategy)
+        call data_holder_ptr % preprocess_hist_new(this%x_hist, this%x_hist_row, this%hparam%max_bins, this%hparam%strategy)
 
         ! print*, "init"
         call this%init(data_holder_ptr)

@@ -86,17 +86,18 @@ contains
     !! \param print_node ***OPTIONAL*** if True, print node informations after training
     !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
     !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
-    subroutine fit_decision_tree_regressor(this, data_holder_ptr, print_node, &
+    subroutine fit_decision_tree_regressor(this, dholder, print_node, &
         feature_indices, feature_indices_scanning_range, sample_indices)
         implicit none
 
         class(decision_tree_regressor) :: this
-        type(data_holder), pointer     :: data_holder_ptr
+        type(data_holder), target      :: dholder
         logical(kind=4), OPTIONAL      :: print_node
         integer(kind=8), optional      :: feature_indices(:)
         integer(kind=8), optional      :: feature_indices_scanning_range(2)
         integer(kind=8), optional      :: sample_indices(:)
-
+        
+        type(data_holder), pointer     :: data_holder_ptr
         type(node_axis), target            :: root_node
         type(hparam_decisiontree), target  :: hparam
         type(hparam_decisiontree), pointer :: hparam_ptr
@@ -108,6 +109,7 @@ contains
         integer(kind=8) :: depth, n_columns, n
         integer(kind=8), allocatable :: feature_indices_(:), feature_indices_scanning_range_(:)
 
+        data_holder_ptr => dholder
         include "./include/set_feature_indices_and_scanning_range.f90"
 
         call this%init(data_holder_ptr)

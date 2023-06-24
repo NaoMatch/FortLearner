@@ -9,7 +9,7 @@ program main_decision_tree_decision_tree
     use mod_common
     implicit none
 
-    integer(kind=8) :: date_value1(8), date_value2(8)
+    integer(kind=8) :: date_value1(8), date_value2(8), time_train
     integer(kind=4) :: time_naive, time_branchless, time_branchless_subset, time_branched
 
     integer(kind=8)    :: n_samples_trains(5), n_columns_trains(5)
@@ -43,12 +43,12 @@ program main_decision_tree_decision_tree
 
     file_name_x_train_bin = "../sample_data/make_regression_X_train_0000100000x00100.bin"
     file_name_y_train_bin = "../sample_data/make_regression_y_train_0000100000x00100.bin"
-    ! file_name_x_train_bin = "../sample_data/make_regression_X_train_0001000000x00100.bin"
-    ! file_name_y_train_bin = "../sample_data/make_regression_y_train_0001000000x00100.bin"
+    file_name_x_train_bin = "../sample_data/make_regression_X_train_0001000000x00100.bin"
+    file_name_y_train_bin = "../sample_data/make_regression_y_train_0001000000x00100.bin"
     ! file_name_x_train_bin = "../sample_data/diabetes_data_x.bin"
     ! file_name_y_train_bin = "../sample_data/diabetes_data_y.bin"
-    file_name_x_train_bin = "../sample_data/linnerud_exercise_x.bin"
-    file_name_y_train_bin = "../sample_data/linnerud_exercise_y.bin"
+    ! file_name_x_train_bin = "../sample_data/linnerud_exercise_x.bin"
+    ! file_name_y_train_bin = "../sample_data/linnerud_exercise_y.bin"
     call read_bin_2d(file_name_x_train_bin, x_train)
     call read_bin_2d(file_name_y_train_bin, y_train)
     dholder = data_holder(x_train, y_train, is_trans_x=f_)
@@ -56,14 +56,17 @@ program main_decision_tree_decision_tree
 
     ! Train, Test, Dump -----------------------------------------------------------------
     ! print*, "Train, Test, Dump Trained Model"
-    do d=9, 12, 1
-        print*, '*********************************************************************************************'
-        print*, '*********************************************************************************************'
-        print*, '*********************************************************************************************'
-        print*, '*********************************************************************************************'
-        print*, '*********************************************************************************************'
+    do d=2, 3, 1
+        ! print*, '*********************************************************************************************'
+        ! print*, '*********************************************************************************************'
+        ! print*, '*********************************************************************************************'
+        ! print*, '*********************************************************************************************'
+        ! print*, '*********************************************************************************************'
         dt = decision_tree_regressor(max_depth=d, min_samples_leaf=2_8)
-        call dt%fit(dholder_ptr)
+        call date_and_time(values=date_value1)
+        call dt%fit(dholder)
+        call date_and_time(values=date_value2)
+        time_train = time_diff(date_value1, date_value2)
         ! call dt%dump(file_name="dt.bin")
 
         ! Load, Test ------------------------------------------------------------------------
@@ -73,7 +76,7 @@ program main_decision_tree_decision_tree
         max_iter = 1
         ! call dt2%load(file_name="dt.bin")
 
-        print*, 1
+        ! print*, 1
         call date_and_time(values=date_value1)
         do iter=1, max_iter, 1
             y_train_pred = dt%predict(x_train)
@@ -82,7 +85,7 @@ program main_decision_tree_decision_tree
         time_naive = time_diff(date_value1, date_value2)
         mse_naive = metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
 
-        print*, 2
+        ! print*, 2
         call dt%branched_jit()
         call date_and_time(values=date_value1)
         do iter=1, max_iter, 1
@@ -92,7 +95,7 @@ program main_decision_tree_decision_tree
         time_branched = time_diff(date_value1, date_value2)
         mse_branched = metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
                 
-        print*, 3
+        ! print*, 3
         call dt%branchless_jit()
         call date_and_time(values=date_value1)
         do iter=1, max_iter, 1
@@ -103,7 +106,7 @@ program main_decision_tree_decision_tree
         mse_branchless = metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
 
         print*, d, &
-                " :: ", time_naive, time_branched, time_branchless, &
+                " :: ", time_train, " :: ", time_naive, time_branched, time_branchless, &
                 " :: ", mse_naive, mse_branched, mse_branchless
     end do
 

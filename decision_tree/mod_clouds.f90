@@ -20,6 +20,7 @@ module mod_clouds
     type, extends(base_tree) ::  clouds_regressor
     contains
         procedure :: fit => fit_clouds_regressor
+        procedure :: fit_clouds_regressor_ptr
         procedure :: predict => predict_clouds_regressor
         procedure :: dump => dump_clouds_regressor
         procedure :: load => load_clouds_regressor
@@ -106,7 +107,89 @@ contains
     !! \param print_node ***OPTIONAL*** if True, print node informations after training
     !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
     !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
-    subroutine fit_clouds_regressor(this, data_holder_ptr, print_node, &
+    subroutine fit_clouds_regressor(this, dholder, print_node, &
+        feature_indices, feature_indices_scanning_range)
+        implicit none
+
+        class(clouds_regressor) :: this
+        type(data_holder), target      :: dholder
+        logical(kind=4), OPTIONAL      :: print_node
+        integer(kind=8), optional      :: feature_indices(:)
+        integer(kind=8), optional      :: feature_indices_scanning_range(2)
+        
+        type(data_holder), pointer     :: data_holder_ptr
+        type(node_axis), target            :: root_node
+        type(hparam_decisiontree), target  :: hparam
+        type(hparam_decisiontree), pointer :: hparam_ptr
+        type(node_axis_ptr), allocatable   :: selected_node_ptrs(:)
+        logical(kind=4)                    :: is_permute_per_node
+
+        logical(kind=4) :: is_stop
+        type(node_splitter) :: splitter
+        integer(kind=8) :: depth, n_columns, n, i
+        integer(kind=8), allocatable :: feature_indices_(:), feature_indices_scanning_range_(:)
+        integer(kind=4), allocatable :: column_copy(:)
+        data_holder_ptr => dholder
+
+        ! print*, "feature"
+        include "./include/set_feature_indices_and_scanning_range.f90"
+
+        ! print*, "preprocess", this%hparam%max_bins, this%hparam%strategy
+        call data_holder_ptr % preprocess_hist_new(this%x_hist, this%x_hist_row, this%hparam%max_bins, this%hparam%strategy)
+
+        ! print*, "init"
+        call this%init(data_holder_ptr)
+
+        ! print*, "associcate"
+        if (associated(this%root_node_axis_ptr)) nullify(this%root_node_axis_ptr)
+        this%root_node_axis_ptr => root_node
+        call this%init_root_node(data_holder_ptr, is_classification=this%is_classification)
+
+        ! print*, "check"
+        hparam = this%hparam
+        hparam%max_bins = extract_max_bins(data_holder_ptr%disc)
+        hparam_ptr => hparam
+        call this%root_node_axis_ptr%hparam_check(hparam_ptr)
+        is_stop = this%induction_stop_check(hparam_ptr)
+        if ( is_stop ) return
+
+        ! print*, "start"
+        depth = 1
+        do while (t_)
+            ! print*, "depth: ", depth
+            is_stop = f_
+            if (allocated(selected_node_ptrs)) deallocate(selected_node_ptrs)
+            allocate(selected_node_ptrs(0))
+
+            call this%extract_split_node_ptrs_axis(selected_node_ptrs, depth)
+            call splitter%split_clouds_regressor(selected_node_ptrs, data_holder_ptr, hparam_ptr, &
+                n_columns, feature_indices_, feature_indices_scanning_range_, is_permute_per_node)
+            call this%adopt_node_ptrs_axis(selected_node_ptrs, data_holder_ptr, hparam_ptr, &
+                this%is_classification, this%is_threshold_tree, this%lr_layer, is_hist=t_)
+
+            is_stop = this%induction_stop_check(hparam_ptr)
+            if (is_stop) exit
+            depth = depth + 1
+        end do
+        call termination_node_ptr_axis(this%root_node_axis_ptr)
+        
+
+        call this%postprocess(this%is_classification)
+        call convert_thresholds_discretized_to_raw(& 
+            this%results%split_thresholds_, this%results%split_features_, this%results%is_terminals_, &
+            data_holder_ptr%disc)
+
+        if ( present(print_node) ) then
+            if ( print_node ) then
+                call this%print_info(this%root_node_axis_ptr)
+            end if
+        end if
+
+        this % is_trained = t_
+    end subroutine fit_clouds_regressor
+
+
+    subroutine fit_clouds_regressor_ptr(this, data_holder_ptr, print_node, &
         feature_indices, feature_indices_scanning_range)
         implicit none
 
@@ -183,7 +266,7 @@ contains
         end if
 
         this % is_trained = t_
-    end subroutine fit_clouds_regressor
+    end subroutine fit_clouds_regressor_ptr
 
 
     !> A function to predict regression for 'x'.

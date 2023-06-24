@@ -78,14 +78,15 @@ contains
     !! \return returns fitted 'isolation_tree' tree
     !! \param data_holder_ptr pointer of data_holder 
     !! \param print_node ***OPTIONAL*** if True, print node informations after training
-    subroutine fit_isolation_tree(this, data_holder_ptr, print_node)
+    subroutine fit_isolation_tree(this, dholder, print_node)
         implicit none
 
         class(isolation_tree)          :: this
 
-        type(data_holder), pointer     :: data_holder_ptr
+        type(data_holder), target     :: dholder
         logical(kind=4), optional      :: print_node
-
+        
+        type(data_holder), pointer     :: data_holder_ptr
         type(node_axis), target            :: root_node
         type(hparam_decisiontree), target  :: hparam
         type(hparam_decisiontree), pointer :: hparam_ptr
@@ -96,6 +97,7 @@ contains
         type(node_splitter)          :: splitter
         integer(kind=8)              :: depth, n_columns, n
         integer(kind=8) :: debug
+        data_holder_ptr => dholder
         debug = 0
 
         ! Overwrite Hyperparameters

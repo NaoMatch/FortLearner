@@ -16,7 +16,7 @@ program main_decision_tree_extra_tree
     CHARACTER(len=256) :: file_name_x_train_bin, file_name_y_train_bin
     CHARACTER(len=256) :: file_name_x_test_csv, file_name_y_test_csv
     CHARACTER(len=256) :: file_name_x_test_bin, file_name_y_test_bin
-    real(kind=8), ALLOCATABLE :: x_train(:,:)
+    real(kind=8), ALLOCATABLE :: x_train(:,:), x_train_t(:,:)
     real(kind=8), ALLOCATABLE :: y_train(:,:)
     real(kind=8), ALLOCATABLE :: y_train_pred(:,:)
     integer(kind=8), ALLOCATABLE :: feature_indices(:), feature_indices_scanning_range(:)
@@ -30,23 +30,34 @@ program main_decision_tree_extra_tree
     file_name_y_train_bin = "../sample_data/make_regression_y_train_0000100000x00100.bin"
     call read_bin_2d(file_name_x_train_bin, x_train)
     call read_bin_2d(file_name_y_train_bin, y_train)
+    allocate(x_train_t(size(x_train, dim=2), size(x_train, dim=1)))
+    x_train_t = transpose(x_train)
+    
+    ! Train, Test, Dump -----------------------------------------------------------------
     dholder = data_holder(x_train, y_train, is_trans_x=f_)
     dholder_ptr => dholder
-
-    ! Train, Test, Dump -----------------------------------------------------------------
     print*, "Train, Test, Dump Trained Model"
-    et = extra_tree_regressor(max_depth=8_8, n_repeats=1_8)
-    call et%fit(dholder_ptr)
+    et = extra_tree_regressor(max_depth=2_8, n_repeats=10_8)
+    call et%fit(dholder)
     y_train_pred = et%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
-    call et%dump(file_name="et.bin")
+
+    ! Train, Test, Dump -----------------------------------------------------------------
+    dholder = data_holder(x_train_t, y_train, is_trans_x=t_)
+    dholder_ptr => dholder
+    print*, "Train, Test, Dump Trained Model"
+    et = extra_tree_regressor(max_depth=2_8, n_repeats=10_8)
+    call et%fit_faster(dholder)
+    y_train_pred = et%predict(x_train)
+    print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
+    ! call et%dump(file_name="et.bin")
 
     ! Load, Test ------------------------------------------------------------------------
-    print*, "Load Trained Model, Test"
-    et2 = extra_tree_regressor(max_depth=5_8)
-    call et2%load(file_name="et.bin")
-    y_train_pred = et2%predict(x_train)
-    print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
+    ! print*, "Load Trained Model, Test"
+    ! et2 = extra_tree_regressor(max_depth=5_8)
+    ! call et2%load(file_name="et.bin")
+    ! y_train_pred = et2%predict(x_train)
+    ! print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
 
     ! Dump (Error) ----------------------------------------------------------------------
     ! et3 = extra_tree_regressor()

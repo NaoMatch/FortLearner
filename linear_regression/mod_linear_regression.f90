@@ -128,12 +128,14 @@ contains
     !> If the number of columns is '1', call 'fit_linear_regression_simple'.
     !> If the number of columns is greater than '1', call 'fit_linear_regression_multiple'.
     !! \param data_holder_ptr a pointer of data_holder
-    subroutine fit_linear_regression(this, data_holder_ptr)
+    subroutine fit_linear_regression(this, dholder)
         implicit none
         class(linear_regression)   :: this
+        type(data_holder), target :: dholder
         type(data_holder), pointer :: data_holder_ptr
         integer(kind=8)            :: one_i8=1_8
         type(error)                :: err
+        data_holder_ptr => dholder
         call err%only_accept_Nx1_matrix(data_holder_ptr%y_shape, "y", "linear_regression")
 
         if ( data_holder_ptr%n_columns .eq. one_i8 ) then
@@ -272,12 +274,14 @@ contains
     !> If the number of columns is '1', call 'fit_ridge_regression_simple'.
     !> If the number of columns is greater than '1', call 'fit_ridge_regression_multiple'.
     !! \param data_holder_ptr a pointer of data_holder
-    subroutine fit_ridge_regression(this, data_holder_ptr)
+    subroutine fit_ridge_regression(this, dholder)
         implicit none
         class(ridge_regression)    :: this
+        type(data_holder), target :: dholder
         type(data_holder), pointer :: data_holder_ptr
         integer(kind=8)            :: one_i8=1_8
         type(error)                :: err
+        data_holder_ptr => dholder
         call err%only_accept_Nx1_matrix(data_holder_ptr%y_shape, "y", "linear_regression")
 
         if ( data_holder_ptr%n_columns .eq. one_i8 ) then
@@ -419,10 +423,11 @@ contains
     !! \return returns trained model
     !! \param x 2-dim variable
     !! \param y 1-dim response
-    subroutine fit_lasso_regression(this, data_holder_ptr)
+    subroutine fit_lasso_regression(this, dholder)
         use mod_timer
         implicit none
         class(lasso_regression)    :: this
+        type(data_holder), target :: dholder
         type(data_holder), pointer :: data_holder_ptr
 
         integer(kind=8)    :: date_value1(8), date_value2(8)
@@ -438,6 +443,7 @@ contains
         real(kind=8), allocatable :: x_sq_sum(:), xw(:), tmp_x(:)
         real(kind=8), allocatable :: tmp_y(:)
         real(kind=8) :: tmp_update(7), tmp_w
+        data_holder_ptr => dholder
 
         ! Validation
         if ( allocated(this%coefs_) ) deallocate(this%coefs_)

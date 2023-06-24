@@ -96,9 +96,10 @@ contains
     end function new_sgd_regressor
 
 
-    subroutine fit_sgd_regressor(this, data_holder_ptr)
+    subroutine fit_sgd_regressor(this, dholder)
         implicit none
         class(sgd_regressor)       :: this
+        type(data_holder) :: dholder
         type(data_holder), pointer :: data_holder_ptr
         type(error) :: err
         type(metrics) :: metric
@@ -112,15 +113,15 @@ contains
         real(kind=8), allocatable :: update_w(:), best_coefs_(:)
         integer(kind=8) :: count_no_change
 
-        n_samples = data_holder_ptr%n_samples
-        n_columns = data_holder_ptr%n_columns
+        n_samples = dholder%n_samples
+        n_columns = dholder%n_columns
         n_samples_train = int(n_samples*(1d0-this%hparam%validation_fraction), kind=kind(n_samples_train))
         n_samples_valid = n_samples - n_samples_train
         n_samples_train_inv = 1d0 / dble(n_samples_train)
-        call err%only_accept_Nx1_matrix(data_holder_ptr%y_shape, "y", this%algo_name)
+        call err%only_accept_Nx1_matrix(dholder%y_shape, "y", this%algo_name)
 
-        print*, '============================================================='
-        print*, "Initialize Weight and Intercept"
+        ! print*, '============================================================='
+        ! print*, "Initialize Weight and Intercept"
         allocate(this%coefs_(n_columns))
         allocate(update_w(n_columns))
         call random_number(this%coefs_)
@@ -132,8 +133,8 @@ contains
             this%intercept_ = 2d0 * this%intercept_ - 1d0
         end if
 
-        print*, '============================================================='
-        print*, "Train Test Split"
+        ! print*, '============================================================='
+        ! print*, "Train Validation Split"
         allocate(indices_all(n_samples))
         allocate(indices_train(n_samples_train))
         allocate(indices_valid(n_samples_valid))
@@ -148,12 +149,12 @@ contains
         allocate(y_true_valid(n_samples_valid))
         do batch=1, n_samples_valid, 1
             idx = indices_valid(batch)
-            x_valid(batch,:) = data_holder_ptr%x_ptr%x_r8_ptr(idx,:)
-            y_true_valid(batch) = data_holder_ptr%y_ptr%y_r8_ptr(idx,1)
+            x_valid(batch,:) = dholder%x_ptr%x_r8_ptr(idx,:)
+            y_true_valid(batch) = dholder%y_ptr%y_r8_ptr(idx,1)
         end do
 
-        print*, '============================================================='
-        print*, "START"
+        ! print*, '============================================================='
+        ! print*, "START"
         allocate(x_sample(n_columns))
         allocate(best_coefs_(n_columns))
         best_loss = huge(0d0)
@@ -161,11 +162,13 @@ contains
         count_no_change = 0_8
 
         do epoch=1, this%hparam%max_iter, 1
+            ! call progress_bar(epoch, this%hparam%max_iter, this%hparam%max_iter/1000)
+            ! print*, current_loss, best_loss, count_no_change
             if (this%hparam%shuffle) call permutation(indices_train, n_samples_train)
             do batch=1, n_samples_train, 1
                 idx = indices_train(batch)
-                x_sample(:) = data_holder_ptr%x_ptr%x_r8_ptr(idx,:)
-                y_sample    = data_holder_ptr%y_ptr%y_r8_ptr(idx,1)
+                x_sample(:) = dholder%x_ptr%x_r8_ptr(idx,:)
+                y_sample    = dholder%y_ptr%y_r8_ptr(idx,1)
 
                 update_b = - y_sample + sum(x_sample*this%coefs_) + this%intercept_
                 if ( this%hparam%penalty_int .eq. 1_8 ) then
@@ -193,7 +196,7 @@ contains
                 best_coefs_ = this%coefs_
                 best_intercept_ = this%intercept_
                 count_no_change = 0_8
-            elseif (this%hparam%tolerance .lt. abs(best_loss-current_loss) ) then
+            elseif (this%hparam%tolerance .lt. abs(best_loss-current_loss) / maxval([best_loss, current_loss]) ) then
                 count_no_change = count_no_change + 1
             end if
 

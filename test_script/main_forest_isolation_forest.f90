@@ -46,6 +46,7 @@ program main_forest_isolation_forest
     integer(kind=8) :: time_fit, time_pred
     real(kind=8), allocatable :: aucs_trian(:), aucs_test(:)
     real(kind=8), allocatable :: avgp_trian(:), avgp_test(:)
+    character(:), allocatable :: header
 
 
     fns_x_train = [ &
@@ -255,17 +256,19 @@ program main_forest_isolation_forest
         x_train = ss%transform(x_train)
         x_valid = ss%transform(x_valid)
         x_test = ss%transform(x_test)
-           
+
         dholder = data_holder(x_train, y_train)
-        dholder_ptr => dholder
 
         print*, '*********************************************************************************************'
         print*, trim(fns_x_train(i)), shape(x_train)
+        header = "Feature,     Split,       Depth, Thinning, AUC(train),      AUC(test)"
+        header = header // "        avgPrec(train),  avgPrec(test),     Fit[sec],  Pred[sec]"
+        print*, header
         do f=1, size(feature_selection), 1
             do s=1, size(split_selection), 1
                 do d=1, size(depth), 1
                     do t=1, size(thinning), 1
-                        call compute_score_and_time(dholder_ptr, &
+                        call compute_score_and_time(dholder, &
                                 x_train, y_train, x_valid, y_valid, x_test, y_test, thinning(t), &
                                 aucs_trian, aucs_test, avgp_trian, avgp_test, &
                                 time_fit, time_pred, max_iter)
@@ -283,7 +286,7 @@ program main_forest_isolation_forest
 contains
 
     subroutine compute_score_and_time(&
-        dholder_ptr, &
+        dholder, &
         x_train, y_train, &
         x_valid, y_valid, &
         x_test, y_test, thin, &
@@ -293,7 +296,7 @@ contains
         n_iter)
         implicit none
         type(isolation_forest)      :: iforest
-        type(data_holder), pointer  :: dholder_ptr
+        type(data_holder)           :: dholder
         real(kind=8), intent(in)    :: x_train(:,:), x_valid(:,:), x_test(:,:)
         integer(kind=8), intent(in) :: y_train(:,:), y_valid(:,:), y_test(:,:)
         logical(kind=4), intent(in) :: thin
@@ -328,7 +331,7 @@ contains
             ! call progress_bar(iter, n_iter, 1_8)
 
             call date_and_time(values=date_value1)
-            call iforest%fit(dholder_ptr)
+            call iforest%fit(dholder)
             call date_and_time(values=date_value2)
             time_fit = time_fit + time_diff(date_value1, date_value2)
 

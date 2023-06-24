@@ -70,16 +70,17 @@ contains
         new_sliq_regressor = tmp
     end function new_sliq_regressor
 
-    subroutine fit_sliq_regressor(this, data_holder_ptr, print_node, &
+    subroutine fit_sliq_regressor(this, dholder, print_node, &
         feature_indices, feature_indices_scanning_range)
         implicit none
         integer(kind=8)        :: date_value1(8), date_value2(8)
         class(sliq_regressor) :: this
-        type(data_holder), pointer     :: data_holder_ptr
+        type(data_holder), target     :: dholder
         logical(kind=4), OPTIONAL      :: print_node
         integer(kind=8), optional      :: feature_indices(:)
         integer(kind=8), optional      :: feature_indices_scanning_range(2)
-
+        
+        type(data_holder), pointer     :: data_holder_ptr
         type(node_axis), target            :: root_node
         type(hparam_decisiontree), target  :: hparam
         type(hparam_decisiontree), pointer :: hparam_ptr
@@ -92,9 +93,11 @@ contains
         integer(kind=8), allocatable :: feature_indices_(:), feature_indices_scanning_range_(:)
         integer(kind=4), allocatable :: column_copy(:)
 
+        data_holder_ptr => dholder
+
         include "./include/set_feature_indices_and_scanning_range.f90"
         call date_and_time(values=date_value1)
-        call data_holder_ptr % preprocess_presort()
+        call data_holder_ptr % preprocess_presort_new(this%works)
         call date_and_time(values=date_value2)
         ! print*, "Presort: ", time_diff(date_value1, date_value2)
 

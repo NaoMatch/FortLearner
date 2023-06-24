@@ -40,7 +40,7 @@ program main_decision_tree_sliq
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, "Train, Test, Dump Trained Model"
     sliq_reg = sliq_regressor(max_depth=8_8, min_samples_leaf=10_8)
-    call sliq_reg%fit(dholder_ptr)
+    call sliq_reg%fit(dholder)
     y_train_pred = sliq_reg%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
     call sliq_reg%dump(file_name="sliq_reg.bin")

@@ -26,15 +26,16 @@ program main_decision_tree_clouds
 
     file_name_x_train_bin = "../sample_data/make_regression_X_train_0000100000x00100.bin"
     file_name_y_train_bin = "../sample_data/make_regression_y_train_0000100000x00100.bin"
+    file_name_x_train_bin = "../sample_data/make_regression_X_train_0001000000x00100.bin"
+    file_name_y_train_bin = "../sample_data/make_regression_y_train_0001000000x00100.bin"
     call read_bin_2d(file_name_x_train_bin, x_train)
     call read_bin_2d(file_name_y_train_bin, y_train)
     dholder = data_holder(x_train, y_train, is_trans_x=f_)
-    dholder_ptr => dholder
 
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, "Train, Test, Dump Trained Model"
-    et = clouds_regressor(max_depth=8_8)
-    call et%fit(dholder_ptr)
+    et = clouds_regressor(max_depth=2_8)
+    call et%fit(dholder)
     print*, "    done."
     y_train_pred = et%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))

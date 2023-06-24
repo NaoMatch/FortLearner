@@ -80,13 +80,15 @@ contains
 
     !> A subroutine to fit 'isolation_forest'
     !! \param data_holder_ptr pointer to 'data_holder'
-    subroutine fit_isolation_forest(this, data_holder_ptr)
+    subroutine fit_isolation_forest(this, dholder)
         implicit none
         class(isolation_forest)    :: this
+        type(data_holder), target :: dholder
+        
         type(data_holder), pointer :: data_holder_ptr
-
         integer(kind=8) :: n
         type(isolation_tree) :: itree
+        data_holder_ptr => dholder
 
         if (allocated(this%trees)) deallocate(this%trees)
         allocate(this%trees(this%hparam%n_estimators))

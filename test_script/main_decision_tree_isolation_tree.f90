@@ -31,12 +31,11 @@ program main_decision_tree_isolation_tree
     call read_bin_2d(file_name_x_train_bin, x_train)
     call read_bin_2d(file_name_y_train_bin, y_train)
     dholder = data_holder(x_train, y_train, is_trans_x=f_)
-    dholder_ptr => dholder
 
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, "Train, Test, Dump Trained Model"
     itree = isolation_tree(max_samples=256_8)
-    call itree%fit(dholder_ptr)
+    call itree%fit(dholder)
     print*, "    done."
     y_train_pred = itree%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))

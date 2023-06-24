@@ -40,7 +40,6 @@ program main_decision_tree_sadt
 
     print*, minval(x_train, dim=1)
     print*, maxval(x_train, dim=1)
-    stop 
 
     dholder = data_holder(x_train, y_train, is_trans_x=f_)
     dholder_ptr => dholder

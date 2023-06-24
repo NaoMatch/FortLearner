@@ -522,7 +522,7 @@ contains
             ! Histogram-based Algorithm
             do i=1, node_ptr%n_samples
                 idx = node_ptr%indices(i)
-                if ( data_holder_ptr%x_hist(idx, fid) .le. node_ptr%threshold_ ) then
+                if ( data_holder_ptr%x_hist_ptr(idx, fid) .le. node_ptr%threshold_ ) then
                     node_axis_l%indices(cnt_l) = idx
                     cnt_l = cnt_l + 1
                 else

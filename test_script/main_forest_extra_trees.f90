@@ -20,29 +20,27 @@ program main_forest_extra_trees
     integer(kind=8), ALLOCATABLE :: feature_indices(:), feature_indices_scanning_range(:)
 
     type(metrics) :: metric
-    type(extra_trees_regressor) :: rf_reg, rf_reg2
+    type(extra_trees_regressor) :: et_reg, et_reg2
     type(data_holder), target     :: dholder
-    type(data_holder), pointer    :: dholder_ptr
 
     file_name_x_train_bin = "../sample_data/make_regression_X_train_0000100000x00100.bin"
     file_name_y_train_bin = "../sample_data/make_regression_y_train_0000100000x00100.bin"
     call read_bin_2d(file_name_x_train_bin, x_train)
     call read_bin_2d(file_name_y_train_bin, y_train)
     dholder = data_holder(x_train, y_train, is_trans_x=f_)
-    dholder_ptr => dholder
 
     print*, '============================================================='
     print*, "Train: "
-    rf_reg = extra_trees_regressor(n_estimators=100_8, max_depth=8_8)
-    call rf_reg%fit(dholder_ptr)
-    y_train_pred = rf_reg%predict(x_train)
+    et_reg = extra_trees_regressor(n_estimators=100_8, max_depth=8_8)
+    call et_reg%fit(dholder)
+    y_train_pred = et_reg%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
-    call rf_reg%dump(file_name="cl_gbdt.bin")
+    call et_reg%dump(file_name="cl_gbdt.bin")
 
     ! Load, Test ------------------------------------------------------------------------
     print*, "Load Trained Model, Test"
-    call rf_reg2%load(file_name="cl_gbdt.bin")
-    y_train_pred = rf_reg2%predict(x_train)
+    call et_reg2%load(file_name="cl_gbdt.bin")
+    y_train_pred = et_reg2%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
 
 end program main_forest_extra_trees

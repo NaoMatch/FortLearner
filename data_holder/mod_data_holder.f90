@@ -49,22 +49,32 @@ module mod_data_holder
         type(y_pointer) :: y_ptr                       !< pointer to input objective variable
         type(x_pointer) :: x_t_ptr                     !< pointer to transposed input explanatory variable
         integer(kind=4), allocatable :: x_hist(:,:)    !< binned array of input explanatory variables
+        integer(kind=4), pointer :: x_hist_ptr(:,:)    !< binned array of input explanatory variables
 
         type(work_space), allocatable :: works(:)      !< to be stored presorted results by column
+        type(work_space), pointer :: works_ptr(:)      !< to be stored presorted results by column
+        type(work_space), pointer :: rr_works_ptr(:)      !< to be stored presorted results by column
+        real(kind=8), allocatable :: rr_mat_r8(:,:)    !< random rotated explanatory variable kind=4
+        real(kind=8), pointer :: rr_mat_r8_ptr(:,:)    !< random rotated explanatory variable kind=8
         real(kind=4), allocatable :: rr_mat_r4(:,:)    !< random rotated explanatory variable kind=4
-        real(kind=8), allocatable :: rr_mat_r8(:,:)    !< random rotated explanatory variable kind=8
+        real(kind=4), pointer :: rr_mat_r4_ptr(:,:)    !< random rotated explanatory variable kind=4
 
         type(discretizer) :: disc                      !< discretizer object
         real(kind=8), pointer :: cluster_centers_ptr(:,:)
         ! 
         type(work_space), allocatable :: x_hist_row(:) !< to be stored binned array of input explanatory variables by row to speed up by memory sequential access. @todo It could be achieved by storing the transposed and binned array in 'x_hist'. 
+        type(work_space), pointer :: x_hist_row_ptr(:) !< to be stored binned array of input explanatory variables by row to speed up by memory sequential access. @todo It could be achieved by storing the transposed and binned array in 'x_hist'. 
+
         ! real(kind=8), pointer :: x_t_ptr
         real(kind=8), allocatable :: y_sq(:,:)
     contains
         procedure :: preprocess_store_colwise
         procedure :: preprocess_random_rotate
+        procedure :: preprocess_random_rotate_new
         procedure :: preprocess_hist
+        procedure :: preprocess_hist_new
         procedure :: preprocess_presort
+        procedure :: preprocess_presort_new
         procedure :: preprocess_y_sq
     end type data_holder
 
@@ -149,6 +159,42 @@ contains
         this%is_hist = t_
     end subroutine preprocess_hist
 
+    subroutine preprocess_hist_new(this, x_hist, x_hist_row, max_bins, strategy)
+        implicit none
+        class(data_holder)           :: this
+        integer(kind=4), allocatable, target, intent(inout) :: x_hist(:,:)
+        type(work_space), allocatable, target, intent(inout) :: x_hist_row(:)
+        integer(kind=8), intent(in)  :: max_bins
+        character(len=*), intent(in) :: strategy
+        integer(kind=8) :: c, i, j
+        integer(kind=8) :: n_samples, n_columns
+
+        if (this%is_hist) return
+        if (allocated(x_hist)) deallocate(x_hist)
+        if (allocated(x_hist_row)) deallocate(x_hist_row)
+
+        n_samples = this % n_samples
+        n_columns = this % n_columns
+        allocate(x_hist(n_samples, n_columns))
+
+        this%disc = discretizer(max_bins, strategy)
+        call this%disc%fit(this % x_ptr % x_r8_ptr)
+
+        x_hist = this%disc%transform(this % x_ptr % x_r8_ptr)
+        allocate(x_hist_row(this%n_samples))
+        do i=1, this%n_samples, 1
+            allocate(x_hist_row(i)%i_i4(this%n_columns))
+            do j=1, this%n_columns, 1
+                x_hist_row(i)%i_i4(j) = x_hist(i,j)
+            end do
+        end do
+        ! print*, "finish"
+        this%is_hist = t_
+
+        this%x_hist_ptr => x_hist
+        this%x_hist_row_ptr => x_hist_row
+    end subroutine preprocess_hist_new
+
     subroutine preprocess_y_sq(this)
         implicit none
         class(data_holder)           :: this
@@ -201,6 +247,7 @@ contains
         class(data_holder) :: this
         integer(kind=8)    :: i, n
 
+        if (this%is_presort) return
         if (allocated(this%works)) deallocate(this%works)
         allocate(this%works(this%n_columns))
         do i=1, this%n_columns, 1
@@ -226,7 +273,46 @@ contains
                 call pbucket_argsort(this%works(i)%x_r4, this%works(i)%i_i4, int(this%n_samples, kind=4))
             end if
         end do
+        this%is_presort = t_
     end subroutine preprocess_presort
+
+
+    subroutine preprocess_presort_new(this, works)
+        implicit none
+        class(data_holder) :: this
+        type(work_space), allocatable, target :: works(:)
+        integer(kind=8)    :: i, n
+
+        print*, "preprocess_presort_new: ", loc(works)
+        if (this%is_presort) return
+        if (allocated(works)) deallocate(works)
+        allocate(works(this%n_columns))
+        do i=1, this%n_columns, 1
+            if ( associated(this%x_ptr%x_r8_ptr) ) then
+                if (allocated(works(i)%x_r8)) deallocate(works(i)%x_r8)
+                if (allocated(works(i)%i_i8)) deallocate(works(i)%i_i8)
+                allocate(works(i)%x_r8(this%n_samples))
+                allocate(works(i)%i_i8(this%n_samples))
+                do n=1, this%n_samples, 1
+                    works(i)%x_r8(n) = this%x_ptr%x_r8_ptr(n,i)
+                    works(i)%i_i8(n) = n
+                end do
+                call pbucket_argsort(works(i)%x_r8, works(i)%i_i8, int(this%n_samples, kind=8))
+            else
+                if (allocated(works(i)%x_r4)) deallocate(works(i)%x_r4)
+                if (allocated(works(i)%i_i4)) deallocate(works(i)%i_i4)
+                allocate(works(i)%x_r4(this%n_samples))
+                allocate(works(i)%i_i4(this%n_samples))
+                do n=1, this%n_samples, 1
+                    works(i)%x_r4(n) = this%x_ptr%x_r4_ptr(n,i)
+                    works(i)%i_i4(n) = n
+                end do
+                call pbucket_argsort(works(i)%x_r4, works(i)%i_i4, int(this%n_samples, kind=4))
+            end if
+        end do
+        this%works_ptr => works
+        this%is_presort = t_
+    end subroutine preprocess_presort_new
 
 
     !> A subroutine to random rotate input explanatory array and store generated random rotation matrix to 'rr_mat_rX'.
@@ -262,5 +348,27 @@ contains
             this%rr_mat_r4 = rr_mat_r4
         end if
     end subroutine preprocess_random_rotate
+
+    subroutine preprocess_random_rotate_new(this, rr_works, rr_mat_r8)
+        implicit none
+        class(data_holder) :: this
+        type(work_space), allocatable, target :: rr_works(:)
+        real(kind=8), allocatable, target :: rr_mat_r8(:,:)
+        integer(kind=8) :: i
+
+        if (allocated(rr_works)) deallocate(rr_works)
+        allocate(rr_works(this%n_columns))
+        allocate(rr_mat_r8(this%n_columns, this%n_columns))
+        call random_rotation(rr_mat_r8, this%n_columns)
+        if ( associated(this%x_ptr%x_r8_ptr) ) then
+            do i=1, this%n_columns, 1
+                if (allocated(rr_works(i)%x_r8)) deallocate(rr_works(i)%x_r8)
+                allocate(rr_works(i)%x_r8(this%n_samples))
+                call multi_mat_vec(this%x_ptr%x_r8_ptr, rr_mat_r8(:,i), rr_works(i)%x_r8, this%n_samples, this%n_columns)
+            end do
+        end if
+        this % rr_works_ptr => rr_works
+        this % rr_mat_r8_ptr => rr_mat_r8
+    end subroutine preprocess_random_rotate_new
 
 end module mod_data_holder

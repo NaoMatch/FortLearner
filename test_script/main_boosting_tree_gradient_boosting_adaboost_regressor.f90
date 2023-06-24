@@ -33,7 +33,6 @@ program main_boosting_tree_gradient_boosting_adaboost_regressor
     call read_bin_2d(file_name_y_train_bin, y_train)
 
     dholder = data_holder(x_train, y_train, is_trans_x=f_)
-    dholder_ptr => dholder
 
     print*, "shape(x_train): ", shape(x_train), sum(x_train)
     print*, "shape(y_train): ", shape(y_train), sum(y_train)
@@ -42,7 +41,7 @@ program main_boosting_tree_gradient_boosting_adaboost_regressor
     print*, "AdaboostRegressor"
     ab_reg = new_adaboost_regressor(n_estimators=10_8)
     call date_and_time(values=date_value1)
-    call ab_reg%fit(dholder_ptr, x_train, y_train)
+    call ab_reg%fit(dholder)
     call date_and_time(values=date_value2)
     print*, time_diff(date_value1, date_value2)
     y_train_pred = ab_reg%predict(dholder%x_ptr%x_r8_ptr)

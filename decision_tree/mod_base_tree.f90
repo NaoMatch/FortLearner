@@ -64,6 +64,11 @@ module mod_base_tree
         real(kind=8), allocatable :: responses(:,:)
         integer(kind=8), allocatable :: used_features(:)
         
+        integer(kind=4), allocatable :: x_hist(:,:)    !< binned array of input explanatory variables
+        type(work_space), allocatable :: x_hist_row(:) !< to be stored binned array of input explanatory variables by row to speed up by memory sequential access. @todo It could be achieved by storing the transposed and binned array in 'x_hist'. 
+        type(work_space), allocatable :: works(:)
+        type(work_space), allocatable :: rr_works(:)
+        real(kind=8), allocatable :: rr_mat_r8(:,:)    !< random rotated explanatory variable kind=4
     contains
         procedure :: init => init_base_tree
         procedure :: induction_stop_check

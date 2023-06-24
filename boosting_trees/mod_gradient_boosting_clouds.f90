@@ -113,12 +113,14 @@ contains
 
     !> A subroutine to fit gradient_boosting_clouds_regressor.
     !! \param data_holder_ptr pointer of data_holder
-    subroutine fit_gradient_boosting_clouds_regressor(this, data_holder_ptr)
+    subroutine fit_gradient_boosting_clouds_regressor(this, dholder)
         implicit none
         class(gradient_boosting_clouds_regressor) :: this
-        type(data_holder), pointer     :: data_holder_ptr
+        type(data_holder), target     :: dholder
         integer(kind=8) :: i, n
+        type(data_holder), pointer     :: data_holder_ptr
         real(kind=8), allocatable :: y_save(:,:), y_pred(:,:), y_current_pred(:,:)
+        data_holder_ptr => dholder
 
         if (allocated(this%ctrees)) deallocate(this%ctrees)
         if (allocated(this%y_train_mean)) deallocate(this%y_train_mean)
