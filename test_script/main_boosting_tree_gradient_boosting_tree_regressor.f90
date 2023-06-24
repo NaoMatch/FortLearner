@@ -35,7 +35,7 @@ program main_boosting_tree_gradient_boosting_tree_regressor
     print*, '============================================================='
     print*, "Train: "
     gbdt_reg = gradient_boosting_tree_regressor(n_estimators=100_8, max_depth=6_8)
-    call gbdt_reg%fit(dholder_ptr)
+    call gbdt_reg%fit(dholder)
     y_train_pred = gbdt_reg%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
     call gbdt_reg%dump(file_name="cl_gbdt.bin")

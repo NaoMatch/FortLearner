@@ -5,6 +5,7 @@ program main_forest_random_forest
     implicit none
 
     integer(kind=8)    :: date_value1(8), date_value2(8)
+    integer(kind=8)    :: time_train
     integer(kind=8)    :: time_rf_naive, time_rf_jitted, time_jit, time_pack, time_rf_packed
     integer(kind=8)    :: n_samples_trains(5), n_columns_trains(5)
     integer(kind=8)    :: n_samples_train, n_columns_train 
@@ -33,20 +34,27 @@ program main_forest_random_forest
 
     file_name_x_train_bin = "../sample_data/make_regression_X_train_0000100000x00100.bin"
     file_name_y_train_bin = "../sample_data/make_regression_y_train_0000100000x00100.bin"
+    file_name_x_train_bin = "../sample_data/make_regression_X_train_0001000000x00100.bin"
+    file_name_y_train_bin = "../sample_data/make_regression_y_train_0001000000x00100.bin"
     call read_bin_2d(file_name_x_train_bin, x_train)
     call read_bin_2d(file_name_y_train_bin, y_train)
     dholder = data_holder(x_train, y_train, is_trans_x=f_)
     dholder_ptr => dholder
 
-    ! print*, '============================================================='
-    ! print*, "Train: "
-    ! rf_reg = random_forest_regressor(&
-    !     n_estimators=100_8, max_depth=6_8, min_samples_leaf=10_8, num_threads=2_8)
-    ! call rf_reg%fit(dholder_ptr)
-    ! print*, "done"
-    ! y_train_pred = rf_reg%predict(x_train)
-    ! print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
+    print*, '============================================================='
+    print*, "Train: "
+    rf_reg = random_forest_regressor(&
+        n_estimators=10_8, max_depth=2_8, min_samples_leaf=500_8, num_threads=2_8)
+    call date_and_time(values=date_value1)
+    call rf_reg%fit(dholder)
+    ! call rf_reg%fit_random_forest_regressor_ptr(dholder_ptr)
+    call date_and_time(values=date_value2)
+    time_train = time_diff(date_value1, date_value2)
+    print*, "done"
+    y_train_pred = rf_reg%predict(x_train)
+    print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1)), time_train
     ! call rf_reg%dump(file_name="rf.bin")
+    stop
 
     ! Load, Test ------------------------------------------------------------------------
     print*, '*********************************************************************************************'

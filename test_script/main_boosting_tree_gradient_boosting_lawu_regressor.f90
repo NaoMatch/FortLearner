@@ -35,7 +35,7 @@ program main_boosting_tree_gradient_boosting_lawu_regressor
     print*, '============================================================='
     print*, "Train: "
     gbdt_reg = gradient_boosting_lawu_regressor(n_estimators=10_8, max_depth=2_8)
-    call gbdt_reg%fit(dholder_ptr)
+    call gbdt_reg%fit(dholder)
     print*, '============================================================='
     y_train_pred = gbdt_reg%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))

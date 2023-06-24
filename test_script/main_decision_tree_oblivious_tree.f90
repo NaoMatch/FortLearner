@@ -41,7 +41,7 @@ program main_decision_tree_oblivious_tree
     
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, '*********************************************************************************************'
-    print*, "Train, Test, Dump Trained Model"
+    print*, "Train, Test, Dump Trained Model: oblivious_tree_regressor"
     obtree = oblivious_tree_regressor(max_depth=8_8, min_samples_leaf=10_8)
     call date_and_time(values=date_value1)
     call obtree%fit(dholder_ptr)
@@ -53,7 +53,7 @@ program main_decision_tree_oblivious_tree
 
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, '*********************************************************************************************'
-    print*, "Train, Test, Dump Trained Model"
+    print*, "Train, Test, Dump Trained Model: decision_tree_regressor"
     dtreg = decision_tree_regressor(max_depth=8_8, min_samples_leaf=10_8)
     call date_and_time(values=date_value1)
     call dtreg%fit(dholder_ptr)
@@ -65,7 +65,7 @@ program main_decision_tree_oblivious_tree
 
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, '*********************************************************************************************'
-    print*, "Train, Test, Dump Trained Model"
+    print*, "Train, Test, Dump Trained Model: sliq_regressor"
     sliqreg = sliq_regressor(max_depth=8_8, min_samples_leaf=10_8)
     call date_and_time(values=date_value1)
     call sliqreg%fit(dholder_ptr)
@@ -77,7 +77,7 @@ program main_decision_tree_oblivious_tree
 
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, '*********************************************************************************************'
-    print*, "Train, Test, Dump Trained Model"
+    print*, "Train, Test, Dump Trained Model: clouds_regressor"
     cloudsreg = clouds_regressor(max_depth=8_8, min_samples_leaf=10_8)
     call date_and_time(values=date_value1)
     call cloudsreg%fit(dholder_ptr)

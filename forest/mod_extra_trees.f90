@@ -89,18 +89,20 @@ contains
     !! \param data_holder_ptr pointer of data_holder 
     !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
     !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
-    subroutine fit_extra_trees_regressor(this, data_holder_ptr, &
+    subroutine fit_extra_trees_regressor(this, dholder, &
         feature_indices, feature_indices_scanning_range)
         implicit none
         class(extra_trees_regressor) :: this
-        type(data_holder), pointer     :: data_holder_ptr
+        type(data_holder), target     :: dholder
         integer(kind=8), optional      :: feature_indices(:)
         integer(kind=8), optional      :: feature_indices_scanning_range(2)
-
+        
+        type(data_holder), pointer     :: data_holder_ptr
         integer(kind=8) :: n, n_columns
         logical(kind=4) :: is_permute_per_node
         integer(kind=8), allocatable :: feature_indices_(:), feature_indices_scanning_range_(:)
         type(extra_tree_regressor) :: et
+        data_holder_ptr => dholder
 
         include "../decision_tree/include/set_feature_indices_and_scanning_range.f90"
 

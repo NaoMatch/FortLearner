@@ -67,12 +67,13 @@ contains
         new_random_rotation_decision_tree_regressor = tmp
     end function new_random_rotation_decision_tree_regressor
 
-    subroutine fit_random_rotation_decision_tree_regressor(this, data_holder_ptr, print_node)
+    subroutine fit_random_rotation_decision_tree_regressor(this, dholder, print_node)
         implicit none
         class(random_rotation_decision_tree_regressor) :: this
-        type(data_holder), pointer     :: data_holder_ptr
+        type(data_holder), target     :: dholder
         logical(kind=4), OPTIONAL      :: print_node
-
+        
+        type(data_holder), pointer     :: data_holder_ptr
         type(node_oblq), target            :: root_node
         type(hparam_decisiontree), target  :: hparam
         type(hparam_decisiontree), pointer :: hparam_ptr
@@ -84,7 +85,9 @@ contains
         integer(kind=8) :: depth, n_columns, n
         integer(kind=8), allocatable :: feature_indices_(:), feature_indices_scanning_range_(:)
 
-        call data_holder_ptr%preprocess_random_rotate()
+        data_holder_ptr => dholder
+
+        call data_holder_ptr%preprocess_random_rotate_new(this%rr_works, this%rr_mat_r8)
 
         call this%init(data_holder_ptr)
 

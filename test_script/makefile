@@ -2,7 +2,7 @@ compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
 opt              := -O2
-option           := -cpp -D_x86_64 -fopenmp
+option           := -cpp -D_x86_64 -fopenmp -fbounds-check
 option_degug     := 
 option_blas      := -lopenblas -ldl
 
@@ -55,6 +55,8 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_dbscan.out \
 						\
 						./mod/mod_linear_regression.out \
+						./mod/mod_logistic_regression.out \
+						./mod/mod_sgd_estimator.out \
 						\
 						./mod/mod_node.out \
 						./mod/mod_splitter.out \
@@ -222,6 +224,8 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_isolation_forest.f90 -o ./mod/mod_isolation_forest.out
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../linear_regression/mod_linear_regression.f90 -o ./mod/mod_linear_regression.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../logistic_regression/mod_logistic_regression.f90 -o ./mod/mod_logistic_regression.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../sgd_estimator/mod_sgd_estimator.f90 -o ./mod/mod_sgd_estimator.out
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_variable_in_variable.f90 -o ./mod/mod_variable_in_variable.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../multi_layer_perceptron/mod_wengert_list.f90 -o ./mod/mod_wengert_list.out
@@ -282,20 +286,69 @@ clean:
 	-rm ./*.out
 
 build:
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_common.f90 -o ./mod/mod_common.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_base_kmeans.f90 -o ./mod/mod_base_kmeans.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_kmeans.f90 -o ./mod/mod_kmeans.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_minibatch_kmeans.f90 -o ./mod/mod_minibatch_kmeans.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_breathing_kmeans.f90 -o ./mod/mod_breathing_kmeans.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../data_holder/mod_data_holder.f90 -o ./mod/mod_data_holder.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_node.f90 -o ./mod/mod_node.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_splitter.f90 -o ./mod/mod_splitter.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_woodworking_tools.f90 -o ./mod/mod_woodworking_tools.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_base_tree.f90 -o ./mod/mod_base_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_decision_tree.f90 -o ./mod/mod_decision_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_extra_tree.f90 -o ./mod/mod_extra_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_clouds.f90 -o ./mod/mod_clouds.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_lawu.f90 -o ./mod/mod_lawu.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_sadt.f90 -o ./mod/mod_sadt.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_isolation_tree.f90 -o ./mod/mod_isolation_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_extended_isolation_tree.f90 -o ./mod/mod_extended_isolation_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_random_rotation_decision_tree.f90 -o ./mod/mod_random_rotation_decision_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_sliq.f90 -o ./mod/mod_sliq.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_oblivious_tree.f90 -o ./mod/mod_oblivious_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_threshold_tree.f90 -o ./mod/mod_threshold_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_random_forest.f90 -o ./mod/mod_random_forest.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_extra_trees.f90 -o ./mod/mod_extra_trees.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_isolation_forest.f90 -o ./mod/mod_isolation_forest.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_clouds.f90 -o ./mod/mod_gradient_boosting_clouds.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_extra_tree.f90 -o ./mod/mod_gradient_boosting_extra_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_lawu.f90 -o ./mod/mod_gradient_boosting_lawu.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_tree.f90 -o ./mod/mod_gradient_boosting_tree.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_adaboost.f90 -o ./mod/mod_gradient_boosting_adaboost.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../linear_regression/mod_linear_regression.f90 -o ./mod/mod_linear_regression.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../logistic_regression/mod_logistic_regression.f90 -o ./mod/mod_logistic_regression.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../sgd_estimator/mod_sgd_estimator.f90 -o ./mod/mod_sgd_estimator.out
 
 test:
 	# make clean
 	make build
 	# make build_all
-	# make main_clustering_kmeans
-	# make main_clustering_minibatch_kmeans
-	make main_clustering_breathing_kmeans
+	# make main_forest_random_forest
+	# make main_forest_extra_trees
+	# make main_forest_isolation_forest
+	# make main_decision_tree_clouds
+	# make main_decision_tree_decision_tree
+	# make main_decision_tree_extra_tree
+	# make main_decision_tree_isolation_tree
+	# make main_decision_tree_lawu
+	# make main_decision_tree_random_rotation_decision_tree
+	# make main_decision_tree_sliq
+	# make main_decision_tree_oblivious_tree
+	# valgrind --tool=massif --time-unit=B --stacks=yes --max-stackframe=2000028 ./main_decision_tree_clouds.out
+	# make main_boosting_tree_gradient_boosting_clouds_regressor
+	# make main_boosting_tree_gradient_boosting_extra_tree_regressor
+	# make main_boosting_tree_gradient_boosting_lawu_regressor
+	# make main_boosting_tree_gradient_boosting_tree_regressor
+	# make main_boosting_tree_gradient_boosting_adaboost_regressor
+	# make main_linear_regression_lasso_regression
+	# make main_linear_regression_linear_regression
+	# make main_linear_regression_ridge_regression
+	# make main_logistic_regression_logistic_regression
+	make main_sgd_estimator_sgd_regressor
+
+test_all:
+	make clean
+	make build_all
+	make main_csv2bin
+	python create_datasets.py
+	# make main_linear_regression_ridge_regression
+	# make main_logistic_regression_logistic_regression
+	make 
 
 test_all:
 	make clean
@@ -355,6 +408,22 @@ test_all:
 	make main_svm_kernel_svm
 	make main_hash_hash_map
 	make main_data_structure_union_find
+
+main_sgd_estimator_sgd_regressor:
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main_sgd_estimator_sgd_regressor.f90 -o main_sgd_estimator_sgd_regressor.out \
+	$(option_blas)
+	./main_sgd_estimator_sgd_regressor.out
+
+main_logistic_regression_logistic_regression:
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main_logistic_regression_logistic_regression.f90 -o main_logistic_regression_logistic_regression.out \
+	$(option_blas)
+	./main_logistic_regression_logistic_regression.out
 
 main_data_structure_union_find:
 	$(compiler_fortran) -w -unroll \
@@ -489,7 +558,7 @@ main_decision_tree_clouds:
 	$(asm) $(option) $(mod) $(opt) \
 	main_decision_tree_clouds.f90 -o main_decision_tree_clouds.out \
 	$(option_blas)
-	./main_decision_tree_clouds.out
+	# ./main_decision_tree_clouds.out
 
 main_decision_tree_decision_tree:
 	$(compiler_fortran) -w -unroll \

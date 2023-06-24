@@ -112,11 +112,11 @@ contains
     end subroutine update_sample_weights
 
     
-    subroutine fit_adaboost_regressor(this, dholder, X, y)
+    subroutine fit_adaboost_regressor(this, dholder)
         implicit none
         class(adaboost_regressor)  :: this
-        type(data_holder), pointer :: dholder
-        real(kind=8), intent(inout), target   :: x(:,:), y(:,:)
+        type(data_holder), target :: dholder
+        type(data_holder), pointer :: dholder_ptr
         
         type(data_holder), pointer :: dholder_2_ptr
         type(data_holder), target :: dholder_2
@@ -126,35 +126,35 @@ contains
         real(kind=8), allocatable, target    :: x_copy(:,:), y_copy(:,:)
         real(kind=8)                 :: max_diff, avg_loss, beta
         type(metrics) :: met
+        dholder_ptr => dholder
 
-        if (dholder%n_outputs /= 1_8) stop "#outputs must be 1."
-        this%n_outputs = dholder%n_outputs
+        if (dholder_ptr%n_outputs /= 1_8) stop "#outputs must be 1."
+        this%n_outputs = dholder_ptr%n_outputs
 
-        allocate(indices(dholder%n_samples))
-        call this%initialize(dholder)
+        allocate(indices(dholder_ptr%n_samples))
+        call this%initialize(dholder_ptr)
 
         allocate(this%estimators(this%hparam%n_estimators))
-        allocate(pred(dholder%n_samples, dholder%n_outputs))
-        allocate(diff(dholder%n_samples))
-        allocate(losses(dholder%n_samples))
-        allocate(x_copy(dholder%n_samples,dholder%n_columns), y_copy(dholder%n_samples,dholder%n_outputs))
+        allocate(pred(dholder_ptr%n_samples, dholder_ptr%n_outputs))
+        allocate(diff(dholder_ptr%n_samples))
+        allocate(losses(dholder_ptr%n_samples))
+        allocate(x_copy(dholder_ptr%n_samples,dholder_ptr%n_columns), y_copy(dholder_ptr%n_samples,dholder_ptr%n_outputs))
 
         do e=1, this%hparam%n_estimators
             this%estimators(e) = decision_tree_regressor(max_depth=4_8)
-            call weighted_sampling(indices, dholder%n_samples, this%sample_weights, dholder%n_samples)
-            call quick_sort(indices, dholder%n_samples)
-            x_copy = dholder%x_ptr%x_r8_ptr(indices,:)
-            y_copy = dholder%y_ptr%y_r8_ptr(indices,:)
+            call weighted_sampling(indices, dholder_ptr%n_samples, this%sample_weights, dholder_ptr%n_samples)
+            call quick_sort(indices, dholder_ptr%n_samples)
+            x_copy = dholder_ptr%x_ptr%x_r8_ptr(indices,:)
+            y_copy = dholder_ptr%y_ptr%y_r8_ptr(indices,:)
             dholder_2 = data_holder(x_copy, y_copy, is_trans_x=f_)
-            dholder_2_ptr => dholder_2
-            call this%estimators(e)%fit(dholder_2_ptr)
+            call this%estimators(e)%fit(dholder_2)
             ! call this%estimators(e)%fit(dholder, sample_indices=indices)
 
-            pred = this%estimators(e)%predict(dholder%x_ptr%x_r8_ptr)
+            pred = this%estimators(e)%predict(dholder_ptr%x_ptr%x_r8_ptr)
             
-            diff(:) = abs( dholder%y_ptr%y_r8_ptr(:,1) - pred(:,1) )
+            diff(:) = abs( dholder_ptr%y_ptr%y_r8_ptr(:,1) - pred(:,1) )
             
-            call this%compute_loss(losses, diff, dholder%n_samples)
+            call this%compute_loss(losses, diff, dholder_ptr%n_samples)
             avg_loss = sum(losses * this%sample_probas)
             beta = avg_loss/(1d0-avg_loss)
             this%betas = [this%betas, beta]
@@ -162,10 +162,10 @@ contains
             
             ! print*, "round=", int(e), "  sum(diff)=", real(sum(diff)), "  sum(losses)=", real(sum(losses)), &
             !     "  sum(pred)=", real(sum(pred)),  &
-            !     "  mse=", real(met%mean_square_error(dholder%y_ptr%y_r8_ptr(:,1), pred(:,1))), &
+            !     "  mse=", real(met%mean_square_error(dholder_ptr%y_ptr%y_r8_ptr(:,1), pred(:,1))), &
             !     "  avg_loss=", real(avg_loss), &
             !     "  beta=", real(beta)
-            call this%update_sample_weights(beta, losses, dholder%n_samples)
+            call this%update_sample_weights(beta, losses, dholder_ptr%n_samples)
         end do
     end subroutine fit_adaboost_regressor
 

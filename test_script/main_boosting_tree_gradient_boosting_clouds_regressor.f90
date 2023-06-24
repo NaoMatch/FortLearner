@@ -30,12 +30,11 @@ program main_boosting_tree_gradient_boosting_clouds_regressor
     call read_bin_2d(file_name_x_train_bin, x_train)
     call read_bin_2d(file_name_y_train_bin, y_train)
     dholder = data_holder(x_train, y_train, is_trans_x=f_)
-    dholder_ptr => dholder
 
     print*, '============================================================='
     print*, "Train: "
     gbdt_reg = gradient_boosting_clouds_regressor(n_estimators=100_8, max_depth=6_8)
-    call gbdt_reg%fit(dholder_ptr)
+    call gbdt_reg%fit(dholder)
     y_train_pred = gbdt_reg%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
     call gbdt_reg%dump(file_name="cl_gbdt.bin")

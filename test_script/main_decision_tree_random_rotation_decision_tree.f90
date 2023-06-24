@@ -23,21 +23,19 @@ program main_decision_tree_random_rotation_decision_tree
     integer(kind=8), ALLOCATABLE :: feature_indices(:), feature_indices_scanning_range(:)
 
     type(random_rotation_decision_tree_regressor)        :: itree, itree2
-    type(metrics)                 :: metric
-    type(data_holder), target     :: dholder
-    type(data_holder), pointer    :: dholder_ptr
+    type(metrics)     :: metric
+    type(data_holder) :: dholder
 
     file_name_x_train_bin = "../sample_data/make_regression_X_train_0000100000x00100.bin"
     file_name_y_train_bin = "../sample_data/make_regression_y_train_0000100000x00100.bin"
     call read_bin_2d(file_name_x_train_bin, x_train)
     call read_bin_2d(file_name_y_train_bin, y_train)
     dholder = data_holder(x_train, y_train, is_trans_x=f_)
-    dholder_ptr => dholder
 
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, "Train, Test, Dump Trained Model"
     itree = random_rotation_decision_tree_regressor(max_depth=8_8)
-    call itree%fit(dholder_ptr)
+    call itree%fit(dholder)
     y_train_pred = itree%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
     call itree%dump(file_name="cl.bin")

@@ -36,7 +36,7 @@ program main_linear_regression_ridge_regression
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, "Train, Test, Dump Trained Model"
     lr  = ridge_regression()
-    call lr%fit(dholder_ptr)
+    call lr%fit(dholder)
     y_train_pred = lr%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
     call lr%dump(file_name="lr.bin")

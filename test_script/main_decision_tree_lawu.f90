@@ -36,7 +36,7 @@ program main_decision_tree_extra_tree
     ! Train, Test, Dump -----------------------------------------------------------------
     print*, "Train, Test, Dump Trained Model"
     lw = lawu_regressor(max_depth=2_8, learning_rate_layer=0.950d0)
-    call lw%fit(dholder_ptr)
+    call lw%fit(dholder)
     y_train_pred = lw%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1))
     call lw%dump(file_name="et.bin")

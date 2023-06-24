@@ -79,7 +79,7 @@ contains
 
         include "./include/set_feature_indices_and_scanning_range.f90"
         call date_and_time(values=date_value1)
-        call data_holder_ptr % preprocess_presort()
+        call data_holder_ptr % preprocess_presort_new(this%works)
         call date_and_time(values=date_value2)
         ! print*, "Presort: ", time_diff(date_value1, date_value2)
         

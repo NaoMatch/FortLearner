@@ -211,11 +211,11 @@ contains
     end function hess
 
 
-    subroutine fit_newton_logistic_regression(this, data_holder_ptr)
+    subroutine fit_newton_logistic_regression(this, dholder)
         implicit none
         class(logistic_regression) :: this
         type(logistic_regression)  :: lr
-        type(data_holder), pointer :: data_holder_ptr
+        type(data_holder), target :: dholder
         type(error) :: err
         integer(kind=8) :: n_samples, n_columns
         real(kind=8), allocatable :: x_ini(:), x_min(:)
@@ -223,9 +223,9 @@ contains
         type(newton_method)    :: newton
 
         lr_temp%hparam = this%hparam
-        lr_temp%data_holder_ptr => data_holder_ptr
-        lr_temp%n_columns = data_holder_ptr%n_columns
-        lr_temp%n_samples = data_holder_ptr%n_samples
+        lr_temp%data_holder_ptr => dholder
+        lr_temp%n_columns = dholder%n_columns
+        lr_temp%n_samples = dholder%n_samples
         call ifdealloc(lr_temp%thetas_)
 
         allocate(lr_temp%thetas_(lr_temp%n_columns))
@@ -233,7 +233,7 @@ contains
         allocate(x_min(lr_temp%n_columns+1))
         call rand_uniform(lr_temp%thetas_,    -1d0, 1d0, lr_temp%n_columns)
         call rand_uniform(lr_temp%intercept_, -1d0, 1d0)
-        call err%is_binary_labels(data_holder_ptr%y_ptr%y_i8_ptr, lr_temp%n_samples, lr_temp%hparam%algo_name)
+        call err%is_binary_labels(dholder%y_ptr%y_i8_ptr, lr_temp%n_samples, lr_temp%hparam%algo_name)
 
         lr_temp%thetas_ = 1d0
         lr_temp%intercept_ = 1d0
@@ -270,10 +270,11 @@ contains
     end subroutine fit_newton_logistic_regression
 
 
-    subroutine fit_bfgs_logistic_regression(this, data_holder_ptr)
+    subroutine fit_bfgs_logistic_regression(this, dholder)
         implicit none
         class(logistic_regression) :: this
         type(logistic_regression)  :: lr
+        type(data_holder), target :: dholder
         type(data_holder), pointer :: data_holder_ptr
         type(error) :: err
         integer(kind=8) :: n_samples, n_columns
@@ -283,9 +284,9 @@ contains
         type(bfgs)    :: bfgs_
 
         lr_temp2%hparam = this%hparam
-        lr_temp2%data_holder_ptr => data_holder_ptr
-        lr_temp2%n_columns = data_holder_ptr%n_columns
-        lr_temp2%n_samples = data_holder_ptr%n_samples
+        lr_temp2%data_holder_ptr => dholder
+        lr_temp2%n_columns = dholder%n_columns
+        lr_temp2%n_samples = dholder%n_samples
         call ifdealloc(lr_temp2%thetas_)
 
         allocate(lr_temp2%thetas_(lr_temp2%n_columns))
@@ -293,7 +294,7 @@ contains
         allocate(x_min(lr_temp2%n_columns+1))
         call rand_uniform(lr_temp2%thetas_,    -1d0, 1d0, lr_temp2%n_columns)
         call rand_uniform(lr_temp2%intercept_, -1d0, 1d0)
-        call err%is_binary_labels(data_holder_ptr%y_ptr%y_i8_ptr, lr_temp2%n_samples, lr_temp2%hparam%algo_name)
+        call err%is_binary_labels(dholder%y_ptr%y_i8_ptr, lr_temp2%n_samples, lr_temp2%hparam%algo_name)
 
         lr_temp2%thetas_ = 1d0
         lr_temp2%intercept_ = 1d0

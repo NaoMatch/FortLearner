@@ -96,16 +96,17 @@ contains
     !! \param print_node ***OPTIONAL*** if True, print node informations after training
     !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
     !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
-    subroutine fit_extra_tree_regressor(this, data_holder_ptr, print_node, &
+    subroutine fit_extra_tree_regressor(this, dholder, print_node, &
         feature_indices, feature_indices_scanning_range)
         implicit none
 
         class(extra_tree_regressor) :: this
-        type(data_holder), pointer     :: data_holder_ptr
+        type(data_holder), target      :: dholder
         logical(kind=4), OPTIONAL      :: print_node
         integer(kind=8), optional      :: feature_indices(:)
         integer(kind=8), optional      :: feature_indices_scanning_range(2)
-
+        
+        type(data_holder), pointer     :: data_holder_ptr
         type(node_axis), target            :: root_node
         type(hparam_decisiontree), target  :: hparam
         type(hparam_decisiontree), pointer :: hparam_ptr
@@ -119,6 +120,7 @@ contains
         integer(kind=8) :: date_value1(8), date_value2(8)
         integer(kind=8), save :: time_splti=0
 
+        data_holder_ptr => dholder
         include "./include/set_feature_indices_and_scanning_range.f90"
 
         call this%init(data_holder_ptr)
@@ -175,16 +177,17 @@ contains
     !! \param print_node ***OPTIONAL*** if True, print node informations after training
     !! \param feature_indices ***OPTIONAL*** Order of features given by hand for 'DeepForest'
     !! \param feature_indices_scanning_range ***OPTIONAL*** The index of the range to be used in the "Tree" when "feature_indices" is given.
-    subroutine fit_extra_tree_regressor_faster(this, data_holder_ptr, print_node, &
+    subroutine fit_extra_tree_regressor_faster(this, dholder, print_node, &
         feature_indices, feature_indices_scanning_range)
         implicit none
 
         class(extra_tree_regressor) :: this
-        type(data_holder), pointer     :: data_holder_ptr
+        type(data_holder), target     :: dholder
         logical(kind=4), OPTIONAL      :: print_node
         integer(kind=8), optional      :: feature_indices(:)
         integer(kind=8), optional      :: feature_indices_scanning_range(2)
-
+        
+        type(data_holder), pointer     :: data_holder_ptr
         type(node_axis), target            :: root_node
         type(hparam_decisiontree), target  :: hparam
         type(hparam_decisiontree), pointer :: hparam_ptr
@@ -197,6 +200,7 @@ contains
         integer(kind=8), allocatable :: feature_indices_(:), feature_indices_scanning_range_(:)
         integer(kind=8) :: date_value1(8), date_value2(8)
         integer(kind=8), save :: time_splti=0
+        data_holder_ptr => dholder
 
         include "./include/set_feature_indices_and_scanning_range.f90"
 
@@ -235,6 +239,7 @@ contains
                 this%is_threshold_tree, this%lr_layer)
 
             is_stop = this%induction_stop_check(hparam_ptr)
+            if (is_stop) exit
             depth = depth + 1
         end do
         call termination_node_ptr_axis(this%root_node_axis_ptr)
