@@ -3,12 +3,15 @@ module mod_minibatch_kmeans
     use mod_hyperparameter
     use mod_base_kmeans
     use mod_random
+    use mod_data_holder
     implicit none
 
 
     type, extends(base_kmeans) :: minibatch_kmeans
     contains
-        procedure :: fit => fit_minibatch_kmeans
+        procedure, pass :: fit_minibatch_kmeans_x
+        procedure, pass :: fit_minibatch_kmeans_dholder
+        generic :: fit => fit_minibatch_kmeans_x, fit_minibatch_kmeans_dholder
     end type minibatch_kmeans
 
     !> An interface to create new 'kmeans' object.
@@ -51,7 +54,7 @@ contains
     end function new_minibatch_kmeans
 
     
-    subroutine fit_minibatch_kmeans(this, x)
+    subroutine fit_minibatch_kmeans_x(this, x)
         implicit none
         class(minibatch_kmeans) :: this
         real(kind=8), intent(in) :: x(:,:)
@@ -94,7 +97,7 @@ contains
             x_minibatch_sq_sum_row(:) = x_sq_sum_row(indices(this%hparam%max_samples))
 
             distance_matrix(:,:) = spread(x_minibatch_sq_sum_row, dim=2, ncopies=this%hparam%n_clusters) & 
-                                 + spread(c_sq_sum_row,           dim=1, ncopies=this%hparam%max_samples)
+                                +  spread(c_sq_sum_row,           dim=1, ncopies=this%hparam%max_samples)
             call dgemm("N", "N", & 
                 this%hparam%max_samples, this%hparam%n_clusters, this % n_columns, &
                 -2d0, & 
@@ -102,7 +105,7 @@ contains
                 this%cluster_centers, this % n_columns, &
                 1d0, &
                 distance_matrix, this%hparam%max_samples)
-                 
+
             cluster_labels(:) = minloc(distance_matrix, dim=2)
 
             do j=1, this%hparam%max_samples, 1
@@ -116,6 +119,14 @@ contains
         end do
         this % is_trained = t_
         if (this%fix_seed) call release_random_seed()
-    end subroutine fit_minibatch_kmeans
+    end subroutine fit_minibatch_kmeans_x
+
+    
+    subroutine fit_minibatch_kmeans_dholder(this, dholder)
+        implicit none
+        class(minibatch_kmeans) :: this
+        type(data_holder), intent(in) :: dholder
+        call this%fit_minibatch_kmeans_x(dholder%x_ptr%x_r8_ptr)
+    end subroutine fit_minibatch_kmeans_dholder
 
 end module mod_minibatch_kmeans

@@ -7,6 +7,7 @@ module mod_product_quantization
     use mod_hyperparameter
     use mod_threshold_tree
     use mod_stats
+    use mod_data_holder    
     use mod_nearest_neighbour, only: neighbor_indices
     implicit none
 
@@ -43,7 +44,9 @@ module mod_product_quantization
 
         type(sample_enc), allocatable :: code_book(:)
     contains
-        procedure :: fit    => fit_product_quantization
+        procedure, pass :: fit_product_quantization_x
+        procedure, pass :: fit_product_quantization_dholder
+        generic :: fit => fit_product_quantization_x, fit_product_quantization_dholder
         procedure :: encode => encode_product_quantization
         procedure :: query  => query_product_quantization
     end type product_quantization
@@ -69,7 +72,7 @@ contains
     end function new_product_quantization
 
 
-    subroutine fit_product_quantization(this, x)
+    subroutine fit_product_quantization_x(this, x)
         implicit none
         class(product_quantization) :: this
         real(kind=8), intent(in)  :: x(:,:)
@@ -86,15 +89,18 @@ contains
         allocate(pred_idxs(n_samples))
 
         ! fit coarse quantizer
+        ! print*, "fit coarse quantizer"
         this%km_cq = kmeans(n_clusters=this%n_clusters)
         call this%km_cq%fit_dgemm(x)
         pred_idxs = this%km_cq%predict(x)
 
         ! compute residual
+        ! print*, "compute residual"
         allocate(x_residual(n_samples, n_columns))
         x_residual(:,:) = x(:,:) - transpose(this%km_cq%cluster_centers(:,pred_idxs))
 
         ! fit product quantizer
+        ! print*, "fit product quantizer"
         dim_step = n_columns / this%n_subspace
         allocate(this%dim_ranges(this%n_subspace, 2))
         allocate(this%kms_pq(this%n_subspace))
@@ -102,17 +108,28 @@ contains
         ini = 1
         do s=1, this%n_subspace, 1
             ! Set Feature Range
+            ! print*, "Set Feature Range"
             fin = minval([ini + dim_step-1, n_columns])
             this%dim_ranges(s,:) = [ini, fin]
 
             ! Fit Product Quantizer
+            ! print*, "Fit Product Quantizer"
             this%kms_pq(s) = kmeans(n_clusters=this%n_clusters)
-            call this%kms_pq(s)%fit_dgemm(x_residual(:, ini:fin))
+            call this%kms_pq(s)%fit(x_residual(:, ini:fin))
 
             ! Shift
+            ! print*, "Shift"
             ini = fin + 1
         end do
-    end subroutine fit_product_quantization
+    end subroutine fit_product_quantization_x
+
+    
+    subroutine fit_product_quantization_dholder(this, dholder)
+        implicit none
+        class(product_quantization) :: this
+        type(data_holder), intent(in) :: dholder
+        call this%fit_product_quantization_x(dholder%x_ptr%x_r8_ptr)
+    end subroutine fit_product_quantization_dholder
 
 
     subroutine encode_product_quantization(this, x, add_new_data)

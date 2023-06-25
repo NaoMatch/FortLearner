@@ -90,6 +90,7 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_balltree.out \
 						./mod/mod_brute_force_search.out \
 						./mod/mod_kdtree.out \
+						./mod/mod_lsh.out \
 						./mod/mod_product_quantization.out \
 						./mod/mod_k_nearest_neighbor_regressor.out \
 						./mod/mod_k_nearest_neighbor_classifier.out \
@@ -286,60 +287,25 @@ clean:
 	-rm ./*.out
 
 build:
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../data_holder/mod_data_holder.f90 -o ./mod/mod_data_holder.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_node.f90 -o ./mod/mod_node.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_splitter.f90 -o ./mod/mod_splitter.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_woodworking_tools.f90 -o ./mod/mod_woodworking_tools.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_base_tree.f90 -o ./mod/mod_base_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_decision_tree.f90 -o ./mod/mod_decision_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_extra_tree.f90 -o ./mod/mod_extra_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_clouds.f90 -o ./mod/mod_clouds.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_lawu.f90 -o ./mod/mod_lawu.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_sadt.f90 -o ./mod/mod_sadt.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_isolation_tree.f90 -o ./mod/mod_isolation_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_extended_isolation_tree.f90 -o ./mod/mod_extended_isolation_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_random_rotation_decision_tree.f90 -o ./mod/mod_random_rotation_decision_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_sliq.f90 -o ./mod/mod_sliq.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_oblivious_tree.f90 -o ./mod/mod_oblivious_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../decision_tree/mod_threshold_tree.f90 -o ./mod/mod_threshold_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_random_forest.f90 -o ./mod/mod_random_forest.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_extra_trees.f90 -o ./mod/mod_extra_trees.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../forest/mod_isolation_forest.f90 -o ./mod/mod_isolation_forest.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_clouds.f90 -o ./mod/mod_gradient_boosting_clouds.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_extra_tree.f90 -o ./mod/mod_gradient_boosting_extra_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_lawu.f90 -o ./mod/mod_gradient_boosting_lawu.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_tree.f90 -o ./mod/mod_gradient_boosting_tree.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../boosting_trees/mod_gradient_boosting_adaboost.f90 -o ./mod/mod_gradient_boosting_adaboost.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../linear_regression/mod_linear_regression.f90 -o ./mod/mod_linear_regression.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../logistic_regression/mod_logistic_regression.f90 -o ./mod/mod_logistic_regression.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../sgd_estimator/mod_sgd_estimator.f90 -o ./mod/mod_sgd_estimator.out
-
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_base_kmeans.f90 -o ./mod/mod_base_kmeans.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_kmeans.f90 -o ./mod/mod_kmeans.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_product_quantization.f90 -o ./mod/mod_product_quantization.out
+	
 test:
 	# make clean
-	make build
+	# make build
 	# make build_all
-	# make main_forest_random_forest
-	# make main_forest_extra_trees
-	# make main_forest_isolation_forest
-	# make main_decision_tree_clouds
-	# make main_decision_tree_decision_tree
-	# make main_decision_tree_extra_tree
-	# make main_decision_tree_isolation_tree
-	# make main_decision_tree_lawu
-	# make main_decision_tree_random_rotation_decision_tree
-	# make main_decision_tree_sliq
-	# make main_decision_tree_oblivious_tree
-	# valgrind --tool=massif --time-unit=B --stacks=yes --max-stackframe=2000028 ./main_decision_tree_clouds.out
-	# make main_boosting_tree_gradient_boosting_clouds_regressor
-	# make main_boosting_tree_gradient_boosting_extra_tree_regressor
-	# make main_boosting_tree_gradient_boosting_lawu_regressor
-	# make main_boosting_tree_gradient_boosting_tree_regressor
-	# make main_boosting_tree_gradient_boosting_adaboost_regressor
-	# make main_linear_regression_lasso_regression
-	# make main_linear_regression_linear_regression
-	# make main_linear_regression_ridge_regression
-	# make main_logistic_regression_logistic_regression
-	make main_sgd_estimator_sgd_regressor
+	# make main_clustering_kmeans
+	# make main_clustering_breathing_kmeans
+	# make main_clustering_minibatch_kmeans
+	# make main_clustering_dbscan
+	# make main_decomposition_nipals
+	# make main_neighbour_balltree
+	# make main_neighbour_brute_force_search
+	# make main_neighbour_exact_duplicate_search
+	# make main_neighbour_kdtree
+	make main_neighbour_lsh
+	# make main_neighbour_product_quantization
 
 test_all:
 	make clean
@@ -743,6 +709,14 @@ main_neighbour_k_nearest_neighbor_regressor:
 	main_neighbour_k_nearest_neighbor_regressor.f90 -o main_neighbour_k_nearest_neighbor_regressor.out \
 	$(option_blas)
 	./main_neighbour_k_nearest_neighbor_regressor.out
+
+main_neighbour_lsh:
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main_neighbour_lsh.f90 -o main_neighbour_lsh.out \
+	$(option_blas)
+	./main_neighbour_lsh.out
 
 main_neighbour_product_quantization:
 	$(compiler_fortran) -w -unroll \

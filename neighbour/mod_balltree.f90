@@ -5,6 +5,7 @@ module mod_balltree
     use mod_linalg
     use mod_timer
     use mod_hyperparameter
+    use mod_data_holder    
     use mod_nearest_neighbour, only: neighbor_results, base_node_for_nearest_neighbor
     implicit none
 
@@ -46,7 +47,9 @@ module mod_balltree
 
         integer(kind=8), allocatable :: x_sq_sum(:) !< squared sum of x by row
     contains
-        procedure :: build => build_balltree
+        procedure, pass :: build_balltree_x
+        procedure, pass :: build_balltree_dholder
+        generic :: build => build_balltree_x, build_balltree_dholder
         procedure :: build_balltree_rec
 
         procedure :: query => query_balltree
@@ -220,7 +223,7 @@ contains
 
     !> Building 'balltree'.
     !! \param x input data.
-    subroutine build_balltree(this, x)
+    subroutine build_balltree_x(this, x)
         implicit none
         class(balltree) :: this
         real(kind=8), target, intent(in) :: x(:,:)
@@ -253,7 +256,15 @@ contains
         ! print*, "Get Pivot Position    : ", times(4)
         ! print*, "Initialize Child Balls: ", times(5)
         ! print*, "Allocate Indices      : ", times(6)
-    end subroutine build_balltree
+    end subroutine build_balltree_x
+
+    
+    subroutine build_balltree_dholder(this, dholder)
+        implicit none
+        class(balltree) :: this
+        type(data_holder), intent(in) :: dholder
+        call this%build_balltree_x(dholder%x_ptr%x_r8_ptr)
+    end subroutine build_balltree_dholder
 
     
     !> Building 'balltree' recursively using in 'build_balltree'.

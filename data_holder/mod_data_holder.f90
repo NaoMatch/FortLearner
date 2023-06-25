@@ -83,6 +83,7 @@ module mod_data_holder
         module procedure :: new_data_holder_i4_r4
         module procedure :: new_data_holder_r8_r8
         module procedure :: new_data_holder_r8_i8
+        module procedure :: new_data_holder_r8
     end interface data_holder
 
 
@@ -121,6 +122,25 @@ contains
 
         new_data_holder_r8_r8 % is_preprocessed = f_
     end function new_data_holder_r8_r8
+
+    function new_data_holder_r8(x)
+        implicit none
+        type(data_holder)    :: new_data_holder_r8
+        real(kind=8), target :: x(:,:)
+        logical(kind=4)      :: is_trans_x
+
+        integer(kind=8) :: x_shape(2)
+        type(error)     :: err
+
+        x_shape = shape(x)
+        new_data_holder_r8 % x_ptr % x_r8_ptr   => x
+
+        new_data_holder_r8 % n_samples          =  x_shape(1)
+        new_data_holder_r8 % n_columns          =  x_shape(2)
+        new_data_holder_r8 % x_shape            =  x_shape
+
+        new_data_holder_r8 % is_preprocessed = f_
+    end function new_data_holder_r8
     include "./include/new_data_holder/inc_new_data_holder.f90"
 
 

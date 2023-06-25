@@ -6,6 +6,7 @@ module mod_exact_duplicate_search
     use mod_hash
     use mod_common
     use mod_common_type
+    use mod_data_holder    
     use mod_linalg, only: multi_mat_vec
     implicit none
 
@@ -47,7 +48,9 @@ module mod_exact_duplicate_search
         type(node_eds), pointer :: root_node_ptr
     contains
         procedure :: init => init_exact_duplicate_search
-        procedure :: search => search_exact_duplicate
+        procedure, pass :: search_exact_duplicate_x
+        procedure, pass :: search_exact_duplicate_dholder
+        generic :: search => search_exact_duplicate_x, search_exact_duplicate_dholder
         procedure :: build_exact_duplicate
         procedure :: build_exact_duplicate_rec
     end type exact_duplicate_search
@@ -58,7 +61,9 @@ module mod_exact_duplicate_search
 
     type hash_exact_duplicate_search
     contains
-        procedure :: search => search_hash_exact_duplicate_search_matrix
+        procedure, pass :: search_hash_exact_duplicate_search_matrix_x
+        procedure, pass :: search_hash_exact_duplicate_search_matrix_dholder
+        generic :: search => search_hash_exact_duplicate_search_matrix_x, search_hash_exact_duplicate_search_matrix_dholder
     end type hash_exact_duplicate_search
 
     interface hash_exact_duplicate_search
@@ -73,11 +78,11 @@ contains
         type(hash_exact_duplicate_search) :: new_hash_exact_duplicate_search
     end function new_hash_exact_duplicate_search
 
-    function search_hash_exact_duplicate_search_matrix(this, x)
+    function search_hash_exact_duplicate_search_matrix_x(this, x)
         implicit none
         class(hash_exact_duplicate_search) :: this
         integer(kind=8), intent(in) :: x(:,:)
-        type(duplicate_index), ALLOCATABLE, target  :: search_hash_exact_duplicate_search_matrix(:)
+        type(duplicate_index), ALLOCATABLE, target  :: search_hash_exact_duplicate_search_matrix_x(:)
         type(duplicate_index), pointer :: res_ptr(:)
         integer(kind=8) :: n_samples, n_columns, x_shape(2), n_uniq
         integer(kind=8) :: i, l, ini, fin
@@ -96,8 +101,8 @@ contains
         call quick_argsort(hashes, indices, n_samples)
 
         n_uniq = count_unique(hashes, n_samples)
-        allocate( search_hash_exact_duplicate_search_matrix(n_uniq) )
-        res_ptr => search_hash_exact_duplicate_search_matrix
+        allocate( search_hash_exact_duplicate_search_matrix_x(n_uniq) )
+        res_ptr => search_hash_exact_duplicate_search_matrix_x
         if ( n_uniq .eq. n_samples ) then
             do l=1, n_uniq, 1
                 res_ptr(l)%vector = (/l/)
@@ -118,8 +123,17 @@ contains
             res_ptr(n_uniq)%vector = indices(ini:n_samples)
         end if
         ! print*, hashes(:10)
-    end function search_hash_exact_duplicate_search_matrix
+    end function search_hash_exact_duplicate_search_matrix_x
 
+    
+    function search_hash_exact_duplicate_search_matrix_dholder(this, dholder)
+        implicit none
+        class(hash_exact_duplicate_search) :: this
+        type(data_holder), intent(in) :: dholder
+        type(duplicate_index), ALLOCATABLE, target  :: search_hash_exact_duplicate_search_matrix_dholder(:)
+        search_hash_exact_duplicate_search_matrix_dholder &
+            = this%search_hash_exact_duplicate_search_matrix_x(dholder%x_ptr%x_i8_ptr)
+    end function search_hash_exact_duplicate_search_matrix_dholder
     ! -------------------------------------------------------------
     ! Exaxt Duplicate Search---------------------------------------
     ! -------------------------------------------------------------
@@ -142,11 +156,11 @@ contains
 
 
     !> Search Exact Duplicate from input data
-    function search_exact_duplicate(this, x)
+    function search_exact_duplicate_x(this, x)
         implicit none
         class(exact_duplicate_search)       :: this
         integer(kind=8), target, intent(in) :: x(:,:)
-        type(duplicate_index), ALLOCATABLE  :: search_exact_duplicate(:)
+        type(duplicate_index), ALLOCATABLE  :: search_exact_duplicate_x(:)
 
         integer(kind=8)          :: x_shape(2), l
         integer(kind=8), pointer :: x_ptr(:,:)
@@ -170,13 +184,22 @@ contains
         call extract_leaf_nodes_eds(this%root_node_ptr, leaf_node_ptrs)
 
         ! print*, "size(leaf_node_ptrs): ", size(leaf_node_ptrs)
-        allocate( search_exact_duplicate(size(leaf_node_ptrs)) )
+        allocate( search_exact_duplicate_x(size(leaf_node_ptrs)) )
 
         do l=1, size(leaf_node_ptrs), 1
             ! call quick_sort(leaf_node_ptrs(l)%ptr%indices(:), leaf_node_ptrs(l)%ptr%n_samples)
-            search_exact_duplicate(l)%vector = leaf_node_ptrs(l)%ptr%indices(:)
+            search_exact_duplicate_x(l)%vector = leaf_node_ptrs(l)%ptr%indices(:)
         end do
-    end function search_exact_duplicate
+    end function search_exact_duplicate_x
+
+    
+    function search_exact_duplicate_dholder(this, dholder)
+        implicit none
+        class(exact_duplicate_search) :: this
+        type(data_holder), intent(in) :: dholder
+        type(duplicate_index), ALLOCATABLE  :: search_exact_duplicate_dholder(:)
+        search_exact_duplicate_dholder = this%search_exact_duplicate_x(dholder%x_ptr%x_i8_ptr)
+    end function search_exact_duplicate_dholder
 
 
     !> Build 'exact_duplicate_search' object

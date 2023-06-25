@@ -1,5 +1,6 @@
 program main_clustering_breathing_kmeans
     use mod_breathing_kmeans
+    use mod_data_holder
     implicit none
     
 
@@ -20,10 +21,12 @@ program main_clustering_breathing_kmeans
     integer(kind=8), ALLOCATABLE :: feature_indices(:), feature_indices_scanning_range(:)
 
     type(kmeans) :: km
+    type(data_holder) :: dholder
     type(breathing_kmeans) :: bkm, bkm2
 
     file_name_x_train_bin = "../sample_data/make_regression_X_train_0000100000x00100.bin"
     call read_bin_2d(file_name_x_train_bin, x_train)
+    dholder = data_holder(x_train)
     
     print*, '============================================================='
     print*, "Train: "
@@ -31,6 +34,11 @@ program main_clustering_breathing_kmeans
     ! km = breathing_kmeans(n_clusters=2_8, n_clusters_breathing_in=2_8)
     call date_and_time(values=date_value1)
     call bkm%fit(x_train)
+    call date_and_time(values=date_value2)
+    print*, bkm%score(x_train), time_diff(date_value1, date_value2)
+    
+    call date_and_time(values=date_value1)
+    call bkm%fit(dholder)
     call date_and_time(values=date_value2)
     print*, bkm%score(x_train), time_diff(date_value1, date_value2)
     

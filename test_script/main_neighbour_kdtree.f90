@@ -4,12 +4,15 @@ program main_neighbour_kdtree
     use mod_brute_force_search
     use mod_kdtree
     use mod_balltree
+    use mod_data_holder
     implicit none
+
     integer(kind=8)        :: date_value1(8), date_value2(8)
     type(brute_force_search) :: bfsearch
     type(kdtree) :: kdtsearch
     type(balltree) :: btsearch
     type(neighbor_results) :: res, res_new
+    type(data_holder) :: dholder
 
     real(kind=8), allocatable :: x(:,:)
     real(kind=8), allocatable :: q(:,:)
@@ -123,6 +126,10 @@ program main_neighbour_kdtree
         "../sample_data/make_regression_X_test_0001000000x00800.bin"&
     ]
 
+    fns_x_train = ["../sample_data/mnist_X_train.bin                           "]
+
+    fns_x_test  = [ "../sample_data/mnist_X_test.bin                           "]
+
     n_iter = 10000000
     min_seconds = 60
 
@@ -142,6 +149,7 @@ program main_neighbour_kdtree
             print*, trim(fns_x_train(j))
             call read_bin_2d(fns_x_train(j), x_train, print_log=f_)
             call read_bin_2d(fns_x_test(j), x_test, print_log=f_)
+            dholder = data_holder(x_train)
 
             n_test = size(x_test, dim=1) * 0.1d0
 
@@ -160,7 +168,35 @@ program main_neighbour_kdtree
             print*, real(res%distances(1)%dst(:8))
 
             kdtsearch = kdtree(min_samples_in_leaf=min_samples_in_leaf)
+            call kdtsearch%build(dholder)
+            call date_and_time(values=date_value1)
+            do iter=1, n_iter, 1
+                res = kdtsearch%query(q=x_test(1:n_test,:), n_neighbors=10_8)
+                call date_and_time(values=date_value2)
+                if (time_diff(date_value1, date_value2) >= min_seconds*1000_8) exit
+            end do
+            call date_and_time(values=date_value2)
+            times(1) = time_diff(date_value1, date_value2) / 1000d0 / dble(maxval([iter-1, 1_8]))
+            print   '("   Duration [sec] :        ", f12.6)', times(1)
+            print*, int(res%indices(1)%idx(:8))
+            print*, real(res%distances(1)%dst(:8))
+
+            kdtsearch = kdtree(min_samples_in_leaf=min_samples_in_leaf)
             call kdtsearch%build_new(x_train)
+            call date_and_time(values=date_value1)
+            do iter=1, n_iter, 1
+                res = kdtsearch%query(q=x_test(1:n_test,:), n_neighbors=10_8)
+                call date_and_time(values=date_value2)
+                if (time_diff(date_value1, date_value2) >= min_seconds*1000_8) exit
+            end do
+            call date_and_time(values=date_value2)
+            times(1) = time_diff(date_value1, date_value2) / 1000d0 / dble(maxval([iter-1, 1_8]))
+            print   '("   Duration [sec] :        ", f12.6)', times(1)
+            print*, int(res%indices(1)%idx(:8))
+            print*, real(res%distances(1)%dst(:8))
+
+            kdtsearch = kdtree(min_samples_in_leaf=min_samples_in_leaf)
+            call kdtsearch%build_new(dholder)
             call date_and_time(values=date_value1)
             do iter=1, n_iter, 1
                 res = kdtsearch%query(q=x_test(1:n_test,:), n_neighbors=10_8)

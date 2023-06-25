@@ -3,11 +3,13 @@ program main_neighbour_balltree
     use mod_nearest_neighbour
     use mod_brute_force_search
     use mod_balltree
+    use mod_data_holder
     implicit none
 
     type(brute_force_search) :: bfsearch
     type(balltree) :: btsearch
     type(neighbor_results) :: res
+    type(data_holder) :: dholder
 
     real(kind=8), allocatable :: x(:,:)
     real(kind=8), allocatable :: q(:,:)
@@ -31,6 +33,7 @@ program main_neighbour_balltree
     call read_bin_2d(fn_q, q)
     call read_bin_2d(fn_d, d)
     call read_bin_2d(fn_i, i)
+    dholder = data_holder(x)
 
     n_x = size(x, dim=1)
     n_x = 1000
@@ -52,7 +55,42 @@ program main_neighbour_balltree
     print*, "n_neighbors: Success!"
 
     btsearch = balltree(min_samples_in_leaf=64_8)
+    call btsearch%build(dholder)
+    res = btsearch%query(q, n_neighbors=n_x)
+    do n=1, size(q, dim=1), 1
+        ! print*, '*********************************************************************************************'
+        ! print*, i(n,:n_x)
+        ! print*, res%indices(n)%idx(:n_x)
+        ! print*, res%distances(n)%dst(:n_x)
+        counter = count(i(n,:n_x) == res%indices(n)%idx(:n_x))
+        if (counter /= n_x) then
+            stop "n_neighbors: Result Mismatch!"
+        end if
+    end do
+    print*, "n_neighbors: Success!"
+
+    btsearch = balltree(min_samples_in_leaf=64_8)
     call btsearch%build(x)
+    res = btsearch%query(q, radius=radius)
+    do n=1, size(q, dim=1), 1
+        i_pack_sk = pack(i(n,:), mask=d(n,:)<=radius)
+        i_pack_fl = res%indices(n)%idx(:)
+        ! n_max = minval([size(i_pack_sk)+0_8, 10_8])
+        ! print*, '*********************************************************************************************'
+        ! print*, size(i_pack_sk), size(i_pack_fl)
+        ! print*, int(i_pack_sk(:n_max))
+        ! print*, int(res%indices(n)%idx(:n_max))
+        ! print*, real(d(n, :n_max))
+        ! print*, real(res%distances(n)%dst(:n_max))
+        counter = count(i_pack_sk == i_pack_fl)
+        if (counter /= size(i_pack_sk)) then
+            stop "radius: Result Mismatch!"
+        end if
+    end do
+    print*, "radius: Success!"
+
+    btsearch = balltree(min_samples_in_leaf=64_8)
+    call btsearch%build(dholder)
     res = btsearch%query(q, radius=radius)
     do n=1, size(q, dim=1), 1
         i_pack_sk = pack(i(n,:), mask=d(n,:)<=radius)

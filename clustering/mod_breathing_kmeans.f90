@@ -6,6 +6,7 @@ module mod_breathing_kmeans
     use mod_common
     use mod_const
     use mod_stats
+    use mod_data_holder
     implicit none
 
     type breathing_kmeans
@@ -17,7 +18,9 @@ module mod_breathing_kmeans
 
         logical(kind=4) :: fix_seed
     contains
-        procedure :: fit => fit_breathing_kmeans
+        procedure, pass :: fit_breathing_kmeans_x
+        procedure, pass :: fit_breathing_kmeans_dholder
+        generic :: fit => fit_breathing_kmeans_x, fit_breathing_kmeans_dholder
         procedure :: predict => predict_breathing_kmeans
         procedure :: calc_rmse_per_centers
 
@@ -71,7 +74,7 @@ contains
     end function new_breathing_kmeans
 
 
-    subroutine fit_breathing_kmeans(this, x)
+    subroutine fit_breathing_kmeans_x(this, x)
         implicit none
         class(breathing_kmeans)  :: this
         real(kind=8), intent(in) :: x(:,:)
@@ -117,7 +120,15 @@ contains
         end do
         this%km%cluster_centers = centers_best_
         if (this%fix_seed) call release_random_seed
-    end subroutine fit_breathing_kmeans
+    end subroutine fit_breathing_kmeans_x
+
+
+    subroutine fit_breathing_kmeans_dholder(this, dholder)
+        implicit none
+        class(breathing_kmeans)  :: this
+        type(data_holder) :: dholder
+        call this%fit_breathing_kmeans_x(dholder%x_ptr%x_r8_ptr)
+    end subroutine fit_breathing_kmeans_dholder
 
 
     function predict_breathing_kmeans(this, x)

@@ -10,16 +10,25 @@ module mod_kmeans
     use mod_linalg
     use mod_math
     use mod_base_kmeans
+    use mod_data_holder
     implicit none
     
     !> A type for kmeans. initial centroids are selected by 'kmeans++'.
     type, extends(base_kmeans) :: kmeans
     contains
-        procedure :: fit_elkan => fit_elkan_kmeans
-        procedure :: fit      => fit_kmeans
+        procedure, pass :: fit_elkan_x
+        procedure, pass :: fit_elkan_dholder
+        generic :: fit_elkan => fit_elkan_x, fit_elkan_dholder
+        procedure, pass :: fit_kmeans_x
+        procedure, pass :: fit_kmeans_dholder
+        generic :: fit => fit_kmeans_x, fit_kmeans_dholder
         procedure :: fit_slow => fit_slow_kmeans
-        procedure :: fit_dgemm => fit_dgemm_kmeans
-        procedure :: fit_dgemv => fit_dgemv_kmeans
+        procedure, pass :: fit_dgemm_x
+        procedure, pass :: fit_dgemm_dholder
+        generic :: fit_dgemm => fit_dgemm_x, fit_dgemm_dholder
+        procedure, pass :: fit_dgemv_x
+        procedure, pass :: fit_dgemv_dholder
+        generic :: fit_dgemv => fit_dgemv_x, fit_dgemv_dholder
     end type kmeans
 
     !> An interface to create new 'kmeans' object.
@@ -129,7 +138,7 @@ contains
 
     !> A subroutine to fit 'kmeans' object by optimized(heuristic) method.
     !! \param x data to be fitted
-    subroutine fit_kmeans(this, x, centers)
+    subroutine fit_kmeans_x(this, x, centers)
         class(kmeans) :: this
         real(kind=8), intent(in) :: x(:,:)
         real(kind=8), optional, intent(in) :: centers(:,:)
@@ -220,14 +229,22 @@ contains
         this % is_trained = t_
         this % cluster_centers(:,:) = new_cluster_centers(:,:)
 
+        if (allocated(this%cluster_centers_t)) deallocate(this%cluster_centers_t)
         allocate(this%cluster_centers_t(this%hparam%n_clusters, this%n_columns))
         this % cluster_centers_t(:,:) = transpose(new_cluster_centers(:,:))
         if (this%fix_seed) call release_random_seed()
-    end subroutine fit_kmeans
+    end subroutine fit_kmeans_x
+
+    subroutine fit_kmeans_dholder(this, dholder, centers)
+        class(kmeans) :: this
+        type(data_holder), intent(in) :: dholder
+        real(kind=8), optional, intent(in) :: centers(:,:)
+        call this%fit_kmeans_x(dholder%x_ptr%x_r8_ptr)
+    end subroutine fit_kmeans_dholder
 
     !> A subroutine to fit 'kmeans' object by optimized(heuristic) method and dgemv.
     !! \param x data to be fitted
-    subroutine fit_dgemv_kmeans(this, x)
+    subroutine fit_dgemv_x(this, x)
         class(kmeans) :: this
         real(kind=8), intent(in) :: x(:,:)
 
@@ -309,11 +326,17 @@ contains
         allocate(this%cluster_centers_t(this%hparam%n_clusters, this%n_columns))
         this % cluster_centers_t(:,:) = transpose(new_cluster_centers(:,:))
         call release_random_seed()
-    end subroutine fit_dgemv_kmeans
+    end subroutine fit_dgemv_x
+
+    subroutine fit_dgemv_dholder(this, dholder)
+        class(kmeans) :: this
+        type(data_holder), intent(in) :: dholder
+        call this%fit_dgemv_x(dholder%x_ptr%x_r8_ptr)
+    end subroutine fit_dgemv_dholder
 
     !> A subroutine to fit 'kmeans' object by optimized(heuristic) method and dgemm.
     !! \param x data to be fitted
-    subroutine fit_dgemm_kmeans(this, x)
+    subroutine fit_dgemm_x(this, x)
         class(kmeans) :: this
         real(kind=8), intent(in) :: x(:,:)
 
@@ -399,11 +422,17 @@ contains
         allocate(this%cluster_centers_t(this%hparam%n_clusters, this%n_columns))
         this % cluster_centers_t(:,:) = transpose(new_cluster_centers(:,:))
         call release_random_seed()
-    end subroutine fit_dgemm_kmeans
+    end subroutine fit_dgemm_x
+
+    subroutine fit_dgemm_dholder(this, dholder)
+        class(kmeans) :: this
+        type(data_holder), intent(in) :: dholder
+        call this%fit_dgemm_x(dholder%x_ptr%x_r8_ptr)
+    end subroutine fit_dgemm_dholder
 
     !> A subroutine to fit 'kmeans' object by elkan's method.
     !! \param x data to be fitted
-    subroutine fit_elkan_kmeans(this, x)
+    subroutine fit_elkan_x(this, x)
 
         integer(kind=8) :: date_value1(8), date_value2(8)
         integer(kind=8) :: time_calculate_distance_from_center_slow
@@ -451,7 +480,7 @@ contains
 
         ! calculate square sum of x by row
         allocate(x_sq_sum_row(this%n_samples))
-        allocate(cluster_sq_sum_row(this%n_samples))
+        allocate(cluster_sq_sum_row(this%hparam%n_clusters))
         x_sq_sum_row(:) = 0d0
         call matrix_sqsum_row(x, x_sq_sum_row, this%n_samples, this%n_columns)
 
@@ -601,7 +630,13 @@ contains
         allocate(this%cluster_centers_t(this%hparam%n_clusters, this%n_columns))
         this % cluster_centers_t(:,:) = transpose(new_cluster_centers(:,:))
         call release_random_seed()
-    end subroutine fit_elkan_kmeans
+    end subroutine fit_elkan_x
+
+    subroutine fit_elkan_dholder(this, dholder)
+        class(kmeans) :: this
+        type(data_holder), intent(in) :: dholder
+        call this%fit_elkan_x(dholder%x_ptr%x_r8_ptr)
+    end subroutine fit_elkan_dholder
 
 
 

@@ -9,6 +9,7 @@ module mod_kdtree
     use mod_linalg
     use mod_math, only: relu
     use mod_brute_force_search
+    use mod_data_holder    
     use mod_nearest_neighbour, only: neighbor_results, base_node_for_nearest_neighbor
     implicit none
     
@@ -72,10 +73,14 @@ module mod_kdtree
         real(kind=8), allocatable :: rec_center(:,:) ! center position of hyper rectangle
         real(kind=8), allocatable :: rec_center_sq(:) ! center position of hyper rectangle
     contains
-        procedure :: build
+        procedure, pass :: build_x
+        procedure, pass :: build_dholder
+        generic :: build => build_x, build_dholder
         procedure :: build_rec
 
-        procedure :: build_new
+        procedure, pass :: build_new_x
+        procedure, pass :: build_new_dholder
+        generic :: build_new => build_new_x, build_new_dholder
         procedure :: build_new_rec
 
         procedure :: query
@@ -538,7 +543,7 @@ contains
 
     !> Building kdtree, wrapping 'build_rec'
     !! \param x input explanatory variable
-    subroutine build(this, x)
+    subroutine build_x(this, x)
         implicit none
         class(kdtree) :: this
         real(kind=8), target  :: x(:,:)
@@ -570,7 +575,15 @@ contains
 
         this%n_samples = n_samples
         this%n_columns = n_columns
-    end subroutine build
+    end subroutine build_x
+
+    
+    subroutine build_dholder(this, dholder)
+        implicit none
+        class(kdtree) :: this
+        type(data_holder), intent(in) :: dholder
+        call this%build_x(dholder%x_ptr%x_r8_ptr)
+    end subroutine build_dholder
 
 
     !> Building kdtree recursively. Best-First Method.
@@ -645,7 +658,7 @@ contains
 
     !> Building kdtree, wrapping 'build_rec'
     !! \param x input explanatory variable
-    subroutine build_new(this, x)
+    subroutine build_new_x(this, x)
         implicit none
         class(kdtree) :: this
         real(kind=8), target  :: x(:,:)
@@ -706,7 +719,15 @@ contains
             this%leaves(l)%ptr%radius = maxval(dist)
             deallocate(dist)
         end do
-    end subroutine build_new
+    end subroutine build_new_x
+
+    
+    subroutine build_new_dholder(this, dholder)
+        implicit none
+        class(kdtree) :: this
+        type(data_holder), intent(in) :: dholder
+        call this%build_new_x(dholder%x_ptr%x_r8_ptr)
+    end subroutine build_new_dholder
 
 
     !> Building kdtree recursively. Best-First Method.    

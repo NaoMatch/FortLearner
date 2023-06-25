@@ -1,4 +1,4 @@
-subroutine fit_pca_r8(this, x)
+subroutine fit_pca_x_r8(this, x)
     implicit none
     class(pca)                :: this
     real(kind=8), intent(in)  :: x(:,:)
@@ -37,5 +37,5 @@ subroutine fit_pca_r8(this, x)
     deallocate(cov_mat_copy)
     this%is_fitted = t_
     this%n_columns = n_columns
-end subroutine fit_pca_r8
+end subroutine fit_pca_x_r8
 

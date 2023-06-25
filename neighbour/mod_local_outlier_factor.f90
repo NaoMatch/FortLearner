@@ -4,6 +4,7 @@ module mod_local_outlier_factor
     use mod_balltree
     use mod_nearest_neighbour
     use mod_hyperparameter
+    use mod_data_holder    
     implicit none
 
     type local_outlier_factor
@@ -18,7 +19,9 @@ module mod_local_outlier_factor
         real(kind=8), allocatable :: scores_(:) ! anomaly score
         real(kind=8), allocatable :: scores_scaled(:) ! scaled anomaly score
     contains
-        procedure :: fit => fit_local_outlier_factor
+        procedure, pass :: fit_local_outlier_factor_x
+        procedure, pass :: fit_local_outlier_factor_dholder
+        generic :: fit => fit_local_outlier_factor_x, fit_local_outlier_factor_dholder
         procedure :: compute_reachability_density
         procedure :: score_samples
     end type local_outlier_factor
@@ -50,7 +53,7 @@ contains
     end function new_local_outlier_factor
 
 
-    subroutine fit_local_outlier_factor(this, x)
+    subroutine fit_local_outlier_factor_x(this, x)
         implicit none
         class(local_outlier_factor) :: this
         real(kind=8), intent(in) :: x(:,:)
@@ -99,7 +102,15 @@ contains
         min_val = minval(this%scores_)
         max_val = maxval(this%scores_)
         this%scores_scaled = (this%scores_-min_val) / (max_val-min_val)
-    end subroutine fit_local_outlier_factor
+    end subroutine fit_local_outlier_factor_x
+
+    
+    subroutine fit_local_outlier_factor_dholder(this, dholder)
+        implicit none
+        class(local_outlier_factor) :: this
+        type(data_holder), intent(in) :: dholder
+        call this%fit_local_outlier_factor_x(dholder%x_ptr%x_r8_ptr)
+    end subroutine fit_local_outlier_factor_dholder
 
 
     subroutine compute_reachability_density(this, res_, lrd_)

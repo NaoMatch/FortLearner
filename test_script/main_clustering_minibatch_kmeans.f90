@@ -1,6 +1,7 @@
 program main_clustering_minibatch_kmeans
     use mod_minibatch_kmeans
     use mod_kmeans
+    use mod_data_holder
     implicit none
 
     integer(kind=8) :: date_value1(8), date_value2(8), time_dt, time_et, time_cl, time_lw
@@ -22,15 +23,22 @@ program main_clustering_minibatch_kmeans
     real(kind=8) :: score_1, score_2
     type(minibatch_kmeans) :: mbkm, mbkm2
     type(kmeans) :: km, km2
+    type(data_holder) :: dholder
 
     file_name_x_train_bin = "../sample_data/make_regression_X_train_0000100000x00100.bin"
     call read_bin_2d(file_name_x_train_bin, x_train)
-    
+    dholder = data_holder(x_train)
+
     print*, '============================================================='
     print*, "Train: Minibatch-Kmeans"
     mbkm = minibatch_kmeans(n_clusters=10_8, max_iter=1000_8, max_samples=1024_8, random_state=42_8)
     call date_and_time(values=date_value1)
     call mbkm%fit(x_train)
+    call date_and_time(values=date_value2)
+    print*, mbkm%score(x_train), time_diff(date_value1, date_value2)
+
+    call date_and_time(values=date_value1)
+    call mbkm%fit(dholder)
     call date_and_time(values=date_value2)
     print*, mbkm%score(x_train), time_diff(date_value1, date_value2)
 

@@ -4,6 +4,7 @@ module mod_dbscan
     use mod_kdtree
     use mod_balltree
     use mod_brute_force_search
+    use mod_data_holder
     implicit none
 
     type dbscan
@@ -14,7 +15,9 @@ module mod_dbscan
         type(balltree) :: btree
         type(brute_force_search) :: brute
     contains
-        procedure :: fit => fit_dbscan
+        procedure, pass :: fit_dbscan_x
+        procedure, pass :: fit_dbscan_dholder
+        generic :: fit => fit_dbscan_x, fit_dbscan_dholder
         procedure :: expanding
     end type dbscan
 
@@ -54,7 +57,7 @@ contains
     end function new_dbscan
 
 
-    subroutine fit_dbscan(this, x)
+    subroutine fit_dbscan_x(this, x)
         implicit none
         class(dbscan) :: this
         real(kind=8), intent(in) :: x(:,:)
@@ -100,6 +103,7 @@ contains
         end if
         res_ptr => res
 
+        if (allocated(this%is_visited)) deallocate(this%is_visited)
         allocate(this%is_visited(n_samples)); this%is_visited(:) = f_
         label = 1
         do i=1, n_samples, 1
@@ -111,7 +115,15 @@ contains
                 label = label + 1
             end if
         end do
-    end subroutine fit_dbscan
+    end subroutine fit_dbscan_x
+
+    
+    subroutine fit_dbscan_dholder(this, dholder)
+        implicit none
+        class(dbscan) :: this
+        type(data_holder), intent(in) :: dholder
+        call this%fit_dbscan_x(dholder%x_ptr%x_r8_ptr)
+    end subroutine fit_dbscan_dholder
 
     function expanding(this, res_ptr, query_idx, label)
         implicit none

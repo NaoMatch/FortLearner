@@ -9,6 +9,7 @@ program main_neighbour_product_quantization
     use mod_balltree
     use mod_brute_force_search
     use mod_nearest_neighbour
+    use mod_data_holder
     implicit none
 
     integer(kind=8)        :: date_value1(8), date_value2(8)
@@ -25,6 +26,7 @@ program main_neighbour_product_quantization
     type(brute_force_search) :: bf
     type(product_quantization) :: pq
     type(neighbor_indices) :: res_pq
+    type(data_holder) :: dholder
 
     file_name_x = "../sample_data/make_regression_X_train_0000100000x00100.bin"
     call read_bin_2d(file_name_x, x)
@@ -52,6 +54,13 @@ program main_neighbour_product_quantization
     call date_and_time(values=date_value1)
     pq = product_quantization(n_subspace=4_8, n_clusters=256_8)    
     call pq%fit(x_small)
+    call date_and_time(values=date_value2)
+    print*, "fit_pq: ", time_diff(date_value1, date_value2)
+    
+    call date_and_time(values=date_value1)
+    pq = product_quantization(n_subspace=4_8, n_clusters=256_8)    
+    dholder = data_holder(x_small)
+    call pq%fit(dholder)
     call date_and_time(values=date_value2)
     print*, "fit_pq: ", time_diff(date_value1, date_value2)
     
