@@ -4,6 +4,7 @@ module mod_brute_force_search
     use mod_const
     use mod_common
     use mod_linalg
+    use mod_data_holder    
     use mod_nearest_neighbour, only: neighbor_results
     implicit none
 
@@ -13,7 +14,9 @@ module mod_brute_force_search
         real(kind=8), ALLOCATABLE :: x(:,:) !< input data
         real(kind=8), ALLOCATABLE :: x_sq_sum(:) !< squared sum of input data
     contains
-        procedure :: build => build_brute_force_search
+        procedure, pass :: build_brute_force_search_x
+        procedure, pass :: build_brute_force_search_dholder
+        generic :: build => build_brute_force_search_x, build_brute_force_search_dholder
         procedure :: query => query_brute_force_search
         procedure :: dump => dump_brute_force_search
         procedure :: load => load_brute_force_search
@@ -41,7 +44,7 @@ contains
     !> Build 'brute_force_search'
     !> Store input data. Calculate and Store its squared sum of row.
     !! \param x 2-dim matrix. domain data
-    subroutine build_brute_force_search(this, x)
+    subroutine build_brute_force_search_x(this, x)
         implicit none
         class(brute_force_search) :: this
         real(kind=8), intent(in)  :: x(:,:)
@@ -58,7 +61,15 @@ contains
 
         allocate(this%x_sq_sum(this%n_samples))
         call matrix_sqsum_row(x, this%x_sq_sum, this%n_samples, this%n_columns, parallel=f_)
-    end subroutine build_brute_force_search
+    end subroutine build_brute_force_search_x
+
+    
+    subroutine build_brute_force_search_dholder(this, dholder)
+        implicit none
+        class(brute_force_search) :: this
+        type(data_holder), intent(in) :: dholder
+        call this%build_brute_force_search_x(dholder%x_ptr%x_r8_ptr)
+    end subroutine build_brute_force_search_dholder
 
 
     !> Query by 'brute_force_search'

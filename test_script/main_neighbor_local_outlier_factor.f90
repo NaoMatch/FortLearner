@@ -2,6 +2,7 @@ program main_neighbor_local_outlier_factor
     use mod_local_outlier_factor
     use mod_metric
     use mod_scaler
+    use mod_data_holder
     implicit none
 
     integer(kind=8)    :: date_value1(8), date_value2(8)
@@ -30,6 +31,7 @@ program main_neighbor_local_outlier_factor
     type(metrics) :: metric
     type(standard_scaler) :: ss
     integer(kind=8) :: i, iter, max_iter
+    type(data_holder) :: dholder
 
     character(len=13) :: feature_selection(3)
     character(len=13) :: split_selection(3)
@@ -286,6 +288,7 @@ contains
         real(kind=8), allocatable :: y_train_pred(:), y_test_pred(:)
         real(kind=8) :: auc_score_train, auc_score_test
         real(kind=8) :: avgp_score_train, avgp_score_test
+        type(data_holder) :: dholder
 
         lof = local_outlier_factor(n_neighbors=20_8, kernel=kernel_list(k))
         time_fit = 0
@@ -301,6 +304,13 @@ contains
             call lof%fit(x_train)
             call date_and_time(values=date_value2)
             time_fit = time_fit + time_diff(date_value1, date_value2)
+
+            dholder = data_holder(x_train)
+            call date_and_time(values=date_value1)
+            call lof%fit(dholder)
+            call date_and_time(values=date_value2)
+            time_fit = time_fit + time_diff(date_value1, date_value2)
+            time_fit = time_fit * 0.5d0
 
             call date_and_time(values=date_value1)
             y_train_pred = lof%scores_scaled

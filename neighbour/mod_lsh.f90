@@ -11,6 +11,7 @@ module mod_lsh
     use mod_hash
     use mod_hash_table
     use mod_math
+    use mod_data_holder    
     implicit none
 
     !> Locality-Sensitive-Hashing.
@@ -30,7 +31,9 @@ module mod_lsh
         real(kind=8), allocatable :: x(:,:)
         real(kind=8), allocatable :: x_sq_sum(:)
     contains
-        procedure :: build => build_lsh
+        procedure, pass :: build_lsh_x
+        procedure, pass :: build_lsh_dholder
+        generic :: build => build_lsh_x, build_lsh_dholder
         procedure :: query => query_lsh
 
         procedure :: build_lsh_random_projection
@@ -119,7 +122,7 @@ contains
 
     !> Build LSH.
     !! \param x input data
-    subroutine build_lsh(this, x)
+    subroutine build_lsh_x(this, x)
         implicit none
         class(lsh) :: this
         real(kind=8), target, intent(in) :: x(:,:)
@@ -154,8 +157,15 @@ contains
         allocate(this%x_sq_sum(this%n_samples))
         this%x = x
         call matrix_sqsum_row(this%x, this%x_sq_sum, this%n_samples, this%n_columns, parallel=t_)
-    end subroutine build_lsh
+    end subroutine build_lsh_x
 
+    
+    subroutine build_lsh_dholder(this, dholder)
+        implicit none
+        class(lsh) :: this
+        type(data_holder), intent(in) :: dholder
+        call this%build_lsh_x(dholder%x_ptr%x_r8_ptr)
+    end subroutine build_lsh_dholder
 
     !> Query function for lsh.
     !! \param q query samples

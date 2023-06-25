@@ -1,6 +1,7 @@
 module mod_nipals
     use mod_hyperparameter
     use mod_stats
+    use mod_data_holder
     implicit none
 
     type nipals
@@ -9,8 +10,12 @@ module mod_nipals
         real(kind=8), allocatable :: mean_(:)
         integer(kind=8) :: n_samples, n_columns
     contains
-        procedure :: fit => fit_nipals
-        procedure :: fit_transform => fit_transform_nipals
+        procedure, pass :: fit_nipals_x
+        procedure, pass :: fit_nipals_dholder
+        generic :: fit => fit_nipals_x, fit_nipals_dholder
+        procedure, pass :: fit_transform_nipals_x
+        procedure, pass :: fit_transform_nipals_dholder
+        generic :: fit_transform => fit_transform_nipals_x, fit_transform_nipals_dholder
         ! procedure :: transform => transform_nipals
     end type nipals
 
@@ -34,7 +39,7 @@ contains
     end function new_nipals
 
 
-    subroutine fit_nipals(this, x)
+    subroutine fit_nipals_x(this, x)
         implicit none
         class(nipals)            :: this
         real(kind=8), intent(in) :: x(:,:)
@@ -84,14 +89,22 @@ contains
             x_zero_mean = x_zero_mean - tmp_m
             this%p(:,fid) = tmp_p
         end do
-    end subroutine fit_nipals
+    end subroutine fit_nipals_x
+
+    
+    subroutine fit_nipals_dholder(this, dholder)
+        implicit none
+        class(nipals) :: this
+        type(data_holder), intent(in) :: dholder
+        call this%fit_nipals_x(dholder%x_ptr%x_r8_ptr)
+    end subroutine fit_nipals_dholder
 
 
-    function fit_transform_nipals(this, x)
+    function fit_transform_nipals_x(this, x)
         implicit none
         class(nipals)            :: this
         real(kind=8), intent(in) :: x(:,:)
-        real(kind=8), allocatable :: fit_transform_nipals(:,:)
+        real(kind=8), allocatable :: fit_transform_nipals_x(:,:)
         integer(kind=8)          :: xshape(2)
 
         real(kind=8), allocatable :: tmp_f(:), tmp_f_old(:), tmp_p(:), x_zero_mean(:,:)
@@ -112,7 +125,7 @@ contains
         x_zero_mean = x - spread(this%mean_, dim=1, ncopies=this%n_samples)
 
         ! Iteration
-        allocate(fit_transform_nipals(this%n_samples, this%hparam%n_components))
+        allocate(fit_transform_nipals_x(this%n_samples, this%hparam%n_components))
         allocate(tmp_f(this%n_samples), tmp_p(this%n_columns))
         allocate(tmp_f_old(this%n_samples))
         allocate(tmp_m(this%n_samples, this%n_columns))
@@ -136,12 +149,21 @@ contains
             end do
             call vv2mat(tmp_f, tmp_p, tmp_m, this%n_samples, this%n_columns)
             x_zero_mean = x_zero_mean - tmp_m
-            fit_transform_nipals(:,fid) = tmp_f
+            fit_transform_nipals_x(:,fid) = tmp_f
         end do
 
 
 
-    end function fit_transform_nipals
+    end function fit_transform_nipals_x
+
+    function fit_transform_nipals_dholder(this, dholder)
+        implicit none
+        class(nipals) :: this
+        type(data_holder), intent(in) :: dholder
+        real(kind=8), allocatable :: fit_transform_nipals_dholder(:,:)
+        fit_transform_nipals_dholder = this%fit_transform_nipals_x(dholder%x_ptr%x_r8_ptr)
+    end function fit_transform_nipals_dholder
+
 
 
 end module mod_nipals

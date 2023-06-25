@@ -5,6 +5,7 @@ module mod_pca
     use mod_error
     use mod_sort
     use mod_const
+    use mod_data_holder
     implicit none
 
     !> Type for Priciple Component Analysis
@@ -18,12 +19,14 @@ module mod_pca
         real(kind=8), allocatable :: cov_mat_r8(:,:)           !< covariance matrix of input explanatory (#columns, #columns), kind=8
     contains
         procedure       :: dealloc_all
-        procedure, pass :: fit_pca_r4
-        procedure, pass :: fit_pca_r8
-        generic         :: fit => fit_pca_r4, fit_pca_r8
-        procedure, pass :: transform_pca_r4
-        procedure, pass :: transform_pca_r8
-        generic         :: transform => transform_pca_r4, transform_pca_r8
+        procedure, pass :: fit_pca_x_r4
+        procedure, pass :: fit_pca_x_r8
+        procedure, pass :: fit_pca_dholder
+        generic         :: fit => fit_pca_x_r4, fit_pca_x_r8, fit_pca_dholder
+        procedure, pass :: transform_pca_x_r4
+        procedure, pass :: transform_pca_x_r8
+        procedure, pass :: transform_pca_dholder
+        generic         :: transform => transform_pca_x_r4, transform_pca_x_r8, transform_pca_dholder
     end type pca
 
     !> An interface to create new 'pca' object
@@ -54,7 +57,7 @@ contains
     !> A subroutine to fit 'pca'
     !! \returns fitted 'pca' object.
     !! \param x input 2-dim array
-    subroutine fit_pca_r4(this, x)
+    subroutine fit_pca_x_r4(this, x)
         implicit none
         class(pca)                :: this
         real(kind=4), intent(in)  :: x(:,:)
@@ -93,18 +96,29 @@ contains
         deallocate(cov_mat_copy)
         this%is_fitted = t_
         this%n_columns = n_columns
-    end subroutine fit_pca_r4
+    end subroutine fit_pca_x_r4
     include "./include/pca_fit_pca/inc_fit_pca.f90"
+
+    subroutine fit_pca_dholder(this, dholder)
+        implicit none
+        class(pca) :: this
+        type(data_holder), intent(in) :: dholder
+        if (associated(dholder%x_ptr%x_r4_ptr)) then
+            call this%fit_pca_x_r4(dholder%x_ptr%x_r4_ptr)
+        elseif (associated(dholder%x_ptr%x_r8_ptr)) then
+            call this%fit_pca_x_r8(dholder%x_ptr%x_r8_ptr)
+        end if
+    end subroutine fit_pca_dholder
 
 
     !> A function to transform by fitted 'pca'
     !! \returns transformed x
     !! \param x input 2-dim array
-    function transform_pca_r4(this, x)
+    function transform_pca_x_r4(this, x)
         implicit none
         class(pca)                :: this
         real(kind=4), intent(in)  :: x(:,:)
-        real(kind=4), allocatable :: transform_pca_r4(:,:)
+        real(kind=4), allocatable :: transform_pca_x_r4(:,:)
 
         integer(kind=4) :: x_shape(2), n_samples, n_columns, i
         type(error) :: err
@@ -115,12 +129,24 @@ contains
         call err%check_estimator_is_fitted(this%is_fitted, "pca")
         call err%check_number_of_features_mismatch(int(this%n_columns, kind=kind(n_columns)), n_columns, "pca")
 
-        allocate(transform_pca_r4(n_samples, n_columns))
+        allocate(transform_pca_x_r4(n_samples, n_columns))
         do i=1, n_columns
-            call multi_mat_vec(x, this%eig%eigen_vectors_r4(:,i), transform_pca_r4(:,i), n_samples, n_columns)
-            transform_pca_r4(:,i) = transform_pca_r4(:,i) - sum(this%eig%eigen_vectors_r4(:,i)*this%means_of_matrix_r4)
+            call multi_mat_vec(x, this%eig%eigen_vectors_r4(:,i), transform_pca_x_r4(:,i), n_samples, n_columns)
+            transform_pca_x_r4(:,i) = transform_pca_x_r4(:,i) - sum(this%eig%eigen_vectors_r4(:,i)*this%means_of_matrix_r4)
         end do
-    end function transform_pca_r4
+    end function transform_pca_x_r4
     include "./include/pca_transform_pca/inc_transform_pca.f90"
+
+    function transform_pca_dholder(this, dholder)
+        implicit none
+        class(pca) :: this
+        type(data_holder), intent(in) :: dholder
+        real(kind=8), allocatable :: transform_pca_dholder(:,:)
+        if (associated(dholder%x_ptr%x_r4_ptr)) then
+            transform_pca_dholder = this%transform_pca_x_r4(dholder%x_ptr%x_r4_ptr)
+        elseif (associated(dholder%x_ptr%x_r8_ptr)) then
+            transform_pca_dholder = this%transform_pca_x_r8(dholder%x_ptr%x_r8_ptr)
+        end if
+    end function transform_pca_dholder
 
 end module mod_pca
