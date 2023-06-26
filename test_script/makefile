@@ -287,25 +287,13 @@ clean:
 	-rm ./*.out
 
 build:
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_base_kmeans.f90 -o ./mod/mod_base_kmeans.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../clustering/mod_kmeans.f90 -o ./mod/mod_kmeans.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_product_quantization.f90 -o ./mod/mod_product_quantization.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_hash.f90 -o ./mod/mod_hash.out
 	
 test:
 	# make clean
-	# make build
+	make build
 	# make build_all
-	# make main_clustering_kmeans
-	# make main_clustering_breathing_kmeans
-	# make main_clustering_minibatch_kmeans
-	# make main_clustering_dbscan
-	# make main_decomposition_nipals
-	# make main_neighbour_balltree
-	# make main_neighbour_brute_force_search
-	# make main_neighbour_exact_duplicate_search
-	# make main_neighbour_kdtree
-	make main_neighbour_lsh
-	# make main_neighbour_product_quantization
+	make main_common_hash_one_at_a_time_hash
 
 test_all:
 	make clean
@@ -321,6 +309,7 @@ test_all:
 	make build_all
 	make main_csv2bin
 	python create_datasets.py
+	make main_common_hash_one_at_a_time_hash
 	make main_boosting_tree_gradient_boosting_clouds_regressor
 	make main_boosting_tree_gradient_boosting_extra_tree_regressor
 	make main_boosting_tree_gradient_boosting_lawu_regressor
@@ -374,6 +363,14 @@ test_all:
 	make main_svm_kernel_svm
 	make main_hash_hash_map
 	make main_data_structure_union_find
+
+main_common_hash_one_at_a_time_hash:
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main_common_hash_one_at_a_time_hash.f90 -o main_common_hash_one_at_a_time_hash.out \
+	$(option_blas)
+	./main_common_hash_one_at_a_time_hash.out
 
 main_sgd_estimator_sgd_regressor:
 	$(compiler_fortran) -w -unroll \
