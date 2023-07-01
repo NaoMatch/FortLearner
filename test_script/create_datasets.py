@@ -228,7 +228,7 @@ for n_samples_train in n_samples_list:
             pd.DataFrame(X[n_s:n_e,:]).to_csv(file_name_x_out, index=False)
             pd.DataFrame(y[n_s:n_e]).to_csv(file_name_y_out, index=False)
 
-ｊ            subprocess.run(f"./main_csv2bin.out {d_sep} {n_sam} {n_columns} {file_name_x_out} {file_name_x_out.replace('.csv', '.bin')} {dtype_in} {dtype_out}", shell=True, check=True)
+            subprocess.run(f"./main_csv2bin.out {d_sep} {n_sam} {n_columns} {file_name_x_out} {file_name_x_out.replace('.csv', '.bin')} {dtype_in} {dtype_out}", shell=True, check=True)
             subprocess.run(f"./main_csv2bin.out {d_sep} {n_sam} {1}         {file_name_y_out} {file_name_y_out.replace('.csv', '.bin')} {dtype_in} i", shell=True, check=True)
             n_s = n_e
 

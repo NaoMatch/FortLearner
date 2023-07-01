@@ -41,7 +41,6 @@ contains
         hash = 0_8
 
         do i=1, n_elements, 1
-            print*, transfer(vector(i), 0_8)
             hash = hash + transfer(vector(i), 0_8)
             hash = hash + ishft(hash, 10_8)
             hash = xor(hash, ishft(hash, -6_8))
@@ -53,25 +52,39 @@ contains
         one_at_a_time_hash_vec_r8 = hash
     end function one_at_a_time_hash_vec_r8
 
-    function one_at_a_time_hash_mat_r8(matrix, n_samples, n_elements)
+    function one_at_a_time_hash_mat_r8(matrix, n_samples, n_elements, start_idx)
         implicit none
         real(kind=8), intent(in)  :: matrix(n_samples, n_elements)
         integer(kind=8), intent(in)  :: n_samples, n_elements
+        integer(kind=8), optional, intent(in)  :: start_idx
         integer(kind=8), ALLOCATABLE, target :: one_at_a_time_hash_mat_r8(:)
         integer(kind=8), pointer :: res_ptr(:)
 
+        integer(kind=8) :: start_idx_opt
         integer(kind=8) :: i, j, jj, hash
         integer(kind=8) :: j_unroll, j_remain, j_unroll_size
         integer(kind=8) :: buffer_hash(15)
+
+        start_idx_opt = 1
+        if (present(start_idx)) start_idx_opt = start_idx
 
         allocate( one_at_a_time_hash_mat_r8(n_samples) )
         one_at_a_time_hash_mat_r8(:) = 0_8
 
         res_ptr => one_at_a_time_hash_mat_r8
 
-        do j=1, n_elements, 1
+        do j=start_idx_opt, n_elements, 1
             do i=1, n_samples, 1
-                print*, transfer(matrix(i,j), 0_8)
+                hash = one_at_a_time_hash_mat_r8(i)
+                hash = hash + transfer(matrix(i,j), 0_8)
+                hash = hash + ishft(hash, 10_8)
+                hash = xor(hash, ishft(hash, -6_8))
+                one_at_a_time_hash_mat_r8(i) = hash
+            end do
+        end do
+
+        do j=1, start_idx_opt-1, 1
+            do i=1, n_samples, 1
                 hash = one_at_a_time_hash_mat_r8(i)
                 hash = hash + transfer(matrix(i,j), 0_8)
                 hash = hash + ishft(hash, 10_8)
