@@ -88,6 +88,7 @@ common           := 	./mod/mod_const.out \
 						\
 						./mod/mod_nearest_neighbour.out \
 						./mod/mod_balltree.out \
+						./mod/mod_exact_duplication_search.out \
 						./mod/mod_brute_force_search.out \
 						./mod/mod_kdtree.out \
 						./mod/mod_lsh.out \
@@ -288,12 +289,16 @@ clean:
 
 build:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_hash.f90 -o ./mod/mod_hash.out
-	
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_exact_duplication_search.f90 -o ./mod/mod_exact_duplication_search.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_common.f90 -o ./mod/mod_common.out
+
 test:
 	# make clean
 	make build
 	# make build_all
-	make main_common_hash_one_at_a_time_hash
+	make main_neighbour_exact_duplication_search
+	# make main_csv2bin
+	# ./main_csv2bin.out train 11000000 28 ../sample_data/HIGGS_X.csv ../sample_data/HIGGS_X.bin r r 
 
 test_all:
 	make clean
@@ -339,6 +344,7 @@ test_all:
 	make main_linear_regression_linear_regression
 	make main_linear_regression_ridge_regression
 	make main_multi_layer_perceptron
+	make main_neighbour_exact_duplication_search
 	make main_neighbour_brute_force_search
 	make main_neighbour_balltree
 	make main_neighbour_kdtree
@@ -674,6 +680,14 @@ main_neighbour_balltree:
 	main_neighbour_balltree.f90 -o main_neighbour_balltree.out \
 	$(option_blas)
 	./main_neighbour_balltree.out
+
+main_neighbour_exact_duplication_search:
+	$(compiler_fortran) -w -unroll \
+	$(common) \
+	$(asm) $(option) $(mod) $(opt) \
+	main_neighbour_exact_duplication_search.f90 -o main_neighbour_exact_duplication_search.out \
+	$(option_blas)
+	./main_neighbour_exact_duplication_search.out
 
 main_neighbour_brute_force_search:
 	$(compiler_fortran) -w -unroll \
