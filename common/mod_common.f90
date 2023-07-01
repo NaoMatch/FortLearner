@@ -753,6 +753,7 @@ contains
         real(kind=4), allocatable       :: tmp_r(:)
         integer(kind=4)                 :: bit_size
         integer(kind=4)                 :: nd
+        integer(kind=4)                 :: newunit
         nd = 2 ! #Dimension
         bit_size = 32 ! Bit Size
         include "./include/common/read2bin_2d/inc_read2bin_2d_detail.f90"

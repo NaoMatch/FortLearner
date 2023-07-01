@@ -12,6 +12,7 @@ subroutine read2bin_2d_64bit(input_file_name, output_file_name, &
     real(kind=8), allocatable       :: tmp_r(:)
     integer(kind=4)                 :: bit_size
     integer(kind=4)                 :: nd
+    integer(kind=4)                 :: newunit
     nd = 2 ! #Dimension
     bit_size = 64 ! Bit Size
     include "./include/common/read2bin_2d/inc_read2bin_2d_detail.f90"
