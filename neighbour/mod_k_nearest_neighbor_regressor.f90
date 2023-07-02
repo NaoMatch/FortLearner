@@ -16,7 +16,9 @@ module mod_k_nearest_neighbor_regressor
         type(kdtree) :: kd
         type(balltree) :: bt
     contains
-        procedure :: fit => fit_k_nearest_neighbor_regressor
+        procedure, pass :: fit_k_nearest_neighbor_regressor_xy
+        procedure, pass :: fit_k_nearest_neighbor_regressor_dholder
+        generic :: fit => fit_k_nearest_neighbor_regressor_xy, fit_k_nearest_neighbor_regressor_dholder
         procedure :: predict => predict_k_nearest_neighbor_regressor
     end type k_nearest_neighbor_regressor
 
@@ -44,10 +46,10 @@ contains
         if (present(min_samples_in_leaf)) knn%hparam%min_samples_in_leaf = min_samples_in_leaf
         if (present(split_algo))          knn%hparam%split_algo = split_algo
         if (present(kernel))          knn%hparam%kernel = kernel
-    end function 
+    end function new_k_nearest_neighbor_regressor
 
 
-    subroutine fit_k_nearest_neighbor_regressor(this, x, y)
+    subroutine fit_k_nearest_neighbor_regressor_xy(this, x, y)
         implicit none
         class(k_nearest_neighbor_regressor) :: this
         real(kind=8), intent(in) :: x(:,:)
@@ -67,9 +69,16 @@ contains
         this%n_samples = size(x, dim=1)
         this%n_columns = size(x, dim=2)
         this%n_outputs = size(y, dim=2)
+        if (allocated(this%y)) deallocate(this%y)
         allocate(this%y, source=y)
-    end subroutine fit_k_nearest_neighbor_regressor
+    end subroutine fit_k_nearest_neighbor_regressor_xy
 
+    subroutine fit_k_nearest_neighbor_regressor_dholder(this, dholder)
+        implicit none
+        class(k_nearest_neighbor_regressor) :: this
+        type(data_holder) :: dholder
+        call this%fit_k_nearest_neighbor_regressor_xy(dholder%x_ptr%x_r8_ptr, dholder%y_ptr%y_r8_ptr)
+    end subroutine fit_k_nearest_neighbor_regressor_dholder
 
     function predict_k_nearest_neighbor_regressor(this, x) result(pred)
         implicit none

@@ -6,6 +6,7 @@ module mod_kernel_svm
     use mod_kernel
     use mod_svm_cache
     use mod_hash_map
+    use mod_data_holder
     implicit none
     
     !> A kernel svc type.
@@ -17,7 +18,9 @@ module mod_kernel_svm
         integer(kind=8) :: n_iter_ !> number of iteration. training result
         type(kernel) :: kernel !> kernel
     contains
-        procedure :: fit => fit_kernel_svm_classifier
+        procedure, pass :: fit_kernel_svm_classifier_x
+        procedure, pass :: fit_kernel_svm_classifier_dholder
+        generic :: fit => fit_kernel_svm_classifier_x, fit_kernel_svm_classifier_dholder
         procedure :: predict => predict_kernel_svm_classifier
 
         procedure :: transform_y
@@ -71,11 +74,17 @@ contains
 
     end function new_kernel_svm_classifier
 
+    subroutine fit_kernel_svm_classifier_dholder(this, dholder)
+        implicit none
+        class(kernel_svm_classifier) :: this
+        type(data_holder) :: dholder
+        call this%fit_kernel_svm_classifier_x(dholder%x_ptr%x_r8_ptr, dholder%y_ptr%y_i8_ptr)
+    end subroutine fit_kernel_svm_classifier_dholder
 
     !> Fit linear_svm_classifier. binary classification only
     !! \param x input data
     !! \param y labels
-    subroutine fit_kernel_svm_classifier(this, x, y)
+    subroutine fit_kernel_svm_classifier_x(this, x, y)
         implicit none
         class(kernel_svm_classifier) :: this
         real(kind=8), intent(in) :: x(:,:)
@@ -112,7 +121,6 @@ contains
 
         integer(kind=8) :: ws(2), ws_old(2), count_tol, max_count_tol
         max_count_tol = 2_8
-
 
         call this%transform_y(y, y_)
 
@@ -270,7 +278,7 @@ contains
                 end if
             else
                 if (mod(loop_cnt-loop_cnt_base, minval([1000_8, n_samples]))==0 .and. this%hparam%shrinking) then
-                    print*, this%hparam%shrinking
+                    ! print*, this%hparam%shrinking
                     ydf(indices_) = ydf_
                     condition_i(indices_) = condition_i_
                     condition_j(indices_) = condition_j_
@@ -305,7 +313,7 @@ contains
         this%w0_ = sum(this%y_ - ydf(indices_)) / dble(n_samples_)
 
         this%n_iter_ = loop_cnt 
-    end subroutine fit_kernel_svm_classifier
+    end subroutine fit_kernel_svm_classifier_x
 
 
     !> Predict 'linear_svm_classifier'

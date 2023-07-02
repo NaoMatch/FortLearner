@@ -288,17 +288,19 @@ clean:
 	-rm ./*.out
 
 build:
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_hash.f90 -o ./mod/mod_hash.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../neighbour/mod_exact_duplication_search.f90 -o ./mod/mod_exact_duplication_search.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../common/mod_common.f90 -o ./mod/mod_common.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_kernel.f90 -o ./mod/mod_kernel.out	
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_svm_cache.f90 -o ./mod/mod_svm_cache.out	
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_linear_svm.f90 -o ./mod/mod_linear_svm.out	
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../svm/mod_kernel_svm.f90 -o ./mod/mod_kernel_svm.out	
 
 test:
 	# make clean
 	make build
+	# python create_datasets.py
 	# make build_all
-	make main_neighbour_exact_duplication_search
-	# make main_csv2bin
-	# ./main_csv2bin.out train 11000000 28 ../sample_data/HIGGS_X.csv ../sample_data/HIGGS_X.bin r r 
+	# make main_neighbour_k_nearest_neighbor_classifier
+	# make main_svm_linear_svm
+	make main_svm_kernel_svm
 
 test_all:
 	make clean

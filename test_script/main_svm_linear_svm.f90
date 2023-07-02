@@ -3,6 +3,7 @@ program main_svm_linear_svm
     use mod_metric
     use mod_timer
     use mod_scaler
+    use mod_data_holder
     implicit none
 
     integer(kind=8) :: date_value1(8), date_value2(8)
@@ -15,6 +16,7 @@ program main_svm_linear_svm
     type(metrics) :: mtrc
     type(standard_scaler) :: ss_sclr
     type(linear_svm_classifier) :: li_svc
+    type(data_holder) :: dholder
 
     CHARACTER(len=256), allocatable :: fns_x_train(:), fns_y_train(:)
     CHARACTER(len=256), allocatable :: fns_x_test(:), fns_y_test(:)
@@ -114,6 +116,8 @@ program main_svm_linear_svm
         x_train = ss_sclr%transform(x_train)
         x_test = ss_sclr%transform(x_test)
 
+        dholder = data_holder(x_train, y_train)
+
         li_svc = linear_svm_classifier()
         print*, '*********************************************************************************************'
         print*, ""
@@ -122,6 +126,23 @@ program main_svm_linear_svm
         call date_and_time(values=date_value1)
         do iter=1, n_iter, 1
             call li_svc%fit(x_train, y_train)
+            call date_and_time(values=date_value2)
+            if (time_diff(date_value1, date_value2) >= 60_8*1000_8) exit
+        end do
+        call date_and_time(values=date_value2)
+        print   '("   Duration [sec] :        ", f12.6)', time_diff(date_value1, date_value2) / 1000d0 / dble(maxval([iter-1, 1_8]))
+        pred_train = li_svc%predict(x_train)
+        pred_test  = li_svc%predict(x_test)
+        print*, "  Train:    ", mtrc%accuracy(y_train(:,1), pred_train(:,1))
+        print*, "  Test:     ", mtrc%accuracy(y_test(:,1), pred_test(:,1))
+        print*, "  Iter:     ", li_svc%n_iter_
+        print*, '*********************************************************************************************'
+        print*, ""
+        print*, ""
+        print*, trim(fns_x_train(i))
+        call date_and_time(values=date_value1)
+        do iter=1, n_iter, 1
+            call li_svc%fit(dholder)
             call date_and_time(values=date_value2)
             if (time_diff(date_value1, date_value2) >= 60_8*1000_8) exit
         end do

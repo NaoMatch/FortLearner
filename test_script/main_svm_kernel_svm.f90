@@ -11,6 +11,7 @@ program main_svm_kernel_svm
     use mod_metric
     use mod_scaler
     use mod_timer
+    use mod_data_holder
     implicit none
 
     integer(kind=8)        :: dval1(8), dval2(8)
@@ -20,6 +21,7 @@ program main_svm_kernel_svm
     type(linear_svm_classifier) :: lsvc
     type(metrics) :: mtrc
     type(standard_scaler) :: ss_sclr
+    type(data_holder) :: dholder
     real(kind=8)    :: acc_train(5)
     real(kind=8)    :: acc_test(5)
 
@@ -60,13 +62,7 @@ program main_svm_kernel_svm
         "../sample_data/make_classification_X_train_0000010000x00050_class=002.bin",&
         "../sample_data/make_classification_X_train_0000010000x00100_class=002.bin",&
         "../sample_data/make_classification_X_train_0000010000x00200_class=002.bin",&
-        "../sample_data/make_classification_X_train_0000010000x00400_class=002.bin",&
-        "../sample_data/make_classification_X_train_0000100000x00005_class=002.bin",&
-        "../sample_data/make_classification_X_train_0000100000x00010_class=002.bin",&
-        "../sample_data/make_classification_X_train_0000100000x00050_class=002.bin",&
-        "../sample_data/make_classification_X_train_0000100000x00100_class=002.bin",&
-        "../sample_data/make_classification_X_train_0000100000x00200_class=002.bin",&
-        "../sample_data/make_classification_X_train_0000100000x00400_class=002.bin"&
+        "../sample_data/make_classification_X_train_0000010000x00400_class=002.bin"&
     ]
     fns_y_train = [ &
         "../sample_data/make_classification_y_train_0000000100x00005_class=002.bin",&
@@ -86,13 +82,7 @@ program main_svm_kernel_svm
         "../sample_data/make_classification_y_train_0000010000x00050_class=002.bin",&
         "../sample_data/make_classification_y_train_0000010000x00100_class=002.bin",&
         "../sample_data/make_classification_y_train_0000010000x00200_class=002.bin",&
-        "../sample_data/make_classification_y_train_0000010000x00400_class=002.bin",&
-        "../sample_data/make_classification_y_train_0000100000x00005_class=002.bin",&
-        "../sample_data/make_classification_y_train_0000100000x00010_class=002.bin",&
-        "../sample_data/make_classification_y_train_0000100000x00050_class=002.bin",&
-        "../sample_data/make_classification_y_train_0000100000x00100_class=002.bin",&
-        "../sample_data/make_classification_y_train_0000100000x00200_class=002.bin",&
-        "../sample_data/make_classification_y_train_0000100000x00400_class=002.bin"&
+        "../sample_data/make_classification_y_train_0000010000x00400_class=002.bin"&
     ]
 
     fns_x_test = [ &
@@ -113,13 +103,7 @@ program main_svm_kernel_svm
         "../sample_data/make_classification_X_test_0000010000x00050_class=002.bin",&
         "../sample_data/make_classification_X_test_0000010000x00100_class=002.bin",&
         "../sample_data/make_classification_X_test_0000010000x00200_class=002.bin",&
-        "../sample_data/make_classification_X_test_0000010000x00400_class=002.bin",&
-        "../sample_data/make_classification_X_test_0000100000x00005_class=002.bin",&
-        "../sample_data/make_classification_X_test_0000100000x00010_class=002.bin",&
-        "../sample_data/make_classification_X_test_0000100000x00050_class=002.bin",&
-        "../sample_data/make_classification_X_test_0000100000x00100_class=002.bin",&
-        "../sample_data/make_classification_X_test_0000100000x00200_class=002.bin",&
-        "../sample_data/make_classification_X_test_0000100000x00400_class=002.bin"&
+        "../sample_data/make_classification_X_test_0000010000x00400_class=002.bin"&
     ]
     fns_y_test = [ &
         "../sample_data/make_classification_y_test_0000000100x00005_class=002.bin",&
@@ -139,44 +123,32 @@ program main_svm_kernel_svm
         "../sample_data/make_classification_y_test_0000010000x00050_class=002.bin",&
         "../sample_data/make_classification_y_test_0000010000x00100_class=002.bin",&
         "../sample_data/make_classification_y_test_0000010000x00200_class=002.bin",&
-        "../sample_data/make_classification_y_test_0000010000x00400_class=002.bin",&
-        "../sample_data/make_classification_y_test_0000100000x00005_class=002.bin",&
-        "../sample_data/make_classification_y_test_0000100000x00010_class=002.bin",&
-        "../sample_data/make_classification_y_test_0000100000x00050_class=002.bin",&
-        "../sample_data/make_classification_y_test_0000100000x00100_class=002.bin",&
-        "../sample_data/make_classification_y_test_0000100000x00200_class=002.bin",&
-        "../sample_data/make_classification_y_test_0000100000x00400_class=002.bin"&
+        "../sample_data/make_classification_y_test_0000010000x00400_class=002.bin"&
     ]
 
     data_desc = [ &
-        "0000000100x00005_class=002", &
-        "0000000100x00010_class=002", &
-        "0000000100x00050_class=002", &
-        "0000000100x00100_class=002", &
-        "0000000100x00200_class=002", &
-        "0000000100x00400_class=002", &
-        "0000001000x00005_class=002", &
-        "0000001000x00010_class=002", &
-        "0000001000x00050_class=002", &
-        "0000001000x00100_class=002", &
-        "0000001000x00200_class=002", &
-        "0000001000x00400_class=002", &
-        "0000010000x00005_class=002", &
-        "0000010000x00010_class=002", &
-        "0000010000x00050_class=002", &
-        "0000010000x00100_class=002", &
-        "0000010000x00200_class=002", &
-        "0000010000x00400_class=002", &
-        "0000100000x00005_class=002", &
-        "0000100000x00010_class=002", &
-        "0000100000x00050_class=002", &
-        "0000100000x00100_class=002", &
-        "0000100000x00200_class=002", &
-        "0000100000x00400_class=002"  &
+        "  100x00005_class=  2",&
+        "  100x00010_class=  2",&
+        "  100x00050_class=  2",&
+        "  100x00100_class=  2",&
+        "  100x00200_class=  2",&
+        "  100x00400_class=  2",&
+        " 1000x00005_class=  2",&
+        " 1000x00010_class=  2",&
+        " 1000x00050_class=  2",&
+        " 1000x00100_class=  2",&
+        " 1000x00200_class=  2",&
+        " 1000x00400_class=  2",&
+        "10000x00005_class=  2",&
+        "10000x00010_class=  2",&
+        "10000x00050_class=  2",&
+        "10000x00100_class=  2",&
+        "10000x00200_class=  2",&
+        "10000x00400_class=  2"&
     ]
 
     n_iter = 1000
-    min_seconds = 30
+    min_seconds = 5
 
     header3 = "                               -----------------   TRAIN TIME   ------------------------"
     header4 = "   ----------          TRAIN ACCURACY           ------------ "
@@ -199,6 +171,8 @@ program main_svm_kernel_svm
         call ss_sclr%fit(x_train)
         x_train = ss_sclr%transform(x_train)
         x_test = ss_sclr%transform(x_test)
+
+        dholder = data_holder(x_train, y_train)
 
         lsvc         = linear_svm_classifier(tolerance=1d-4, cache_size=1024_8, shrinking=t_)
         ksvc_linear  = kernel_svm_classifier(kernel="linear",  tolerance=1d-4, cache_size=1024_8, shrinking=t_)
@@ -236,6 +210,59 @@ program main_svm_kernel_svm
 
         call date_and_time(values=dval1)
         call ksvc_rbf%fit(x_train, y_train)
+        call date_and_time(values=dval2)
+        times(5) = time_diff(dval1, dval2)
+        pred_train_rbf = ksvc_rbf%predict(x_train)
+        pred_test_rbf = ksvc_rbf%predict(x_test)
+        
+        
+        acc_train(1) = mtrc%accuracy(y_train(:,1), pred_train_lsvc(:,1))
+        acc_train(2) = mtrc%accuracy(y_train(:,1), pred_train_linear(:,1))
+        acc_train(3) = mtrc%accuracy(y_train(:,1), pred_train_poly(:,1))
+        acc_train(4) = mtrc%accuracy(y_train(:,1), pred_train_sigmoid(:,1))
+        acc_train(5) = mtrc%accuracy(y_train(:,1), pred_train_rbf(:,1))
+        
+        acc_test(1) = mtrc%accuracy(y_test(:,1), pred_test_lsvc(:,1))
+        acc_test(2) = mtrc%accuracy(y_test(:,1), pred_test_linear(:,1))
+        acc_test(3) = mtrc%accuracy(y_test(:,1), pred_test_poly(:,1))
+        acc_test(4) = mtrc%accuracy(y_test(:,1), pred_test_sigmoid(:,1))
+        acc_test(5) = mtrc%accuracy(y_test(:,1), pred_test_rbf(:,1))
+
+        fmt1 = '(a, "  || ", i10, "  ", i10, "  ", i10, "  ", i10, "  ", i10, "  "'
+        fmt2 = ', f10.5, "  ", f10.5, "  ", f10.5, "  ", f10.5, "  ", f10.5'
+        fmt = trim(fmt1) // ' "||" ' // trim(fmt2) //  ' " || " ' // trim(fmt2) // ")"
+        print   trim(fmt), trim(data_desc(i)), times, acc_train, acc_test
+
+        call date_and_time(values=dval1)
+        call lsvc%fit(dholder)
+        call date_and_time(values=dval2)
+        times(1) = time_diff(dval1, dval2)
+        pred_train_lsvc = lsvc%predict(x_train)
+        pred_test_lsvc = lsvc%predict(x_test)
+
+        call date_and_time(values=dval1)
+        call ksvc_linear%fit(dholder)
+        call date_and_time(values=dval2)
+        times(2) = time_diff(dval1, dval2)
+        pred_train_linear = ksvc_linear%predict(x_train)
+        pred_test_linear = ksvc_linear%predict(x_test)
+
+        call date_and_time(values=dval1)
+        call ksvc_poly%fit(dholder)
+        call date_and_time(values=dval2)
+        times(3) = time_diff(dval1, dval2)
+        pred_train_poly = ksvc_poly%predict(x_train)
+        pred_test_poly = ksvc_poly%predict(x_test)
+
+        call date_and_time(values=dval1)
+        call ksvc_sigmoid%fit(dholder)
+        call date_and_time(values=dval2)
+        times(4) = time_diff(dval1, dval2)
+        pred_train_sigmoid = ksvc_sigmoid%predict(x_train)
+        pred_test_sigmoid = ksvc_sigmoid%predict(x_test)
+
+        call date_and_time(values=dval1)
+        call ksvc_rbf%fit(dholder)
         call date_and_time(values=dval2)
         times(5) = time_diff(dval1, dval2)
         pred_train_rbf = ksvc_rbf%predict(x_train)
