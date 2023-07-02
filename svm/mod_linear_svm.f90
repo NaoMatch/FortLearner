@@ -9,6 +9,7 @@ module mod_linear_svm
     use mod_linalg
     use mod_svm_cache
     use mod_hash_map
+    use mod_data_holder
     implicit none
 
     !> Linear SVM Classifier, Not yet optimized.
@@ -18,7 +19,9 @@ module mod_linear_svm
         real(kind=8), allocatable :: w0_ !> intercept. training result
         integer(kind=8), allocatable :: n_iter_ !> number of iteration. training result
     contains
-        procedure :: fit => fit_linear_svm_classifier
+        procedure, pass :: fit_linear_svm_classifier_x
+        procedure, pass :: fit_linear_svm_classifier_dholder
+        generic :: fit => fit_linear_svm_classifier_x, fit_linear_svm_classifier_dholder
         procedure :: fit_linear_svm_classifier_hard
         procedure :: predict => predict_linear_svm_classifier
 
@@ -86,10 +89,17 @@ contains
     end function predict_linear_svm_classifier
 
 
+    subroutine fit_linear_svm_classifier_dholder(this, dholder)
+        implicit none
+        class(linear_svm_classifier) :: this
+        type(data_holder) :: dholder
+        call this%fit_linear_svm_classifier_x(dholder%x_ptr%x_r8_ptr, dholder%y_ptr%y_i8_ptr)
+    end subroutine fit_linear_svm_classifier_dholder
+
     !> Fit linear_svm_classifier. binary classification only
     !! \param x input data
     !! \param y labels
-    subroutine fit_linear_svm_classifier(this, x, y)
+    subroutine fit_linear_svm_classifier_x(this, x, y)
         implicit none
         class(linear_svm_classifier) :: this
         real(kind=8), intent(in) :: x(:,:)
@@ -388,7 +398,7 @@ contains
         ! print*, "Cache Size [MB]:       ", cache%comput_cache_size()
         ! print*, "Cache Used Count:      ", count(cache%is_used), cache%n_used
         ! print*, "Cache Available Count: ", cache%n_avail
-    end subroutine fit_linear_svm_classifier
+    end subroutine fit_linear_svm_classifier_x
 
     
     !> Fit linear_svm_classifier. binary classification only. hard margin. do not use.

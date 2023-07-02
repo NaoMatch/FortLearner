@@ -17,7 +17,9 @@ module mod_k_nearest_neighbor_classifier
         type(kdtree) :: kd
         type(balltree) :: bt
     contains
-        procedure :: fit => fit_k_nearest_neighbor_classifier
+        procedure, pass :: fit_k_nearest_neighbor_classifier_xy
+        procedure, pass :: fit_k_nearest_neighbor_classifier_dholder
+        generic :: fit => fit_k_nearest_neighbor_classifier_xy, fit_k_nearest_neighbor_classifier_dholder
         procedure :: predict => predict_k_nearest_neighbor_classifier
     end type k_nearest_neighbor_classifier
 
@@ -47,7 +49,7 @@ contains
     end function 
 
 
-    subroutine fit_k_nearest_neighbor_classifier(this, x, y)
+    subroutine fit_k_nearest_neighbor_classifier_xy(this, x, y)
         implicit none
         class(k_nearest_neighbor_classifier) :: this
         real(kind=8), intent(in) :: x(:,:)
@@ -67,8 +69,17 @@ contains
         this%n_samples = size(x, dim=1)
         this%n_columns = size(x, dim=2)
         this%n_classes = size(y, dim=2)
+        if (allocated(this%y)) deallocate(this%y)
         allocate(this%y, source=y)
-    end subroutine fit_k_nearest_neighbor_classifier
+    end subroutine fit_k_nearest_neighbor_classifier_xy
+
+
+    subroutine fit_k_nearest_neighbor_classifier_dholder(this, dholder)
+        implicit none
+        class(k_nearest_neighbor_classifier) :: this
+        type(data_holder) :: dholder
+        call this%fit_k_nearest_neighbor_classifier_xy(dholder%x_ptr%x_r8_ptr, dholder%y_ptr%y_i8_ptr)
+    end subroutine fit_k_nearest_neighbor_classifier_dholder
 
 
     function predict_k_nearest_neighbor_classifier(this, x) result(pred)
@@ -101,6 +112,16 @@ contains
             coef_ = 1d0 / sqrt(2d0 * pi_)
             do n=1, n_samples, 1
                 neighbors%distances(n)%dst = 2d0 * coef_ * ( exp(0.5d0) - exp(0.5d0 - neighbors%distances(n)%dst) )
+            end do
+        elseif (this%hparam%kernel=="epanechnikov") then
+            coef_ = 3d0 / 4d0
+            do n=1, n_samples, 1
+                neighbors%distances(n)%dst = 2d0 * coef_ * ( 1d0 - (1d0 - neighbors%distances(n)%dst**2d0) )
+            end do
+        elseif (this%hparam%kernel=="tricubic") then
+            coef_ = 71d0 / 80d0
+            do n=1, n_samples, 1
+                neighbors%distances(n)%dst = 2d0 * coef_ * ( 1d0 - (1d0 - neighbors%distances(n)%dst**3d0)**3d0 )
             end do
         end if
 

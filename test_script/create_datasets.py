@@ -162,14 +162,12 @@ subprocess.run("make main_csv2bin", shell=True, check=True)
 
 
 
-# n_samples_list = [100, 1000, 10000, 100000, 1000000]
-# n_columns_list = [5, 10, 50, 100, 200, 400, 800]
+n_samples_list = [100, 1000, 10000]
+n_columns_list = [5, 10, 50, 100, 200, 400, 800]
 # n_samples_list = [100000, 1000000]
 # n_columns_list = [100]
-# ratio_test  = 0.2
-# ratio_valid = 0.2
-n_samples_list = [1000, 10000]
-n_columns_list = [5, 10]
+# n_samples_list = [10000]
+# n_columns_list = [100]
 ratio_test  = 0.2
 ratio_valid = 0.2
 
