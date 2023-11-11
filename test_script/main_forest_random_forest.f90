@@ -53,8 +53,7 @@ program main_forest_random_forest
     print*, "done"
     y_train_pred = rf_reg%predict(x_train)
     print*, metric%mean_square_error(y_train(:,1), y_train_pred(:,1)), time_train
-    ! call rf_reg%dump(file_name="rf.bin")
-    stop
+    call rf_reg%dump(file_name="rf.bin")
 
     ! Load, Test ------------------------------------------------------------------------
     print*, '*********************************************************************************************'

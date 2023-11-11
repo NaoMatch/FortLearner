@@ -2,7 +2,7 @@ compiler_fortran := gfortran
 compiler_clang   := gcc
 mod              := -J mod/
 opt              := -O2
-option           := -cpp -D_x86_64 -fopenmp -fbounds-check
+option           := -cpp -D_x86_64 -fopenmp
 option_degug     := 
 option_blas      := -lopenblas -ldl
 
@@ -295,12 +295,13 @@ build:
 
 test:
 	# make clean
-	make build
+	# make build
 	# python create_datasets.py
 	# make build_all
 	# make main_neighbour_k_nearest_neighbor_classifier
 	# make main_svm_linear_svm
-	make main_svm_kernel_svm
+	# make main_svm_kernel_svm
+	make main_forest_random_forest
 
 test_all:
 	make clean
