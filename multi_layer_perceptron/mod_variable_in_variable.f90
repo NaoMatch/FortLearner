@@ -1537,7 +1537,7 @@ contains
         else
             print*, "v1: ", shape(v1)
             print*, "v2: ", shape(v2)
-            print '(A,I0)', "ShapeMissmatchError in " // __FILE__ // " on line ", __LINE__
+            print '(A,I0)', "ShapeMissmatchError in " // __FILE__ // " on line " // __LINE__
             stop
         end if
     end function division_vv_vv
