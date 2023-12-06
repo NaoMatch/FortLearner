@@ -50,14 +50,14 @@ contains
         call get_input_variable_pointer(elm, input_var_ptr)
         call get_output_variable_pointer(elm, output_var_ptr)
 
-        call debug_print(__FILE__, __LINE__, elm, input_var_ptr, output_var_ptr, t_)        
+        ! call debug_print(__FILE__, __LINE__, elm, input_var_ptr, output_var_ptr, t_)        
         out_var%var = mask_one(input_var_ptr%var)
         if (input_var_ptr%grd%dtype==-1) then
             input_var_ptr%grd = out_var%var * output_var_ptr%grd
         else
             input_var_ptr%grd = input_var_ptr%grd + out_var%var * output_var_ptr%grd
         end if
-        call debug_print(__FILE__, __LINE__, elm, input_var_ptr, output_var_ptr, f_)        
+        ! call debug_print(__FILE__, __LINE__, elm, input_var_ptr, output_var_ptr, f_)        
     end subroutine backward_relu
 
     function relu_var(input_var) result(output_var)
