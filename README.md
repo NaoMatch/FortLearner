@@ -12,6 +12,7 @@ make test_all
 
 
 # Update
+2024/01/09: my dgemv  
 2023/06/25: models can accept data_holder not only x  
 2023/06/10: fix and release random seed    
 2023/06/10: [Forest Packing](https://arxiv.org/abs/1806.07300) like implementation, 2x faster than naive implementation  
