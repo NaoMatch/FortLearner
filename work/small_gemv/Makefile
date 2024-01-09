@@ -179,3 +179,8 @@ main:
 		-J mod/ $(common) ./mod/mod_small_gemv.out ./main.f90 -o ./main.out -lopenblas -ldl
 
 	./main.out
+
+
+dll:
+	gfortran -J mod/ ./mod/mod_timer.out -o main_dll.out main_dll.f90  -lopenblas -ldl
+	./main_dll.out

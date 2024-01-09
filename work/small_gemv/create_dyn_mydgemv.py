@@ -122,7 +122,7 @@ double sum_zmm_elements_{hash_val}(__m512d zmmX){{
         op_concat += f"\n        y[i] = sum_zmm_elements_{hash_val}({accm_op[-1]}); a_t += {n_columns};"
         
         base = f"""
-void mydgemv_{hash_val}(double a_t[], double x[], double y[], int64_t lda){{
+void mydgemv_{hash_val}(double a_t[], double x[], double y[], int64_t lda, int64_t ldx, int64_t ldy){{
     {declare_zmm};
     {load_zmm}
     
