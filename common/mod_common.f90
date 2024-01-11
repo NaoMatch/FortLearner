@@ -822,4 +822,17 @@ contains
         end do
     end function vmv_r8
 
+
+    function find_next_multiple(number, mod_num) result(next_multiple)
+        implicit none
+        integer(kind=8), intent(in) :: number, mod_num
+        integer(kind=8) :: next_multiple
+
+        if (mod(number, mod_num) == 0) then
+            next_multiple = number
+        else
+            next_multiple = number + (mod_num - mod(number, mod_num))
+        end if
+    end function find_next_multiple
+
 end module mod_common
