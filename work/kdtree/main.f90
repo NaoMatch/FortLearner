@@ -7,7 +7,7 @@ program main
     implicit none
     integer(kind=8) :: date_value1(8), date_value2(8)
     integer(kind=8), allocatable :: time1(:), time2(:)
-    type(kdtree) :: tree, tree_pointer
+    type(kdtree) :: tree, tree_pointer, tree_pointer2, tree_pointer3
     type(neighbor_results) :: results, results2
     
     real(kind=8), ALLOCATABLE, target :: x(:,:), x_sq_sum(:), dist(:,:)
@@ -18,39 +18,133 @@ program main
 
     integer(kind=8) :: n_rows_x, n_rows_y, n_cols, i, j, n, iter, n_iter, count_eq, flg, n_neighbors, pow_
     integer(kind=8) :: count_dup
-    integer(kind=8) :: time_1, time_2
+    integer(kind=8) :: time_1, time_2, times(4)
 
-    integer(kind=8) :: idx, fid
+    integer(kind=8) :: idx, fid, time
     real(kind=8) :: val, diff
 
     n_rows_x = 1000000
-    n_cols = 32_8
+    n_cols = 128_8
     allocate(x(n_rows_x, n_cols))
+    call fix_random_seed(100_8)
     call RANDOM_NUMBER(x)
     x = 10d0*x-10d0*.5d0
-    tree_pointer = kdtree(min_samples_in_leaf=256_8)
+    print*, "sum(x): ", sum(x)
+    tree_pointer = kdtree(min_samples_in_leaf=128_8)
+    tree_pointer2 = kdtree(min_samples_in_leaf=128_8)
+    tree_pointer3 = kdtree(min_samples_in_leaf=128_8)
+    n_rows_y = 100
 
+
+    print*, '*********************************************************************************************'
+    print*, '*********************************************************************************************'
+    print*, '*********************************************************************************************'
+    print*, '*********************************************************************************************'
     call date_and_time(values=date_value1)
     call tree_pointer%build(x)
     call date_and_time(values=date_value2)
     print*, "BuildTree:                  ", time_diff(date_value1, date_value2)
 
-    do i=0, 3, 1
-        n_rows_y = 10**i
-        call date_and_time(values=date_value1)
-        do j=1, 1, 1
-            results = tree_pointer%query(x(1:n_rows_y,:), n_neighbors=16_8)
-        end do
-        call date_and_time(values=date_value2)
-        time_1 = time_diff(date_value1, date_value2)
-        print*, "QueryTree:                  ", n_rows_y, time_1
+    call date_and_time(values=date_value1)
+    do j=1, 1, 1
+        results = tree_pointer%query(x(1:n_rows_y,:), n_neighbors=32_8)
     end do
+    call date_and_time(values=date_value2)
+    time_1 = time_diff(date_value1, date_value2)
+    print*, "QueryTree:                  ", n_rows_y, time_1
+
+
+    print*, '*********************************************************************************************'
+    print*, '*********************************************************************************************'
+    print*, '*********************************************************************************************'
+    print*, '*********************************************************************************************'
+    call date_and_time(values=date_value1)
+    call tree_pointer2%build_mydgemv(x)
+    call date_and_time(values=date_value2)
+    print*, "BuildTree mydgemv:          ", time_diff(date_value1, date_value2)
+
+    call date_and_time(values=date_value1)
+    do j=1, 1, 1
+        time = 0
+        results2 = tree_pointer2%query_mydgemv(time, x(1:n_rows_y,:), n_neighbors=32_8)
+    end do
+    call date_and_time(values=date_value2)
+    time_2 = time_diff(date_value1, date_value2)
+    print*, "QueryTree:                  ", n_rows_y, time_2, time
+
+    ! print*, '*********************************************************************************************'
+    ! print*, '*********************************************************************************************'
+    ! print*, '*********************************************************************************************'
+    ! print*, '*********************************************************************************************'
+    ! call date_and_time(values=date_value1)
+    ! call tree_pointer3%build(x)
+    ! call date_and_time(values=date_value2)
+    ! print*, "BuildTree:                  ", time_diff(date_value1, date_value2)
+
+    ! call date_and_time(values=date_value1)
+    ! do j=1, 1, 1
+    !     times = 0
+    !     results = tree_pointer%query_time(times, x(1:n_rows_y,:), n_neighbors=32_8)
+    ! end do
+    ! call date_and_time(values=date_value2)
+    ! time_1 = time_diff(date_value1, date_value2)
+    ! print*, "QueryTree:                  ", n_rows_y, time_1, times
+
 
     do i=1, 10
         print*, '*********************************************************************************************'
         print*, results%indices(i)%idx(1:5)
         print*, results2%indices(i)%idx(1:5)
     end do
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ! n_rows_y = 10
+    ! call date_and_time(values=date_value1)
+    ! do j=1, 1, 1
+    !     results = tree_pointer%query(x(1:n_rows_y,:), n_neighbors=16_8)
+    ! end do
+    ! call date_and_time(values=date_value2)
+    ! time_1 = time_diff(date_value1, date_value2)
+    ! print*, "QueryTree:                  ", n_rows_y, time_1
+
+
+    ! do i=0, 3, 1
+    !     n_rows_y = 10**i
+    !     call date_and_time(values=date_value1)
+    !     do j=1, 1, 1
+    !         results = tree_pointer%query(x(1:n_rows_y,:), n_neighbors=16_8)
+    !     end do
+    !     call date_and_time(values=date_value2)
+    !     time_1 = time_diff(date_value1, date_value2)
+    !     print*, "QueryTree:                  ", n_rows_y, time_1
+    ! end do
+
+    ! do i=1, 10
+    !     print*, '*********************************************************************************************'
+    !     print*, results%indices(i)%idx(1:5)
+    ! end do
 
 
     ! do n_cols=5, 100, 5
