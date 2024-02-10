@@ -179,7 +179,6 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../decomposition/mod_pca.f90 -o ./mod/mod_pca.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../decomposition/mod_nipals.f90 -o ./mod/mod_nipals.out
 	\
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neighbour/mod_small_dgemv.f90 -o ./mod/mod_small_dgemv.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neighbour/mod_nearest_neighbour.f90 -o ./mod/mod_nearest_neighbour.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neighbour/mod_brute_force_search.f90 -o ./mod/mod_brute_force_search.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neighbour/mod_kdtree.f90 -o ./mod/mod_kdtree.out

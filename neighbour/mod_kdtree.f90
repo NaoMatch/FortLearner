@@ -13,7 +13,6 @@ module mod_kdtree
     use mod_data_holder    
     use mod_nearest_neighbour, only: neighbor_results, base_node_for_nearest_neighbor
     use mod_hash
-    use mod_small_dgemv
     implicit none
     
 
