@@ -12,6 +12,7 @@ make test_all
 
 
 # Update
+2024/02/18: branchless binary search and prefix sum with simd  
 2024/01/14: apply mydgemv to kdtree (replace openblas 'dgemv')  
 2024/01/09: my dgemv  
 2023/06/25: models can accept data_holder not only x  
