@@ -2,7 +2,7 @@ compiler_fortran := gfortran
 compiler_clang   := gcc-8
 mod              := -J mod/
 opt              := -O3
-option           := -cpp -D_x86_64 -fopenmp
+option           := -cpp -D_x86_64 -fopenmp -march=native
 option_degug     := 
 option_blas      := -lopenblas -ldl
 
@@ -21,6 +21,7 @@ asm              := ./mod/inc_sum_up_vector_c.out \
 					./mod/inc_get_matrix_count_and_sum_up_gt_parallel.out \
 					./mod/inc_multi_mat_vec.out \
 					./mod/inc_matrix_sqsum_row.out \
+					./mod/inc_prefix_sum.out \
 
 common           := 	./mod/mod_const.out \
 						./mod/mod_common.out \
@@ -180,9 +181,6 @@ build_all:
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../data_holder/mod_data_holder.f90 -o ./mod/mod_data_holder.out
 	\
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../decomposition/mod_pca.f90 -o ./mod/mod_pca.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../decomposition/mod_nipals.f90 -o ./mod/mod_nipals.out
-	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neighbour/mod_nearest_neighbour.f90 -o ./mod/mod_nearest_neighbour.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neighbour/mod_brute_force_search.f90 -o ./mod/mod_brute_force_search.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neighbour/mod_kdtree.f90 -o ./mod/mod_kdtree.out
@@ -196,6 +194,9 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../clustering/mod_minibatch_kmeans.f90 -o ./mod/mod_minibatch_kmeans.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../clustering/mod_breathing_kmeans.f90 -o ./mod/mod_breathing_kmeans.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../clustering/mod_dbscan.f90 -o ./mod/mod_dbscan.out
+	\
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../decomposition/mod_pca.f90 -o ./mod/mod_pca.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../decomposition/mod_nipals.f90 -o ./mod/mod_nipals.out
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../decision_tree/mod_node.f90 -o ./mod/mod_node.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../decision_tree/mod_splitter.f90 -o ./mod/mod_splitter.out
@@ -286,13 +287,15 @@ build_all:
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/include/linalg_ax_plus_y/inc_ax_plus_y.c -o ./mod/inc_ax_plus_y.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/include/linalg_multi_mat_vec/inc_multi_mat_vec.c -o ./mod/inc_multi_mat_vec.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/include/linalg_matrix_sqsum_row/inc_matrix_sqsum_row.c -o ./mod/inc_matrix_sqsum_row.out
+	\
+	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../common/include/common/prefix_sum/inc_prefix_sum.c -o ./mod/inc_prefix_sum.out 
 
 build:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_common.f90 -o ./mod/mod_common.out
 
 main:
-	# make build_all
-	make build
+	make build_all
+	# make build
 
 	$(compiler_fortran) -w -unroll \
 	$(common) \

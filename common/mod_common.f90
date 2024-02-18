@@ -5,6 +5,14 @@ module mod_common
     implicit none
 
     interface
+        subroutine prefix_sum_double(a, b, n) bind(C, name='prefix_sum_double')
+            import
+            integer(c_int64_t), value :: n
+            real(c_double), intent(in) :: a(n), b(n)
+        end subroutine prefix_sum_double
+    end interface
+
+    interface
         function dlopen(filename,mode) bind(c,name="dlopen")
             ! void *dlopen(const char *filename, int mode);
             use iso_c_binding
@@ -278,7 +286,20 @@ module mod_common
         module procedure find_nearest_power_of_two_above_i8
     end interface find_nearest_power_of_two_above
 
+    interface prefix_sum
+        module procedure prefix_sum_r8
+    end interface prefix_sum
+
 contains
+
+    subroutine prefix_sum_r8(x, cumsum, n)
+        implicit none
+        real(kind=8), intent(in) :: x(n)
+        real(kind=8), intent(inout) :: cumsum(n)
+        integer(kind=8), intent(in) :: n
+        call prefix_sum_double(x, cumsum, n)
+    end subroutine prefix_sum_r8
+
 
     function find_nearest_power_of_two_below_i4(x) result(val)
         implicit none

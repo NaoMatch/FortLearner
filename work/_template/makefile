@@ -2,7 +2,7 @@ compiler_fortran := gfortran
 compiler_clang   := gcc-8
 mod              := -J mod/
 opt              := -O3
-option           := -cpp -D_x86_64 -fopenmp
+option           := -cpp -D_x86_64 -fopenmp  -march=native
 option_degug     := 
 option_blas      := -lopenblas -ldl
 
@@ -21,6 +21,7 @@ asm              := ./mod/inc_sum_up_vector_c.out \
 					./mod/inc_get_matrix_count_and_sum_up_gt_parallel.out \
 					./mod/inc_multi_mat_vec.out \
 					./mod/inc_matrix_sqsum_row.out \
+					./mod/inc_prefix_sum.out \
 
 common           := 	./mod/mod_const.out \
 						./mod/mod_common.out \
@@ -29,6 +30,8 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_timer.out \
 						./mod/mod_error.out \
 						./mod/mod_random.out \
+						\
+						./mod/mod_simple_tree.out \
 						\
 						./mod/mod_hash.out \
 						./mod/mod_hash_table.out \
@@ -152,6 +155,8 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_random.f90 -o ./mod/mod_random.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_hash.f90 -o ./mod/mod_hash.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_sort.f90 -o ./mod/mod_sort.out
+	\
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_simple_tree.f90 -o ./mod/mod_simple_tree.out
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../math/mod_math.f90 -o ./mod/mod_math.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../math/mod_stats.f90 -o ./mod/mod_stats.out
@@ -282,6 +287,8 @@ build_all:
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/include/linalg_ax_plus_y/inc_ax_plus_y.c -o ./mod/inc_ax_plus_y.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/include/linalg_multi_mat_vec/inc_multi_mat_vec.c -o ./mod/inc_multi_mat_vec.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/include/linalg_matrix_sqsum_row/inc_matrix_sqsum_row.c -o ./mod/inc_matrix_sqsum_row.out
+	\
+	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../common/include/common/prefix_sum/inc_prefix_sum.c -o ./mod/inc_prefix_sum.out 
 
 build:
 	# SUBSET BUILD
