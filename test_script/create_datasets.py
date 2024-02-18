@@ -162,43 +162,43 @@ subprocess.run("make main_csv2bin", shell=True, check=True)
 
 
 
-n_samples_list = [100, 1000, 10000]
-n_columns_list = [5, 10, 50, 100, 200, 400, 800]
-# n_samples_list = [100000, 1000000]
-# n_columns_list = [100]
+# n_samples_list = [100, 1000, 10000]
+# n_columns_list = [5, 10, 50, 100, 200, 400, 800]
+n_samples_list = [100000, 1000000]
+n_columns_list = [100]
 # n_samples_list = [10000]
 # n_columns_list = [100]
 ratio_test  = 0.2
 ratio_valid = 0.2
 
-# dtype_in = "r"
-# dtype_out = "r"
-# for n_samples_train in n_samples_list:
-#     n_samples_valid = int(n_samples_train*ratio_valid)
-#     n_samples_test  = int(n_samples_train*ratio_test)
-#     for n_columns in n_columns_list:
-#         print("Creating Regression Datasets ***************************************************************************************")
-#         print("     Tarin: #Samples={}, #Columns={}".format(n_samples_train, n_columns))
-#         print("     Valid: #Samples={}, #Columns={}".format(n_samples_valid, n_columns))
-#         print("     Test:  #Samples={}, #Columns={}".format(n_samples_test, n_columns))
-#         X, y = make_regression(n_samples=n_samples_train+n_samples_valid+n_samples_test, n_features=n_columns)
+dtype_in = "r"
+dtype_out = "r"
+for n_samples_train in n_samples_list:
+    n_samples_valid = int(n_samples_train*ratio_valid)
+    n_samples_test  = int(n_samples_train*ratio_test)
+    for n_columns in n_columns_list:
+        print("Creating Regression Datasets ***************************************************************************************")
+        print("     Tarin: #Samples={}, #Columns={}".format(n_samples_train, n_columns))
+        print("     Valid: #Samples={}, #Columns={}".format(n_samples_valid, n_columns))
+        print("     Test:  #Samples={}, #Columns={}".format(n_samples_test, n_columns))
+        X, y = make_regression(n_samples=n_samples_train+n_samples_valid+n_samples_test, n_features=n_columns)
 
-#         list_data_seps = ["train", "valid", "test"]
-#         list_n_samples = [n_samples_train, n_samples_valid, n_samples_test]
-#         n_s = 0
-#         n_e = 0
-#         for d_sep, n_sam in zip(list_data_seps, list_n_samples):
-#             n_e = n_s + n_sam
+        list_data_seps = ["train", "valid", "test"]
+        list_n_samples = [n_samples_train, n_samples_valid, n_samples_test]
+        n_s = 0
+        n_e = 0
+        for d_sep, n_sam in zip(list_data_seps, list_n_samples):
+            n_e = n_s + n_sam
 
-#             file_name_x_out = "../sample_data/make_regression_X_{0}_{1:0=10}x{2:0=5}.csv".format(d_sep, n_samples_train, n_columns)
-#             file_name_y_out = "../sample_data/make_regression_y_{0}_{1:0=10}x{2:0=5}.csv".format(d_sep, n_samples_train, n_columns)
-#             pd.DataFrame(X[n_s:n_e,:]).to_csv(file_name_x_out, index=False)
-#             pd.DataFrame(y[n_s:n_e]).to_csv(file_name_y_out, index=False)
+            file_name_x_out = "../sample_data/make_regression_X_{0}_{1:0=10}x{2:0=5}.csv".format(d_sep, n_samples_train, n_columns)
+            file_name_y_out = "../sample_data/make_regression_y_{0}_{1:0=10}x{2:0=5}.csv".format(d_sep, n_samples_train, n_columns)
+            pd.DataFrame(X[n_s:n_e,:]).to_csv(file_name_x_out, index=False)
+            pd.DataFrame(y[n_s:n_e]).to_csv(file_name_y_out, index=False)
 
-#             subprocess.run(f"./main_csv2bin.out {d_sep} {n_sam} {n_columns} {file_name_x_out} {file_name_x_out.replace('.csv', '.bin')} {dtype_in} {dtype_out}", shell=True, check=True)
-#             subprocess.run(f"./main_csv2bin.out {d_sep} {n_sam} {1}         {file_name_y_out} {file_name_y_out.replace('.csv', '.bin')} {dtype_in} {dtype_out}", shell=True, check=True)
-#             n_s = n_e
-# sys.exit()
+            subprocess.run(f"./main_csv2bin.out {d_sep} {n_sam} {n_columns} {file_name_x_out} {file_name_x_out.replace('.csv', '.bin')} {dtype_in} {dtype_out}", shell=True, check=True)
+            subprocess.run(f"./main_csv2bin.out {d_sep} {n_sam} {1}         {file_name_y_out} {file_name_y_out.replace('.csv', '.bin')} {dtype_in} {dtype_out}", shell=True, check=True)
+            n_s = n_e
+sys.exit()
 
 
 n_classes = 2
