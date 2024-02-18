@@ -5,6 +5,14 @@ module mod_common
     implicit none
 
     interface
+        subroutine prefix_sum_double(a, b, n) bind(C, name='prefix_sum_double')
+            import
+            integer(c_int64_t), value :: n
+            real(c_double), intent(in) :: a(n), b(n)
+        end subroutine prefix_sum_double
+    end interface
+
+    interface
         function dlopen(filename,mode) bind(c,name="dlopen")
             ! void *dlopen(const char *filename, int mode);
             use iso_c_binding
@@ -85,6 +93,22 @@ module mod_common
         module procedure binary_search_right_i4
         module procedure binary_search_right_i8
     end interface binary_search_right
+
+    !> An interface to binary search from left
+    interface binary_search_left_branchless
+        module procedure binary_search_left_branchless_r4
+        module procedure binary_search_left_branchless_r8
+        module procedure binary_search_left_branchless_i4
+        module procedure binary_search_left_branchless_i8
+    end interface binary_search_left_branchless
+
+    !> An interface to binary search from right
+    interface binary_search_right_branchless
+        module procedure binary_search_right_branchless_r4
+        module procedure binary_search_right_branchless_r8
+        module procedure binary_search_right_branchless_i4
+        module procedure binary_search_right_branchless_i8
+    end interface binary_search_right_branchless
 
     !> An interface to collect unique values from already sorted array
     interface collect_unique_values
@@ -252,7 +276,127 @@ module mod_common
         module procedure vmv_r8
     end interface vmv
 
+    interface find_nearest_power_of_two_below
+        module procedure find_nearest_power_of_two_below_i4
+        module procedure find_nearest_power_of_two_below_i8
+    end interface find_nearest_power_of_two_below
+
+    interface find_nearest_power_of_two_above
+        module procedure find_nearest_power_of_two_above_i4
+        module procedure find_nearest_power_of_two_above_i8
+    end interface find_nearest_power_of_two_above
+
+    interface prefix_sum
+        module procedure prefix_sum_r8
+    end interface prefix_sum
+
 contains
+
+    subroutine prefix_sum_r8(x, cumsum, n)
+        implicit none
+        real(kind=8), intent(in) :: x(n)
+        real(kind=8), intent(inout) :: cumsum(n)
+        integer(kind=8), intent(in) :: n
+        call prefix_sum_double(x, cumsum, n)
+    end subroutine prefix_sum_r8
+
+
+    function find_nearest_power_of_two_below_i4(x) result(val)
+        implicit none
+        integer(kind=4), intent(in) :: x
+        integer(kind=4) :: val
+
+        integer(kind=4) :: tmp
+
+        if (x<=0_8) goto 999
+
+        tmp = x - 1
+
+        tmp = ior(tmp, (ishft(tmp,-1)))
+        tmp = ior(tmp, (ishft(tmp,-2)))
+        tmp = ior(tmp, (ishft(tmp,-4)))
+        tmp = ior(tmp, (ishft(tmp,-8)))
+        tmp = ior(tmp, (ishft(tmp,-16)))
+
+        val = ishft(tmp + 1, -1)
+        return
+        999 continue
+        stop "'x' must be greater than 0."
+    end function find_nearest_power_of_two_below_i4
+
+    function find_nearest_power_of_two_below_i8(x) result(val)
+        implicit none
+        integer(kind=8), intent(in) :: x
+        integer(kind=8) :: val
+
+        integer(kind=8) :: tmp
+
+        if (x<=0_8) goto 999
+
+        tmp = x - 1
+
+        tmp = ior(tmp, (ishft(tmp,-1)))
+        tmp = ior(tmp, (ishft(tmp,-2)))
+        tmp = ior(tmp, (ishft(tmp,-4)))
+        tmp = ior(tmp, (ishft(tmp,-8)))
+        tmp = ior(tmp, (ishft(tmp,-16)))
+        tmp = ior(tmp, (ishft(tmp,-32)))
+
+        val = ishft(tmp + 1, -1)
+        return
+        999 continue
+        stop "'x' must be greater than 0."
+    end function find_nearest_power_of_two_below_i8
+
+
+    function find_nearest_power_of_two_above_i4(x) result(val)
+        implicit none
+        integer(kind=4), intent(in) :: x
+        integer(kind=4) :: val
+
+        integer(kind=4) :: tmp
+
+        if (x<=0_8 .or. x>1073741824) goto 999
+
+        tmp = x - 1
+
+        tmp = ior(tmp, (ishft(tmp,-1)))
+        tmp = ior(tmp, (ishft(tmp,-2)))
+        tmp = ior(tmp, (ishft(tmp,-4)))
+        tmp = ior(tmp, (ishft(tmp,-8)))
+        tmp = ior(tmp, (ishft(tmp,-16)))
+
+        val = tmp + 1
+        return
+        999 continue
+        stop "'x' must be greater than 0 or less eqaul 1073741824."
+    end function find_nearest_power_of_two_above_i4
+
+    function find_nearest_power_of_two_above_i8(x) result(val)
+        implicit none
+        integer(kind=8), intent(in) :: x
+        integer(kind=8) :: val
+
+        integer(kind=8) :: tmp
+
+        if (x<=0_8 .or. x>4611686018427387904_8) goto 999
+
+        tmp = x - 1
+
+        tmp = ior(tmp, (ishft(tmp,-1)))
+        tmp = ior(tmp, (ishft(tmp,-2)))
+        tmp = ior(tmp, (ishft(tmp,-4)))
+        tmp = ior(tmp, (ishft(tmp,-8)))
+        tmp = ior(tmp, (ishft(tmp,-16)))
+        tmp = ior(tmp, (ishft(tmp,-32)))
+
+        val = tmp + 1
+        return
+        999 continue
+        stop "'x' must be greater than 0 or less eqaul 4611686018427387904_8."
+    end function find_nearest_power_of_two_above_i8
+
+
 
     function get_datetime()
         implicit none
@@ -318,6 +462,49 @@ contains
         binary_search_right_r4 = lo
     end function binary_search_right_r4
     include "./include/common/binary_search/inc_binary_search_right.f90"
+
+
+
+    !> A function to `branchless` binary search from left.
+    !> 'vector' must be sorted by ascending order.
+    !! \return returns the index of the closest value less than 'value'.
+    !! \param vector ascending sorted array to be searched
+    !! \param n_samples size of input vector
+    !! \param value value
+    function binary_search_left_branchless_r4(vector, n_samples, value) result(idx)
+        implicit none
+        integer(kind=4)             :: idx
+        real(kind=4), intent(in)    :: vector(n_samples)
+        integer(kind=4), intent(in) :: n_samples
+        real(kind=4), intent(in)    :: value
+
+        integer(kind=4) :: lo, hi, mid, step, step_, flg
+        include "./include/common/binary_search/inc_binary_search_left_branchless_detail.f90"
+    end function binary_search_left_branchless_r4
+    include "./include/common/binary_search/inc_binary_search_left_branchless.f90"
+
+
+    !> A function to `branchless` binary search from right.
+    !> 'vector' must be sorted by ascending order.
+    !! \return returns the index of the closest value greater than 'value'.
+    !! \param vector ascending sorted array to be searched
+    !! \param n_samples size of input vector
+    !! \param value value
+    function binary_search_right_branchless_r4(vector, n_samples, value) result(idx)
+        implicit none
+        integer(kind=4) :: idx
+        real(kind=4), intent(in)    :: vector(n_samples)
+        integer(kind=4), intent(in) :: n_samples
+        real(kind=4), intent(in)    :: value
+
+        integer(kind=4) :: lo, hi, mid, step, step_, flg
+        include "./include/common/binary_search/inc_binary_search_right_branchless_detail.f90"
+    end function binary_search_right_branchless_r4
+    include "./include/common/binary_search/inc_binary_search_right_branchless.f90"
+
+
+
+
 
 
     !> A subroutine to collect unique values from already sorted array
