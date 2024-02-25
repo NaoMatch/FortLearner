@@ -12,6 +12,7 @@ make test_all
 
 
 # Update
+2024/02/25: replace the weighted sampling method with a method that uses ↓  
 2024/02/18: branchless binary search and prefix sum with simd  
 2024/01/14: apply mydgemv to kdtree (replace openblas 'dgemv')  
 2024/01/09: my dgemv  
