@@ -54,8 +54,7 @@ module mod_random
     end interface roulette_selection
 
     interface weighted_sampling
-        module procedure weighted_sampling_with_preprocess_r8
-        module procedure weighted_sampling_without_preprocess_r8
+        module procedure weighted_sampling_r8
     end interface weighted_sampling
 
 
@@ -272,93 +271,159 @@ contains
         val = (hi-lo)*tmp + lo + 1
     end subroutine rand_integer_scl_i4
 
-
-    subroutine weighted_sampling_with_preprocess_r8(indices, n_samples, weights, n_weights)
+    subroutine weighted_sampling_r8(indices, n_samples, weights, n_weights, replace)
         implicit none
         integer(kind=8), intent(inout) :: indices(n_samples)
         integer(kind=8), intent(in)    :: n_samples
         real(kind=8), intent(in)       :: weights(n_weights)
         integer(kind=8), intent(in)    :: n_weights
+        logical(kind=4), optional      :: replace
 
-        real(kind=8)                   :: weight_sum
-        integer(kind=8)                :: h, l, i, j, k, idx
-        real(kind=8), allocatable      :: thresholds(:), rand_vals(:)
-        integer(kind=8), allocatable   :: candidates(:), hl(:), rand_idxs(:)
+        logical(kind=4) :: rlpc
 
-        allocate(thresholds(n_weights))
-        weight_sum = sum(weights)
-        thresholds(:) = weights(:) * n_weights / weight_sum 
+        rlpc = t_
+        if (present(replace)) rlpc = replace
 
-        allocate(candidates(n_weights), hl(n_weights))
-        candidates(:) = 1_8
-        hl(:) = 1_8
-        l = 1
-        h = n_weights        
+        if (rlpc) then
+            call weighted_sampling_with_replacement(indices, n_samples, weights, n_weights)
+        else
+            call weighted_sampling_without_replacement(indices, n_samples, weights, n_weights)
+        end if
+    end subroutine weighted_sampling_r8
 
-        do i=1, n_weights, 1
-            if ( thresholds(i) < 1d0 ) then
-                hl(l) = i
-                l = l + 1
-            else
-                hl(h) = i
-                h = h - 1
-            end if
-        end do
-    
-        do while ( (l>1) .and. (h<n_weights) ) 
-            j = hl(l-1)
-            k = hl(h+1)
-    
-            candidates(j) = k
-            thresholds(k) = thresholds(k) + thresholds(j) - 1d0
-            if (thresholds(k)<1d0) then
-                hl(l-1) = k
-                h = h + 1
-            else
-                l = l - 1
-            end if
-        end do 
-            
-        allocate(rand_vals(n_samples), rand_idxs(n_samples))
-        call random_number(rand_vals)
-        rand_idxs = int(rand_vals*n_weights) + 1
-        call random_number(rand_vals)
-    
-        do i=1, n_samples, 1
-            idx = rand_idxs(i)
-            if ( rand_vals(i)<=thresholds(idx) ) then
-                indices(i) = idx
-            else
-                indices(i) = candidates(idx)
-            end if
-        end do
-    end subroutine weighted_sampling_with_preprocess_r8
-
-    subroutine weighted_sampling_without_preprocess_r8(indices, n_samples, thresholds, candidates, n_weights)
+    subroutine weighted_sampling_with_replacement(indices, n_samples, weights, n_weights)
         implicit none
         integer(kind=8), intent(inout) :: indices(n_samples)
-        integer(kind=8), intent(in)    :: n_samples
-        real(kind=8), intent(in)       :: thresholds(n_weights)
-        integer(kind=8), intent(in)    :: candidates(n_weights)
-        integer(kind=8), intent(in)    :: n_weights
+        integer(kind=8), intent(in) :: n_samples
+        real(kind=8), intent(in) :: weights(n_weights)
+        integer(kind=8), intent(in) :: n_weights
 
-        integer(kind=8)                :: idx, i
-        real(kind=8), allocatable      :: rand_vals(:)
-        integer(kind=8), allocatable   :: rand_idxs(:)
+        integer(kind=8) :: i, idx
+        real(kind=8) :: val, max_c
+        real(kind=8), allocatable :: c(:)
 
-        allocate(rand_vals(n_samples), rand_idxs(n_samples))
-        call random_number(rand_vals)
-        rand_idxs = int(rand_vals*n_weights) + 1
-        call random_number(rand_vals)
-    
+        allocate(c(n_weights))
+        call prefix_sum(weights, c, n_weights)
+
+        max_c = c(n_weights)
         do i=1, n_samples, 1
-            idx = rand_idxs(i)
-            if ( rand_vals(i)<=thresholds(idx) ) then
-                indices(i) = idx
-            else
-                indices(i) = candidates(idx)
-            end if
+            call random_number(val)
+            val = val * max_c
+            idx = binary_search_left_branchless(c, n_weights, val)
+            indices(i) = idx
         end do
-    end subroutine weighted_sampling_without_preprocess_r8
+    end subroutine weighted_sampling_with_replacement
+
+    subroutine weighted_sampling_without_replacement(indices, n_samples, weights, n_weights)
+        implicit none
+        integer(kind=8), intent(inout) :: indices(n_samples)
+        integer(kind=8), intent(in) :: n_samples
+        real(kind=8), intent(in) :: weights(n_weights)
+        integer(kind=8), intent(in) :: n_weights
+
+        integer(kind=8) :: i, idx
+        real(kind=8) :: val, max_c
+        real(kind=8), allocatable :: c(:)
+
+        allocate(c(n_weights))
+        call prefix_sum(weights, c, n_weights)
+
+        do i=1, n_samples, 1
+            max_c = c(n_weights)
+            call random_number(val)
+            val = val * max_c
+            idx = binary_search_left_branchless(c, n_weights, val)
+            c(idx:) = c(idx:) - weights(idx)
+            indices(i) = idx
+        end do
+    end subroutine weighted_sampling_without_replacement
+
+    ! subroutine weighted_sampling_with_preprocess_r8(indices, n_samples, weights, n_weights)
+    !     implicit none
+    !     integer(kind=8), intent(inout) :: indices(n_samples)
+    !     integer(kind=8), intent(in)    :: n_samples
+    !     real(kind=8), intent(in)       :: weights(n_weights)
+    !     integer(kind=8), intent(in)    :: n_weights
+
+    !     real(kind=8)                   :: weight_sum
+    !     integer(kind=8)                :: h, l, i, j, k, idx
+    !     real(kind=8), allocatable      :: thresholds(:), rand_vals(:)
+    !     integer(kind=8), allocatable   :: candidates(:), hl(:), rand_idxs(:)
+
+    !     allocate(thresholds(n_weights))
+    !     weight_sum = sum(weights)
+    !     thresholds(:) = weights(:) * n_weights / weight_sum 
+
+    !     allocate(candidates(n_weights), hl(n_weights))
+    !     candidates(:) = 1_8
+    !     hl(:) = 1_8
+    !     l = 1
+    !     h = n_weights        
+
+    !     do i=1, n_weights, 1
+    !         if ( thresholds(i) < 1d0 ) then
+    !             hl(l) = i
+    !             l = l + 1
+    !         else
+    !             hl(h) = i
+    !             h = h - 1
+    !         end if
+    !     end do
+    
+    !     do while ( (l>1) .and. (h<n_weights) ) 
+    !         j = hl(l-1)
+    !         k = hl(h+1)
+    
+    !         candidates(j) = k
+    !         thresholds(k) = thresholds(k) + thresholds(j) - 1d0
+    !         if (thresholds(k)<1d0) then
+    !             hl(l-1) = k
+    !             h = h + 1
+    !         else
+    !             l = l - 1
+    !         end if
+    !     end do 
+            
+    !     allocate(rand_vals(n_samples), rand_idxs(n_samples))
+    !     call random_number(rand_vals)
+    !     rand_idxs = int(rand_vals*n_weights) + 1
+    !     call random_number(rand_vals)
+    
+    !     do i=1, n_samples, 1
+    !         idx = rand_idxs(i)
+    !         if ( rand_vals(i)<=thresholds(idx) ) then
+    !             indices(i) = idx
+    !         else
+    !             indices(i) = candidates(idx)
+    !         end if
+    !     end do
+    ! end subroutine weighted_sampling_with_preprocess_r8
+
+    ! subroutine weighted_sampling_without_preprocess_r8(indices, n_samples, thresholds, candidates, n_weights)
+    !     implicit none
+    !     integer(kind=8), intent(inout) :: indices(n_samples)
+    !     integer(kind=8), intent(in)    :: n_samples
+    !     real(kind=8), intent(in)       :: thresholds(n_weights)
+    !     integer(kind=8), intent(in)    :: candidates(n_weights)
+    !     integer(kind=8), intent(in)    :: n_weights
+
+    !     integer(kind=8)                :: idx, i
+    !     real(kind=8), allocatable      :: rand_vals(:)
+    !     integer(kind=8), allocatable   :: rand_idxs(:)
+
+    !     allocate(rand_vals(n_samples), rand_idxs(n_samples))
+    !     call random_number(rand_vals)
+    !     rand_idxs = int(rand_vals*n_weights) + 1
+    !     call random_number(rand_vals)
+    
+    !     do i=1, n_samples, 1
+    !         idx = rand_idxs(i)
+    !         if ( rand_vals(i)<=thresholds(idx) ) then
+    !             indices(i) = idx
+    !         else
+    !             indices(i) = candidates(idx)
+    !         end if
+    !     end do
+    ! end subroutine weighted_sampling_without_preprocess_r8
 
 end module mod_random
