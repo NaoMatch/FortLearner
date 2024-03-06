@@ -8,10 +8,12 @@ make test_all
 
 # WIP:  
 [Forest Packing](https://arxiv.org/abs/1806.07300) like implementation for Python  
+Re-Implement Automatic Differentiation  
 ~Benchmark and Optimize KDTree, Naive Bayse, Implement Linear/Kernel SVR, One-Class SVM, ica, HDBSCAN(not accelarated one)~
 
 
 # Update
+2024/03/06: sparse matrix multiplication (csr-like sparse matrix and dense matrix)  
 2024/02/25: replace the weighted sampling method with a method that uses ↓  
 2024/02/18: branchless binary search and prefix sum with simd  
 2024/01/14: apply mydgemv to kdtree (replace openblas 'dgemv')  
