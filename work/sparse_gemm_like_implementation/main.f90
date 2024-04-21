@@ -1,6 +1,6 @@
 program main
     !$ use omp_lib
-    use mod_sparse_dgemm_implementation
+    use mod_sparse_dgemm
     use mod_random
     use mod_sort
     use mod_timer
@@ -14,12 +14,9 @@ program main
     real(kind=8), allocatable :: a(:,:), b(:,:), c(:,:), vals(:)
     real(kind=8), allocatable :: b_t(:,:), c_t(:,:)
     integer(kind=8), allocatable :: rows(:), cols(:), idxs(:)
-    type(csr_matrix) :: csr_a
-    type(csr_matrix_for_c) :: cc
+    type(csr_matrix) :: csr_F, csr_C
     real(kind=8) :: sum_a
     real(kind=8), allocatable :: sum_a_rows(:), sum_a_cols(:)
-    csr_a = csr_matrix()
-    cc = csr_matrix_for_c()
 
     max_iter = 10000
     ! max_iter = 1000
@@ -31,6 +28,9 @@ program main
     s = 8
     n = s * m
 
+    csr_F = csr_matrix(n_columns=k)
+    csr_C = csr_matrix(n_columns=k, start_index=0_8)
+
     ! m = 8
     ! k = 16
     ! l = 16
@@ -39,8 +39,8 @@ program main
 
     ! Matrix
     allocate(a(m,k))
-    allocate(b(k,l))
-    allocate(c(m,l))
+    allocate(b(k,l), b_t(l,k))
+    allocate(c(m,l), c_t(l,m))
 
     ! COO
     allocate(rows(n))
@@ -69,8 +69,8 @@ program main
         cols(start:final) = idxs(1:s)
         call quick_sort(cols(start:final), s)
 
-        call csr_a%insert(cols(start:final), a(i, cols(start:final)))
-        call cc%insert(cols(start:final), a(i, cols(start:final)))
+        call csr_F%insert(cols(start:final), a(i, cols(start:final)))
+        call csr_C%insert(cols(start:final), a(i, cols(start:final)))
 
         start = final + 1
         final = start + s - 1
@@ -95,42 +95,43 @@ program main
     call date_and_time(values=date_value1)
     do iter=1, max_iter, 1
         call dgemm("N", "N", m, k, l, 1d0, a, m, b, k, 0d0, c, m) 
+        ! call dgemm("N", "T", m, k, l, 1d0, a, m, b_t, l, 0d0, c, m) 
     end do
     call date_and_time(values=date_value2)
     print*, "dgemm:    ", sum(c), sum(a), time_diff(date_value1, date_value2)
-    
-    ! print*, '*********************************************************************************************'
-    ! c = 0d0
-    ! call date_and_time(values=date_value1)
-    ! do iter=1, max_iter, 1
-    !     c = matmul(a,b)
-    ! end do
-    ! call date_and_time(values=date_value2)
-    ! print*, "matmul: ", sum(c), sum(a), time_diff(date_value1, date_value2)
-    
-    ! print*, '*********************************************************************************************'
-    ! c = 0d0
-    ! call date_and_time(values=date_value1)
-    ! do iter=1, max_iter, 1
-    !     call spmm_ver0(c, csr_a, b, m, k, l)
-    ! end do
-    ! call date_and_time(values=date_value2)
-    ! print*, "my_ver0:  ", sum(c), sum(a), time_diff(date_value1, date_value2)
-    
-    ! print*, '*********************************************************************************************'
-    ! c = 0d0
-    ! call date_and_time(values=date_value1)
-    ! do iter=1, max_iter, 1
-    !     call spmm_ver1(c, csr_a, b, m, k, l)
-    ! end do
-    ! call date_and_time(values=date_value2)
-    ! print*, "my_ver1:  ", sum(c), sum(a), time_diff(date_value1, date_value2)
     
     print*, '*********************************************************************************************'
     c = 0d0
     call date_and_time(values=date_value1)
     do iter=1, max_iter, 1
-        call spmm_ver2(c, csr_a, b_t, m, k, l)
+        c = matmul(a,b)
+    end do
+    call date_and_time(values=date_value2)
+    print*, "matmul: ", sum(c), sum(a), time_diff(date_value1, date_value2)
+    
+    print*, '*********************************************************************************************'
+    c = 0d0
+    call date_and_time(values=date_value1)
+    do iter=1, max_iter, 1
+        call spmm_ver0(c, csr_F, b, m, k, l)
+    end do
+    call date_and_time(values=date_value2)
+    print*, "my_ver0:  ", sum(c), sum(a), time_diff(date_value1, date_value2)
+    
+    print*, '*********************************************************************************************'
+    c = 0d0
+    call date_and_time(values=date_value1)
+    do iter=1, max_iter, 1
+        call spmm_ver1(c, csr_F, b, m, k, l)
+    end do
+    call date_and_time(values=date_value2)
+    print*, "my_ver1:  ", sum(c), sum(a), time_diff(date_value1, date_value2)
+    
+    print*, '*********************************************************************************************'
+    c = 0d0
+    call date_and_time(values=date_value1)
+    do iter=1, max_iter, 1
+        call spmm_ver2(c, csr_F, b_t, m, k, l)
     end do
     call date_and_time(values=date_value2)
     print*, "my_ver2:  ", sum(c), sum(a), time_diff(date_value1, date_value2)
@@ -139,7 +140,7 @@ program main
     c = 0d0
     call date_and_time(values=date_value1)
     do iter=1, max_iter, 1
-        call spmm_ver3(c_t, csr_a, b_t, m, k, l)
+        call spmm_ver3(c_t, csr_F, b_t, m, k, l)
     end do
     call date_and_time(values=date_value2)
     print*, "my_ver3:  ", sum(c_t), sum(a), time_diff(date_value1, date_value2), &
@@ -149,26 +150,26 @@ program main
     c = 0d0
     call date_and_time(values=date_value1)
     do iter=1, max_iter, 1
-        call spmm_ver4(c_t, csr_a, b_t, m, k, l)
+        call spmm_ver4(c_t, csr_F, b_t, m, k, l)
     end do
     call date_and_time(values=date_value2)
     print*, "my_ver4:  ", sum(c_t), sum(a), time_diff(date_value1, date_value2), &
         "Remove Second Loop + Transpose B + Transpose C + OpenMP"
     
-    ! print*, '*********************************************************************************************'
-    ! c = 0d0
-    ! call date_and_time(values=date_value1)
-    ! do iter=1, max_iter, 1
-    !     call spmm_ver5(c_t, csr_a, b_t, m, k, l)
-    ! end do
-    ! call date_and_time(values=date_value2)
-    ! print*, "my_ver5:  ", sum(c_t), sum(a), time_diff(date_value1, date_value2)
+    print*, '*********************************************************************************************'
+    c = 0d0
+    call date_and_time(values=date_value1)
+    do iter=1, max_iter, 1
+        call spmm_ver5(c_t, csr_F, b_t, m, k, l)
+    end do
+    call date_and_time(values=date_value2)
+    print*, "my_ver5:  ", sum(c_t), sum(a), time_diff(date_value1, date_value2)
     
     print*, '*********************************************************************************************'
     c_t = 0d0
     call date_and_time(values=date_value1)
     do iter=1, max_iter, 1
-        call spmm_ver6(c_t, csr_a, b_t, m, k, l)
+        call spmm_ver6(c_t, csr_F, b_t, m, k, l)
     end do
     call date_and_time(values=date_value2)
     print*, "my_ver6:  ", sum(c_t), sum(a), time_diff(date_value1, date_value2), &
@@ -178,7 +179,7 @@ program main
     c_t = 0d0
     call date_and_time(values=date_value1)
     do iter=1, max_iter, 1
-        call spmm_ver7(c_t, cc, b_t, m, k, l)
+        call spmm_ver7(c_t, csr_C, b_t, m, k, l)
     end do
     call date_and_time(values=date_value2)
     print*, "my_ver7:  ", sum(c_t), sum(a), time_diff(date_value1, date_value2), &
@@ -188,11 +189,21 @@ program main
     c_t = 0d0
     call date_and_time(values=date_value1)
     do iter=1, max_iter, 1
-        call spmm_ver8(c_t, cc, b_t, m, k, l, 8_8)
+        call spmm_ver8(c_t, csr_C, b_t, m, k, l, 8_8)
     end do
     call date_and_time(values=date_value2)
     print*, "my_ver8:  ", sum(c_t), sum(a), time_diff(date_value1, date_value2), &
         "All SIMD + OpenMP (not so optimized)"
+
+    print*, '*********************************************************************************************'
+    c_t = 0d0
+    call date_and_time(values=date_value1)
+    do iter=1, max_iter, 1
+        call spmm_ver9(c_t, csr_C, b_t, m, k, l, 8_8)
+    end do
+    call date_and_time(values=date_value2)
+    print*, "my_ver8:  ", sum(c_t), sum(a), time_diff(date_value1, date_value2), &
+        "??????????????????????"
 
 
 
@@ -210,16 +221,17 @@ contains
         integer(kind=8) :: idx
         real(kind=8) :: val, tmp
 
-        type(row_elems), pointer :: r_ptr
+        integer(kind=8) :: ini, fin
 
         ! c = 0d0
         do i=1, csr_a%n_rows, 1
-            r_ptr => csr_a%cols(i)
+            ini = csr_a%rows(i)
+            fin = csr_a%rows(i+1)
             do j=1, l, 1
                 tmp = 0d0
-                do n=1, size(r_ptr%vals), 1
-                    idx = r_ptr%cols(n)
-                    val = r_ptr%vals(n)
+                do n=ini, fin-1, 1
+                    idx = csr_a%cols(n)
+                    val = csr_a%vals(n)
                     tmp = tmp + b(idx, j) * val
                 end do
                 c(i,j) = tmp
@@ -240,16 +252,17 @@ contains
         real(kind=8) :: val
 
         real(kind=8), allocatable :: tmp(:)
-        type(row_elems), pointer :: r_ptr
+        integer(kind=8) :: ini, fin
 
         ! c = 0d0
         allocate(tmp(l))
         do i=1, csr_a%n_rows, 1
-            r_ptr => csr_a%cols(i)
+            ini = csr_a%rows(i)
+            fin = csr_a%rows(i+1)
             tmp = 0d0
-            do n=1, size(r_ptr%vals), 1
-                idx = r_ptr%cols(n)
-                val = r_ptr%vals(n)
+            do n=ini, fin-1, 1
+                idx = csr_a%cols(n)
+                val = csr_a%vals(n)
                 tmp = tmp + b(idx,:) * val
             end do
             c(i,:) = tmp
@@ -269,16 +282,17 @@ contains
         real(kind=8) :: val
 
         real(kind=8), allocatable :: tmp(:)
-        type(row_elems), pointer :: r_ptr
+        integer(kind=8) :: ini, fin
 
         ! c = 0d0
         allocate(tmp(l))
         do i=1, csr_a%n_rows, 1
-            r_ptr => csr_a%cols(i)
+            ini = csr_a%rows(i)
+            fin = csr_a%rows(i+1)
             tmp = 0d0
-            do n=1, size(r_ptr%vals), 1
-                idx = r_ptr%cols(n)
-                val = r_ptr%vals(n)
+            do n=ini, fin-1, 1
+                idx = csr_a%cols(n)
+                val = csr_a%vals(n)
                 tmp = tmp + b_t(:,idx) * val
             end do
             c(i,:) = tmp
@@ -298,16 +312,18 @@ contains
         real(kind=8) :: val
 
         real(kind=8), allocatable :: tmp(:)
-        type(row_elems), pointer :: r_ptr
+        integer(kind=8) :: ini, fin
+
 
         ! c = 0d0
         allocate(tmp(l))
         do i=1, csr_a%n_rows, 1
-            r_ptr => csr_a%cols(i)
+            ini = csr_a%rows(i)
+            fin = csr_a%rows(i+1)
             tmp = 0d0
-            do n=1, size(r_ptr%vals), 1
-                idx = r_ptr%cols(n)
-                val = r_ptr%vals(n)
+            do n=ini, fin-1, 1
+                idx = csr_a%cols(n)
+                val = csr_a%vals(n)
                 tmp = tmp + b_t(:,idx) * val
             end do
             c_t(:,i) = tmp
@@ -327,17 +343,18 @@ contains
         real(kind=8) :: val
 
         real(kind=8), allocatable :: tmp(:)
-        type(row_elems), pointer :: r_ptr
+        integer(kind=8) :: ini, fin
 
         allocate(tmp(l))
         !$omp parallel num_threads(8)
-        !$omp do private(i, r_ptr, tmp, n, idx, val)
+        !$omp do private(i, tmp, n, idx, val, ini, fin)
         do i=1, csr_a%n_rows, 1
-            r_ptr => csr_a%cols(i)
+            ini = csr_a%rows(i)
+            fin = csr_a%rows(i+1)
             tmp = 0d0
-            do n=1, size(r_ptr%vals), 1
-                idx = r_ptr%cols(n)
-                val = r_ptr%vals(n)
+            do n=ini, fin-1, 1
+                idx = csr_a%cols(n)
+                val = csr_a%vals(n)
                 tmp = tmp + b_t(:,idx) * val
             end do
             c_t(:,i) = tmp
@@ -359,17 +376,18 @@ contains
         real(kind=8) :: val
 
         real(kind=8), allocatable :: tmp(:)
-        type(row_elems), pointer :: r_ptr
+        integer(kind=8) :: ini, fin
 
         allocate(tmp(l))
         do i=1, csr_a%n_rows, 1
-            r_ptr => csr_a%cols(i)
+            ini = csr_a%rows(i)
+            fin = csr_a%rows(i+1)
             tmp = 0d0
             !$omp parallel num_threads(4)
             !$omp do private(n, idx, val) reduction(+:tmp)
-            do n=1, size(r_ptr%vals), 1
-                idx = r_ptr%cols(n)
-                val = r_ptr%vals(n)
+            do n=ini, fin-1, 1
+                idx = csr_a%cols(n)
+                val = csr_a%vals(n)
                 tmp = tmp + b_t(:,idx) * val
             end do
             !$omp end do
@@ -391,14 +409,15 @@ contains
         real(kind=8) :: val
 
         real(kind=8), allocatable :: tmp(:)
-        type(row_elems), pointer :: r_ptr
+        integer(kind=8) :: ini, fin
 
         allocate(tmp(l))
         do i=1, csr_a%n_rows, 1
-            r_ptr => csr_a%cols(i)
+            ini = csr_a%rows(i)
+            fin = csr_a%rows(i+1)
             tmp = 0d0
-            n = size(r_ptr%vals)
-            call sparse_mv_ver0(tmp, r_ptr%cols, r_ptr%vals, b_t, n, m, k, l)
+            n = fin-ini
+            call sparse_mv_ver0(tmp, csr_a%cols, csr_a%vals, b_t, n, m, k, l)
             c_t(:,i) = tmp
         end do
     end subroutine spmm_ver6
@@ -407,7 +426,7 @@ contains
         ! すべてCで記述
         implicit none
         real(kind=8), intent(inout)  :: c_t(l,m)
-        type(csr_matrix_for_c), target, intent(in) :: csr_a
+        type(csr_matrix), target, intent(in) :: csr_a
         real(kind=8), intent(in)     :: b_t(l,k)
         integer(kind=8), intent(in)  :: m, k, l
 
@@ -421,15 +440,29 @@ contains
         ! すべてCで記述
         implicit none
         real(kind=8), intent(inout)  :: c_t(l,m)
-        type(csr_matrix_for_c), target, intent(in) :: csr_a
+        type(csr_matrix), target, intent(in) :: csr_a
         real(kind=8), intent(in)     :: b_t(l,k)
         integer(kind=8), intent(in)  :: m, k, l, n_jobs
 
         integer(kind=8) :: n
 
         n = size(csr_a%vals)
-        call sparse_dgemm_ver1(c_t, csr_a%rows, csr_a%cols, csr_a%vals, b_t, n, m, k, l, n_jobs)
+        call sparse_dgemm(c_t, csr_a%rows, csr_a%cols, csr_a%vals, b_t, n, m, k, l, n_jobs)
     end subroutine spmm_ver8
+
+    subroutine spmm_ver9(c_t, csr_a, b_t, m, k, l, n_jobs)
+        ! すべてCで記述
+        implicit none
+        real(kind=8), intent(inout)  :: c_t(l,m)
+        type(csr_matrix), target, intent(in) :: csr_a
+        real(kind=8), intent(in)     :: b_t(l,k)
+        integer(kind=8), intent(in)  :: m, k, l, n_jobs
+
+        integer(kind=8) :: n
+
+        n = size(csr_a%vals)
+        call sparse_dgemm_ver2(c_t, csr_a%rows, csr_a%cols, csr_a%vals, b_t, n, m, k, l, n_jobs)
+    end subroutine spmm_ver9
 
 
 end program main

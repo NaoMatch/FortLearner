@@ -168,7 +168,7 @@ void sparse_dgemm_ver0(
     }
 }
 
-void sparse_dgemm_ver1(
+void sparse_dgemm(
         double c[], 
         int64_t rows[], int64_t cols[], double vals[], 
         double b[],
