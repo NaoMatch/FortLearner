@@ -2,7 +2,7 @@ compiler_fortran := gfortran
 compiler_clang   := gcc-8
 mod              := -J mod/
 opt              := -O3
-option           := -cpp -D_x86_64 -fopenmp  -march=native
+option           := -cpp -D_x86_64 -fopenmp  -march=native -fbounds-check
 option_degug     := 
 option_blas      := -lopenblas -ldl
 
@@ -22,7 +22,7 @@ asm              := ./mod/inc_sum_up_vector_c.out \
 					./mod/inc_multi_mat_vec.out \
 					./mod/inc_matrix_sqsum_row.out \
 					./mod/inc_prefix_sum.out \
-					./mod/mod_sparse_dgemm_implementation_c.out \
+					./mod/mod_sparse_dgemm_c.out \
 
 common           := 	./mod/mod_const.out \
 						./mod/mod_common.out \
@@ -43,6 +43,8 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_metric.out \
 						./mod/mod_linalg.out \
 						./mod/mod_eig.out \
+						./mod/mod_sparse_dgemm.out \
+						./mod/mod_csr.out \
 						./mod/mod_optimization.out \
 						./mod/mod_union_find.out \
 						\
@@ -104,45 +106,10 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_pca.out \
 						./mod/mod_nipals.out \
 						\
-						./mod/mod_variable_in_variable.out \
-						./mod/mod_wengert_list.out \
-						./mod/mod_activation_function.out \
-						./mod/mod_absolute_value.out \
-						./mod/mod_power.out \
-						./mod/mod_summation.out \
-						./mod/mod_spread.out \
-						./mod/mod_addition.out \
-						./mod/mod_substraction.out \
-						./mod/mod_multiplication.out \
-						./mod/mod_division.out \
-						./mod/mod_square.out \
-						./mod/mod_square_root.out \
-						./mod/mod_sinusoid.out \
-						./mod/mod_cosine.out \
-						./mod/mod_tangent.out \
-						./mod/mod_arcsinusoid.out \
-						./mod/mod_arccosine.out \
-						./mod/mod_arctangent.out \
-						./mod/mod_exponential.out \
-						./mod/mod_log_natural.out \
-						./mod/mod_sigmoid.out \
-						./mod/mod_matmul.out \
-						./mod/mod_relu.out \
-						./mod/mod_dense.out \
-						./mod/mod_softmax.out \
-						./mod/mod_loss_function.out \
-						./mod/mod_backwards.out \
-						./mod/mod_my_mlp.out \
-						./mod/mod_mnist_classifier.out \
-						\
 						./mod/mod_kernel.out \
 						./mod/mod_svm_cache.out \
 						./mod/mod_linear_svm.out \
 						./mod/mod_kernel_svm.out \
-						\
-						./mod/mod_sparse_dgemm_implementation.out \
-						\
-						./mod/mod_csr.out \
 
 clean:
 	rm ./mod/*.mod
@@ -170,6 +137,9 @@ build_all:
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_linalg.f90 -o ./mod/mod_linalg.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_eig.f90 -o ./mod/mod_eig.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_sparse_dgemm.f90 -o ./mod/mod_sparse_dgemm.out
+	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/mod_sparse_dgemm.c -o ./mod/mod_sparse_dgemm_c.out 
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_csr.f90 -o ./mod/mod_csr.out
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../optimization/mod_optimization.f90 -o ./mod/mod_optimization.out
 	\
@@ -239,37 +209,6 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../logistic_regression/mod_logistic_regression.f90 -o ./mod/mod_logistic_regression.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../sgd_estimator/mod_sgd_estimator.f90 -o ./mod/mod_sgd_estimator.out
 	\
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/mod_variable_in_variable.f90 -o ./mod/mod_variable_in_variable.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/mod_wengert_list.f90 -o ./mod/mod_wengert_list.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/mod_activation_function.f90 -o ./mod/mod_activation_function.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_operators/mod_power.f90 -o ./mod/mod_power.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_operators/mod_addition.f90 -o ./mod/mod_addition.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_operators/mod_multiplication.f90 -o ./mod/mod_multiplication.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_operators/mod_substraction.f90 -o ./mod/mod_substraction.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_operators/mod_division.f90 -o ./mod/mod_division.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_functions/mod_summation.f90 -o ./mod/mod_summation.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_functions/mod_spread.f90 -o ./mod/mod_spread.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_functions/mod_absolute_value.f90 -o ./mod/mod_absolute_value.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_functions/mod_square_root.f90 -o ./mod/mod_square_root.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_functions/mod_sinusoid.f90 -o ./mod/mod_sinusoid.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_functions/mod_cosine.f90 -o ./mod/mod_cosine.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_functions/mod_tangent.f90 -o ./mod/mod_tangent.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_functions/mod_arcsinusoid.f90 -o ./mod/mod_arcsinusoid.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_functions/mod_arccosine.f90 -o ./mod/mod_arccosine.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_functions/mod_arctangent.f90 -o ./mod/mod_arctangent.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_functions/mod_exponential.f90 -o ./mod/mod_exponential.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_functions/mod_log_natural.f90 -o ./mod/mod_log_natural.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/intrinsic_functions/mod_matmul.f90 -o ./mod/mod_matmul.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/activation_function/mod_sigmoid.f90 -o ./mod/mod_sigmoid.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/activation_function/mod_square.f90 -o ./mod/mod_square.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/activation_function/mod_relu.f90 -o ./mod/mod_relu.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/activation_function/mod_softmax.f90 -o ./mod/mod_softmax.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/layer/mod_dense.f90 -o ./mod/mod_dense.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/mod_loss_function.f90 -o ./mod/mod_loss_function.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/mod_backwards.f90 -o ./mod/mod_backwards.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/mod_my_mlp.f90 -o ./mod/mod_my_mlp.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../multi_layer_perceptron/mod_mnist_classifier.f90 -o ./mod/mod_mnist_classifier.out
-	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../svm/mod_kernel.f90 -o ./mod/mod_kernel.out	
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../svm/mod_svm_cache.f90 -o ./mod/mod_svm_cache.out	
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../svm/mod_linear_svm.f90 -o ./mod/mod_linear_svm.out	
@@ -295,14 +234,8 @@ build_all:
 	\
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../common/include/common/prefix_sum/inc_prefix_sum.c -o ./mod/inc_prefix_sum.out 
 
-build:
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ./mod_sparse_dgemm_implementation.f90 -o ./mod/mod_sparse_dgemm_implementation.out
-	$(compiler_clang)   $(mod) $(opt) $(option) -c    ./mod_sparse_dgemm_implementation.c -o ./mod/mod_sparse_dgemm_implementation_c.out 
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ./mod_csr.f90 -o ./mod/mod_csr.out
-
 main:
-	# make build_all
-	make build
+	make build_all
 
 	$(compiler_fortran) -w -unroll \
 	$(common) \
