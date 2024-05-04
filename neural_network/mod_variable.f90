@@ -1,4 +1,5 @@
 module mod_variable
+    use mod_config
     implicit none
 
     type jagged_matrix
@@ -13,17 +14,20 @@ module mod_variable
         integer(kind=8) :: lid=-1
         character(len=:), allocatable :: name
         logical(kind=4) :: is_parameter = .false.
+        logical(kind=4) :: is_train = .true.
     end type velement
 
     type variable
         integer(kind=8) :: id = -1
         integer(kind=8) :: generation = 0
         integer(kind=8), allocatable :: param_ids(:)
+        integer(kind=8), allocatable :: non_param_ids(:)
     contains
         procedure :: backward
         procedure :: set_name
         procedure :: get_grad
         procedure :: get_data
+        procedure :: get_shape
         procedure :: clear_grad
         procedure :: is_alloc
     end type variable 
@@ -45,6 +49,8 @@ module mod_variable
         integer(kind=8)   :: n_in=-1, n_out=-1
         integer(kind=8)   :: id_in_1=-1, id_in_2=-1
         integer(kind=8)   :: id_out_1=-1, id_out_2=-1
+        integer(kind=8)   :: shape_in_1(2) = [-1,-1], shape_in_2(2) = [-1,-1]
+        integer(kind=8)   :: shape_out_1(2) = [-1,-1], shape_out_2(2) = [-1,-1]
 
         ! Summation & Spreading
         integer(kind=8)   :: dim=-1
@@ -64,6 +70,10 @@ module mod_variable
         ! Dropout
         real(kind=8) :: drop_ratio = 0d0
         real(kind=8), allocatable :: mask(:,:)
+
+        ! Binary Cross Entropy
+        character(len=4) :: reduction="mean"
+        integer(kind=8) :: n_classes = -1
     contains
         procedure :: act_1in_1out, act_2in_1out
         generic   :: act => act_1in_1out, act_2in_1out
@@ -104,10 +114,66 @@ module mod_variable
     contains
         procedure :: update
         procedure :: update_one_param
+        procedure :: clear_grads
     end type optimizer
 
 
+    interface set_mode_to_variable
+        procedure :: set_mode_to_variable_id
+        procedure :: set_mode_to_variable_var
+    end interface set_mode_to_variable
+
 contains
+
+    subroutine clear_stack(var)
+        implicit none
+        integer(kind=8) :: p, id
+        type(variable) :: var
+
+        integer(kind=8), allocatable :: var_ids(:)
+
+        do p=1, size(var%param_ids), 1
+            id = var%param_ids(p)
+            if (allocated(vstack(id)%g)) deallocate(vstack(id)%g)
+        end do
+
+        do p=1, size(var%non_param_ids), 1
+            id = var%non_param_ids(p)
+            if (allocated(vstack(id)%v)) deallocate(vstack(id)%v)
+            if (allocated(vstack(id)%g)) deallocate(vstack(id)%g)
+        end do
+
+        ! do p=1, size(vstack), 1
+        !     id = p
+        !     if (.not. vstack(id)%is_train) then
+        !         if (allocated(vstack(id)%v)) deallocate(vstack(id)%v)
+        !         if (allocated(vstack(id)%g)) deallocate(vstack(id)%g)            
+        !     end if
+        ! end do
+
+        deallocate(fstack)
+        allocate(fstack(0))
+    end subroutine clear_stack
+
+
+    function unused_stack_id() result(id)
+        implicit none
+        integer(kind=8) :: id
+
+        integer(kind=8) :: n_stacks, s
+
+        id = -1
+        n_stacks = size(vstack)
+        ! print*, '*********************************************************************************************'
+        do s=1, n_stacks, 1
+            ! print*, "stack id: ", s, allocated(vstack(s)%v)
+            if (.not. allocated(vstack(s)%v)) then
+                id = s
+                exit
+            end if
+        end do
+        ! print*, '*********************************************************************************************'
+    end function unused_stack_id
 
     function act(this, var_in) result(var_out)
         implicit none
@@ -137,9 +203,6 @@ contains
     end subroutine set_params
 
 
-
-
-
     subroutine pop_by_index(flist, glist, pop_index)
         implicit none
         integer(kind=8), allocatable, intent(inout) :: flist(:)
@@ -157,35 +220,13 @@ contains
         end if
     end subroutine pop_by_index
 
-
     subroutine init_stack()
         implicit none
         integer(kind=8) :: i, n_hold
         integer(kind=8) :: last_hold_idx
 
-        if (.not. allocated(vstack)) then
-            allocate(vstack(0))
-        else
-            ! print*, "zero clear"
-            do i=1, size(vstack), 1
-                if (vstack(i)%fid<0) then
-                    last_hold_idx = i
-                    if (allocated(vstack(i)%g)) vstack(i)%g = 0d0
-                end if
-            end do
-            
-            ! print*, "delete useless stacks"
-            vstack = vstack(1:last_hold_idx)
-            
-            ! print*, "deallocate"
-            do i=1, size(vstack), 1
-                if (vstack(i)%fid>0) then
-                    if (allocated(vstack(i)%v)) deallocate(vstack(i)%v)
-                    if (allocated(vstack(i)%g)) deallocate(vstack(i)%g)
-                end if
-            end do
-            ! print*, "done"
-        end if
+        if (allocated(vstack)) deallocate(vstack)
+        allocate(vstack(0))
 
         if (allocated(fstack)) deallocate(fstack)
         allocate(fstack(0))
@@ -200,11 +241,52 @@ contains
         type(felement) :: func
         type(velement) :: elm
 
+        integer(kind=8) :: id
+
+        id = unused_stack_id()
+        if (id == -1) then
+            vstack = [vstack, elm]
+            vid = size(vstack)
+        else
+            vid = id
+        end if
+
         fstack = [fstack, func]
-        vstack = [vstack, elm]
         fid = size(fstack)
-        vid = size(vstack)
     end subroutine append_new_element_to_stack
+
+    subroutine set_mode_to_variable_id(id)
+        implicit none
+        integer(kind=8) :: id
+
+        vstack(id)%is_train = is_train
+    end subroutine set_mode_to_variable_id
+
+    subroutine set_mode_to_variable_var(var)
+        implicit none
+        type(variable) :: var
+        vstack(var%id)%is_train = is_train
+    end subroutine set_mode_to_variable_var
+
+    subroutine train_mode()
+        implicit none
+
+        integer(kind=8) :: id, p
+        is_train = .true.
+
+        do p=1, size(vstack), 1
+            id = p
+            if (.not. vstack(id)%is_train) then
+                if (allocated(vstack(id)%v)) deallocate(vstack(id)%v)
+                if (allocated(vstack(id)%g)) deallocate(vstack(id)%g)            
+            end if
+        end do
+    end subroutine train_mode
+    
+    subroutine test_mode()
+        implicit none
+        is_train = .false.
+    end subroutine test_mode
 
 
     subroutine set_name(this, name)
@@ -229,6 +311,9 @@ contains
         class(variable) :: this
         real(kind=8), allocatable :: grad(:,:)
 
+        if (this%id == -1) then
+            stop "'variable' is not assigned."
+        end if
         allocate(grad, source=vstack(this%id)%g)
     end function get_grad
 
@@ -237,8 +322,19 @@ contains
         class(variable) :: this
         real(kind=8), allocatable :: grad(:,:)
 
+        if (this%id == -1) then
+            stop "'variable' is not assigned."
+        end if
         allocate(grad, source=vstack(this%id)%v)
     end function get_data
+
+    function get_shape(this) result(dshape)
+        implicit none
+        class(variable) :: this
+        integer(kind=8) :: dshape(2)
+
+        dshape = shape(vstack(this%id)%v)
+    end function get_shape
 
     function is_alloc(this)
         implicit none
@@ -265,7 +361,14 @@ contains
         type(jagged_matrix), allocatable :: g_outs(:)
 
         if (allocated(this%param_ids)) deallocate(this%param_ids)
+        if (allocated(this%non_param_ids)) deallocate(this%non_param_ids)
         allocate(this%param_ids(0))
+        allocate(this%non_param_ids(0))
+        if (vstack(this%id)%is_parameter) then
+            this%param_ids = [this%param_ids, this%id]
+        else
+            this%non_param_ids = [this%non_param_ids, this%id]
+        end if
 
         vid = this%id
         allocate(func_ids(0))
@@ -282,9 +385,9 @@ contains
         do while (size(func_ids)>0)
             max_g_idx = maxloc(func_gs, dim=1)
             fid = func_ids(max_g_idx)
-            ! print*, fid, func_gs
             select type (creator => fstack(fid)%func)
                 class is (base_function)
+                    ! print*, fid, creator%fname
                     ! Get Variable IDs ------------------------------------------------------------
                     id_in_1  = creator%id_in_1
                     id_in_2  = creator%id_in_2
@@ -296,10 +399,18 @@ contains
 
                     ! Get Parameter IDs -----------------------------------------------------------
                     if (id_in_1>0) then
-                        if (vstack(id_in_1)%is_parameter) this%param_ids = [this%param_ids, id_in_1]
+                        if (vstack(id_in_1)%is_parameter) then
+                            this%param_ids = [this%param_ids, id_in_1]
+                        else
+                            this%non_param_ids = [this%non_param_ids, id_in_1]
+                        end if
                     end if
                     if (id_in_2>0) then
-                        if (vstack(id_in_2)%is_parameter) this%param_ids = [this%param_ids, id_in_2]
+                        if (vstack(id_in_2)%is_parameter) then
+                            this%param_ids = [this%param_ids, id_in_2]
+                        else
+                            this%non_param_ids = [this%non_param_ids, id_in_2]
+                        end if
                     end if
 
                     ! Add Grads -------------------------------------------------------------------
@@ -367,6 +478,7 @@ contains
         if (present(is_parameter)) elm%is_parameter = is_parameter
         vstack = [vstack, elm]
         var%id = size(vstack)
+        call set_mode_to_variable(var)
     end function new_variable_r8_scl
 
 
@@ -381,6 +493,7 @@ contains
         if (present(is_parameter)) elm%is_parameter = is_parameter
         vstack = [vstack, elm]
         var%id = size(vstack)
+        call set_mode_to_variable(var)
     end function new_variable_r8_vec
 
 
@@ -390,11 +503,19 @@ contains
         real(kind=8), intent(in) :: x(:,:)
         logical(kind=4), optional :: is_parameter
         type(velement) :: elm
+        integer(kind=8) :: id
 
         elm%v = x
         if (present(is_parameter)) elm%is_parameter = is_parameter
-        vstack = [vstack, elm]
-        var%id = size(vstack)
+        id = unused_stack_id()
+        if (id==-1_8) then
+            vstack = [vstack, elm]
+            var%id = size(vstack)
+        else
+            vstack(id) = elm
+            var%id = id
+        end if
+        call set_mode_to_variable(var)
     end function new_variable_r8_mat
 
     function act_1in_1out(this, var_in) result(var_out)
@@ -414,10 +535,14 @@ contains
         ! print*, "ids: ", var_in_1%id, var_in_2%id, " -->  ", vid
         this%id_in_1 = var_in%id
         this%id_out_1 = vid
+        this%shape_in_1 = var_in%get_shape()
         allocate(fstack(fid)%func, source=this)
         
         vstack(vid)%v = this%forward(vstack(var_in%id)%v)
         vstack(vid)%fid = fid
+        this%shape_out_1 = var_out%get_shape()
+
+        call set_mode_to_variable(var_out)
     end function act_1in_1out
 
     function act_2in_1out(this, var_in_1, var_in_2) result(var_out)
@@ -437,10 +562,14 @@ contains
         this%id_in_1 = var_in_1%id
         this%id_in_2 = var_in_2%id        
         this%id_out_1 = vid
+        this%shape_in_1 = var_in_1%get_shape()
+        this%shape_in_2 = var_in_2%get_shape()
         allocate(fstack(fid)%func, source=this)
         
         vstack(vid)%v = this%forward(vstack(var_in_1%id)%v, vstack(var_in_2%id)%v)
         vstack(vid)%fid = fid
+        this%shape_out_1 = var_out%get_shape()
+        call set_mode_to_variable(var_out)
     end function act_2in_1out
 
     function forward_2in_1out(this, v_in_1, v_in_2) result(v_out)
@@ -489,5 +618,20 @@ contains
         integer(kind=8) :: id
         stop "NotImplemented Error, " // __FILE__ // "."
     end subroutine update_one_param
+
+    subroutine clear_grads(this, var)
+        implicit none
+        class(optimizer) :: this
+        type(variable), intent(in) :: var
+
+        integer(kind=8) :: n_params, p, id
+
+        n_params = size(var%param_ids)
+
+        do p=1, n_params, 1
+            id = var%param_ids(p)
+            deallocate(vstack(id)%g)
+        end do
+    end subroutine clear_grads
 
 end module mod_variable

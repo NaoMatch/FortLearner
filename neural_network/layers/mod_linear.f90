@@ -1,4 +1,5 @@
 module mod_linear
+    use mod_random
     use mod_variable
     use mod_intrinsics
     implicit none
@@ -6,7 +7,6 @@ module mod_linear
     type, extends(base_layer) :: linear
         type(variable) :: w, b
     contains
-        ! procedure :: init_w
         procedure :: forward => forward_linear
     end type linear
 
@@ -35,7 +35,7 @@ contains
         ! Initialize Weight
         if (new_linear%in_size>0_8) then
             allocate(w(in_size, out_size))
-            call random_number(w)
+            call rand_normal(w, in_size, out_size)
             w = w * sqrt(1d0 / in_size)
             new_linear%w = variable(w, is_parameter=.true.)
             call new_linear%w%set_name("weight")
@@ -65,7 +65,7 @@ contains
             n_cols = size(var_in%get_data(), dim=2)
             this%in_size = n_cols
             allocate(w(n_cols, this%out_size))
-            call random_number(w)
+            call rand_normal(w, n_cols, this%out_size)
             w = w * sqrt(1d0 / n_cols)
             this%w = variable(w, is_parameter=.true.)
             call this%w%set_name("weight")
