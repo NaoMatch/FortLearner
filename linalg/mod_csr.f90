@@ -1,4 +1,6 @@
 module mod_csr
+    use mod_random
+    use mod_common_type
     implicit none
 
     type csr_matrix
@@ -11,13 +13,19 @@ module mod_csr
         integer(kind=8) :: offset
     contains
         procedure :: delete
-        procedure :: insert
+        procedure, pass :: insert_value, insert_csr
+        generic :: insert => insert_value, insert_csr
     end type csr_matrix
 
     interface csr_matrix 
         procedure :: new_csr_matrix
     end interface csr_matrix 
-    
+
+    interface dense2csr_weighted_sampling
+        procedure :: dense2csr_weighted_sampling_mat
+        procedure :: dense2csr_weighted_sampling_vec
+    end interface dense2csr_weighted_sampling
+
 contains
 
     function new_csr_matrix(n_columns, start_index)
@@ -55,7 +63,7 @@ contains
         this%n_rows = 0
     end subroutine delete
 
-    subroutine insert(this, cols, vals)
+    subroutine insert_value(this, cols, vals)
         implicit none
         class(csr_matrix) :: this
         integer(kind=8), intent(in) :: cols(:)
@@ -72,7 +80,118 @@ contains
         this%vals = [this%vals, vals]
 
         this%n_rows = this%n_rows + 1
-    end subroutine insert
+    end subroutine insert_value
 
+    subroutine insert_csr(this, csr)
+        implicit none
+        class(csr_matrix) :: this
+        type(csr_matrix) :: csr
+
+        integer(kind=8) :: row_id, n_elms, row_offset
+
+        if (csr%n_cols /= this%n_cols) stop "Number of Column Missmatch."
+        if (csr%offset /= this%offset) stop "Offset Missmatch."
+
+        n_elms = size(this%rows)
+        if (n_elms == 1_8) then
+            this%rows = csr%cols
+        else
+            row_offset = this%rows(n_elms)
+            this%rows = [this%rows(1:n_elms-1), row_offset+csr%rows(1:)]
+        end if
+        this%cols = [this%cols, csr%cols]
+        this%vals = [this%vals, csr%vals]
+        
+        this%n_rows = this%n_rows + csr%n_rows
+    end subroutine insert_csr
+
+
+    function dense2csr_weighted_sampling_mat(mat, n_top, dim, start_index) result(sp_mat)
+        implicit none
+        type(csr_matrix) :: sp_mat
+        real(kind=8), intent(in) :: mat(:,:)
+        integer(kind=8), intent(in) :: n_top
+        integer(kind=8), optional :: dim
+        integer(kind=8), optional :: start_index
+
+        integer(kind=8) :: dim_opt, start_index_opt
+        integer(kind=8) :: n_columns, c, n_samples, s
+        real(kind=8), allocatable :: tmp_vec(:), tmp_psum(:)
+        integer(kind=8), allocatable :: indices(:)
+
+        ! Argument Check --------------------------------------------------------------------------
+        dim_opt = 2
+        if (present(dim)) dim_opt = dim
+        if (dim_opt>2) goto 990
+
+        start_index_opt = 1
+        if (present(start_index)) start_index_opt = start_index
+
+        if (n_top<=0) goto 991
+
+
+        ! Processing ------------------------------------------------------------------------------
+        if (dim_opt==1_8) then
+            n_columns = size(mat, dim=1_8)
+            n_samples = size(mat, dim=2_8)
+        else
+            n_columns = size(mat, dim=2_8)
+            n_samples = size(mat, dim=1_8)
+        end if
+
+        allocate(tmp_vec(n_columns))
+        allocate(indices(n_top))
+        sp_mat = csr_matrix(n_columns, start_index_opt)
+
+        do s=1, n_samples, 1
+            if (dim_opt==1_8) then
+                tmp_vec = mat(:,s)
+            else
+                tmp_vec = mat(s,:)
+            end if 
+
+            call weighted_sampling(indices, n_top, tmp_vec, n_columns, replace=.false.)
+
+            call sp_mat%insert(indices, tmp_vec(indices))
+        end do
+
+
+        return
+        990 continue 
+        stop "argument 'dim' must be 1 or 2."
+
+        991 continue 
+        stop "argument 'n_top' must be greater equal 1."
+    end function dense2csr_weighted_sampling_mat
+
+    function dense2csr_weighted_sampling_vec(vec, n_top, start_index) result(indices)
+        implicit none
+        real(kind=8), intent(in) :: vec(:)
+        integer(kind=8), intent(in) :: n_top
+        integer(kind=8), optional :: start_index
+
+        integer(kind=8) :: start_index_opt
+        integer(kind=8) :: n_columns, c, n_samples, s
+        real(kind=8), allocatable :: tmp_vec(:), tmp_psum(:)
+        integer(kind=8), allocatable :: indices(:)
+
+        ! Argument Check --------------------------------------------------------------------------
+        start_index_opt = 1
+        if (present(start_index)) start_index_opt = start_index
+        
+        if (n_top<=0) goto 991
+        
+        ! Processing ------------------------------------------------------------------------------
+        n_columns = size(vec)
+        
+        allocate(indices(n_top))
+        
+        call weighted_sampling(indices, n_top, vec, n_columns, replace=.false.)
+        
+        ! print*, indices
+        return
+        991 continue 
+        stop "argument 'n_top' must be greater equal 1."
+    end function dense2csr_weighted_sampling_vec
 
 end module mod_csr
