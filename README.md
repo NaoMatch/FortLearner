@@ -13,6 +13,9 @@ Re-Implement Automatic Differentiation
 
 
 # Update
+2024/05/05: dense matrix to csr matrix    
+2024/05/04: mnist classifier example code  
+2024/04/21: add 'neural_network' (Re-implementation of automatic differentiation)  
 2024/04/20: remove 'multi_layer_perceptron'  
 2024/03/06: sparse matrix multiplication (csr-like sparse matrix and dense matrix)  
 2024/02/25: replace the weighted sampling method with a method that uses ↓  
