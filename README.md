@@ -13,6 +13,7 @@ Re-Implement Automatic Differentiation
 
 
 # Update
+2024/05/05: csr to dense.     
 2024/05/05: add optional argument for 'weighted_sampling', ignoring negative weightes.     
 2024/05/05: dense matrix to csr matrix    
 2024/05/04: mnist classifier example code  
