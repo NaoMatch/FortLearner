@@ -295,10 +295,30 @@ module mod_common
         module procedure clipping_i8
     end interface clipping
 
+    interface clipping_lower
+        module procedure clipping_lower_r8
+        module procedure clipping_lower_i8
+    end interface clipping_lower
+
+    interface clipping_upper
+        module procedure clipping_upper_r8
+        module procedure clipping_upper_i8
+    end interface clipping_upper
+
     interface clipping_array
         module procedure clipping_array_r8
         module procedure clipping_array_i8
     end interface clipping_array
+
+    interface clipping_array_lower
+        module procedure clipping_array_lower_r8
+        module procedure clipping_array_lower_i8
+    end interface clipping_array_lower
+
+    interface clipping_array_upper
+        module procedure clipping_array_upper_r8
+        module procedure clipping_array_upper_i8
+    end interface clipping_array_upper
 
 contains
 
@@ -319,6 +339,43 @@ contains
 
         y = minval([x_max, maxval([x, x_min])])
     end function clipping_i8
+
+    function clipping_lower_r8(x, x_min) result(y)
+        implicit none
+        real(kind=8) :: y
+        real(kind=8), intent(in) :: x
+        real(kind=8), intent(in) :: x_min
+
+        y = maxval([x, x_min])
+    end function clipping_lower_r8
+
+    function clipping_lower_i8(x, x_min) result(y)
+        implicit none
+        integer(kind=8) :: y
+        integer(kind=8), intent(in) :: x
+        integer(kind=8), intent(in) :: x_min
+
+        y = maxval([x, x_min])
+    end function clipping_lower_i8
+
+    function clipping_upper_r8(x, x_max) result(y)
+        implicit none
+        real(kind=8) :: y
+        real(kind=8), intent(in) :: x
+        real(kind=8), intent(in) :: x_max
+
+        y = minval([x_max, x])
+    end function clipping_upper_r8
+
+    function clipping_upper_i8(x, x_max) result(y)
+        implicit none
+        integer(kind=8) :: y
+        integer(kind=8), intent(in) :: x
+        integer(kind=8), intent(in) :: x_max
+
+        y = minval([x_max, x])
+    end function clipping_upper_i8
+
 
     subroutine clipping_array_r8(x, n, x_min, x_max)
         implicit none
@@ -345,6 +402,58 @@ contains
             x(i) = minval([x_max, maxval([x(i), x_min])])
         end do
     end subroutine clipping_array_i8
+
+    subroutine clipping_array_lower_r8(x, n, x_min)
+        implicit none
+        real(kind=8), intent(inout) :: x(n)
+        integer(kind=8), intent(in) :: n
+        real(kind=8), intent(in) :: x_min
+
+        integer(kind=8) :: i
+
+        do i=1, n, 1
+            x(i) = maxval([x(i), x_min])
+        end do
+    end subroutine clipping_array_lower_r8
+
+    subroutine clipping_array_lower_i8(x, n, x_min)
+        implicit none
+        integer(kind=8), intent(inout) :: x(n)
+        integer(kind=8), intent(in) :: n
+        integer(kind=8), intent(in) :: x_min
+
+        integer(kind=8) :: i
+
+        do i=1, n, 1
+            x(i) = maxval([x(i), x_min])
+        end do
+    end subroutine clipping_array_lower_i8
+
+    subroutine clipping_array_upper_r8(x, n, x_max)
+        implicit none
+        real(kind=8), intent(inout) :: x(n)
+        integer(kind=8), intent(in) :: n
+        real(kind=8), intent(in) :: x_max
+
+        integer(kind=8) :: i
+
+        do i=1, n, 1
+            x(i) = minval([x_max, x(i)])
+        end do
+    end subroutine clipping_array_upper_r8
+
+    subroutine clipping_array_upper_i8(x, n, x_max)
+        implicit none
+        integer(kind=8), intent(inout) :: x(n)
+        integer(kind=8), intent(in) :: n
+        integer(kind=8), intent(in) :: x_max
+
+        integer(kind=8) :: i
+
+        do i=1, n, 1
+            x(i) = minval([x_max, x(i)])
+        end do
+    end subroutine clipping_array_upper_i8
 
 
     subroutine prefix_sum_r8(x, cumsum, n)
