@@ -1,6 +1,7 @@
 module mod_csr
     use mod_random
     use mod_common_type
+    use mod_sort
     implicit none
 
     type csr_matrix
@@ -12,6 +13,7 @@ module mod_csr
         integer(kind=8) :: n_rows, n_cols
         integer(kind=8) :: offset
     contains
+        procedure :: to_dense
         procedure :: delete
         procedure, pass :: insert_value, insert_csr
         generic :: insert => insert_value, insert_csr
@@ -45,6 +47,28 @@ contains
 
         new_csr_matrix%offset = new_csr_matrix%start_index - 1
     end function new_csr_matrix
+
+    function to_dense(this) result(matrix)
+        implicit none
+        class(csr_matrix) :: this
+        real(kind=8), allocatable :: matrix(:,:)
+
+        integer(kind=8) :: row, ini, fin, ii, col
+        real(kind=8) :: val
+
+        allocate(matrix(this%n_rows, this%n_cols))
+        matrix(:,:) = 0d0
+
+        do row=1, this%n_rows, 1
+            ini = this%rows(row) - this%offset
+            fin = this%rows(row+1) - this%start_index
+            do ii=ini, fin, 1
+                col = this%cols(ii) - this%offset
+                val = this%vals(ii)
+                matrix(row, col) = val
+            end do
+        end do
+    end function to_dense
 
     subroutine delete(this)
         implicit none
@@ -152,6 +176,7 @@ contains
 
             call weighted_sampling(indices, n_top, tmp_vec, n_columns, replace=.false.)
 
+            ! call quick_sort(indices, n_top)
             call sp_mat%insert(indices, tmp_vec(indices))
         end do
 
@@ -185,7 +210,8 @@ contains
         n_columns = size(vec)
         
         allocate(indices(n_top))
-        
+
+        ! call quick_sort(indices, n_top)
         call weighted_sampling(indices, n_top, vec, n_columns, replace=.false.)
         
         ! print*, indices
