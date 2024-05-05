@@ -12,45 +12,49 @@ program main
     integer(kind=8)        :: date_value1(8), date_value2(8)
     integer(kind=8) :: iter, max_iter, idx, i
 
+    real(kind=8), allocatable :: a(:,:), b(:,:), c(:,:)
+
 
     n_samples = 8
-    n_weights = 10
-    max_iter = 1000_8
+    n_weights = 1024
+    max_iter = 100_8
 
-
+    allocate(a(n_weights, n_weights), b(n_weights, n_weights))
     allocate(idxs(n_samples))
     allocate(wght(n_weights))
     allocate(counter(n_weights))
 
     wght(:) = 1d0
-    wght(:) = (/(i, i=1, n_weights, 1)/)
+    wght(3) = -.5d0
+    ! wght(3) = 0d0
+    ! wght(:) = (/(i, i=1, n_weights, 1)/)
     ! wght = wght / sum(wght)
     
-    counter(:) = 0
-    call date_and_time(values=date_value1)
-    do iter=1, n_weights * max_iter
-        call weighted_sampling_cumsum_binary_with_replacement(idxs, n_samples, wght, n_weights)
-        do idx=1, n_samples, 1
-            counter(idxs(idx)) = counter(idxs(idx)) + 1
-        end do
-    end do
-    call date_and_time(values=date_value2)
-    print*, "Cumsum and Binary with Replacement         : ", time_diff(date_value1, date_value2)
-    print*, sum(counter)
-    print*, counter
+    ! counter(:) = 0
+    ! call date_and_time(values=date_value1)
+    ! do iter=1, n_weights * max_iter
+    !     call weighted_sampling_cumsum_binary_with_replacement(idxs, n_samples, wght, n_weights)
+    !     do idx=1, n_samples, 1
+    !         counter(idxs(idx)) = counter(idxs(idx)) + 1
+    !     end do
+    ! end do
+    ! call date_and_time(values=date_value2)
+    ! print*, "Cumsum and Binary with Replacement         : ", time_diff(date_value1, date_value2)
+    ! print*, sum(counter)
+    ! print*, int(counter)
 
-    counter(:) = 0
-    call date_and_time(values=date_value1)
-    do iter=1, n_weights * max_iter
-        call weighted_sampling_cumsum_binary_without_replacement_2(idxs, n_samples, wght, n_weights)
-        do idx=1, n_samples, 1
-            counter(idxs(idx)) = counter(idxs(idx)) + 1
-        end do
-    end do
-    call date_and_time(values=date_value2)
-    print*, "Cumsum and Binary without Replacement      : ", time_diff(date_value1, date_value2)
-    print*, sum(counter)
-    print*, counter
+    ! counter(:) = 0
+    ! call date_and_time(values=date_value1)
+    ! do iter=1, n_weights * max_iter
+    !     call weighted_sampling_cumsum_binary_without_replacement_2(idxs, n_samples, wght, n_weights)
+    !     do idx=1, n_samples, 1
+    !         counter(idxs(idx)) = counter(idxs(idx)) + 1
+    !     end do
+    ! end do
+    ! call date_and_time(values=date_value2)
+    ! print*, "Cumsum and Binary without Replacement      : ", time_diff(date_value1, date_value2)
+    ! print*, sum(counter)
+    ! print*, int(counter)
     
     counter(:) = 0
     call date_and_time(values=date_value1)
@@ -61,9 +65,24 @@ program main
         end do
     end do
     call date_and_time(values=date_value2)
-    print*, "Naive Implementation True                       : ", time_diff(date_value1, date_value2)
+    print*, "Naive Implementation True                       : ", &
+        dble(time_diff(date_value1, date_value2)) / n_weights / max_iter, n_weights * max_iter
     print*, sum(counter)
-    print*, counter
+    print*, int(counter(1:5))
+    
+    ! counter(:) = 0 ! Error
+    ! call date_and_time(values=date_value1)
+    ! do iter=1, n_weights * max_iter
+    !     call weighted_sampling(idxs, n_samples, wght, n_weights, replace=t_, ignore_negative_weights=f_)
+    !     do idx=1, n_samples, 1
+    !         counter(idxs(idx)) = counter(idxs(idx)) + 1
+    !     end do
+    ! end do
+    ! call date_and_time(values=date_value2)
+    ! print*, "Naive Implementation True                       : ", &
+    !    dble(time_diff(date_value1, date_value2)) / n_weights / max_iter, n_weights * max_iter
+    ! print*, sum(counter)
+    ! print*, int(counter(1:5))
     
     counter(:) = 0
     call date_and_time(values=date_value1)
@@ -74,10 +93,20 @@ program main
         end do
     end do
     call date_and_time(values=date_value2)
-    print*, "Naive Implementation False                       : ", time_diff(date_value1, date_value2)
+    print*, "Naive Implementation False                       : ", &
+        dble(time_diff(date_value1, date_value2)) / n_weights / max_iter, n_weights * max_iter
     print*, sum(counter)
-    print*, counter
+    print*, int(counter(1:5))
 
+
+
+
+    call date_and_time(values=date_value1)
+    do iter=1, 1000
+        c = matmul(a, b)
+    end do
+    call date_and_time(values=date_value2)
+    print*, "Naive Implementation False                       : ", dble(time_diff(date_value1, date_value2)) / 1000, 1000
 
 contains
 

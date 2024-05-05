@@ -47,6 +47,8 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_optimization.out \
 						./mod/mod_union_find.out \
 						\
+						./mod/mod_metric.out \
+						\
 						./mod/mod_hyperparameter.out \
 						./mod/mod_discretizer.out \
 						./mod/mod_data_holder.out \
@@ -157,8 +159,6 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_sgd.out \
 						./mod/mod_momentum_sgd.out \
 						./mod/mod_optimizers.out \
-						\
-						./mod/mod_metric.out \
 
 
 clean:
@@ -192,6 +192,8 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../optimization/mod_optimization.f90 -o ./mod/mod_optimization.out
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../data_structure/mod_union_find.f90 -o ./mod/mod_union_find.out
+	\
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../metric/mod_metric.f90 -o ./mod/mod_metric.out
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../hyperparameter/mod_hyperparameter.f90 -o ./mod/mod_hyperparameter.out
 	\
@@ -308,8 +310,6 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/optimizers/mod_sgd.f90                   -o ./mod/mod_sgd.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/optimizers/mod_momentum_sgd.f90          -o ./mod/mod_momentum_sgd.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/optimizers/mod_optimizers.f90            -o ./mod/mod_optimizers.out
-	\
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../metric/mod_metric.f90 -o ./mod/mod_metric.out
 	\
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../math/include/stats/sum_up/inc_sum_up_vector.c -o ./mod/inc_sum_up_vector_c.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../math/include/stats/sum_up/inc_sum_up_matrix.c -o ./mod/inc_sum_up_matrix_c.out ./mod/inc_sum_up_vector_c.out
