@@ -271,39 +271,52 @@ contains
         val = (hi-lo)*tmp + lo + 1
     end subroutine rand_integer_scl_i4
 
-    subroutine weighted_sampling_r8(indices, n_samples, weights, n_weights, replace)
+    subroutine weighted_sampling_r8(indices, n_samples, weights, n_weights, replace, ignore_negative_weights)
         implicit none
         integer(kind=8), intent(inout) :: indices(n_samples)
         integer(kind=8), intent(in)    :: n_samples
         real(kind=8), intent(in)       :: weights(n_weights)
         integer(kind=8), intent(in)    :: n_weights
         logical(kind=4), optional      :: replace
+        logical(kind=4), optional      :: ignore_negative_weights
 
-        logical(kind=4) :: rlpc
+        logical(kind=4) :: rlpc, ignr
 
         rlpc = t_
         if (present(replace)) rlpc = replace
 
+        ignr = t_
+        if (present(ignore_negative_weights)) ignr = ignore_negative_weights
+
         if (rlpc) then
-            call weighted_sampling_with_replacement(indices, n_samples, weights, n_weights)
+            call weighted_sampling_with_replacement(indices, n_samples, weights, n_weights, ignr)
         else
-            call weighted_sampling_without_replacement(indices, n_samples, weights, n_weights)
+            call weighted_sampling_without_replacement(indices, n_samples, weights, n_weights, ignr)
         end if
     end subroutine weighted_sampling_r8
 
-    subroutine weighted_sampling_with_replacement(indices, n_samples, weights, n_weights)
+    subroutine weighted_sampling_with_replacement(indices, n_samples, weights, n_weights, ignr)
         implicit none
         integer(kind=8), intent(inout) :: indices(n_samples)
         integer(kind=8), intent(in) :: n_samples
         real(kind=8), intent(in) :: weights(n_weights)
         integer(kind=8), intent(in) :: n_weights
+        logical(kind=4), intent(in) :: ignr
 
         integer(kind=8) :: i, idx
         real(kind=8) :: val, max_c
-        real(kind=8), allocatable :: c(:)
+        real(kind=8), allocatable :: c(:), w_copy(:)
 
+        allocate(w_copy, source=weights)
         allocate(c(n_weights))
-        call prefix_sum(weights, c, n_weights)
+        if (ignr) then
+            call clipping_array_lower(w_copy, n_weights, x_min=0d0)
+        else
+            if (minval(w_copy)<0d0) then
+                stop "argument 'weights' contains negative value(s) in 'weighted_sampling'."
+            end if
+        end if
+        call prefix_sum(w_copy, c, n_weights)
 
         max_c = c(n_weights)
         do i=1, n_samples, 1
@@ -314,26 +327,35 @@ contains
         end do
     end subroutine weighted_sampling_with_replacement
 
-    subroutine weighted_sampling_without_replacement(indices, n_samples, weights, n_weights)
+    subroutine weighted_sampling_without_replacement(indices, n_samples, weights, n_weights, ignr)
         implicit none
         integer(kind=8), intent(inout) :: indices(n_samples)
         integer(kind=8), intent(in) :: n_samples
         real(kind=8), intent(in) :: weights(n_weights)
         integer(kind=8), intent(in) :: n_weights
+        logical(kind=4), intent(in) :: ignr
 
         integer(kind=8) :: i, idx
         real(kind=8) :: val, max_c
-        real(kind=8), allocatable :: c(:)
+        real(kind=8), allocatable :: c(:), w_copy(:)
 
+        allocate(w_copy, source=weights)
         allocate(c(n_weights))
-        call prefix_sum(weights, c, n_weights)
+        if (ignr) then
+            call clipping_array_lower(w_copy, n_weights, x_min=0d0)
+        else
+            if (minval(w_copy)<0d0) then
+                stop "argument 'weights' contains negative value(s) in 'weighted_sampling'."
+            end if
+        end if
+        call prefix_sum(w_copy, c, n_weights)
 
         do i=1, n_samples, 1
             max_c = c(n_weights)
             call random_number(val)
             val = val * max_c
             idx = binary_search_left_branchless(c, n_weights, val)
-            c(idx:) = c(idx:) - weights(idx)
+            c(idx:) = c(idx:) - w_copy(idx)
             indices(i) = idx
         end do
     end subroutine weighted_sampling_without_replacement
