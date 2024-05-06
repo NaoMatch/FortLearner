@@ -332,12 +332,12 @@ build_all:
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../common/include/common/prefix_sum/inc_prefix_sum.c -o ./mod/inc_prefix_sum.out 
 
 build:
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_const.f90 -o ./mod/mod_const.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_common.f90 -o ./mod/mod_common.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_common_type.f90 -o ./mod/mod_common_type.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_heap.f90 -o ./mod/mod_heap.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_timer.f90 -o ./mod/mod_timer.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../error/mod_error.f90 -o ./mod/mod_error.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_const.f90 -o ./mod/mod_const.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_common.f90 -o ./mod/mod_common.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_common_type.f90 -o ./mod/mod_common_type.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_heap.f90 -o ./mod/mod_heap.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_timer.f90 -o ./mod/mod_timer.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../error/mod_error.f90 -o ./mod/mod_error.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_random.f90 -o ./mod/mod_random.out
 
 
