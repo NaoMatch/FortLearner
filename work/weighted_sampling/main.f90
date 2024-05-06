@@ -15,20 +15,23 @@ program main
     real(kind=8), allocatable :: a(:,:), b(:,:), c(:,:)
 
 
-    n_samples = 8
-    n_weights = 1024
-    max_iter = 100_8
+    call fix_random_seed(42_8)
+    n_samples = 5
+    n_weights = 15
+    max_iter = 10000_8
 
     allocate(a(n_weights, n_weights), b(n_weights, n_weights))
-    allocate(idxs(n_samples))
     allocate(wght(n_weights))
     allocate(counter(n_weights))
 
     wght(:) = 1d0
-    wght(3) = -.5d0
+    ! wght(3) = -.5d0
+    ! wght(5) = -.5d0
     ! wght(3) = 0d0
-    ! wght(:) = (/(i, i=1, n_weights, 1)/)
-    ! wght = wght / sum(wght)
+    wght(:) = (/(i, i=1, n_weights, 1)/)
+    wght(3) = -0d0
+    wght(5) = -1d0
+    wght(7) = -2d0
     
     ! counter(:) = 0
     ! call date_and_time(values=date_value1)
@@ -55,58 +58,103 @@ program main
     ! print*, "Cumsum and Binary without Replacement      : ", time_diff(date_value1, date_value2)
     ! print*, sum(counter)
     ! print*, int(counter)
+
+    print*, '*********************************************************************************************'
+    print*, "Original Weights"
+    print*, int(wght)
     
+    print*, '*********************************************************************************************'
     counter(:) = 0
     call date_and_time(values=date_value1)
     do iter=1, n_weights * max_iter
-        call weighted_sampling(idxs, n_samples, wght, n_weights, replace=t_)
-        do idx=1, n_samples, 1
+        call weighted_sampling(idxs, n_samples, wght, n_weights, replace=t_, negative_weights="filter")
+        do idx=1, size(idxs), 1
             counter(idxs(idx)) = counter(idxs(idx)) + 1
         end do
     end do
     call date_and_time(values=date_value2)
-    print*, "Naive Implementation True                       : ", &
-        dble(time_diff(date_value1, date_value2)) / n_weights / max_iter, n_weights * max_iter
+    print*, "Repacement = True, negative_weights = filter                       : "
     print*, sum(counter)
-    print*, int(counter(1:5))
+    print*, int(clipper(wght))
+    print*, int(counter(:))
     
-    ! counter(:) = 0 ! Error
-    ! call date_and_time(values=date_value1)
-    ! do iter=1, n_weights * max_iter
-    !     call weighted_sampling(idxs, n_samples, wght, n_weights, replace=t_, ignore_negative_weights=f_)
-    !     do idx=1, n_samples, 1
-    !         counter(idxs(idx)) = counter(idxs(idx)) + 1
-    !     end do
-    ! end do
-    ! call date_and_time(values=date_value2)
-    ! print*, "Naive Implementation True                       : ", &
-    !    dble(time_diff(date_value1, date_value2)) / n_weights / max_iter, n_weights * max_iter
-    ! print*, sum(counter)
-    ! print*, int(counter(1:5))
-    
+    print*, '*********************************************************************************************'
     counter(:) = 0
     call date_and_time(values=date_value1)
     do iter=1, n_weights * max_iter
-        call weighted_sampling(idxs, n_samples, wght, n_weights, replace=f_)
-        do idx=1, n_samples, 1
+        call weighted_sampling(idxs, n_samples, wght, n_weights, replace=t_, negative_weights="shift")
+        do idx=1, size(idxs), 1
             counter(idxs(idx)) = counter(idxs(idx)) + 1
         end do
     end do
     call date_and_time(values=date_value2)
-    print*, "Naive Implementation False                       : ", &
-        dble(time_diff(date_value1, date_value2)) / n_weights / max_iter, n_weights * max_iter
+    print*, "Repacement = True, negative_weights = shift                       : "
     print*, sum(counter)
-    print*, int(counter(1:5))
-
-
-
-
+    print*, int(wght-minval(wght))
+    print*, int(counter(:))
+    
+    print*, '*********************************************************************************************'
+    counter(:) = 0
     call date_and_time(values=date_value1)
-    do iter=1, 1000
-        c = matmul(a, b)
+    do iter=1, n_weights * max_iter
+        call weighted_sampling(idxs, n_samples, wght, n_weights, replace=t_, negative_weights="absolute")
+        do idx=1, size(idxs), 1
+            counter(idxs(idx)) = counter(idxs(idx)) + 1
+        end do
     end do
     call date_and_time(values=date_value2)
-    print*, "Naive Implementation False                       : ", dble(time_diff(date_value1, date_value2)) / 1000, 1000
+    print*, "Repacement = True, negative_weights = absolute                       : "
+    print*, sum(counter)
+    print*, int(abs(wght))
+    print*, int(counter(:))
+    
+
+
+
+    print*, '*********************************************************************************************'
+    counter(:) = 0
+    call date_and_time(values=date_value1)
+    do iter=1, n_weights * max_iter
+        call weighted_sampling(idxs, n_samples, wght, n_weights, replace=f_, negative_weights="filter")
+        do idx=1, size(idxs), 1
+            counter(idxs(idx)) = counter(idxs(idx)) + 1
+        end do
+    end do
+    call date_and_time(values=date_value2)
+    print*, "Repacement = False, negative_weights = filter                       : "
+    print*, sum(counter)
+    print*, int(clipper(wght))
+    print*, int(counter(:))
+    
+    print*, '*********************************************************************************************'
+    counter(:) = 0
+    call date_and_time(values=date_value1)
+    do iter=1, n_weights * max_iter
+        call weighted_sampling(idxs, n_samples, wght, n_weights, replace=f_, negative_weights="shift")
+        do idx=1, size(idxs), 1
+            counter(idxs(idx)) = counter(idxs(idx)) + 1
+        end do
+    end do
+    call date_and_time(values=date_value2)
+    print*, "Repacement = False, negative_weights = shift                       : "
+    print*, sum(counter)
+    print*, int(wght-minval(wght))
+    print*, int(counter(:))
+    
+    print*, '*********************************************************************************************'
+    counter(:) = 0
+    call date_and_time(values=date_value1)
+    do iter=1, n_weights * max_iter
+        call weighted_sampling(idxs, n_samples, wght, n_weights, replace=f_, negative_weights="absolute")
+        do idx=1, size(idxs), 1
+            counter(idxs(idx)) = counter(idxs(idx)) + 1
+        end do
+    end do
+    call date_and_time(values=date_value2)
+    print*, "Repacement = False, negative_weights = absolute                       : "
+    print*, sum(counter)
+    print*, int(abs(wght))
+    print*, int(counter(:))
 
 contains
 
@@ -182,5 +230,13 @@ contains
             indices(i) = idx
         end do
     end subroutine weighted_sampling_cumsum_binary_without_replacement_2
+
+    elemental function clipper(x) result(y)
+        implicit none
+        real(kind=8), intent(in) :: x
+        real(kind=8) :: y
+        y = maxval([x, 0d0])
+    end function 
+
 
 end program main
