@@ -14,6 +14,7 @@ module mod_csr
         integer(kind=8) :: offset
     contains
         procedure :: to_dense
+        procedure :: n_elements_per_row
         procedure :: delete
         procedure, pass :: insert_value, insert_csr
         generic :: insert => insert_value, insert_csr
@@ -69,6 +70,24 @@ contains
             end do
         end do
     end function to_dense
+
+    function n_elements_per_row(this) result(n_elements)
+        implicit none
+        class(csr_matrix) :: this
+        integer(kind=8), allocatable :: n_elements(:)
+
+        integer(kind=8) :: row, ini, fin, ii, col
+        real(kind=8) :: val
+
+        allocate(n_elements(this%n_rows))
+        n_elements(:) = 0d0
+
+        do row=1, this%n_rows, 1
+            ini = this%rows(row) - this%offset
+            fin = this%rows(row+1) - this%start_index
+            n_elements(row) = fin - ini + 1
+        end do
+    end function n_elements_per_row
 
     subroutine delete(this)
         implicit none
@@ -130,18 +149,20 @@ contains
     end subroutine insert_csr
 
 
-    function dense2csr_weighted_sampling_mat(mat, n_top, dim, start_index) result(sp_mat)
+    function dense2csr_weighted_sampling_mat(mat, n_top, dim, start_index, negative_weights) result(sp_mat)
         implicit none
         type(csr_matrix) :: sp_mat
         real(kind=8), intent(in) :: mat(:,:)
         integer(kind=8), intent(in) :: n_top
         integer(kind=8), optional :: dim
         integer(kind=8), optional :: start_index
+        character(len=*), optional :: negative_weights
 
         integer(kind=8) :: dim_opt, start_index_opt
         integer(kind=8) :: n_columns, c, n_samples, s
         real(kind=8), allocatable :: tmp_vec(:), tmp_psum(:)
         integer(kind=8), allocatable :: indices(:)
+        character(len=:), allocatable :: how
 
         ! Argument Check --------------------------------------------------------------------------
         dim_opt = 2
@@ -152,6 +173,9 @@ contains
         if (present(start_index)) start_index_opt = start_index
 
         if (n_top<=0) goto 991
+
+        how = "filter"
+        if (present(negative_weights)) how = negative_weights
 
 
         ! Processing ------------------------------------------------------------------------------
@@ -174,9 +198,9 @@ contains
                 tmp_vec = mat(s,:)
             end if 
 
-            call weighted_sampling(indices, n_top, tmp_vec, n_columns, replace=.false.)
+            call weighted_sampling(indices, n_top, tmp_vec, n_columns, replace=.false., negative_weights=how)
 
-            ! call quick_sort(indices, n_top)
+            ! call quick_sort(indices, size(indices, kind=kind(0_8)))
             call sp_mat%insert(indices, tmp_vec(indices))
         end do
 
@@ -189,16 +213,18 @@ contains
         stop "argument 'n_top' must be greater equal 1."
     end function dense2csr_weighted_sampling_mat
 
-    function dense2csr_weighted_sampling_vec(vec, n_top, start_index) result(indices)
+    function dense2csr_weighted_sampling_vec(vec, n_top, start_index, negative_weights) result(indices)
         implicit none
         real(kind=8), intent(in) :: vec(:)
         integer(kind=8), intent(in) :: n_top
         integer(kind=8), optional :: start_index
+        character(len=*), optional :: negative_weights
 
         integer(kind=8) :: start_index_opt
         integer(kind=8) :: n_columns, c, n_samples, s
         real(kind=8), allocatable :: tmp_vec(:), tmp_psum(:)
         integer(kind=8), allocatable :: indices(:)
+        character(len=:), allocatable :: how
 
         ! Argument Check --------------------------------------------------------------------------
         start_index_opt = 1
@@ -206,12 +232,15 @@ contains
         
         if (n_top<=0) goto 991
         
+        how = "filter"
+        if (present(negative_weights)) how = negative_weights
+
         ! Processing ------------------------------------------------------------------------------
         n_columns = size(vec)
         
         allocate(indices(n_top))
 
-        ! call quick_sort(indices, n_top)
+        ! call quick_sort(indices, size(indices, kind=kind(0_8)))
         call weighted_sampling(indices, n_top, vec, n_columns, replace=.false.)
         
         ! print*, indices
