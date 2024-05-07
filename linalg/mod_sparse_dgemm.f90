@@ -39,19 +39,6 @@ module mod_sparse_dgemm
         end subroutine sparse_dgemm_ver2            
     end interface 
 
-    interface
-        subroutine sparse_mv_ver0(vec, cols, vals, b_t, n, m, k, l) bind(C, name="sparse_mv_ver0")
-            Import  
-            integer(c_int64_t), Value     :: n
-            integer(c_int64_t), Value     :: m
-            integer(c_int64_t), Value     :: k
-            integer(c_int64_t), Value     :: l
-            real(c_double), intent(inout) :: vec(l)
-            integer(c_int64_t), intent(in) :: cols(n)
-            real(c_double), intent(in) :: vals(n), b_t(l,k)
-        end subroutine sparse_mv_ver0                   
-    end interface 
-
 contains
     
 end module mod_sparse_dgemm
