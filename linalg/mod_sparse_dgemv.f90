@@ -58,7 +58,7 @@ module mod_sparse_dgemv
             real(c_double), intent(in) :: vals(n), b_t(1,k)
         end subroutine sparse_dgemv_ver3                   
 
-        subroutine sparse_dgemv_ver4(c, rows, cols, vals, b_t, n, m, k, n_jobs) bind(C, name="sparse_dgemv_ver4")
+        subroutine sparse_dgemv(c, rows, cols, vals, b_t, n, m, k, n_jobs) bind(C, name="sparse_dgemv")
             Import  
             integer(c_int64_t), Value     :: n
             integer(c_int64_t), Value     :: m
@@ -67,7 +67,29 @@ module mod_sparse_dgemv
             real(c_double), intent(inout) :: c(1,m)
             integer(c_int64_t), intent(in) :: rows(m+1), cols(n)
             real(c_double), intent(in) :: vals(n), b_t(1,k)
-        end subroutine sparse_dgemv_ver4                   
+        end subroutine sparse_dgemv                   
+
+        subroutine sparse_dgemv_ver5(c, rows, cols, vals, b_t, n, m, k, n_jobs) bind(C, name="sparse_dgemv_ver5")
+            Import  
+            integer(c_int64_t), Value     :: n
+            integer(c_int64_t), Value     :: m
+            integer(c_int64_t), Value     :: k
+            integer(c_int64_t), Value     :: n_jobs
+            real(c_double), intent(inout) :: c(1,m)
+            integer(c_int64_t), intent(in) :: rows(m+1), cols(n)
+            real(c_double), intent(in) :: vals(n), b_t(1,k)
+        end subroutine sparse_dgemv_ver5                   
+
+        subroutine sparse_dgemv_ver6(c, rows, cols, vals, b_t, n, m, k, n_jobs) bind(C, name="sparse_dgemv_ver6")
+            Import  
+            integer(c_int64_t), Value     :: n
+            integer(c_int64_t), Value     :: m
+            integer(c_int64_t), Value     :: k
+            integer(c_int64_t), Value     :: n_jobs
+            real(c_double), intent(inout) :: c(1,m)
+            integer(c_int64_t), intent(in) :: rows(m+1), cols(n)
+            real(c_double), intent(in) :: vals(n), b_t(1,k)
+        end subroutine sparse_dgemv_ver6                   
     end interface 
 
 contains
