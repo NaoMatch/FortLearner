@@ -15,6 +15,7 @@ module mod_csr
     contains
         procedure :: to_dense
         procedure :: n_elements_per_row
+        procedure :: count_col_idx
         procedure :: delete
         procedure, pass :: insert_value, insert_csr
         generic :: insert => insert_value, insert_csr
@@ -88,6 +89,27 @@ contains
             n_elements(row) = fin - ini + 1
         end do
     end function n_elements_per_row
+
+    function count_col_idx(this) result(counter)
+        implicit none
+        class(csr_matrix) :: this
+        integer(kind=8), allocatable :: counter(:)
+
+        integer(kind=8) :: row, ini, fin, ii, col
+        real(kind=8) :: val
+
+        allocate(counter(this%n_cols))
+        counter(:) = 0d0
+
+        do row=1, this%n_rows, 1
+            ini = this%rows(row) - this%offset
+            fin = this%rows(row+1) - this%start_index
+            do ii=ini, fin, 1
+                col = this%cols(ii) - this%offset
+                counter(col) = counter(col) + 1
+            end do
+        end do
+    end function count_col_idx
 
     subroutine delete(this)
         implicit none
