@@ -1,4 +1,5 @@
 module mod_csr
+    use mod_timer
     use mod_random
     use mod_common_type
     use mod_sort
@@ -185,6 +186,7 @@ contains
         real(kind=8), allocatable :: tmp_vec(:), tmp_psum(:)
         integer(kind=8), allocatable :: indices(:)
         character(len=:), allocatable :: how
+        integer(kind=8)        :: date_value1(8), date_value2(8)
 
         ! Argument Check --------------------------------------------------------------------------
         dim_opt = 2

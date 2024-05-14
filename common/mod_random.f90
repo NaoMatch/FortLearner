@@ -370,7 +370,7 @@ contains
         allocate(indices(n_select_))
 
         call prefix_sum(w_copy, c, n_weights)
-
+        
         do i=1, n_select_, 1
             max_c = c(n_weights)
             call random_number(val)
