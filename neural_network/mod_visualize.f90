@@ -3,16 +3,6 @@ module mod_visualize
     implicit none
     
 contains
-    function num2char_i8(num)
-        character(:), allocatable   :: num2char_i8
-        integer(kind=8), intent(in) :: num
-        integer(kind=8) :: num_digit
-
-        num_digit = 4
-        allocate(character(num_digit)::num2char_i8)
-        write (num2char_i8, '(i0)') num
-    end function num2char_i8
-
     subroutine plot_dot_graph(var, file, verbose)
         implicit none
         type(variable)   :: var
