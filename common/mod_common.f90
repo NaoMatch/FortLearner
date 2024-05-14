@@ -5,7 +5,7 @@ module mod_common
     implicit none
 
     interface
-        subroutine prefix_sum_double(a, b, n) bind(C, name='prefix_sum_double')
+        subroutine prefix_sum_double(a, b, n) bind(C, name='prefix_sum_naive')
             import
             integer(c_int64_t), value :: n
             real(c_double), intent(in) :: a(n), b(n)
