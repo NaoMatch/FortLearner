@@ -1,15 +1,20 @@
 module mod_variable
+    use mod_csr
     use mod_config
     implicit none
 
     type jagged_matrix
         real(kind=8), allocatable :: g(:,:)
+        type(csr_matrix), allocatable :: csr_g
     end type jagged_matrix
 
     type velement
         real(kind=8), allocatable :: v(:,:)
         real(kind=8), allocatable :: g(:,:)
         real(kind=8), allocatable :: c(:,:)
+        type(csr_matrix), allocatable :: csr_v
+        type(csr_matrix), allocatable :: csr_g
+        type(csr_matrix), allocatable :: csr_c
         integer(kind=8) :: fid=-1
         integer(kind=8) :: lid=-1
         character(len=:), allocatable :: name
@@ -36,6 +41,7 @@ module mod_variable
         module procedure new_variable_r8_scl
         module procedure new_variable_r8_vec
         module procedure new_variable_r8_mat
+        module procedure new_variable_r8_csr
     end interface variable    
 
     type felement
@@ -74,14 +80,19 @@ module mod_variable
         ! Binary Cross Entropy
         character(len=4) :: reduction="mean"
         integer(kind=8) :: n_classes = -1
+
+        ! CSR2DENSE
+        integer(kind=8) :: top_k = -1
+        character(len=16) :: how = "filter"
     contains
         procedure :: act_1in_1out, act_2in_1out
         generic   :: act => act_1in_1out, act_2in_1out
 
         procedure :: forward_1in_1out, forward_2in_1out
+        procedure :: forward_1in_1out_csr, forward_2in_1out_csr
         generic   :: forward => forward_1in_1out, forward_2in_1out
 
-        procedure :: backward_1in_2out
+        procedure :: backward_1in_2out, backward_1in_2out_csr
         generic   :: backward => backward_1in_2out
 
         procedure :: append_new_element_to_stack
@@ -167,7 +178,7 @@ contains
         ! print*, '*********************************************************************************************'
         do s=1, n_stacks, 1
             ! print*, "stack id: ", s, allocated(vstack(s)%v)
-            if (.not. allocated(vstack(s)%v)) then
+            if ((.not. allocated(vstack(s)%v)) .and. (.not. allocated(vstack(s)%csr_v))) then
                 id = s
                 exit
             end if
@@ -333,7 +344,12 @@ contains
         class(variable) :: this
         integer(kind=8) :: dshape(2)
 
-        dshape = shape(vstack(this%id)%v)
+        if (allocated(vstack(this%id)%csr_v)) then
+            dshape(1) = vstack(this%id)%csr_v%n_rows
+            dshape(2) = vstack(this%id)%csr_v%n_cols
+        else
+            dshape = shape(vstack(this%id)%v)
+        end if
     end function get_shape
 
     function is_alloc(this)
@@ -376,8 +392,13 @@ contains
         allocate(func_seen(0))
 
         if (.not. allocated(vstack(vid)%g)) then
-            allocate(vstack(vid)%g, source=vstack(vid)%v)
-            vstack(vid)%g(:,:) = 1d0
+            if (allocated(vstack(vid)%v)) then
+                allocate(vstack(vid)%g, source=vstack(vid)%v)
+                vstack(vid)%g(:,:) = 1d0
+            elseif (allocated(vstack(vid)%csr_v)) then
+                vstack(vid)%csr_g = vstack(vid)%csr_v
+                vstack(vid)%csr_g%vals = 1d0
+            end if
         end if
         func_ids = [func_ids, vstack(vid)%fid]
         func_gs = [func_gs, fstack(vstack(vid)%fid)%generation]
@@ -395,7 +416,11 @@ contains
                     id_out_2 = creator%id_out_2
 
                     ! Compute Grads ---------------------------------------------------------------
-                    g_outs = creator%backward(vstack(id_out_1)%g)
+                    if (creator%fname == "dense2csr") then
+                        g_outs = creator%backward_1in_2out_csr(vstack(id_out_1)%csr_g)
+                    else
+                        g_outs = creator%backward(vstack(id_out_1)%g)
+                    end if
 
                     ! Get Parameter IDs -----------------------------------------------------------
                     if (id_in_1>0) then
@@ -415,10 +440,18 @@ contains
 
                     ! Add Grads -------------------------------------------------------------------
                     if (id_in_1>0) then
-                        if (allocated(vstack(id_in_1)%g)) then
-                            vstack(id_in_1)%g = vstack(id_in_1)%g + g_outs(1)%g
+                        if (allocated(vstack(id_in_1)%csr_v)) then
+                            if (allocated(vstack(id_in_1)%csr_g)) then
+                                vstack(id_in_1)%csr_g%vals(:) = vstack(id_in_1)%csr_g%vals(:) + g_outs(1)%csr_g%vals(:)
+                            else
+                                vstack(id_in_1)%csr_g = g_outs(1)%csr_g
+                            end if
                         else
-                            vstack(id_in_1)%g = g_outs(1)%g
+                            if (allocated(vstack(id_in_1)%g)) then
+                                vstack(id_in_1)%g = vstack(id_in_1)%g + g_outs(1)%g
+                            else
+                                vstack(id_in_1)%g = g_outs(1)%g
+                            end if
                         end if
                     end if
                     if (id_in_2>0) then
@@ -518,6 +551,28 @@ contains
         call set_mode_to_variable(var)
     end function new_variable_r8_mat
 
+
+    function new_variable_r8_csr(x, is_parameter) result(var)
+        implicit none
+        type(variable) :: var
+        type(csr_matrix), intent(in) :: x
+        logical(kind=4), optional :: is_parameter
+        type(velement) :: elm
+        integer(kind=8) :: id
+
+        elm%csr_v = x
+        if (present(is_parameter)) elm%is_parameter = is_parameter
+        id = unused_stack_id()
+        if (id==-1_8) then
+            vstack = [vstack, elm]
+            var%id = size(vstack)
+        else
+            vstack(id) = elm
+            var%id = id
+        end if
+        call set_mode_to_variable(var)
+    end function new_variable_r8_csr
+
     function act_1in_1out(this, var_in) result(var_out)
         implicit none
         class(base_function)      :: this
@@ -538,7 +593,11 @@ contains
         this%shape_in_1 = var_in%get_shape()
         allocate(fstack(fid)%func, source=this)
         
-        vstack(vid)%v = this%forward(vstack(var_in%id)%v)
+        if (this%fname == "dense2csr") then
+            vstack(vid)%csr_v = this%forward_1in_1out_csr(vstack(var_in%id)%v)
+        else
+            vstack(vid)%v = this%forward(vstack(var_in%id)%v)
+        end if
         vstack(vid)%fid = fid
         this%shape_out_1 = var_out%get_shape()
 
@@ -566,7 +625,11 @@ contains
         this%shape_in_2 = var_in_2%get_shape()
         allocate(fstack(fid)%func, source=this)
         
-        vstack(vid)%v = this%forward(vstack(var_in_1%id)%v, vstack(var_in_2%id)%v)
+        if (this%fname == "sparse_matrix_multiplication") then
+            vstack(vid)%v = this%forward_2in_1out_csr(vstack(var_in_1%id)%csr_v, vstack(var_in_2%id)%v)
+        else
+            vstack(vid)%v = this%forward(vstack(var_in_1%id)%v, vstack(var_in_2%id)%v)
+        end if
         vstack(vid)%fid = fid
         this%shape_out_1 = var_out%get_shape()
         call set_mode_to_variable(var_out)
@@ -588,6 +651,23 @@ contains
         stop "NotImplemented Error, " // trim(this%fname) // "."
     end function forward_1in_1out
 
+    function forward_1in_1out_csr(this, v_in) result(v_out)
+        implicit none
+        class(base_function) :: this
+        real(kind=8), intent(in) :: v_in(:,:)
+        type(csr_matrix) :: v_out
+        stop "NotImplemented Error, " // trim(this%fname) // "."
+    end function forward_1in_1out_csr
+
+    function forward_2in_1out_csr(this, v_in_1, v_in_2) result(v_out)
+        implicit none
+        class(base_function) :: this
+        type(csr_matrix), intent(in) :: v_in_1
+        real(kind=8), intent(in) :: v_in_2(:,:)
+        real(kind=8), allocatable :: v_out(:,:)
+        stop "NotImplemented Error, " // trim(this%fname) // "."
+    end function forward_2in_1out_csr
+
     function backward_1in_2out(this, g_in) result(g_outs)
         implicit none
         class(base_function) :: this
@@ -595,6 +675,14 @@ contains
         type(jagged_matrix) :: g_outs(2)
         stop "NotImplemented Error, " // trim(this%fname) // "."
     end function backward_1in_2out
+
+    function backward_1in_2out_csr(this, g_in) result(g_outs)
+        implicit none
+        class(base_function) :: this
+        type(csr_matrix), intent(in) :: g_in
+        type(jagged_matrix) :: g_outs(2)
+        stop "NotImplemented Error, " // trim(this%fname) // "."
+    end function backward_1in_2out_csr
     
 
     subroutine update(this, var)
