@@ -5,7 +5,7 @@ module mod_dense2csr
 
     type, extends(base_function) :: dense2csr
     contains
-        procedure :: forward_1in_csr_1out => forward_dense2csr
+        procedure :: forward_1in_1out_csr => forward_dense2csr
         procedure :: backward_1in_2out_csr => backward_dense2csr
     end type dense2csr
     
