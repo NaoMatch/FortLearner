@@ -1,8 +1,8 @@
 compiler_fortran := gfortran
 compiler_clang   := gcc-8
 mod              := -J mod/
-opt              := -O3
-option           := -cpp -D_x86_64 -fopenmp  -march=native
+opt              := -O2
+option           := -cpp -D_x86_64 -fopenmp  -march=native -fbounds-check
 option_degug     := 
 option_blas      := -lopenblas -ldl
 
@@ -22,7 +22,6 @@ asm              := ./mod/inc_sum_up_vector_c.out \
 					./mod/inc_multi_mat_vec.out \
 					./mod/inc_matrix_sqsum_row.out \
 					./mod/inc_prefix_sum.out \
-					./mod/mod_sparse_dgemv_c.out \
 					./mod/mod_sparse_dgemm_c.out \
 
 common           := 	./mod/mod_const.out \
@@ -43,7 +42,6 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_stats.out \
 						./mod/mod_linalg.out \
 						./mod/mod_eig.out \
-						./mod/mod_sparse_dgemv.out \
 						./mod/mod_sparse_dgemm.out \
 						./mod/mod_csr.out \
 						./mod/mod_optimization.out \
@@ -145,9 +143,13 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_relu.out \
 						./mod/mod_dropout.out \
 						./mod/mod_softmax.out \
+						./mod/mod_dense2csr.out \
+						./mod/mod_csr2dense.out \
+						./mod/mod_spmm.out \
 						./mod/mod_functions.out \
 						\
 						./mod/mod_linear.out \
+						./mod/mod_splinear.out \
 						./mod/mod_simple_residual_block.out \
 						./mod/mod_layers.out \
 						\
@@ -187,8 +189,6 @@ build_all:
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_linalg.f90 -o ./mod/mod_linalg.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_eig.f90 -o ./mod/mod_eig.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_sparse_dgemv.f90 -o ./mod/mod_sparse_dgemv.out
-	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/mod_sparse_dgemv.c -o ./mod/mod_sparse_dgemv_c.out 
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_sparse_dgemm.f90 -o ./mod/mod_sparse_dgemm.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/mod_sparse_dgemm.c -o ./mod/mod_sparse_dgemm_c.out 
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_csr.f90 -o ./mod/mod_csr.out
@@ -298,9 +298,13 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_relu.f90                  -o ./mod/mod_relu.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_dropout.f90               -o ./mod/mod_dropout.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_softmax.f90               -o ./mod/mod_softmax.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_dense2csr.f90             -o ./mod/mod_dense2csr.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_csr2dense.f90             -o ./mod/mod_csr2dense.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_spmm.f90                  -o ./mod/mod_spmm.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_functions.f90             -o ./mod/mod_functions.out
 
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/layers/mod_linear.f90                -o ./mod/mod_linear.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/layers/mod_splinear.f90                -o ./mod/mod_splinear.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/layers/mod_simple_residual_block.f90 -o ./mod/mod_simple_residual_block.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/layers/mod_layers.f90                -o ./mod/mod_layers.out
 
@@ -336,8 +340,11 @@ build_all:
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../common/include/common/prefix_sum/inc_prefix_sum.c -o ./mod/inc_prefix_sum.out 
 
 build:
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_linalg.f90 -o ./mod/mod_linalg.out
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_eig.f90 -o ./mod/mod_eig.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_common.f90 -o ./mod/mod_common.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_random.f90 -o ./mod/mod_random.out
+
+	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../common/include/common/prefix_sum/inc_prefix_sum.c -o ./mod/inc_prefix_sum.out 
+
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_sparse_dgemv.f90 -o ./mod/mod_sparse_dgemv.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/mod_sparse_dgemv.c -o ./mod/mod_sparse_dgemv_c.out 
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_sparse_dgemm.f90 -o ./mod/mod_sparse_dgemm.out

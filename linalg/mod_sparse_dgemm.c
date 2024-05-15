@@ -53,7 +53,7 @@ void sparse_dgemm(
     ){
 
     int64_t ll_block = (l>>4)<<4;
-    int64_t kk_block = (k>>3)<<3;
+    int64_t ll_remain = l - ll_block;
     double *c_ptr;
 
     omp_set_num_threads(n_jobs);
@@ -78,6 +78,17 @@ void sparse_dgemm(
             }
             _mm512_storeu_pd(&c_ptr[ll+0], zmm_accum0);
             _mm512_storeu_pd(&c_ptr[ll+8], zmm_accum1);
+        }
+
+        for(int64_t ll=ll_block; ll<l; ll++){
+            double accm = 0.0;
+            for(int64_t kk=ini; kk<fin; kk++){
+                int64_t idx = cols[kk];
+                double  val = vals[kk];
+
+                accm += val * b[idx*l+ll];
+            }
+            c_ptr[ll+0] = accm;
         }
     }
 }
