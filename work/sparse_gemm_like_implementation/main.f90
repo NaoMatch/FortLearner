@@ -25,37 +25,15 @@ program main
 
     m = 256
     k = 512
-    l = 16*8
+    l = 31
     s = 32
     n = s * m
 
-    ! m = 512
-    ! k = 512
-    ! l = 1
-    ! s = k * 0.05d0
-    ! n = s * m
-
-    csr_F = csr_matrix(n_columns=k)
-    csr_C = csr_matrix(n_columns=k, start_index=0_8)
-
-    ! m = 8
-    ! k = 16
-    ! l = 16
-    ! s = 10
-    ! n = s * m
-
     ! Matrix
-    allocate(a(m,k))
-    allocate(b(k,l), b_t(l,k))
-    allocate(c(m,l), c_t(l,m))
-    !DIR$ ATTRIBUTES ALIGN : 64 :: c_t
+    allocate(a(m,k), b(k,l), b_t(l,k), c(m,l), c_t(l,m))
 
     ! COO
-    allocate(rows(n))
-    allocate(cols(n))
-    allocate(vals(n))
-    allocate(idxs(k))
-    allocate(u(m))
+    allocate(rows(n),cols(n),vals(n),idxs(k),u(m))
 
     call fix_random_seed(100_8)
     call random_number(a)
@@ -74,10 +52,14 @@ program main
     b_t = transpose(b)
     c_t = transpose(c)
 
+    print*, sum(a)
     csr_F = dense2csr_weighted_sampling_mat(a, s, dim=2_8, start_index=1_8, negative_weights="filter")
     csr_C = dense2csr_weighted_sampling_mat(a, s, dim=2_8, start_index=0_8, negative_weights="filter")
     a = csr_C%to_dense()
     print*, csr_C%n_elements_per_row()
+    print*, sum(a)
+    print*, sum(csr_F%vals)
+    print*, sum(csr_C%vals)
     ! print*, csr_C%count_col_idx()
 
     ! print*, '*********************************************************************************************'
@@ -286,26 +268,25 @@ program main
     print*, "my_ver8:  ", sum(c_t), sum(a), time_diff(date_value1, date_value2), &
         "All SIMD + OpenMP (not so optimized)"
 
-    print*, '*********************************************************************************************'
-    c_t = 0d0
-    call date_and_time(values=date_value1)
-    do iter=1, max_iter, 1
-        call spmm_ver9(c_t, csr_C, b_t, m, k, l, 8_8)
-    end do
-    call date_and_time(values=date_value2)
-    print*, "my_ver9:  ", sum(c_t), sum(a), time_diff(date_value1, date_value2), &
-        "??????????????????????"
+    ! print*, '*********************************************************************************************'
+    ! c_t = 0d0
+    ! call date_and_time(values=date_value1)
+    ! do iter=1, max_iter, 1
+    !     call spmm_ver9(c_t, csr_C, b_t, m, k, l, 8_8)
+    ! end do
+    ! call date_and_time(values=date_value2)
+    ! print*, "my_ver9:  ", sum(c_t), sum(a), time_diff(date_value1, date_value2), &
+    !     "??????????????????????"
 
-    print*, '*********************************************************************************************'
-    c_t = 0d0
-    call date_and_time(values=date_value1)
-    do iter=1, max_iter, 1
-        call spmm_ver10(c_t, csr_C, b_t, m, k, l, 8_8)
-    end do
-    call date_and_time(values=date_value2)
-    print*, "my_ver10:  ", sum(c_t), sum(a), time_diff(date_value1, date_value2), &
-        "??????????????????????"
-
+    ! print*, '*********************************************************************************************'
+    ! c_t = 0d0
+    ! call date_and_time(values=date_value1)
+    ! do iter=1, max_iter, 1
+    !     call spmm_ver10(c_t, csr_C, b_t, m, k, l, 8_8)
+    ! end do
+    ! call date_and_time(values=date_value2)
+    ! print*, "my_ver10:  ", sum(c_t), sum(a), sum(csr_C%vals), time_diff(date_value1, date_value2), &
+    !     "??????????????????????"
 
 
 contains

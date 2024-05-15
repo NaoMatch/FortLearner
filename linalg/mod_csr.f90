@@ -63,10 +63,10 @@ contains
         matrix(:,:) = 0d0
 
         do row=1, this%n_rows, 1
-            ini = this%rows(row) - this%offset
-            fin = this%rows(row+1) - this%start_index
+            ini = this%rows(row) - this%offset!*0
+            fin = this%rows(row+1) - this%start_index!*0
             do ii=ini, fin, 1
-                col = this%cols(ii) - this%offset
+                col = this%cols(ii) - this%offset!*0
                 val = this%vals(ii)
                 matrix(row, col) = val
             end do
