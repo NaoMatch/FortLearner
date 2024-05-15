@@ -89,7 +89,7 @@ module mod_variable
         generic   :: act => act_1in_1out, act_2in_1out
 
         procedure :: forward_1in_1out, forward_2in_1out
-        procedure :: forward_1in_1out_csr, forward_2in_1out_csr
+        procedure :: forward_1in_csr_1out, forward_1in_1out_csr, forward_2in_1out_csr
         generic   :: forward => forward_1in_1out, forward_2in_1out
 
         procedure :: backward_1in_2out, backward_1in_2out_csr
@@ -595,6 +595,8 @@ contains
         
         if (this%fname == "dense2csr") then
             vstack(vid)%csr_v = this%forward_1in_1out_csr(vstack(var_in%id)%v)
+        elseif (this%fname == "csr2dense") then
+            vstack(vid)%v = this%forward_1in_csr_1out(vstack(var_in%id)%csr_v)
         else
             vstack(vid)%v = this%forward(vstack(var_in%id)%v)
         end if
@@ -650,7 +652,7 @@ contains
         real(kind=8), allocatable :: v_out(:,:)
         stop "NotImplemented Error, " // trim(this%fname) // "."
     end function forward_1in_1out
-
+    
     function forward_1in_1out_csr(this, v_in) result(v_out)
         implicit none
         class(base_function) :: this
@@ -658,7 +660,15 @@ contains
         type(csr_matrix) :: v_out
         stop "NotImplemented Error, " // trim(this%fname) // "."
     end function forward_1in_1out_csr
-
+    
+    function forward_1in_csr_1out(this, v_in) result(v_out)
+        implicit none
+        class(base_function) :: this
+        type(csr_matrix) :: v_in
+        real(kind=8), allocatable :: v_out(:,:)
+        stop "NotImplemented Error, " // trim(this%fname) // "."
+    end function forward_1in_csr_1out
+    
     function forward_2in_1out_csr(this, v_in_1, v_in_2) result(v_out)
         implicit none
         class(base_function) :: this

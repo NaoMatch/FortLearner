@@ -273,4 +273,34 @@ contains
         stop "argument 'n_top' must be greater equal 1."
     end function dense2csr_weighted_sampling_vec
 
+    function extract_corresponding_position_vals(input_mat, ref_csr) result(vals)
+        implicit none
+        real(kind=8), intent(in) :: input_mat(:,:)
+        type(csr_matrix), intent(in) :: ref_csr
+
+        real(kind=8), allocatable :: vals(:)
+
+        integer(kind=8) :: row, ini, fin, ii, col, nnz
+        real(kind=8) :: val
+
+        if (size(ref_csr%rows) == 1_8) goto 999
+
+        allocate(vals(size(ref_csr%vals)))
+
+        nnz = 1
+        do row=1, ref_csr%n_rows, 1
+            ini = ref_csr%rows(row) - ref_csr%offset
+            fin = ref_csr%rows(row+1) - ref_csr%start_index
+            do ii=ini, fin, 1
+                col = ref_csr%cols(ii) - ref_csr%offset
+                vals(nnz) = input_mat(row, col)
+                nnz = nnz + 1
+            end do
+        end do
+
+        return
+        999 continue
+        stop "input csr matrix is not assigned."
+    end function extract_corresponding_position_vals    
+
 end module mod_csr
