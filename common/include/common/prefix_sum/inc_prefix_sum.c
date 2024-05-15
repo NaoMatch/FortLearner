@@ -10,7 +10,8 @@
 #define NUM_ELES_IN_ZMM (8)
 
 
-void prefix_sum_naive(double a[], double b[], double tmp, int64_t n){
+void prefix_sum_naive(double a[], double b[], int64_t n){
+    double tmp=0.0;
     for(int i=0; i<n; i++){
         tmp += a[i];
         b[i] = tmp;
@@ -21,7 +22,7 @@ void prefix_sum_double(double a[], double b[], int64_t n){
     
     if (n<16){
         double s=0;
-        prefix_sum_naive(a, b, s, n);
+        prefix_sum_naive(a, b, n);
         return;
     }
 
@@ -82,7 +83,6 @@ void prefix_sum_double(double a[], double b[], int64_t n){
     
     int64_t n_remain=n-n_block;
     if (n_remain>0){
-        double s=b[-1];
-        prefix_sum_naive(a, b, s, n_remain);
+        prefix_sum_naive(a, b, n_remain);
     }
 }
