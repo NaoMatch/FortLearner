@@ -143,9 +143,13 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_relu.out \
 						./mod/mod_dropout.out \
 						./mod/mod_softmax.out \
+						./mod/mod_dense2csr.out \
+						./mod/mod_csr2dense.out \
+						./mod/mod_spmm.out \
 						./mod/mod_functions.out \
 						\
 						./mod/mod_linear.out \
+						./mod/mod_splinear.out \
 						./mod/mod_simple_residual_block.out \
 						./mod/mod_layers.out \
 						\
@@ -294,9 +298,13 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_relu.f90                  -o ./mod/mod_relu.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_dropout.f90               -o ./mod/mod_dropout.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_softmax.f90               -o ./mod/mod_softmax.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_dense2csr.f90             -o ./mod/mod_dense2csr.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_csr2dense.f90             -o ./mod/mod_csr2dense.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_spmm.f90                  -o ./mod/mod_spmm.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_functions.f90             -o ./mod/mod_functions.out
 
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/layers/mod_linear.f90                -o ./mod/mod_linear.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/layers/mod_splinear.f90                -o ./mod/mod_splinear.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/layers/mod_simple_residual_block.f90 -o ./mod/mod_simple_residual_block.out
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/layers/mod_layers.f90                -o ./mod/mod_layers.out
 
@@ -332,70 +340,14 @@ build_all:
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../common/include/common/prefix_sum/inc_prefix_sum.c -o ./mod/inc_prefix_sum.out 
 
 build:
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/mod_config.f90                -o ./mod/mod_config.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/mod_variable.f90              -o ./mod/mod_variable.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/mod_visualize.f90             -o ./mod/mod_visualize.out
-
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_addition.f90              -o ./mod/mod_addition.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_multiply.f90              -o ./mod/mod_multiply.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_power.f90                 -o ./mod/mod_power.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_substraction.f90          -o ./mod/mod_substraction.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_division.f90              -o ./mod/mod_division.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_absolute_value.f90        -o ./mod/mod_absolute_value.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_square_root.f90           -o ./mod/mod_square_root.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_sinusoidal.f90            -o ./mod/mod_sinusoidal.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_cosinusoidal.f90          -o ./mod/mod_cosinusoidal.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_tangent.f90               -o ./mod/mod_tangent.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_tangent_hyperbolic.f90    -o ./mod/mod_tangent_hyperbolic.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_exponential.f90           -o ./mod/mod_exponential.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_summation.f90             -o ./mod/mod_summation.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_reshaping.f90             -o ./mod/mod_reshaping.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_transposing.f90           -o ./mod/mod_transposing.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_spreading.f90             -o ./mod/mod_spreading.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_concatination.f90         -o ./mod/mod_concatination.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_matrix_multiplication.f90 -o ./mod/mod_matrix_multiplication.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_get_item.f90              -o ./mod/mod_get_item.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_log_natural.f90           -o ./mod/mod_log_natural.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/intrinsics/mod_intrinsics.f90            -o ./mod/mod_intrinsics.out
-
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_sigmoid.f90               -o ./mod/mod_sigmoid.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_relu.f90                  -o ./mod/mod_relu.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_dropout.f90               -o ./mod/mod_dropout.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_softmax.f90               -o ./mod/mod_softmax.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/functions/mod_functions.f90             -o ./mod/mod_functions.out
-
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/layers/mod_linear.f90                -o ./mod/mod_linear.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/layers/mod_simple_residual_block.f90 -o ./mod/mod_simple_residual_block.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/layers/mod_layers.f90                -o ./mod/mod_layers.out
-
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/losses/mod_mean_squared_error.f90    -o ./mod/mod_mean_squared_error.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/losses/mod_binary_cross_entropy.f90    -o ./mod/mod_binary_cross_entropy.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/losses/mod_cross_entropy.f90    -o ./mod/mod_cross_entropy.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/losses/mod_sigmoid_with_loss.f90    -o ./mod/mod_sigmoid_with_loss.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/losses/mod_softmax_with_loss.f90    -o ./mod/mod_softmax_with_loss.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/losses/mod_losses.f90                -o ./mod/mod_losses.out
-
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/optimizers/mod_sgd.f90                   -o ./mod/mod_sgd.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/optimizers/mod_momentum_sgd.f90          -o ./mod/mod_momentum_sgd.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../neural_network/optimizers/mod_optimizers.f90            -o ./mod/mod_optimizers.out
-
+	
 
 main:
-	# make build_all
-	make build
-
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ./mod_two_layer_model.f90       -o ./mod/mod_two_layer_model.out
-	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ./mod_mnist_classifier.f90       -o ./mod/mod_mnist_classifier.out
-	
-	# $(compiler_fortran) -w -unroll \
-	# $(common) ./mod/mod_two_layer_model.out \
-	# $(asm) $(option) $(mod) $(opt) \
-	# main_mnist_csv2bin.f90 -o main_mnist_csv2bin.out \
-	# $(option_blas)
-	# ./main_mnist_csv2bin.out
+	make build_all
+	# make build
 
 	$(compiler_fortran) -w -unroll \
-	$(common) ./mod/mod_two_layer_model.out ./mod/mod_mnist_classifier.out \
+	$(common) \
 	$(asm) $(option) $(mod) $(opt) \
 	main.f90 -o main.out \
 	$(option_blas)
