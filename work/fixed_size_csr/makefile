@@ -1,8 +1,8 @@
 compiler_fortran := gfortran
 compiler_clang   := gcc-8
 mod              := -J mod/
-opt              := -O2
-option           := -cpp -D_x86_64 -fopenmp  -march=native -fbounds-check
+opt              := -O3
+option           := -cpp -D_x86_64 -fopenmp  -march=native
 option_degug     := 
 option_blas      := -lopenblas -ldl
 
@@ -44,6 +44,7 @@ common           := 	./mod/mod_const.out \
 						./mod/mod_eig.out \
 						./mod/mod_sparse_dgemm.out \
 						./mod/mod_csr.out \
+						./mod/mod_fixed_size_csr.out \
 						./mod/mod_optimization.out \
 						./mod/mod_union_find.out \
 						\
@@ -192,6 +193,7 @@ build_all:
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_sparse_dgemm.f90 -o ./mod/mod_sparse_dgemm.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../linalg/mod_sparse_dgemm.c -o ./mod/mod_sparse_dgemm_c.out 
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_csr.f90 -o ./mod/mod_csr.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_fixed_size_csr.f90 -o ./mod/mod_fixed_size_csr.out
 	\
 	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../optimization/mod_optimization.f90 -o ./mod/mod_optimization.out
 	\
@@ -340,11 +342,13 @@ build_all:
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../common/include/common/prefix_sum/inc_prefix_sum.c -o ./mod/inc_prefix_sum.out 
 
 build:
-	
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_common.f90 -o ./mod/mod_common.out
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../common/mod_random.f90 -o ./mod/mod_random.out
+	$(compiler_fortran) $(mod) $(opt) $(option) -w -c ../../linalg/mod_fixed_size_csr.f90 -o ./mod/mod_fixed_size_csr.out
 
 main:
-	make build_all
-	# make build
+	# make build_all
+	make build
 
 	$(compiler_fortran) -w -unroll \
 	$(common) \
