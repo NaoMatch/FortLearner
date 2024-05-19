@@ -271,7 +271,8 @@ contains
         val = (hi-lo)*tmp + lo + 1
     end subroutine rand_integer_scl_i4
 
-    subroutine weighted_sampling_r8(indices, n_select, weights, n_weights, replace, negative_weights)
+    subroutine weighted_sampling_r8(indices, n_select, weights, n_weights, &
+        replace, negative_weights, use_rejection)
         implicit none
         integer(kind=8), allocatable, intent(inout) :: indices(:)
         integer(kind=8), intent(in)    :: n_select
@@ -279,8 +280,9 @@ contains
         integer(kind=8), intent(in)    :: n_weights
         logical(kind=4), optional      :: replace
         character(len=*), optional :: negative_weights
+        logical(kind=4), optional      :: use_rejection
 
-        logical(kind=4) :: rlpc
+        logical(kind=4) :: rlpc, rejc
         character(len=:), allocatable :: how
 
         if (allocated(indices)) deallocate(indices)
@@ -288,11 +290,16 @@ contains
         rlpc = t_
         if (present(replace)) rlpc = replace
 
+        rejc = t_
+        if (present(use_rejection)) rejc = use_rejection
+
         how = "filter" ! filter, shift, absolute
         if (present(negative_weights)) how = negative_weights
 
         if (rlpc) then
             call weighted_sampling_with_replacement(indices, n_select, weights, n_weights, how)
+        elseif (rejc) then
+            call weighted_sampling_without_replacement_rejction(indices, n_select, weights, n_weights, how)
         else
             call weighted_sampling_without_replacement(indices, n_select, weights, n_weights, how)
         end if
@@ -309,6 +316,7 @@ contains
         integer(kind=8) :: i, idx, n_select_
         real(kind=8) :: val, max_c, min_w
         real(kind=8), allocatable :: c(:), w_copy(:)
+        real(kind=8), allocatable :: vals(:)
 
         allocate(w_copy, source=weights)
         allocate(c(n_weights))
@@ -329,11 +337,12 @@ contains
         allocate(indices(n_select_))
 
         call prefix_sum(w_copy, c, n_weights)
+        allocate(vals(n_select_))
+        call random_number(vals)
 
         max_c = c(n_weights)
         do i=1, n_select_, 1
-            call random_number(val)
-            val = val * max_c
+            val = vals(i) * max_c
             idx = binary_search_left_branchless(c, n_weights, val)
             indices(i) = idx
         end do
@@ -348,8 +357,12 @@ contains
         character(len=*), intent(in) :: how
 
         integer(kind=8) :: i, idx, n_select_
+        integer(kind=4) :: n_select_i4
         real(kind=8) :: val, max_c, min_w
         real(kind=8), allocatable :: c(:), w_copy(:)
+        real(kind=8), allocatable :: vals(:)
+        integer(kind=8), save :: magic_num=123456789_8
+        if (allocated(indices)) deallocate(indices)
 
         allocate(w_copy, source=weights)
         allocate(c(n_weights))
@@ -371,16 +384,77 @@ contains
 
         call prefix_sum(w_copy, c, n_weights)
         
+        allocate(vals(n_select_))
+        call random_number(vals)
         do i=1, n_select_, 1
-            max_c = c(n_weights)
-            call random_number(val)
-            val = val * max_c
+            val = vals(i) * c(n_weights)
             idx = binary_search_left_branchless(c, n_weights, val)
             c(idx:) = c(idx:) - w_copy(idx)
             indices(i) = idx
         end do
     end subroutine weighted_sampling_without_replacement
 
+    subroutine weighted_sampling_without_replacement_rejction(indices, n_select, weights, n_weights, how)
+        implicit none
+        integer(kind=8), allocatable, intent(inout) :: indices(:)
+        integer(kind=8), intent(in) :: n_select
+        real(kind=8), intent(in) :: weights(n_weights)
+        integer(kind=8), intent(in) :: n_weights
+        character(len=*), intent(in) :: how
+
+        integer(kind=8) :: i, idx, n_select_, idx_
+        integer(kind=4) :: n_select_i4
+        real(kind=8) :: val, max_c, min_w
+        real(kind=8), allocatable :: c(:), w_copy(:)
+        real(kind=8), allocatable :: vals(:)
+        integer(kind=8), save :: magic_num=123456789_8
+        if (allocated(indices)) deallocate(indices)
+
+        allocate(w_copy, source=weights)
+        allocate(c(n_weights))
+        if (how=="filter") then
+            call clipping_array_lower(w_copy, n_weights, x_min=0d0)
+        elseif (how=="shift") then
+            min_w = minval(w_copy)
+            w_copy(:) = w_copy(:) - min_w
+        elseif (how=="absolute") then
+            w_copy = abs(w_copy)
+        else
+            if (minval(w_copy)<0d0) then
+                stop "argument 'weights' contains negative value(s) in 'weighted_sampling'."
+            end if
+        end if
+
+        n_select_ = minval([n_select, count(w_copy>0.0d0, kind=kind(0_8))])
+        allocate(indices(n_select_))
+        indices = -1
+
+        call prefix_sum(w_copy, c, n_weights)
+
+        allocate(vals(n_select_))
+        call random_number(vals)
+        max_c = c(n_weights)
+        val = vals(1) * max_c
+        idx = binary_search_left_branchless(c, n_weights, val)
+        indices(1) = idx
+    
+        idx_ = 2
+        do while(t_)
+            do i=1, n_select_, 1
+                val = vals(i) * max_c
+                idx = binary_search_left_branchless(c, n_weights, val)
+                if ( all(indices(1:idx_-1) /= idx) ) then
+                    indices(idx_) = idx
+                    idx_ = idx_ + 1
+                    if (idx_>n_select_) goto 1000
+                end if
+            end do
+            call random_number(vals)
+        end do
+        1000 continue
+    end subroutine weighted_sampling_without_replacement_rejction
+
+    
     ! subroutine weighted_sampling_with_preprocess_r8(indices, n_samples, weights, n_weights)
     !     implicit none
     !     integer(kind=8), intent(inout) :: indices(n_samples)
