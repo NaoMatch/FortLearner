@@ -46,7 +46,7 @@ contains
         end if
 
         ! Initialize Bias
-        allocate(b(1, out_size))
+        allocate(b(out_size, 1))
         b = 0d0
         new_splinear%b = variable(b, is_parameter=.true.)
         call new_splinear%b%set_name("bias")
@@ -58,13 +58,14 @@ contains
         class(splinear) :: this
         type(variable) :: var_in
         type(variable) :: var_out
+        type(variable) :: var_b
 
         integer(kind=8) :: n_rows, n_cols
         real(kind=8), allocatable :: w(:,:)
 
         ! n_rows = size(var_in%get_data(), dim=1)
         n_rows = vstack(var_in%id)%csr_v%n_rows
-
+        
         if (this%in_size<0_8) then
             n_cols = vstack(var_in%id)%csr_v%n_cols
             this%in_size = n_cols
@@ -77,11 +78,11 @@ contains
             call this%w%set_name("weight")
             call this%set_params(this%w)
         end if
-
+        
         if (this%no_bias) then
             var_out = sp_matmul_(var_in, this%w)
         else
-            var_out = sp_matmul_(var_in, this%w) + spread_(this%b, dim=1_8, ncopies=n_rows)
+            var_out = sp_matmul_(var_in, this%w) + spread_(this%b, dim=2_8, ncopies=n_rows)
         end if
     end function forward_splinear
 

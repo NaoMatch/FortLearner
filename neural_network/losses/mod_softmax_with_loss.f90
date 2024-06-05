@@ -68,32 +68,37 @@ contains
     end function softmax_val
 
 
-    function forward_softmax_with_loss(this, v_in_1, v_in_2) result(v_out)
+    subroutine forward_softmax_with_loss(this, v_out, v_in_1, v_in_2)
         implicit none
         class(softmax_with_loss) :: this
         real(kind=8), intent(in) :: v_in_1(:,:), v_in_2(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
 
-        integer(kind=8) :: n_rows, n_cols, c
+        integer(kind=8) :: n_rows, n_cols, c, n
         real(kind=8), allocatable :: soft_max_val(:,:)
 
+        ! print*, 1
         n_rows = size(v_in_1, dim=1)
         n_cols = size(v_in_1, dim=2)
-
+        
         ! Softmax
+        ! print*, 2
         soft_max_val = softmax_val(v_in_2)
-
+        
         ! Loss
-        allocate(v_out(1, 1))
-        v_out = 0d0
+        ! print*, 3, n_cols, allocated(v_out)
         do c=1, n_cols, 1
-            v_out(1,1) = v_out(1,1) - sum(v_in_1(:,c) * log(soft_max_val(:,c) + epsilon_for_log))
+            v_out(1,1) = v_out(1,1) - sum(v_in_1(:,c) * log(soft_max_val(:,c)))
+            ! do n=1, n_rows, 1
+            !     v_out(1,1) = v_out(1,1) - v_in_1(n,c) * log(soft_max_val(n,c))
+            ! end do
         end do
-
+        
+        ! print*, 4
         if (this%reduction == "mean") then
             v_out = v_out / dble(n_rows)
         end if
-    end function forward_softmax_with_loss
+    end subroutine forward_softmax_with_loss
 
     function backward_softmax_with_loss(this, g_in) result(g_outs)
         implicit none
@@ -108,6 +113,8 @@ contains
         n_cols = size(vstack(this%id_in_1)%v, dim=2)
 
         allocate(out_spread, source=vstack(this%id_in_1)%v)
+
+        allocate(g_outs(1)%g, source=vstack(this%id_in_1)%v)
 
         g_outs(2)%g = (softmax_val(vstack(this%id_in_2)%v) - out_spread) * g_in(1,1)
 

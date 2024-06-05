@@ -36,13 +36,13 @@ contains
         new_tangent%n_out = 1
     end function new_tangent
 
-    function forward_tangent(this, v_in) result(v_out)
+    subroutine forward_tangent(this, v_out, v_in)
         implicit none
         class(tangent) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         v_out = tan(v_in)
-    end function forward_tangent
+    end subroutine forward_tangent
 
     function backward_tangent(this, g_in) result(g_outs)
         implicit none

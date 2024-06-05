@@ -1,5 +1,6 @@
 module mod_csr2dense
     use mod_csr
+    use mod_fixed_size_csr
     use mod_variable
     implicit none
 
@@ -35,13 +36,13 @@ contains
         new_csr2dense%n_out = 1
     end function new_csr2dense
 
-    function forward_csr2dense(this, v_in) result(v_out)
+    subroutine forward_csr2dense(this, v_out, v_in)
         implicit none
         class(csr2dense) :: this
-        type(csr_matrix) :: v_in
-        real(kind=8), allocatable :: v_out(:,:)
+        type(fixed_size_csr_matrix) :: v_in
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         v_out = v_in%to_dense()
-    end function forward_csr2dense
+    end subroutine forward_csr2dense
 
     function backward_csr2dense(this, g_in) result(g_outs)
         implicit none
@@ -50,7 +51,7 @@ contains
         type(jagged_matrix) :: g_outs(2)
 
         allocate(g_outs(1)%csr_g, source=vstack(this%id_in_1)%csr_v)
-        g_outs(1)%csr_g%vals = extract_corresponding_position_vals(g_in, vstack(this%id_in_1)%csr_v)
+        g_outs(1)%csr_g%vals = extract_corresponding_position_vals_(g_in, vstack(this%id_in_1)%csr_v)
     end function backward_csr2dense
 
 end module mod_csr2dense

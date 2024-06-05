@@ -39,13 +39,13 @@ contains
     end function new_get_item
 
 
-    function forward_get_item(this, v_in) result(v_out)
+    subroutine forward_get_item(this, v_out, v_in)
         implicit none
         class(get_item) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         v_out = v_in(this%indices,:)
-    end function forward_get_item
+    end subroutine forward_get_item
 
     function backward_get_item(this, g_in) result(g_outs)
         implicit none

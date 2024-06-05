@@ -35,11 +35,11 @@ contains
         new_softmax%n_out = 1
     end function new_softmax
 
-    function forward_softmax(this, v_in) result(v_out)
+    subroutine forward_softmax(this, v_out, v_in)
         implicit none
         class(softmax) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
 
         integer(kind=8) :: n_cols
         real(kind=8), allocatable :: v_in_max(:), exp_v_in(:,:)
@@ -52,7 +52,7 @@ contains
         exp_v_in = exp(exp_v_in)
 
         v_out = exp_v_in / spread(sum(exp_v_in, dim=2), dim=2, ncopies=n_cols)
-    end function forward_softmax
+    end subroutine forward_softmax
 
     function backward_softmax(this, g_in) result(g_outs)
         implicit none

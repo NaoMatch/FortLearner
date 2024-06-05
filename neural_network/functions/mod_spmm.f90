@@ -1,5 +1,6 @@
 module mod_sparse_matrix_multiplication
     use mod_csr
+    use mod_fixed_size_csr
     use mod_sparse_dgemm
     use mod_variable
     implicit none
@@ -34,12 +35,12 @@ contains
         new_sparse_matrix_multiplication%n_out = 1
     end function new_sparse_matrix_multiplication
 
-    function forward_sparse_matrix_multiplication(this, v_in_1, v_in_2) result(v_out)
+    subroutine forward_sparse_matrix_multiplication(this, v_out, v_in_1, v_in_2)
         implicit none
         class(sparse_matrix_multiplication) :: this
-        type(csr_matrix), intent(in) :: v_in_1
+        type(fixed_size_csr_matrix), intent(in) :: v_in_1
         real(kind=8), intent(in) :: v_in_2(:,:)
-        real(kind=8), allocatable :: v_tmp(:,:), v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
 
         integer(kind=8) :: shape1(2), shape2(2), n_jobs, n, m, k, l
 
@@ -56,18 +57,16 @@ contains
         n = 10_8 ! dummy
         
         ! print*, "               ", 3
-        allocate(v_tmp(l,m), v_out(m,l))
         n_jobs = 1_8
-        call sparse_dgemm(v_tmp, v_in_1%rows, v_in_1%cols, v_in_1%vals, v_in_2, n, m, k, l, n_jobs)
+        call sparse_dgemm(v_out, v_in_1%rows, v_in_1%cols, v_in_1%vals, v_in_2, n, m, k, l, n_jobs)
         
         ! print*, "               ", 4
-        v_out = transpose(v_tmp)
         
         return
         990 continue 
         print*, "Shape ", shape1, " ::: ", shape2
         stop "matmul_ shape mismatch error."
-    end function forward_sparse_matrix_multiplication
+    end subroutine forward_sparse_matrix_multiplication
 
     function backward_sparse_matrix_multiplication(this, g_in) result(g_outs)
         implicit none
@@ -77,21 +76,21 @@ contains
 
         integer(kind=8) :: shape1(2), shape2(2), nnz
         real(kind=8), allocatable :: v_in_1(:,:)
+        integer(kind=8) :: n_rows1, n_cols1, n_feats
 
-        ! print*, "           ", 1, shape(g_in), shape(vstack(this%id_in_2)%v)
-        g_outs(1)%g = matmul(g_in, vstack(this%id_in_2)%v)
-        ! print*, "           ", 2
-        ! g_outs(1)%csr_g = vstack(this%id_in_1)%csr_v
+        call date_and_time(values=date_value1)
+        g_outs(1)%g = matmul(transpose(vstack(this%id_in_2)%v), g_in)
+        call date_and_time(values=date_value2)
+        ! print*, "       ----- Matmul Backprop_1: ", time_diff(date_value1, date_value2)
+        
+        call date_and_time(values=date_value1)
         allocate(g_outs(1)%csr_g, source=vstack(this%id_in_1)%csr_v)
-        ! print*, "           ", 3
-        v_in_1 = vstack(this%id_in_1)%csr_v%to_dense()
-        ! print*, "           ", 3, shape(pack(transpose(v_in_1), v_in_1>=0d0))
+        v_in_1 = transpose(vstack(this%id_in_1)%csr_v%to_dense())
         g_outs(1)%csr_g%vals = pack(g_outs(1)%g, v_in_1>=0d0)
-        ! print*, "           ", 4
         deallocate(g_outs(1)%g)
-        ! print*, "           ", 5
-        g_outs(2)%g = matmul(transpose(g_in), v_in_1)
-        ! print*, "           ", 6
+        g_outs(2)%g = matmul(g_in, transpose(v_in_1))
+        call date_and_time(values=date_value2)
+        ! print*, "       ----- Matmul Backprop_1: ", time_diff(date_value1, date_value2)
     end function backward_sparse_matrix_multiplication
 
 end module mod_sparse_matrix_multiplication

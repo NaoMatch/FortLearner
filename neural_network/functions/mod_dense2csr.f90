@@ -1,5 +1,6 @@
 module mod_dense2csr
     use mod_csr
+    use mod_fixed_size_csr
     use mod_variable
     implicit none
 
@@ -41,23 +42,23 @@ contains
         new_dense2csr%n_out = 1
     end function new_dense2csr
 
-    function forward_dense2csr(this, v_in) result(v_out)
+    subroutine forward_dense2csr(this, v_out, v_in)
         implicit none
         class(dense2csr) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        type(csr_matrix) :: v_out
-        v_out = dense2csr_weighted_sampling_mat(v_in, this%top_k, &
-            dim=2_8, start_index=0_8, negative_weights=this%how)
-    end function forward_dense2csr
+        type(fixed_size_csr_matrix), allocatable, intent(inout) :: v_out
+        call dense2fcsr_weighted_sampling_mat(v_out, v_in, this%top_k, &
+            dim=1_8, start_index=0_8, negative_weights=this%how)
+    end subroutine forward_dense2csr
 
     function backward_dense2csr(this, g_in) result(g_outs)
         implicit none
         class(dense2csr) :: this
-        type(csr_matrix), intent(in) :: g_in
+        type(fixed_size_csr_matrix), intent(in) :: g_in
         type(jagged_matrix) :: g_outs(2)
 
-        allocate(g_outs(1)%g(g_in%n_rows, g_in%n_cols))
-        g_outs(1)%g = g_in%to_dense()
+        allocate(g_outs(1)%g(g_in%n_cols, g_in%n_rows))
+        g_outs(1)%g = transpose(g_in%to_dense())
     end function backward_dense2csr
 
 end module mod_dense2csr

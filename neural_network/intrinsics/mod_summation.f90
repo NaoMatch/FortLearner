@@ -43,11 +43,11 @@ contains
         if (present(dim)) new_summation%dim = dim
     end function new_summation
 
-    function forward_summation(this, v_in) result(v_out)
+    subroutine forward_summation(this, v_out, v_in)
         implicit none
         class(summation) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         integer(kind=8) :: n_cols, n_rows
         if (this%dim==-1) then
             v_out = reshape([sum(v_in)], [1,1])
@@ -58,7 +58,7 @@ contains
             n_rows = size(v_in, dim=1)
             v_out = reshape(sum(v_in, dim=this%dim), [n_rows,1_8])
         end if
-    end function forward_summation
+    end subroutine forward_summation
 
     function backward_summation(this, g_in) result(g_outs)
         implicit none

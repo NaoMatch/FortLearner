@@ -42,11 +42,11 @@ contains
         if (present(reduction)) new_cross_entropy%reduction = reduction
     end function new_cross_entropy
 
-    function forward_cross_entropy(this, v_in_1, v_in_2) result(v_out)
+    subroutine forward_cross_entropy(this, v_out, v_in_1, v_in_2)
         implicit none
         class(cross_entropy) :: this
         real(kind=8), intent(in) :: v_in_1(:,:), v_in_2(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
 
         integer(kind=8) :: n_rows, n
 
@@ -62,7 +62,7 @@ contains
             n_rows = size(v_in_2, dim=1)
             v_out = v_out / dble(n_rows)
         end if
-    end function forward_cross_entropy
+    end subroutine forward_cross_entropy
 
     function backward_cross_entropy(this, g_in) result(g_outs)
         implicit none

@@ -53,20 +53,20 @@ contains
         y = dble(flg)
     end function flag_rectifier
 
-    function forward_relu(this, v_in) result(v_out)
+    subroutine forward_relu(this, v_out, v_in)
         implicit none
         class(relu) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         v_out = zero_rectifier(v_in)
-    end function forward_relu
+    end subroutine forward_relu
 
     function backward_relu(this, g_in) result(g_outs)
         implicit none
         class(relu) :: this
         real(kind=8), intent(in) :: g_in(:,:)
         type(jagged_matrix) :: g_outs(2)
-        g_outs(1)%g = g_in * flag_rectifier(vstack(this%id_out_1)%v)
+        g_outs(1)%g = g_in * flag_rectifier(vstack(this%id_in_1)%v)
     end function backward_relu
 
 end module mod_relu

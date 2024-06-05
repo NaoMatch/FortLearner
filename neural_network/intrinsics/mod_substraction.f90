@@ -73,13 +73,13 @@ contains
         new_substraction%n_out = 1
     end function new_substraction
 
-    function forward_substraction(this, v_in_1, v_in_2) result(v_out)
+    subroutine forward_substraction(this, v_out, v_in_1, v_in_2)
         implicit none
         class(substraction) :: this
         real(kind=8), intent(in) :: v_in_1(:,:), v_in_2(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         v_out = v_in_1 - v_in_2
-    end function forward_substraction
+    end subroutine forward_substraction
 
     function backward_substraction(this, g_in) result(g_outs)
         implicit none
