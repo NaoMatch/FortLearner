@@ -87,13 +87,13 @@ contains
         new_multiply%n_out = 1
     end function new_multiply
 
-    function forward_multiply(this, v_in_1, v_in_2) result(v_out)
+    subroutine forward_multiply(this, v_out, v_in_1, v_in_2)
         implicit none
         class(multiply) :: this
         real(kind=8), intent(in) :: v_in_1(:,:), v_in_2(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         v_out = v_in_1 * v_in_2
-    end function forward_multiply
+    end subroutine forward_multiply
 
     function backward_multiply(this, g_in) result(g_outs)
         implicit none

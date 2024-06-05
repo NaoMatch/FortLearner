@@ -36,13 +36,13 @@ contains
         new_log_natural%n_out = 1
     end function new_log_natural
 
-    function forward_log_natural(this, v_in) result(v_out)
+    subroutine forward_log_natural(this, v_out, v_in)
         implicit none
         class(log_natural) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         v_out = log(v_in)
-    end function forward_log_natural
+    end subroutine forward_log_natural
 
     function backward_log_natural(this, g_in) result(g_outs)
         implicit none

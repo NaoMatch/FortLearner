@@ -68,11 +68,11 @@ contains
         new_addition%n_out = 1
     end function new_addition
 
-    function forward_addition(this, v_in_1, v_in_2) result(v_out)
+    subroutine forward_addition(this, v_out, v_in_1, v_in_2)
         implicit none
         class(addition) :: this
         real(kind=8), intent(in) :: v_in_1(:,:), v_in_2(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
 
         integer(kind=8) :: shape1(2), shape2(2)
 
@@ -90,7 +90,7 @@ contains
         else
             v_out = v_in_1 + v_in_2
         end if
-    end function forward_addition
+    end subroutine forward_addition
 
     function backward_addition(this, g_in) result(g_outs)
         implicit none

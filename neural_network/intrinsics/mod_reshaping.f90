@@ -35,15 +35,15 @@ contains
         new_reshaping%shape = shape
     end function new_reshaping
 
-    function forward_reshaping(this, v_in) result(v_out)
+    subroutine forward_reshaping(this, v_out, v_in)
         implicit none
         class(reshaping) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         integer(kind=8) :: n_cols, n_rows
 
         v_out = reshape(v_in, shape=this%shape)
-    end function forward_reshaping
+    end subroutine forward_reshaping
 
     function backward_reshaping(this, g_in) result(g_outs)
         implicit none

@@ -36,13 +36,13 @@ contains
         new_square_root%n_out = 1
     end function new_square_root
 
-    function forward_square_root(this, v_in) result(v_out)
+    subroutine forward_square_root(this, v_out, v_in)
         implicit none
         class(square_root) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         v_out = sqrt(v_in)
-    end function forward_square_root
+    end subroutine forward_square_root
 
     function backward_square_root(this, g_in) result(g_outs)
         implicit none

@@ -36,13 +36,13 @@ contains
         new_sigmoid%n_out = 1
     end function new_sigmoid
 
-    function forward_sigmoid(this, v_in) result(v_out)
+    subroutine forward_sigmoid(this, v_out, v_in)
         implicit none
         class(sigmoid) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         v_out = 1d0 / (1d0 + exp(-v_in))
-    end function forward_sigmoid
+    end subroutine forward_sigmoid
 
     function backward_sigmoid(this, g_in) result(g_outs)
         implicit none

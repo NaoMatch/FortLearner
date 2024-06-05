@@ -293,8 +293,8 @@ contains
         rejc = t_
         if (present(use_rejection)) rejc = use_rejection
 
-        how = "filter" ! filter, shift, absolute
-        if (present(negative_weights)) how = negative_weights
+        how = "absolute" ! filter, shift, absolute
+        ! if (present(negative_weights)) how = negative_weights
 
         if (rlpc) then
             call weighted_sampling_with_replacement(indices, n_select, weights, n_weights, how)

@@ -104,13 +104,13 @@ contains
         new_power_r4%pow = pow
     end function new_power_r4
 
-    function forward_power(this, v_in) result(v_out)
+    subroutine forward_power(this, v_out, v_in)
         implicit none
         class(power) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         v_out = v_in**this%pow
-    end function forward_power
+    end subroutine forward_power
 
     function backward_power(this, g_in) result(g_outs)
         implicit none

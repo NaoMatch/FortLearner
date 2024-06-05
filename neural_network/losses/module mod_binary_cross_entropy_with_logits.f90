@@ -34,16 +34,16 @@ contains
         new_binary_cross_entropy_with_logits%n_out = 1
     end function new_binary_cross_entropy_with_logits
 
-    function forward_binary_cross_entropy_with_logits(this, v_in_1, v_in_2) result(v_out)
+    subroutine forward_binary_cross_entropy_with_logits(this, v_out, v_in_1, v_in_2)
         implicit none
         class(binary_cross_entropy_with_logits) :: this
         real(kind=8), intent(in) :: v_in_1(:,:), v_in_2(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
 
         if (size(v_in_1, dim=2) /= 1 .or. size(v_in_2, dim=2) /= 1) &
             stop "OutputDim must be '1' at " // num2char(__LINE__) // " in " // __FILE__ // "."
         v_out = - v_in_1 * log(sigmoid(v_in_2) + epsilon_for_log) - (1-v_in_1) * log(1-sigmoid(v_in_2) + epsilon_for_log)
-    end function forward_binary_cross_entropy_with_logits
+    end subroutine forward_binary_cross_entropy_with_logits
 
     function backward_binary_cross_entropy_with_logits(this, g_in) result(g_outs)
         implicit none

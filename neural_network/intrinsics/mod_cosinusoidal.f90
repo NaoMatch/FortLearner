@@ -35,13 +35,13 @@ contains
         new_cosinusoidal%n_out = 1
     end function new_cosinusoidal
 
-    function forward_cosinusoidal(this, v_in) result(v_out)
+    subroutine forward_cosinusoidal(this, v_out, v_in)
         implicit none
         class(cosinusoidal) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         v_out = exp(v_in)
-    end function forward_cosinusoidal
+    end subroutine forward_cosinusoidal
 
     function backward_cosinusoidal(this, g_in) result(g_outs)
         implicit none

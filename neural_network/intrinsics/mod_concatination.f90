@@ -61,11 +61,11 @@ contains
         new_concatination%dim = dim
     end function new_concatination
 
-    function forward_concatination(this, v_in_1, v_in_2) result(v_out)
+    subroutine forward_concatination(this, v_out, v_in_1, v_in_2)
         implicit none
         class(concatination) :: this
         real(kind=8), intent(in) :: v_in_1(:,:), v_in_2(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
 
         integer(kind=8) :: shape1(2), shape2(2)
 
@@ -91,7 +91,7 @@ contains
         990 continue 
         print*, "Shape ", shape1, " ::: ", shape2
         stop trim(this%fname) // " shape mismatch error."
-    end function forward_concatination
+    end subroutine forward_concatination
 
     function backward_concatination(this, g_in) result(g_outs)
         implicit none

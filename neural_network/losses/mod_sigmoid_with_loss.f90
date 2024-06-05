@@ -55,11 +55,11 @@ contains
     end function sigmoid_val
 
 
-    function forward_sigmoid_with_loss(this, v_in_1, v_in_2) result(v_out)
+    subroutine forward_sigmoid_with_loss(this, v_out, v_in_1, v_in_2)
         implicit none
         class(sigmoid_with_loss) :: this
         real(kind=8), intent(in) :: v_in_1(:,:), v_in_2(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
 
         integer(kind=8) :: n_rows, n_cols, c
         real(kind=8), allocatable :: soft_max_val(:,:)
@@ -78,7 +78,7 @@ contains
         if (this%reduction == "mean") then
             v_out = v_out / dble(n_rows)
         end if
-    end function forward_sigmoid_with_loss
+    end subroutine forward_sigmoid_with_loss
 
     function backward_sigmoid_with_loss(this, g_in) result(g_outs)
         implicit none

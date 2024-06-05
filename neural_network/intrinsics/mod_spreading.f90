@@ -40,11 +40,11 @@ contains
         new_spreading%ncopies = ncopies
     end function new_spreading
 
-    function forward_spreading(this, v_in) result(v_out)
+    subroutine forward_spreading(this, v_out, v_in)
         implicit none
         class(spreading) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         integer(kind=8) :: n_cols, n_rows
 
         if (this%dim==1) then
@@ -52,7 +52,7 @@ contains
         else
             v_out = spread(v_in(:,1), dim=this%dim, ncopies=this%ncopies)
         end if
-    end function forward_spreading
+    end subroutine forward_spreading
 
     function backward_spreading(this, g_in) result(g_outs)
         implicit none

@@ -36,14 +36,14 @@ contains
         new_tangent_hyperbolic%n_out = 1
     end function new_tangent_hyperbolic
 
-    function forward_tangent_hyperbolic(this, v_in) result(v_out)
+    subroutine forward_tangent_hyperbolic(this, v_out, v_in)
         implicit none
         class(tangent_hyperbolic) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         allocate(v_out, source=tanh(v_in))
         v_out = tanh(v_in)
-    end function forward_tangent_hyperbolic
+    end subroutine forward_tangent_hyperbolic
 
     function backward_tangent_hyperbolic(this, g_in) result(g_outs)
         implicit none

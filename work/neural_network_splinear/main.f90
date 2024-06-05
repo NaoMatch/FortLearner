@@ -1,5 +1,6 @@
 program main
     use mod_common
+    use mod_random
     use mod_variable
     use mod_intrinsics
     use mod_functions
@@ -48,7 +49,9 @@ program main
     integer(kind=8), allocatable :: hidden_dims(:)
     integer(kind=8) :: n_test
     integer(kind=8), allocatable :: y_pred(:), y_true(:)
+    integer(kind=8) :: time_f, time_b
 
+    call fix_random_seed(100_8)
     call init_stack()
 
     ! x = variable(2d0)
@@ -104,20 +107,24 @@ program main
 
     print*, "Start: ", size(vstack), size(fstack)
     n_epoch = 100
-    batch_size = 10000
+    batch_size = 1234
     do epoch=1, n_epoch, 1
         call train_mode()
-        call date_and_time(values=date_value1)
+        time_f = 0
+        time_b = 0
         do batch=1, 60000-batch_size+1, batch_size
             counter = 0
             x_train_ = variable(x_train(batch:batch+batch_size-1,:))
             y_train_ = variable(y_train(batch:batch+batch_size-1,:))
-
-            y_out = mnist_clf_sp%act(x_train_)
+            
+            y_out = mnist_clf%act(x_train_)
             ! y_out = softmax_(y_out)
             ! bce_loss = cross_entropy_(y_train_, y_out, n_classes=10_8)
             bce_loss = softmax_with_loss_(y_train_, y_out, n_classes=10_8)
+            print*, "SOFTMAX WITH LOSS", sum(bce_loss%get_data())
+
             call bce_loss%backward()
+            print*, "BACKWARD DONE"
 
             y_true = maxloc(y_train(batch:batch+batch_size-1,:), dim=2)
             y_pred = maxloc(y_out%get_data(), dim=2)
@@ -130,15 +137,14 @@ program main
             end do
 
             call opt_mom%update(bce_loss)
-            print*, batch, "update", size(vstack), bce_loss%get_data(), sum(y_out%get_data()), counter
+            print*, batch, "update", size(vstack), bce_loss%get_data(), sum(y_out%get_data()), counter, time_f, time_b
             
             call clear_stack(bce_loss)
         end do
-        call date_and_time(values=date_value2)
 
         call test_mode()
 
-        y_test_out = mnist_clf_sp%act(x_test_)
+        y_test_out = mnist_clf%act(x_test_)
         ! y_test_out = softmax_(y_test_out)
         ! bce_loss = cross_entropy_(y_test_, y_test_out, n_classes=10_8)
         bce_loss = softmax_with_loss_(y_test_, y_test_out, n_classes=10_8)
@@ -153,7 +159,7 @@ program main
             end if
         end do
 
-        print*, "epoch = ", epoch, bce_loss%get_data(), counter, time_diff(date_value1, date_value2)
+        print*, "epoch = ", epoch, bce_loss%get_data(), counter, time_f, time_b
     end do
 
 

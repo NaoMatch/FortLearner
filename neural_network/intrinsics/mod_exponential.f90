@@ -21,13 +21,13 @@ contains
         new_exponential%n_out = 1
     end function new_exponential
 
-    function forward_exponential(this, v_in) result(v_out)
+    subroutine forward_exponential(this, v_out, v_in)
         implicit none
         class(exponential) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         v_out = exp(v_in)
-    end function forward_exponential
+    end subroutine forward_exponential
 
     function backward_exponential(this, g_in) result(g_outs)
         implicit none

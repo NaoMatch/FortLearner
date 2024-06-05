@@ -36,13 +36,13 @@ contains
         new_absolute_value%n_out = 1
     end function new_absolute_value
 
-    function forward_absolute_value(this, v_in) result(v_out)
+    subroutine forward_absolute_value(this, v_out, v_in)
         implicit none
         class(absolute_value) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         v_out = abs(v_in)
-    end function forward_absolute_value
+    end subroutine forward_absolute_value
 
     elemental function sign_(x) result(y)
         implicit none

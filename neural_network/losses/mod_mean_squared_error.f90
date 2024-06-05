@@ -31,14 +31,14 @@ contains
         new_mean_squared_error%n_out = 1
     end function new_mean_squared_error
 
-    function forward_mean_squared_error(this, v_in_1, v_in_2) result(v_out)
+    subroutine forward_mean_squared_error(this, v_out, v_in_1, v_in_2)
         implicit none
         class(mean_squared_error) :: this
         real(kind=8), intent(in) :: v_in_1(:,:), v_in_2(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
 
         v_out = reshape([sum( (v_in_1 - v_in_2)**2d0 ) / size(v_in_1, dim=1)], [1,1])
-    end function forward_mean_squared_error
+    end subroutine forward_mean_squared_error
 
     function backward_mean_squared_error(this, g_in) result(g_outs)
         implicit none

@@ -13,6 +13,8 @@ module mod_fixed_size_csr
 
         integer(kind=8) :: n_rows, n_cols
         integer(kind=8) :: offset
+    contains
+        procedure :: to_dense
     end type fixed_size_csr_matrix
     
     interface fixed_size_csr_matrix 
@@ -48,9 +50,31 @@ contains
         fcsr%offset = fcsr%start_index - 1
     end function new_fixed_size_csr_matrix
 
-    function dense2fcsr_weighted_sampling_mat(mat, n_top, dim, start_index, negative_weights, n_jobs) result(sp_mat)
+    function to_dense(this) result(matrix)
         implicit none
-        type(fixed_size_csr_matrix) :: sp_mat
+        class(fixed_size_csr_matrix) :: this
+        real(kind=8), allocatable :: matrix(:,:)
+
+        integer(kind=8) :: row, ini, fin, ii, col
+        real(kind=8) :: val
+
+        allocate(matrix(this%n_rows, this%n_cols))
+        matrix(:,:) = 0d0
+
+        do row=1, this%n_rows, 1
+            ini = this%rows(row) - this%offset!*0
+            fin = this%rows(row+1) - this%start_index!*0
+            do ii=ini, fin, 1
+                col = this%cols(ii) - this%offset!*0
+                val = this%vals(ii)
+                matrix(row, col) = val
+            end do
+        end do
+    end function to_dense    
+
+    subroutine dense2fcsr_weighted_sampling_mat(sp_mat, mat, n_top, dim, start_index, negative_weights, n_jobs)
+        implicit none
+        type(fixed_size_csr_matrix), allocatable, intent(inout) :: sp_mat
         real(kind=8), intent(in) :: mat(:,:)
         integer(kind=8), intent(in) :: n_top
         integer(kind=8), optional :: dim
@@ -91,15 +115,13 @@ contains
             n_columns = size(mat, dim=2_8)
             n_samples = size(mat, dim=1_8)
         end if
-
         allocate(tmp_vec(n_columns))
         sp_mat = fixed_size_csr_matrix(n_samples, n_columns, n_top, start_index_opt)
 
         ! print*, '*********************************************************************************************'
-
-        CALL OMP_SET_NUM_THREADS(n_threads)
-        !$omp parallel shared(sp_mat), private(tmp_vec, ini, indices)
-        !$omp do
+        CALL OMP_SET_NUM_THREADS(1)
+        !!$omp parallel shared(sp_mat), private(tmp_vec, ini, indices)
+        !!$omp do
         do s=1, n_samples, 1
             ini = sp_mat%rows(s) - sp_mat%offset
             if (dim_opt==1_8) then
@@ -107,15 +129,15 @@ contains
             else
                 tmp_vec = mat(s,:)
             end if 
-
-            call weighted_sampling(indices, n_top, tmp_vec, n_columns, replace=.false., negative_weights=how)
+            
+            call weighted_sampling(indices, n_top, tmp_vec, n_columns, replace=.false.)
             
             ! call quick_sort(indices, size(indices, kind=kind(0_8)))
             sp_mat%cols(ini:ini+size(indices)-1) = indices + sp_mat%offset
             sp_mat%vals(ini:ini+size(indices)-1) = tmp_vec(indices)
         end do
-        !$omp end do
-        !$omp end parallel
+        !!$omp end do
+        !!$omp end parallel
 
 
         return
@@ -124,8 +146,38 @@ contains
 
         991 continue 
         stop "argument 'n_top' must be greater equal 1."
-    end function dense2fcsr_weighted_sampling_mat
+    end subroutine dense2fcsr_weighted_sampling_mat
 
+
+    function extract_corresponding_position_vals_(input_mat, ref_csr) result(vals)
+        implicit none
+        real(kind=8), intent(in) :: input_mat(:,:)
+        type(fixed_size_csr_matrix), intent(in) :: ref_csr
+
+        real(kind=8), allocatable :: vals(:)
+
+        integer(kind=8) :: row, ini, fin, ii, col, nnz
+        real(kind=8) :: val
+
+        if (size(ref_csr%rows) == 1_8) goto 999
+
+        allocate(vals(size(ref_csr%vals)))
+
+        nnz = 1
+        do row=1, ref_csr%n_rows, 1
+            ini = ref_csr%rows(row) - ref_csr%offset
+            fin = ref_csr%rows(row+1) - ref_csr%start_index
+            do ii=ini, fin, 1
+                col = ref_csr%cols(ii) - ref_csr%offset
+                vals(nnz) = input_mat(row, col)
+                nnz = nnz + 1
+            end do
+        end do
+
+        return
+        999 continue
+        stop "input csr matrix is not assigned."
+    end function extract_corresponding_position_vals_    
 
 
 end module mod_fixed_size_csr

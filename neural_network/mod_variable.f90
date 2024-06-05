@@ -1,25 +1,27 @@
 module mod_variable
     use mod_csr
+    use mod_fixed_size_csr
     use mod_config
     implicit none
 
     type jagged_matrix
         real(kind=8), allocatable :: g(:,:)
-        type(csr_matrix), allocatable :: csr_g
+        type(fixed_size_csr_matrix), allocatable :: csr_g
     end type jagged_matrix
 
     type velement
         real(kind=8), allocatable :: v(:,:)
         real(kind=8), allocatable :: g(:,:)
         real(kind=8), allocatable :: c(:,:)
-        type(csr_matrix), allocatable :: csr_v
-        type(csr_matrix), allocatable :: csr_g
-        type(csr_matrix), allocatable :: csr_c
+        type(fixed_size_csr_matrix), allocatable :: csr_v
+        type(fixed_size_csr_matrix), allocatable :: csr_g
+        type(fixed_size_csr_matrix), allocatable :: csr_c
         integer(kind=8) :: fid=-1
         integer(kind=8) :: lid=-1
         character(len=:), allocatable :: name
         logical(kind=4) :: is_parameter = .false.
         logical(kind=4) :: is_train = .true.
+        logical(kind=4) :: is_used = .false.
     end type velement
 
     type variable
@@ -110,7 +112,7 @@ module mod_variable
         integer(kind=8), allocatable :: param_ids(:)
         ! Linear
         integer(kind=8) :: in_size=-1, out_size=-1
-        logical(kind=4) :: no_bias=.false.
+        logical(kind=4) :: no_bias = .false.
     contains
         procedure :: act
         procedure :: forward
@@ -136,6 +138,24 @@ module mod_variable
 
 contains
 
+    subroutine reallocator(mat, mat_shape)
+        implicit none
+        real(kind=8), allocatable, intent(inout) :: mat(:,:)
+        integer(kind=8), intent(in) :: mat_shape(2)
+
+        if (.not. allocated(mat)) then
+            allocate(mat(mat_shape(1), mat_shape(2)))
+            return
+        else
+            if (all(shape(mat) == mat_shape)) then
+                return
+            else
+                deallocate(mat)
+                allocate(mat(mat_shape(1), mat_shape(2)))
+            end if
+        end if
+    end subroutine 
+
     subroutine clear_stack(var)
         implicit none
         integer(kind=8) :: p, id
@@ -146,21 +166,20 @@ contains
         do p=1, size(var%param_ids), 1
             id = var%param_ids(p)
             if (allocated(vstack(id)%g)) deallocate(vstack(id)%g)
+            ! vstack(id)%g = 0d0
+            if (allocated(vstack(id)%csr_g)) deallocate(vstack(id)%csr_g)
         end do
 
         do p=1, size(var%non_param_ids), 1
             id = var%non_param_ids(p)
-            if (allocated(vstack(id)%v)) deallocate(vstack(id)%v)
+            vstack(id)%is_used = .false.
+            ! if (allocated(vstack(id)%v)) deallocate(vstack(id)%v)
             if (allocated(vstack(id)%g)) deallocate(vstack(id)%g)
+            vstack(id)%v = 0d0
+            ! vstack(id)%g = 0d0
+            if (allocated(vstack(id)%csr_v)) deallocate(vstack(id)%csr_v)
+            if (allocated(vstack(id)%csr_g)) deallocate(vstack(id)%csr_g)
         end do
-
-        ! do p=1, size(vstack), 1
-        !     id = p
-        !     if (.not. vstack(id)%is_train) then
-        !         if (allocated(vstack(id)%v)) deallocate(vstack(id)%v)
-        !         if (allocated(vstack(id)%g)) deallocate(vstack(id)%g)            
-        !     end if
-        ! end do
 
         deallocate(fstack)
         allocate(fstack(0))
@@ -178,7 +197,8 @@ contains
         ! print*, '*********************************************************************************************'
         do s=1, n_stacks, 1
             ! print*, "stack id: ", s, allocated(vstack(s)%v)
-            if ((.not. allocated(vstack(s)%v)) .and. (.not. allocated(vstack(s)%csr_v))) then
+            ! if ((.not. allocated(vstack(s)%v)) .and. (.not. allocated(vstack(s)%csr_v))) then
+            if (.not. vstack(s)%is_used) then
                 id = s
                 exit
             end if
@@ -237,7 +257,7 @@ contains
         integer(kind=8) :: last_hold_idx
 
         if (allocated(vstack)) deallocate(vstack)
-        allocate(vstack(0))
+        allocate(vstack(100))
 
         if (allocated(fstack)) deallocate(fstack)
         allocate(fstack(0))
@@ -261,7 +281,7 @@ contains
         else
             vid = id
         end if
-
+        vstack(vid)%is_used = .true.
         fstack = [fstack, func]
         fid = size(fstack)
     end subroutine append_new_element_to_stack
@@ -298,7 +318,6 @@ contains
         implicit none
         is_train = .false.
     end subroutine test_mode
-
 
     subroutine set_name(this, name)
         implicit none
@@ -408,6 +427,7 @@ contains
             fid = func_ids(max_g_idx)
             select type (creator => fstack(fid)%func)
                 class is (base_function)
+                    ! print*, '*********************************************************************************************'
                     ! print*, fid, creator%fname
                     ! Get Variable IDs ------------------------------------------------------------
                     id_in_1  = creator%id_in_1
@@ -511,6 +531,7 @@ contains
         if (present(is_parameter)) elm%is_parameter = is_parameter
         vstack = [vstack, elm]
         var%id = size(vstack)
+        vstack(var%id)%is_used = .true.
         call set_mode_to_variable(var)
     end function new_variable_r8_scl
 
@@ -526,6 +547,7 @@ contains
         if (present(is_parameter)) elm%is_parameter = is_parameter
         vstack = [vstack, elm]
         var%id = size(vstack)
+        vstack(var%id)%is_used = .true.
         call set_mode_to_variable(var)
     end function new_variable_r8_vec
 
@@ -548,6 +570,7 @@ contains
             vstack(id) = elm
             var%id = id
         end if
+        vstack(var%id)%is_used = .true.
         call set_mode_to_variable(var)
     end function new_variable_r8_mat
 
@@ -555,7 +578,7 @@ contains
     function new_variable_r8_csr(x, is_parameter) result(var)
         implicit none
         type(variable) :: var
-        type(csr_matrix), intent(in) :: x
+        type(fixed_size_csr_matrix), intent(in) :: x
         logical(kind=4), optional :: is_parameter
         type(velement) :: elm
         integer(kind=8) :: id
@@ -570,6 +593,7 @@ contains
             vstack(id) = elm
             var%id = id
         end if
+        vstack(var%id)%is_used = .true.
         call set_mode_to_variable(var)
     end function new_variable_r8_csr
 
@@ -579,7 +603,7 @@ contains
         type(variable)            :: var_in
         type(variable)            :: var_out
 
-        integer(kind=8) :: fid, vid
+        integer(kind=8) :: fid, vid, out_shape(2)
 
         call this%append_new_element_to_stack(fid, vid)
         var_out%id = vid
@@ -587,18 +611,34 @@ contains
         fstack(fid)%generation = maxval([var_in%generation])
         var_out%generation = fstack(fid)%generation+1
 
-        ! print*, "ids: ", var_in_1%id, var_in_2%id, " -->  ", vid
+        ! print*, '*********************************************************************************************'
+        ! print*, "Function : ", this%fname
+        ! print*, "ids: ", var_in%id, " -->  ", vid, " --- shape: ", var_in%get_shape()
         this%id_in_1 = var_in%id
         this%id_out_1 = vid
         this%shape_in_1 = var_in%get_shape()
         allocate(fstack(fid)%func, source=this)
+
+        if (this%fname == "transposing") then
+            out_shape = [this%shape_in_1(2), this%shape_in_1(1)]
+        elseif (this%fname == "spreading") then
+            if (this%dim == 1) then
+                out_shape = [this%ncopies, this%shape_in_1(2)]
+            else
+                out_shape = [this%shape_in_1(1), this%ncopies]
+            end if
+        else
+            out_shape = this%shape_in_1
+        end if
+        call reallocator(vstack(vid)%v, out_shape)
+        ! call reallocator(vstack(vid)%g, this%shape_in_1)
         
         if (this%fname == "dense2csr") then
-            vstack(vid)%csr_v = this%forward_1in_1out_csr(vstack(var_in%id)%v)
+            call this%forward_1in_1out_csr(vstack(vid)%csr_v, vstack(var_in%id)%v)
         elseif (this%fname == "csr2dense") then
-            vstack(vid)%v = this%forward_1in_csr_1out(vstack(var_in%id)%csr_v)
+            call this%forward_1in_csr_1out(vstack(vid)%v, vstack(var_in%id)%csr_v)
         else
-            vstack(vid)%v = this%forward(vstack(var_in%id)%v)
+            call this%forward(vstack(vid)%v, vstack(var_in%id)%v)
         end if
         vstack(vid)%fid = fid
         this%shape_out_1 = var_out%get_shape()
@@ -612,71 +652,86 @@ contains
         type(variable)            :: var_in_1, var_in_2
         type(variable)            :: var_out
 
-        integer(kind=8) :: fid, vid
+        integer(kind=8) :: fid, vid, out_shape(2)
 
         call this%append_new_element_to_stack(fid, vid)
         var_out%id = vid
         fstack(fid)%generation = maxval([var_in_1%generation, var_in_2%generation])
         var_out%generation = fstack(fid)%generation+1
 
+        ! print*, '*********************************************************************************************'
+        ! print*, "Function : ", this%fname
         ! print*, "ids: ", var_in_1%id, var_in_2%id, " -->  ", vid
+
+
         this%id_in_1 = var_in_1%id
         this%id_in_2 = var_in_2%id        
         this%id_out_1 = vid
         this%shape_in_1 = var_in_1%get_shape()
         this%shape_in_2 = var_in_2%get_shape()
         allocate(fstack(fid)%func, source=this)
-        
-        if (this%fname == "sparse_matrix_multiplication") then
-            vstack(vid)%v = this%forward_2in_1out_csr(vstack(var_in_1%id)%csr_v, vstack(var_in_2%id)%v)
+        if (this%fname == "matrix_multiplication") then
+            out_shape = [this%shape_in_1(1), this%shape_in_2(2)]
+        elseif (this%fname == "sparse_matrix_multiplication") then
+            out_shape = [this%shape_in_2(1), this%shape_in_1(1)]
+        elseif (this%fname == "softmax_with_loss") then
+            out_shape = [1_8, 1_8]
         else
-            vstack(vid)%v = this%forward(vstack(var_in_1%id)%v, vstack(var_in_2%id)%v)
+            out_shape = this%shape_in_1
+        end if
+        call reallocator(vstack(vid)%v, out_shape)
+        ! print*, "              out_shape: ", shape(vstack(vid)%v)
+        ! call reallocator(vstack(vid)%g, out_shape)
+        if (this%fname == "sparse_matrix_multiplication") then
+            call this%forward_2in_1out_csr(vstack(vid)%v, vstack(var_in_1%id)%csr_v, vstack(var_in_2%id)%v)
+        else
+            call this%forward(vstack(vid)%v, vstack(var_in_1%id)%v, vstack(var_in_2%id)%v)
         end if
         vstack(vid)%fid = fid
         this%shape_out_1 = var_out%get_shape()
         call set_mode_to_variable(var_out)
     end function act_2in_1out
 
-    function forward_2in_1out(this, v_in_1, v_in_2) result(v_out)
+    subroutine forward_2in_1out(this, v_out, v_in_1, v_in_2)
         implicit none
         class(base_function) :: this
         real(kind=8), intent(in) :: v_in_1(:,:), v_in_2(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         stop "NotImplemented Error, " // trim(this%fname) // "." 
-    end function forward_2in_1out
+    end subroutine forward_2in_1out
 
-    function forward_1in_1out(this, v_in) result(v_out)
+    subroutine forward_1in_1out(this, v_out, v_in)
         implicit none
         class(base_function) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         stop "NotImplemented Error, " // trim(this%fname) // "."
-    end function forward_1in_1out
+    end subroutine forward_1in_1out
     
-    function forward_1in_1out_csr(this, v_in) result(v_out)
+    subroutine forward_1in_1out_csr(this, v_out, v_in)
         implicit none
         class(base_function) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        type(csr_matrix) :: v_out
+        type(fixed_size_csr_matrix), allocatable, intent(inout) :: v_out
         stop "NotImplemented Error, " // trim(this%fname) // "."
-    end function forward_1in_1out_csr
+    end subroutine forward_1in_1out_csr
     
-    function forward_1in_csr_1out(this, v_in) result(v_out)
+    subroutine forward_1in_csr_1out(this, v_out, v_in)
         implicit none
         class(base_function) :: this
-        type(csr_matrix) :: v_in
-        real(kind=8), allocatable :: v_out(:,:)
+        type(fixed_size_csr_matrix) :: v_in
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         stop "NotImplemented Error, " // trim(this%fname) // "."
-    end function forward_1in_csr_1out
+    end subroutine forward_1in_csr_1out
     
-    function forward_2in_1out_csr(this, v_in_1, v_in_2) result(v_out)
+    subroutine forward_2in_1out_csr(this, v_out, v_in_1, v_in_2)
         implicit none
         class(base_function) :: this
-        type(csr_matrix), intent(in) :: v_in_1
+        type(fixed_size_csr_matrix), intent(in) :: v_in_1
         real(kind=8), intent(in) :: v_in_2(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         stop "NotImplemented Error, " // trim(this%fname) // "."
-    end function forward_2in_1out_csr
+    end subroutine forward_2in_1out_csr
 
     function backward_1in_2out(this, g_in) result(g_outs)
         implicit none
@@ -689,7 +744,7 @@ contains
     function backward_1in_2out_csr(this, g_in) result(g_outs)
         implicit none
         class(base_function) :: this
-        type(csr_matrix), intent(in) :: g_in
+        type(fixed_size_csr_matrix), intent(in) :: g_in
         type(jagged_matrix) :: g_outs(2)
         stop "NotImplemented Error, " // trim(this%fname) // "."
     end function backward_1in_2out_csr

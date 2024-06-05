@@ -39,11 +39,11 @@ contains
         if (present(reduction)) new_binary_cross_entropy%reduction = reduction
     end function new_binary_cross_entropy
 
-    function forward_binary_cross_entropy(this, v_in_1, v_in_2) result(v_out)
+    subroutine forward_binary_cross_entropy(this, v_out, v_in_1, v_in_2)
         implicit none
         class(binary_cross_entropy) :: this
         real(kind=8), intent(in) :: v_in_1(:,:), v_in_2(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
 
         integer(kind=8) :: n_rows
 
@@ -55,7 +55,7 @@ contains
             n_rows = size(v_in_2, dim=1)
             v_out = v_out / dble(n_rows)
         end if
-    end function forward_binary_cross_entropy
+    end subroutine forward_binary_cross_entropy
 
     function backward_binary_cross_entropy(this, g_in) result(g_outs)
         implicit none

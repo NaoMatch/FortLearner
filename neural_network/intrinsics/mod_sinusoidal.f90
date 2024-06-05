@@ -36,13 +36,13 @@ contains
         new_sinusoidal%n_out = 1
     end function new_sinusoidal
 
-    function forward_sinusoidal(this, v_in) result(v_out)
+    subroutine forward_sinusoidal(this, v_out, v_in)
         implicit none
         class(sinusoidal) :: this
         real(kind=8), intent(in) :: v_in(:,:)
-        real(kind=8), allocatable :: v_out(:,:)
+        real(kind=8), allocatable, intent(inout) :: v_out(:,:)
         v_out = sin(v_in)
-    end function forward_sinusoidal
+    end subroutine forward_sinusoidal
 
     function backward_sinusoidal(this, g_in) result(g_outs)
         implicit none
