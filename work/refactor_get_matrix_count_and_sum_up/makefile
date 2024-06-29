@@ -14,6 +14,7 @@ asm              := ./mod/inc_sum_up_vector_c.out \
 					./mod/inc_get_matrix_minmax.out \
 					./mod/new_get_matrix_minmax.out \
 					./mod/inc_get_matrix_count_and_sum_up_gt.out \
+					./mod/new_get_matrix_count_and_sum_up_gt.out \
 					./mod/inc_ax_plus_y.out \
 					./mod/inc_covariance_value_of_vectors.out \
 					./mod/inc_get_minmax_vector2vector.out \
@@ -330,6 +331,7 @@ build_all:
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../math/include/stats/get_minmax/new_get_matrix_minmax.c -o ./mod/new_get_matrix_minmax.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../math/include/stats/variance_value_of_vector/inc_variance_value_of_vector.c -o ./mod/inc_variance_value_of_vector.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../math/include/stats/sum_up_gt/inc_get_matrix_count_and_sum_up_gt.c -o ./mod/inc_get_matrix_count_and_sum_up_gt.out
+	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../math/include/stats/sum_up_gt/new_get_matrix_count_and_sum_up_gt.c -o ./mod/new_get_matrix_count_and_sum_up_gt.out
 	\
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../math/include/stats/covariance_value_of_vectors/inc_covariance_value_of_vectors.c -o ./mod/inc_covariance_value_of_vectors.out
 	$(compiler_clang)   $(mod) $(opt) $(option) -c    ../../math/include/stats/get_minmax_vector2vector/inc_get_minmax_vector2vector.c -o ./mod/inc_get_minmax_vector2vector.out
@@ -347,11 +349,11 @@ build:
 	
 
 main:
-	make build_all
+	# make build_all
 	# make build
 
-	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ./mod_new_get_matrix_minmax.f90 -o ./mod/mod_new_get_matrix_minmax_F.out
-	# $(compiler_clang)   $(mod) $(opt) $(option) -c    ./new_get_matrix_minmax.c -o ./mod/new_get_matrix_minmax_C.out 
+	# $(compiler_fortran) $(mod) $(opt) $(option) -w -c ./new_get_matrix_count_and_sum_up_gt.f90 -o ./mod/new_get_matrix_count_and_sum_up_gt_F.out
+	# $(compiler_clang)   $(mod) $(opt) $(option) -c    ./new_get_matrix_count_and_sum_up_gt.c -o ./mod/new_get_matrix_count_and_sum_up_gt_C.out 
 
 	$(compiler_fortran) -w -unroll \
 	$(common) \
