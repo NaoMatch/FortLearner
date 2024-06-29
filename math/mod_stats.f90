@@ -72,6 +72,21 @@ module mod_stats
         module procedure get_matrix_minmax_parallel_r8
     end interface get_matrix_minmax_parallel
 
+    Interface
+        subroutine new_get_matrix_minmax(min_vals, max_vals, mat_t, indices, n_indices, n_cols, n_rows, n_jobs) & 
+            Bind(C,Name='new_get_matrix_minmax')
+            Import
+            integer(c_int64_t), value      :: n_indices
+            integer(c_int64_t), value      :: n_cols
+            integer(c_int64_t), value      :: n_rows
+            integer(c_int64_t), value      :: n_jobs
+            real(c_double), intent(inout)  :: min_vals(n_cols)
+            real(c_double), intent(inout)  :: max_vals(n_cols)
+            real(c_double), intent(in)     :: mat_t(n_cols, n_rows)
+            integer(c_int64_t), intent(in) :: indices(n_indices)
+        end subroutine new_get_matrix_minmax
+    end interface
+
     !> Median Interface
     interface median
             module procedure median_value_of_vector_r8
