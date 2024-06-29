@@ -73,12 +73,12 @@ module mod_stats
     end interface get_matrix_minmax_parallel
 
     Interface
-        subroutine new_get_matrix_minmax(min_vals, max_vals, mat_t, indices, n_indices, n_cols, n_rows, n_jobs) & 
+        subroutine new_get_matrix_minmax(min_vals, max_vals, mat_t, indices, n_indices, n_rows, n_cols, n_jobs) & 
             Bind(C,Name='new_get_matrix_minmax')
             Import
             integer(c_int64_t), value      :: n_indices
-            integer(c_int64_t), value      :: n_cols
             integer(c_int64_t), value      :: n_rows
+            integer(c_int64_t), value      :: n_cols
             integer(c_int64_t), value      :: n_jobs
             real(c_double), intent(inout)  :: min_vals(n_cols)
             real(c_double), intent(inout)  :: max_vals(n_cols)
