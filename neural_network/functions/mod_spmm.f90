@@ -78,18 +78,18 @@ contains
         real(kind=8), allocatable :: v_in_1(:,:)
         integer(kind=8) :: n_rows1, n_cols1, n_feats
 
-        call date_and_time(values=date_value1)
+        ! call date_and_time(values=date_value1)
         g_outs(1)%g = matmul(transpose(vstack(this%id_in_2)%v), g_in)
-        call date_and_time(values=date_value2)
+        ! call date_and_time(values=date_value2)
         ! print*, "       ----- Matmul Backprop_1: ", time_diff(date_value1, date_value2)
         
-        call date_and_time(values=date_value1)
+        ! call date_and_time(values=date_value1)
         allocate(g_outs(1)%csr_g, source=vstack(this%id_in_1)%csr_v)
         v_in_1 = transpose(vstack(this%id_in_1)%csr_v%to_dense())
         g_outs(1)%csr_g%vals = pack(g_outs(1)%g, v_in_1>=0d0)
         deallocate(g_outs(1)%g)
         g_outs(2)%g = matmul(g_in, transpose(v_in_1))
-        call date_and_time(values=date_value2)
+        ! call date_and_time(values=date_value2)
         ! print*, "       ----- Matmul Backprop_1: ", time_diff(date_value1, date_value2)
     end function backward_sparse_matrix_multiplication
 
