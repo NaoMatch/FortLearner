@@ -207,6 +207,204 @@ void new_get_matrix_count_and_sum_up_gt(
 }
 
 
+void new_get_matrix_count_and_sum_up_gt_single(
+    double *sum_vals_r, int64_t *cnt_vals_r, double *thr_vals, double *mat_t, double *y,
+    int64_t *indices, int64_t n_idxs, int64_t n_rows, int64_t n_cols){
+
+    for(int64_t k=0; k<n_cols; k++){
+        sum_vals_r[k] = 0.0;
+        cnt_vals_r[k] = 0;
+    }
+    
+    int64_t i_unroll = (n_idxs>>3)<<3;
+    for(int64_t i=0; i<i_unroll; i+=8){
+        // Load indices and prepare row pointers and y values
+        int64_t idx1 = indices[i+0]-1;
+        int64_t idx2 = indices[i+1]-1;
+        int64_t idx3 = indices[i+2]-1;
+        int64_t idx4 = indices[i+3]-1;
+        int64_t idx5 = indices[i+4]-1;
+        int64_t idx6 = indices[i+5]-1;
+        int64_t idx7 = indices[i+6]-1;
+        int64_t idx8 = indices[i+7]-1;
+        double *row_ptr1 = &mat_t[idx1*n_cols];
+        double *row_ptr2 = &mat_t[idx2*n_cols];
+        double *row_ptr3 = &mat_t[idx3*n_cols];
+        double *row_ptr4 = &mat_t[idx4*n_cols];
+        double *row_ptr5 = &mat_t[idx5*n_cols];
+        double *row_ptr6 = &mat_t[idx6*n_cols];
+        double *row_ptr7 = &mat_t[idx7*n_cols];
+        double *row_ptr8 = &mat_t[idx8*n_cols];
+        __m512d y1_ = _mm512_set1_pd(y[idx1]);
+        __m512d y2_ = _mm512_set1_pd(y[idx2]);
+        __m512d y3_ = _mm512_set1_pd(y[idx3]);
+        __m512d y4_ = _mm512_set1_pd(y[idx4]);
+        __m512d y5_ = _mm512_set1_pd(y[idx5]);
+        __m512d y6_ = _mm512_set1_pd(y[idx6]);
+        __m512d y7_ = _mm512_set1_pd(y[idx7]);
+        __m512d y8_ = _mm512_set1_pd(y[idx8]);
+        __m512i o_ = _mm512_set1_epi64(1);
+
+        // Process each set of 8 columns with 4 indices unrolled
+        int64_t k_unroll = (n_cols>>3)<<3;
+        for(int64_t k=0; k<k_unroll; k+=8){
+            __m512d sum_v1 = _mm512_loadu_pd(&sum_vals_r[k]);
+            __m512i cnt_v1 = _mm512_loadu_si512(&cnt_vals_r[k]);
+
+            __m512d thr = _mm512_loadu_pd(&thr_vals[k]);
+            __m512d row1 = _mm512_loadu_pd(&row_ptr1[k]);
+            __m512d row2 = _mm512_loadu_pd(&row_ptr2[k]);
+            __m512d row3 = _mm512_loadu_pd(&row_ptr3[k]);
+            __m512d row4 = _mm512_loadu_pd(&row_ptr4[k]);
+            __m512d row5 = _mm512_loadu_pd(&row_ptr5[k]);
+            __m512d row6 = _mm512_loadu_pd(&row_ptr6[k]);
+            __m512d row7 = _mm512_loadu_pd(&row_ptr7[k]);
+            __m512d row8 = _mm512_loadu_pd(&row_ptr8[k]);
+
+            // Compare and accumulate for the first pair of indices
+            __mmask8 mask_d1 = _mm512_cmp_pd_mask(row1, thr, _CMP_GT_OS);
+            __mmask8 mask_d2 = _mm512_cmp_pd_mask(row2, thr, _CMP_GT_OS);
+            __mmask8 mask_d3 = _mm512_cmp_pd_mask(row3, thr, _CMP_GT_OS);
+            __mmask8 mask_d4 = _mm512_cmp_pd_mask(row4, thr, _CMP_GT_OS);
+            __mmask8 mask_d5 = _mm512_cmp_pd_mask(row5, thr, _CMP_GT_OS);
+            __mmask8 mask_d6 = _mm512_cmp_pd_mask(row6, thr, _CMP_GT_OS);
+            __mmask8 mask_d7 = _mm512_cmp_pd_mask(row7, thr, _CMP_GT_OS);
+            __mmask8 mask_d8 = _mm512_cmp_pd_mask(row8, thr, _CMP_GT_OS);
+            sum_v1 = _mm512_mask_add_pd(sum_v1, mask_d1, sum_v1, y1_);
+            sum_v1 = _mm512_mask_add_pd(sum_v1, mask_d2, sum_v1, y2_);
+            sum_v1 = _mm512_mask_add_pd(sum_v1, mask_d3, sum_v1, y3_);
+            sum_v1 = _mm512_mask_add_pd(sum_v1, mask_d4, sum_v1, y4_);
+            sum_v1 = _mm512_mask_add_pd(sum_v1, mask_d5, sum_v1, y5_);
+            sum_v1 = _mm512_mask_add_pd(sum_v1, mask_d6, sum_v1, y6_);
+            sum_v1 = _mm512_mask_add_pd(sum_v1, mask_d7, sum_v1, y7_);
+            sum_v1 = _mm512_mask_add_pd(sum_v1, mask_d8, sum_v1, y8_);
+
+            // Convert masks to 16-bit for counting
+            __mmask16 mask_i1 = _cvtmask8_u32(mask_d1);
+            __mmask16 mask_i2 = _cvtmask8_u32(mask_d2);
+            __mmask16 mask_i3 = _cvtmask8_u32(mask_d3);
+            __mmask16 mask_i4 = _cvtmask8_u32(mask_d4);
+            __mmask16 mask_i5 = _cvtmask8_u32(mask_d5);
+            __mmask16 mask_i6 = _cvtmask8_u32(mask_d6);
+            __mmask16 mask_i7 = _cvtmask8_u32(mask_d7);
+            __mmask16 mask_i8 = _cvtmask8_u32(mask_d8);
+
+            // Accumulate counts
+            cnt_v1 = _mm512_mask_add_epi64(cnt_v1, mask_i1, cnt_v1, o_);
+            cnt_v1 = _mm512_mask_add_epi64(cnt_v1, mask_i2, cnt_v1, o_);
+            cnt_v1 = _mm512_mask_add_epi64(cnt_v1, mask_i3, cnt_v1, o_);
+            cnt_v1 = _mm512_mask_add_epi64(cnt_v1, mask_i4, cnt_v1, o_);
+            cnt_v1 = _mm512_mask_add_epi64(cnt_v1, mask_i5, cnt_v1, o_);
+            cnt_v1 = _mm512_mask_add_epi64(cnt_v1, mask_i6, cnt_v1, o_);
+            cnt_v1 = _mm512_mask_add_epi64(cnt_v1, mask_i7, cnt_v1, o_);
+            cnt_v1 = _mm512_mask_add_epi64(cnt_v1, mask_i8, cnt_v1, o_);
+
+            // Store results
+            _mm512_storeu_pd(&sum_vals_r[k], sum_v1);
+            _mm512_storeu_si512(&cnt_vals_r[k], cnt_v1);
+        }
+
+        for(int64_t k=k_unroll; k<n_cols; k++){
+            double sum_v1 = sum_vals_r[k];
+            double cnt_v1 = cnt_vals_r[k];
+
+            double thr = thr_vals[k];
+            double row1 = row_ptr1[k];
+            double row2 = row_ptr2[k];
+            double row3 = row_ptr3[k];
+            double row4 = row_ptr4[k];
+            double row5 = row_ptr5[k];
+            double row6 = row_ptr6[k];
+            double row7 = row_ptr7[k];
+            double row8 = row_ptr8[k];
+
+            // Compare and accumulate for the first pair of indices
+            int64_t mask_d1 = row1>thr;
+            int64_t mask_d2 = row2>thr;
+            int64_t mask_d3 = row3>thr;
+            int64_t mask_d4 = row4>thr;
+            int64_t mask_d5 = row5>thr;
+            int64_t mask_d6 = row6>thr;
+            int64_t mask_d7 = row7>thr;
+            int64_t mask_d8 = row8>thr;
+            sum_v1 = sum_v1 + mask_d1*y[idx1];
+            sum_v1 = sum_v1 + mask_d2*y[idx2];
+            sum_v1 = sum_v1 + mask_d3*y[idx3];
+            sum_v1 = sum_v1 + mask_d4*y[idx4];
+            sum_v1 = sum_v1 + mask_d5*y[idx5];
+            sum_v1 = sum_v1 + mask_d6*y[idx6];
+            sum_v1 = sum_v1 + mask_d7*y[idx7];
+            sum_v1 = sum_v1 + mask_d8*y[idx8];
+
+            // Accumulate counts
+            cnt_v1 = cnt_v1 + mask_d1;
+            cnt_v1 = cnt_v1 + mask_d2;
+            cnt_v1 = cnt_v1 + mask_d3;
+            cnt_v1 = cnt_v1 + mask_d4;
+            cnt_v1 = cnt_v1 + mask_d5;
+            cnt_v1 = cnt_v1 + mask_d6;
+            cnt_v1 = cnt_v1 + mask_d7;
+            cnt_v1 = cnt_v1 + mask_d8;
+
+            // Store results
+            sum_vals_r[k] = sum_v1;
+            cnt_vals_r[k] = cnt_v1;
+        }
+    }
+
+    for(int64_t i=i_unroll; i<n_idxs; i++){
+        // Load indices and prepare row pointers and y values
+        int64_t idx1 = indices[i+0]-1;
+        double *row_ptr1 = &mat_t[idx1*n_cols];
+        __m512d y1_ = _mm512_set1_pd(y[idx1]);
+        __m512i o_ = _mm512_set1_epi64(1);
+
+        // Process each set of 8 columns with 4 indices unrolled
+        int64_t k_unroll = (n_cols>>3)<<3;
+        for(int64_t k=0; k<k_unroll; k+=8){
+            __m512d sum_v1 = _mm512_loadu_pd(&sum_vals_r[k]);
+            __m512i cnt_v1 = _mm512_loadu_si512(&cnt_vals_r[k]);
+
+            __m512d thr = _mm512_loadu_pd(&thr_vals[k]);
+            __m512d row1 = _mm512_loadu_pd(&row_ptr1[k]);
+
+            // Compare and accumulate for the first pair of indices
+            __mmask8 mask_d1 = _mm512_cmp_pd_mask(row1, thr, _CMP_GT_OS);
+            sum_v1 = _mm512_mask_add_pd(sum_v1, mask_d1, sum_v1, y1_);
+
+            // Convert masks to 16-bit for counting
+            __mmask16 mask_i1 = _cvtmask8_u32(mask_d1);
+
+            // Accumulate counts
+            cnt_v1 = _mm512_mask_add_epi64(cnt_v1, mask_i1, cnt_v1, o_);
+
+            // Store results
+            _mm512_storeu_pd(&sum_vals_r[k], sum_v1);
+            _mm512_storeu_si512(&cnt_vals_r[k], cnt_v1);
+        }
+
+        for(int64_t k=k_unroll; k<n_cols; k++){
+            double sum_v1 = sum_vals_r[k];
+            double cnt_v1 = cnt_vals_r[k];
+
+            double thr = thr_vals[k];
+            double row1 = row_ptr1[k];
+
+            // Compare and accumulate for the first pair of indices
+            int64_t mask_d1 = row1>thr;
+            sum_v1 = sum_v1 + mask_d1*y[idx1];
+
+            // Accumulate counts
+            cnt_v1 = cnt_v1 + mask_d1;
+
+            // Store results
+            sum_vals_r[k] = sum_v1;
+            cnt_vals_r[k] = cnt_v1;
+        }
+    }    
+}
+
+
 // void new_get_matrix_count_and_sum_up_gt(
 //     double *sum_vals_r, int64_t *cnt_vals_r, double *thr_vals, double *mat_t, double *y,
 //     int64_t *indices, int64_t n_idxs, int64_t n_rows, int64_t n_cols, int64_t n_jobs){

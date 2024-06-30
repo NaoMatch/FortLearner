@@ -105,6 +105,23 @@ module mod_stats
             real(c_double), intent(in)         :: y(n_rows)
             integer(c_int64_t), intent(in)     :: indices(n_indices)
         end subroutine new_get_matrix_count_and_sum_up_gt    
+
+        subroutine new_get_matrix_count_and_sum_up_gt_single(&
+                sum_vals_r, cnt_vals_r, thr_vals, &
+                mat_t, y, indices, &
+                n_indices, n_rows, n_cols) & 
+            Bind(C,Name='new_get_matrix_count_and_sum_up_gt_single')
+            Import
+            integer(c_int64_t), value          :: n_indices
+            integer(c_int64_t), value          :: n_rows
+            integer(c_int64_t), value          :: n_cols
+            real(c_double), intent(inout)      :: sum_vals_r(n_cols)
+            integer(c_int64_t), intent(inout)  :: cnt_vals_r(n_cols)
+            real(c_double), intent(inout)      :: thr_vals(n_cols)
+            real(c_double), intent(in)         :: mat_t(n_cols, n_rows)
+            real(c_double), intent(in)         :: y(n_rows)
+            integer(c_int64_t), intent(in)     :: indices(n_indices)
+        end subroutine new_get_matrix_count_and_sum_up_gt_single    
     end interface
 
     !> Median Interface
