@@ -19,7 +19,7 @@ void new_get_matrix_count_and_sum_up_gt(
     int64_t i_unroll = (n_idxs>>3)<<3;
     omp_set_num_threads(n_jobs);
     #pragma omp parallel for reduction(+: sum_vals_r[0:n_cols]) reduction(+: cnt_vals_r[0:n_cols])
-    for(int64_t i=0; i<n_idxs; i+=8){
+    for(int64_t i=0; i<i_unroll; i+=8){
         // Load indices and prepare row pointers and y values
         int64_t idx1 = indices[i+0]-1;
         int64_t idx2 = indices[i+1]-1;
