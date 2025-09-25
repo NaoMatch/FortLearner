@@ -1,0 +1,68 @@
+{
+  "package": "flearner",
+  "version": "0.1.0",
+  "stable": {
+    "classes": [
+      {
+        "name": "flearner.FortKMeans.FortKMeans",
+        "constructor": {
+          "params": [
+            {"name": "n_clusters", "type": "int", "constraints": {"min": 2}},
+            {"name": "max_iter",   "type": "int", "constraints": {"min": 1}},
+            {"name": "n_init",     "type": "int", "constraints": {"min": 1}},
+            {"name": "tol",        "type": "float", "constraints": {"min": 0}},
+            {"name": "init",       "type": "str", "enum": ["kmeans++", "random"]},
+            {"name": "random_state", "type": ["int", "null"]},
+            {"name": "num_threads",  "type": "int", "constraints": {"min": 1}},
+            {"name": "print_log",    "type": "bool"},
+            {"name": "chunk_size",   "type": ["int", "null"], "constraints": {"min": 1}}
+          ]
+        },
+        "methods": [
+          {
+            "name": "fit",
+            "params": [
+              {"name": "X", "type": "ndarray", "dtype": "float64", "ndim": 2, "shape": ["n_samples", "n_features"], "order": "F"}
+            ],
+            "returns": {"type": "null"}
+          },
+          {
+            "name": "predict",
+            "params": [
+              {"name": "X", "type": "ndarray", "dtype": "float64", "ndim": 2, "shape": ["n_samples", "n_features"], "order": "F"}
+            ],
+            "returns": {"type": "ndarray", "dtype": "int64", "ndim": 2, "shape": ["n_samples", 1], "order": "F"}
+          },
+          {
+            "name": "score",
+            "params": [
+              {"name": "X", "type": "ndarray", "dtype": "float64", "ndim": 2, "shape": ["n_samples", "n_features"], "order": "F"}
+            ],
+            "returns": {"type": "float64"}
+          },
+          {
+            "name": "dump",
+            "params": [
+              {"name": "filename", "type": "str"}
+            ],
+            "returns": {"type": "null"}
+          },
+          {
+            "name": "load",
+            "classmethod": true,
+            "params": [
+              {"name": "filename", "type": "str"}
+            ],
+            "returns": {"type": "flearner.FortKMeans.FortKMeans"}
+          }
+        ]
+      }
+    ]
+  },
+  "internal": {
+    "modules": [
+      "flearner.fort_base_estimator",
+      "flearner.handle_owner"
+    ]
+  }
+}

@@ -1,14 +1,52 @@
-html/
-latex/
 *.out
+*.pyc
+*.pyo
+__pycache__/
 *.o
 *.so
+*.pyd
+*.dll
+*.dylib
 *.mod
+*.d
+*.a
 *.bin
-*.csv
-man/
-*.json
-test_script/openml/*
-test_script/decision_tree_regressor_[0-9]*.f90
-test_script/random_forest_regressor_[0-9]*.f90
-massif*
+*.ipynb
+
+# Project build dirs
+build/
+html/
+latex/
+tmp/
+wheelhouse/
+
+# Python packaging
+dist/
+*.egg-info/
+.eggs/
+
+# Tool caches
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Bindings/build outputs
+fortlearner/mod/
+bindings/lib
+flearner/lib/*
+!flearner/lib/__init__.py
+
+# Virtualenvs
+.venv/
+venv/
+env/
