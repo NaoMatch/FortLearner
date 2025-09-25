@@ -19,19 +19,21 @@ contains
         integer(i64),    intent(in) :: code
         character(*),    intent(in) :: msg
         logical,         intent(in) :: fatal
+        integer :: stop_code
+        integer :: max_stop
 
         last_error_code = code
         call set_last_error_msg(msg)
 
         if (fatal) then
-            integer :: stop_code
+            max_stop = huge(stop_code)
 
-            if (code > huge(stop_code)) then
-                stop_code = huge(stop_code)
-            else if (code < -huge(stop_code)) then
-                stop_code = -huge(stop_code)
+            if (code > max_stop) then
+                stop_code = max_stop
+            else if (code < -max_stop) then
+                stop_code = -max_stop
             else
-                stop_code = int(code)
+                stop_code = int(code, kind(stop_code))
             end if
 
             write(error_unit, '(a)') msg
