@@ -24,9 +24,19 @@ contains
         call set_last_error_msg(msg)
 
         if (fatal) then
+            integer :: stop_code
+
+            if (code > huge(stop_code)) then
+                stop_code = huge(stop_code)
+            else if (code < -huge(stop_code)) then
+                stop_code = -huge(stop_code)
+            else
+                stop_code = int(code)
+            end if
+
             write(error_unit, '(a)') msg
             flush(error_unit)
-            error stop code
+            error stop stop_code
         end if
     end subroutine raise_error
 
