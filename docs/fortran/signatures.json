@@ -1,0 +1,117 @@
+{
+  "bindings": [
+    {
+      "module": "mod_kmeans_binding",
+      "symbol": "kmeans_create",
+      "kind": "function",
+      "bind": "C",
+      "c_name": "kmeans_create",
+      "returns": {"ctype": "int64"},
+      "params": [
+        {"name": "n_clusters",   "ctype": "int64",  "intent": "value"},
+        {"name": "max_iter",     "ctype": "int64",  "intent": "value"},
+        {"name": "init",         "ctype": "char[]", "intent": "in"},
+        {"name": "n_init",       "ctype": "int64",  "intent": "value"},
+        {"name": "tol",          "ctype": "double", "intent": "value"},
+        {"name": "random_state", "ctype": "int64",  "intent": "value"},
+        {"name": "num_threads",  "ctype": "int64",  "intent": "value"},
+        {"name": "print_log",    "ctype": "bool",   "intent": "value"},
+        {"name": "chunk_size",   "ctype": "int64",  "intent": "value"}
+      ]
+    },
+    {
+      "module": "mod_kmeans_binding",
+      "symbol": "kmeans_fit",
+      "kind": "subroutine",
+      "bind": "C",
+      "c_name": "kmeans_fit",
+      "params": [
+        {"name": "model_id", "ctype": "int64",  "intent": "value"},
+        {"name": "X",        "ctype": "double*", "intent": "in", "shape": ["n_rows", "n_cols"], "order": "F"},
+        {"name": "n_rows",   "ctype": "int64",  "intent": "value"},
+        {"name": "n_cols",   "ctype": "int64",  "intent": "value"}
+      ]
+    },
+    {
+      "module": "mod_kmeans_binding",
+      "symbol": "kmeans_predict",
+      "kind": "subroutine",
+      "bind": "C",
+      "c_name": "kmeans_predict",
+      "params": [
+        {"name": "model_id", "ctype": "int64",  "intent": "value"},
+        {"name": "X",        "ctype": "double*", "intent": "in",  "shape": ["n_rows", "n_cols"], "order": "F"},
+        {"name": "n_rows",   "ctype": "int64",  "intent": "value"},
+        {"name": "n_cols",   "ctype": "int64",  "intent": "value"},
+        {"name": "labels",   "ctype": "int64*", "intent": "out", "shape": ["n_rows", 1], "order": "F"}
+      ]
+    },
+    {
+      "module": "mod_kmeans_binding",
+      "symbol": "kmeans_score",
+      "kind": "function",
+      "bind": "C",
+      "c_name": "kmeans_score",
+      "returns": {"ctype": "double"},
+      "params": [
+        {"name": "model_id", "ctype": "int64",  "intent": "value"},
+        {"name": "X",        "ctype": "double*", "intent": "in",  "shape": ["n_rows", "n_cols"], "order": "F"},
+        {"name": "n_rows",   "ctype": "int64",  "intent": "value"},
+        {"name": "n_cols",   "ctype": "int64",  "intent": "value"}
+      ]
+    },
+    {
+      "module": "mod_kmeans_binding",
+      "symbol": "kmeans_free",
+      "kind": "subroutine",
+      "bind": "C",
+      "c_name": "kmeans_free",
+      "params": [
+        {"name": "model_id", "ctype": "int64", "intent": "value"}
+      ]
+    },
+    {
+      "module": "mod_kmeans_binding",
+      "symbol": "kmeans_dump",
+      "kind": "subroutine",
+      "bind": "C",
+      "c_name": "kmeans_dump",
+      "params": [
+        {"name": "model_id",  "ctype": "int64",  "intent": "value"},
+        {"name": "file_name", "ctype": "char[]", "intent": "in"},
+        {"name": "n",         "ctype": "size_t", "intent": "value"}
+      ]
+    },
+    {
+      "module": "mod_kmeans_binding",
+      "symbol": "kmeans_load",
+      "kind": "function",
+      "bind": "C",
+      "c_name": "kmeans_load",
+      "returns": {"ctype": "int64"},
+      "params": [
+        {"name": "file_name", "ctype": "char[]", "intent": "in"},
+        {"name": "n",         "ctype": "size_t", "intent": "value"}
+      ]
+    },
+    {
+      "module": "mod_error_bindings",
+      "symbol": "get_last_error",
+      "kind": "subroutine",
+      "bind": "C",
+      "c_name": "get_last_error",
+      "params": [
+        {"name": "code", "ctype": "long*", "intent": "out"},
+        {"name": "msg",  "ctype": "char[]", "intent": "out"}
+      ]
+    },
+    {
+      "module": "mod_error_bindings",
+      "symbol": "clear_last_error",
+      "kind": "subroutine",
+      "bind": "C",
+      "c_name": "clear_last_error",
+      "params": []
+    }
+  ]
+}

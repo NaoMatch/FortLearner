@@ -1,0 +1,7 @@
+include LICENSE
+include Makefile
+recursive-include flearner/lib *
+recursive-include flearner/licenses *
+recursive-include fortlearner *.f90
+recursive-include docs *.md
+include flearner/py.typed

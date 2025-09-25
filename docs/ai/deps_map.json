@@ -1,0 +1,35 @@
+{
+  "python": {
+    "nodes": [
+      "flearner.FortKMeans.FortKMeans",
+      "flearner.fort_base_estimator",
+      "flearner.handle_owner",
+      "libfortlearner"
+    ],
+    "edges": [
+      ["flearner.FortKMeans.FortKMeans", "flearner.fort_base_estimator"],
+      ["flearner.FortKMeans.FortKMeans", "libfortlearner"],
+      ["flearner.fort_base_estimator", "flearner.handle_owner"],
+      ["flearner.fort_base_estimator", "libfortlearner"]
+    ]
+  },
+  "fortran": {
+    "nodes": [
+      "mod_kmeans_binding",
+      "mod_kmeans",
+      "mod_kmeans_registry",
+      "mod_check",
+      "mod_error_manager",
+      "mod_error_bindings",
+      "mod_error_codes"
+    ],
+    "edges": [
+      ["mod_kmeans_binding", "mod_kmeans"],
+      ["mod_kmeans_binding", "mod_kmeans_registry"],
+      ["mod_kmeans_binding", "mod_error_bindings"],
+      ["mod_error_bindings", "mod_error_manager"],
+      ["mod_kmeans_binding", "mod_check"],
+      ["mod_check", "mod_error_codes"]
+    ]
+  }
+}

@@ -1,0 +1,46 @@
+name: Build wheels (CI)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-wheels-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build wheels with cibuildwheel (Linux x86_64)
+        uses: pypa/cibuildwheel@v2.16.5
+        env:
+          CIBW_BUILD: cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64
+          CIBW_ARCHS_LINUX: x86_64
+          # Install build deps (OpenBLAS, gfortran) inside manylinux container before build
+          CIBW_BEFORE_BUILD_LINUX: |
+            yum install -y openblas-devel gcc-gfortran
+          CIBW_ENVIRONMENT: |
+            MAKE=make
+        with:
+          package-dir: ./FortLearner
+          output-dir: ./wheelhouse
+
+      - name: Build sdist
+        run: |
+          python -m pip install --upgrade build
+          python -m build --sdist FortLearner -o dist
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-linux
+          path: |
+            wheelhouse/*.whl
+            dist/*.tar.gz
+
