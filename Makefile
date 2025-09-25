@@ -230,6 +230,7 @@ lib: $(LIBDIR)/$(LIBNAME)
 
 $(LIBDIR)/$(LIBNAME): $(LIB_SRC)
 	$(Q)mkdir -p $(LIBDIR)
+	$(Q)mkdir -p $(BUILDDIR)
 	$(Q)$(FC) $(FCFLAGS) -shared -fPIC $(LIB_SRC) -o $(LIBDIR)/$(LIBNAME) $(LDFLAGS)
 
 # ---- clean ---------------------------------------------------------------
