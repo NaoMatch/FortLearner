@@ -22,8 +22,8 @@ jobs:
         env:
           CIBW_BUILD: cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64
           CIBW_ARCHS_LINUX: x86_64
-          # Install build deps (OpenBLAS, gfortran) inside manylinux container before build
-          CIBW_BEFORE_BUILD_LINUX: |
+          # Install build deps (OpenBLAS, gfortran) once per container with root privileges
+          CIBW_BEFORE_ALL_LINUX: |
             yum install -y openblas-devel gcc-gfortran
           CIBW_ENVIRONMENT: |
             MAKE=make
