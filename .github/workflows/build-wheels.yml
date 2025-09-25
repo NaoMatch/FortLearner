@@ -24,6 +24,9 @@ jobs:
           CIBW_ARCHS_LINUX: x86_64
           # Install build deps (OpenBLAS, gfortran) once per container with root privileges
           CIBW_BEFORE_ALL_LINUX: |
+            sed -i -e 's|^mirrorlist=|#mirrorlist=|g' \
+                   -e 's|^#baseurl=http://mirror.centos.org|baseurl=https://vault.centos.org|g' \
+                   /etc/yum.repos.d/CentOS-*.repo
             yum install -y openblas-devel gcc-gfortran
           CIBW_ENVIRONMENT: |
             MAKE=make
