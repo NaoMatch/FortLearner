@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from setuptools import setup
+from setuptools.dist import Distribution
 from setuptools.command.build_py import build_py as _build_py
 from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
 
@@ -16,6 +17,13 @@ def _platform_lib_name() -> str:
     if sys.platform == "darwin":
         return "libfortlearner.dylib"
     return "libfortlearner.so"
+
+
+class BinaryDistribution(Distribution):
+    """Distribution that always reports extension modules present."""
+
+    def has_ext_modules(self):
+        return True
 
 
 class build_py(_build_py):
@@ -57,4 +65,7 @@ class bdist_wheel(_bdist_wheel):
         self.root_is_pure = False
 
 
-setup(cmdclass={"build_py": build_py, "bdist_wheel": bdist_wheel})
+setup(
+    distclass=BinaryDistribution,
+    cmdclass={"build_py": build_py, "bdist_wheel": bdist_wheel},
+)
