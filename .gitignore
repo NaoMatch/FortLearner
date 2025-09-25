@@ -43,7 +43,8 @@ Thumbs.db
 # Bindings/build outputs
 fortlearner/mod/
 bindings/lib
-flearner/lib/
+flearner/lib/*
+!flearner/lib/__init__.py
 
 # Virtualenvs
 .venv/
