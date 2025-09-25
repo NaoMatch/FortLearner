@@ -230,7 +230,7 @@ lib: $(LIBDIR)/$(LIBNAME)
 
 $(LIBDIR)/$(LIBNAME): $(LIB_OBJS)
 	$(Q)mkdir -p $(LIBDIR)
-	$(Q)$(FC) $(FCFLAGS) -shared -fPIC $(LIB_OBJS) -o $(LIBDIR)/$(LIBNAME) $(LDFLAGS)
+	$(Q)$(FC) $(FCFLAGS) -shared -fPIC $(LIB_OBJS) -o $(LIBDIR)/$(LIBNAME) $(filter-out -lfortlearner,$(LDFLAGS))
 
 # ---- clean ---------------------------------------------------------------
 .PHONY: clean
