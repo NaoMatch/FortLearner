@@ -228,10 +228,9 @@ LIBDIR  = flearner/lib
 lib: $(LIBDIR)/$(LIBNAME)
 	@echo "✓ built $(LIBDIR)/$(LIBNAME)"
 
-$(LIBDIR)/$(LIBNAME): $(LIB_SRC)
+$(LIBDIR)/$(LIBNAME): $(LIB_OBJS)
 	$(Q)mkdir -p $(LIBDIR)
-	$(Q)mkdir -p $(BUILDDIR)
-	$(Q)$(FC) $(FCFLAGS) -shared -fPIC $(LIB_SRC) -o $(LIBDIR)/$(LIBNAME) $(LDFLAGS)
+	$(Q)$(FC) $(FCFLAGS) -shared -fPIC $(LIB_OBJS) -o $(LIBDIR)/$(LIBNAME) $(LDFLAGS)
 
 # ---- clean ---------------------------------------------------------------
 .PHONY: clean
